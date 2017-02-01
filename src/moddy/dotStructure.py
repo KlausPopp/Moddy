@@ -1,0 +1,273 @@
+'''
+Created on 24.01.2017
+
+@author: Klaus Popp
+'''
+from moddy.simulator import sim, simPart
+import subprocess
+import os
+
+
+def moddyGenerateStructureGraph( sim, fileName ):
+    ''' 
+    Generate a graph of the model' structure using the GraphViz dot tool
+    <fileName> should be the relative filename including '.svg'  
+    '''
+    ds = DotStructure(sim.topLevelParts(), sim.outputPorts())
+    ds.dotGen(fileName)
+
+def space(indent):
+    istr = "%" + str(3*indent) + "s"
+    return istr % ""
+
+def moddyNameToDotName(hierarchyName):
+    s = hierarchyName.replace( ".", "__" )
+    s = s.replace("-","_")
+    return s
+
+def subgraphName( partHierarchyName ):    
+    return "cluster_" + moddyNameToDotName(partHierarchyName)
+
+def portOrIoPortHierarchyName(port):
+    ''' return port name or if port is part of IOPort, the IOPorts Name'''
+    if port._ioPort is not None:
+        return port._ioPort.hierarchyName()
+    else:
+        return port.hierarchyName()
+    
+def portOrIoPortObjName(port):
+    ''' return port name or if port is part of IOPort, the IOPorts Name'''
+    if port._ioPort is not None:
+        return port._ioPort.objName()
+    else:
+        return port.objName()
+    
+ 
+class DotStructure(object):
+    '''
+    Display the model structure via the DOT language (Graphviz)
+    Parts are vizualized as subgraphs
+    Ports are vizualized as nodes
+    Parts that have no ports will be invisible
+    '''
+    def __init__(self, topLevelParts, outputPorts):
+        '''
+        <topLevelParts> must be the list of top level parts in the model
+        <outputPorts> must a list of all output ports in the model
+        '''
+        self._topLevelParts = topLevelParts
+        self._outputPorts = outputPorts
+    
+        
+    def showStructure(self):
+        for part in self._topLevelParts:
+            self.showPart(part, 0)
+            
+        print("=== bindings ===")
+        ignInPorts = []
+        ignOutPorts = []
+        
+        for port in self._outputPorts:
+            if port not in ignOutPorts:
+                if port._ioPort is not None:
+                    # test if IOPort 
+                    peer = port._ioPort.peerPort()
+                    if peer is not None:
+                        # Has a peer port, make bidirectional connection
+                        print("C %s -- %s" %(port._ioPort.hierarchyName(), peer.hierarchyName()))
+                        # These ports are already connected, ignore them in the rest of the scan
+                        ignOutPorts.append(port)
+                        ignOutPorts.append(peer._outPort)
+                        ignInPorts.append(port._ioPort._inPort)
+                        ignInPorts.append(peer._inPort)
+                    
+                s = ""
+                for inPort in port._listInPorts:
+                    if not inPort in ignInPorts: 
+                        s += portOrIoPortHierarchyName(inPort) + ";" 
+                if s != "": print("A %s -> %s" %(portOrIoPortHierarchyName(port), s))
+                    
+    def showPart(self, part, level):
+        lstr = "%" + str(3*level) + "s%s"
+        print(lstr % ("", part._objName))
+        for port in part._listPorts:
+            print(lstr % ("", " P:" + port._objName))
+        
+        for subPart in part._listSubParts:
+            self.showPart(subPart, level+1)
+        
+    def partStructureGen(self, part, level):
+        lines = []
+        lines.append( [level, 'subgraph %s {' % subgraphName(part.hierarchyName())])
+        lines.append( [level+1, 'label=<<B>%s</B>>' % part.objName()] )
+        
+        # now the ports
+        listPorts = part._listPorts
+        if len(listPorts) > 0:
+            for port in listPorts:
+                lines.append( [level+1, '%s [label=%s];' % 
+                               (moddyNameToDotName(port.hierarchyName()), moddyNameToDotName(port.objName()))  ])
+            
+                
+        # now the subparts
+        for subPart in part._listSubParts:
+            lines += self.partStructureGen(subPart, level+1)
+
+        lines.append( [level, '}' ])
+        
+        return lines
+            
+    def bindingsGen(self, level):
+        lines = []
+        ignInPorts = []
+        ignOutPorts = []
+        
+        for port in self._outputPorts:
+            if port not in ignOutPorts:
+                if port._ioPort is not None:
+                    # test if IOPort 
+                    peer = port._ioPort.peerPort()
+                    if peer is not None:
+                        # Has a peer port, make bidirectional connection
+                        lines.append( [level, '%s -> %s  [dir=none penwidth=3]' % ( #[constraint=false]
+                              moddyNameToDotName(portOrIoPortHierarchyName(port)),
+                              moddyNameToDotName(peer.hierarchyName())
+                              ) ] )
+
+                        # These ports are already connected, ignore them in the rest of the scan
+                        ignOutPorts.append(port)
+                        ignOutPorts.append(peer._outPort)
+                        ignInPorts.append(port._ioPort._inPort)
+                        ignInPorts.append(peer._inPort)
+                    
+                for inPort in port._listInPorts:
+                    if not inPort in ignInPorts:
+                        lines.append( [level, '%s -> %s ' % ( #[constraint=false]
+                              moddyNameToDotName(portOrIoPortHierarchyName(port)),
+                              moddyNameToDotName(portOrIoPortHierarchyName(inPort))
+                              ) ] )
+                         
+         
+        return lines
+    
+    
+    def dotGen(self, fileName):
+        level = 0
+        lines=[]
+        lines.append( [level, 'digraph G {'] )
+        lines.append( [level+1, 'rankdir=LR;'] )
+        lines.append( [level+1, 'graph [fontname = "helvetica" fontsize=10 fontnodesep=0.1];'] )
+        lines.append( [level+1, 'node [fontname = "helvetica" fontsize=10 shape=box color=lightblue height=.1];'] )
+        lines.append( [level+1, 'edge [fontname = "helvetica" color=red ];'] )
+
+        # Structure
+        for part in self._topLevelParts:
+            lines += self.partStructureGen(part, level+1)
+        
+        # Bindings
+        lines += self.bindingsGen(level+1)
+        
+        # finish
+        lines.append( [level, '}' ])
+        
+        # Output the DOT file as filename.dot e.g. test.svg.gv
+        dotFile = "%s.gv" % fileName
+        print("fileName=%s" % dotFile )
+        f = open(dotFile, 'w')
+        for line in lines:
+            f.write("%s%s\n" % (space(line[0]), line[1]))
+        f.close()
+        subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % fileName])
+        os.unlink(dotFile)
+
+        
+#
+# Test Code
+#    
+if __name__ == '__main__':
+    
+    class EcMaster(simPart):
+        
+        def __init__(self, sim, objName, parentObj = None):
+            super().__init__(sim, objName, parentObj)
+    
+            self.createPorts('io', ['ecPort'])
+            
+    
+        def ecPortRecv(self, port, msg):
+            pass    
+    
+
+    class EcDevice(simPart):
+        
+        def __init__(self, sim, objName, parentObj = None):
+            super().__init__(sim, objName, parentObj)
+    
+            self.createPorts('io', ['ecPort','ucPort'])
+            
+            self.uc = self.EcUc(sim, self)
+            self.fpga = self.EcFpga(sim, self)
+            self.ucPort.bind(self.uc.escPort)
+            self.uc.fpgaPort.bind(self.fpga.ucPort)
+    
+        def ecPortRecv(self, port, msg):
+            pass    
+    
+        def ucPortRecv(self, port, msg):
+            pass
+    
+        class EcUc(simPart):
+            
+            def __init__(self, sim, parentObj):
+                super().__init__(sim, "uC", parentObj)
+                self.createPorts('in', ['sensPort'])
+                self.createPorts('io', ['escPort', 'fpgaPort'])
+
+                
+            def escPortRecv(self, port, msg):
+                pass
+                
+            def fpgaPortRecv(self, port, msg):
+                pass
+                
+            def sensPortRecv(self, port, msg):
+                pass
+
+        class EcFpga(simPart):
+            
+            def __init__(self, sim, parentObj):
+                super().__init__(sim, "FPGA", parentObj)
+                self.createPorts('io', ['ucPort'])
+                
+            def ucPortRecv(self, port, msg):
+                pass
+
+    class Sensor(simPart):
+        
+        def __init__(self, sim, objName, parentObj = None):
+            super().__init__(sim, objName, parentObj)
+    
+            self.createPorts('out', ['outPort'])
+            self.createPorts('in', ['pwrPort'])
+            
+        def pwrPortRecv(self, port, msg):
+                pass
+    
+   
+    simu = sim()
+    ecm = EcMaster(simu,"ECM")
+    ecDev1 = EcDevice(simu,"DEV1")
+    ecDev2 = EcDevice(simu,"DEV2")
+    sensor = Sensor(simu,"SENSOR")
+    ecm.ecPort._outPort.bind(ecDev1.ecPort._inPort)
+    ecDev1.ecPort._outPort.bind(ecDev2.ecPort._inPort)
+    ecDev2.ecPort._outPort.bind(ecm.ecPort._inPort)
+    sensor.outPort.bind(ecDev1.uc.sensPort)
+    sensor.outPort.bind(ecDev2.uc.sensPort)
+    # sensless, but test that a peer-to-peer port can be bound to an additional input port
+    ecDev1.uc.fpgaPort._outPort.bind(sensor.pwrPort)
+    
+    ds = DotStructure(simu.topLevelParts(), simu.outputPorts())
+    ds.showStructure()
+    ds.dotGen('struct')
+    
