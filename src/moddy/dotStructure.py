@@ -172,12 +172,13 @@ class DotStructure(object):
         
         # Output the DOT file as filename.dot e.g. test.svg.gv
         dotFile = "%s.gv" % fileName
-        print("fileName=%s" % dotFile )
+        #print("fileName=%s" % dotFile )
         f = open(dotFile, 'w')
         for line in lines:
             f.write("%s%s\n" % (space(line[0]), line[1]))
         f.close()
         subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % fileName])
+        print("saved %s"  % fileName)
         os.unlink(dotFile)
 
         

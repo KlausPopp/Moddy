@@ -89,38 +89,46 @@ class vtSchedRtos(simPart):
         #
         # wait until vThread executes syscall
         #
-        assert(self._scCallEvent.wait(timeout=self.schedVThreadComTimeout) == True),"Timeout waiting for vThread to issue sysCall"
-        self._scCallEvent.clear()
-        
-        # 
-        # Execute the sysCall
-        # 
-        sysCallName = vThread._scPendingCall[0]
-        sysCallArg  = vThread._scPendingCall[1]
-        
-        #print("  runVThreadTilSysCall %s Exec sysCall %s" % (vThread.objName(), sysCallName))
-        
-        timer = None
-        
-        if sysCallName == 'busy':
-            timer = sysCallArg[0]
-            vThread._scAppStatus  = sysCallArg[1]
-            vThread._scRemainBusyTime = timer
-            vThread._scCallReturnVal = 'ok'
+        rv = self._scCallEvent.wait(timeout=self.schedVThreadComTimeout)
+        if rv == True:
+            self._scCallEvent.clear()
             
-        elif sysCallName == 'wait':
-            timer = sysCallArg[0]
-            vThread._scWaitEvents = sysCallArg[1]
-            self.vtStateMachine(vThread, 'wait')
-            vThread._scCallReturnVal = '?'
+            # 
+            # Execute the sysCall
+            # 
+            sysCallName = vThread._scPendingCall[0]
+            sysCallArg  = vThread._scPendingCall[1]
             
+            #print("  runVThreadTilSysCall %s Exec sysCall %s" % (vThread.objName(), sysCallName))
+            
+            timer = None
+            
+            if sysCallName == 'busy':
+                timer = sysCallArg[0]
+                vThread._scAppStatus  = sysCallArg[1]
+                vThread._scRemainBusyTime = timer
+                vThread._scCallReturnVal = 'ok'
+                
+            elif sysCallName == 'wait':
+                timer = sysCallArg[0]
+                vThread._scWaitEvents = sysCallArg[1]
+                self.vtStateMachine(vThread, 'wait')
+                vThread._scCallReturnVal = '?'
+                
+            else:
+                raise ValueError('Illegal syscall %s' % sysCallName)
+    
+            if timer is not None:
+                vThread._scSysCallTimer.start(timer)
+            self.schedule()
         else:
-            raise ValueError('Illegal syscall %s' % sysCallName)
-
-        if timer is not None:
-            vThread._scSysCallTimer.start(timer)
-        self.schedule()
- 
+            # Timeout waiting for thread to issue sysCall
+            print("Timeout waiting for vThread %s to issue sysCall" % vThread.objName())
+            if vThread.is_alive():
+                raise RuntimeError("Timeout waiting for vThread %s to issue sysCall" % vThread.objName())
+            else:
+                # VThread stopped
+                vThread.setStateIndicator("TERM")
 
     def updateAllStateIndicators(self):
         readyStatusAppearance = {'boxStrokeColor':'grey', 'boxFillColor':'white', 'textColor':'grey'}
@@ -343,8 +351,15 @@ class vtSchedRtos(simPart):
         self._scCallEvent.set()
         
         # wait until scheduler completed syscall
-        assert(vThread._scReturnEvent.wait(timeout=self.schedVThreadComTimeout) == True),"Timeout waiting for scheduler to return from sysCall"
-            
+        rv = vThread._scReturnEvent.wait(timeout=self.schedVThreadComTimeout + 1.0)
+        
+        if rv == False:
+            if vThread._sim.isRunning() == False:
+                # Simulator stop, tell thread to exit
+                vThread._scCallReturnVal = 'exit'
+            else:
+                raise RuntimeError("Timeout waiting for scheduler to return from sysCall")
+        
         vThread._scReturnEvent.clear()
         #print("  VT:sysCall ret",call,vThread._scCallReturnVal)
         if vThread._scCallReturnVal == 'exit':

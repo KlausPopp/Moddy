@@ -13,20 +13,6 @@ objects (called PARTS in moddy) that communicate via messages.
 Moddy was written to analyze complex systems in the concept phase to validate the suitability of the concept.
 
 
-TODOS (FEATURE AND IMPROVEMENT LIST)
-#003 Catch model exceptions, allow result output until exception
-#013 add SamplingIO and QueingIO ports
-#004 BlockDiagrams: Show scheduler and scheduled threads
-#005 BlockDiagrams: Show message types on bindings (learn which messages are sent on outPort)
-#011 SeqDiagram: Group the objects (e.g. message arrow)
-#006 Show scheduler events in event trace
-#009 Add waveform output (.vcf)
-
-DONE 
-#012 SeqDiagram: Do not modify simulator objects
-#002 Create sequence diagrams via single function call
-#010 Allow user to suppress trace prints during simulation   
-#001 Allow colored messages a) via output port b) via messages
 """
 
 

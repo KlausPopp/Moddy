@@ -4,6 +4,7 @@ Moddy - Python system simulator
 '''
 from copy import deepcopy
 from moddy import ms,us,ns,VERSION
+import sys
 
 def timeUnit2Factor(unit):
     """Convert time unit to factor"""
@@ -181,7 +182,7 @@ class simOutputPort(simBaseElement):
                 
             
         def name(self):
-            return self._port.name() + "#fireEvent"
+            return self._port.objName() + "#fireEvent"
         
         def execute(self):
             # pass the message to all bound input ports
@@ -360,6 +361,7 @@ class sim:
         self._disTimeScaleStr = "s"     # time scale string
         self._listTracedEvents = []     # list of all traced events during execution
         self._enableTracePrints = True
+        self._isRunning = False
     #
     # Port Management
     #
@@ -435,6 +437,11 @@ class sim:
         """Cancel an already scheduled event"""
         self._listEvents.remove(event)
         
+    def stop(self):
+        self._isRunning = False
+        print("SIM: Simulator stopped at",self.timeStr(self._time) )
+        for part in self._listParts: part.terminateSim()
+        
     def run(self, stopTime, maxEvents=10000, enableTracePrinting=True):
         '''
         run the simulator until <stopTime>
@@ -444,6 +451,7 @@ class sim:
         self._enableTracePrints = enableTracePrinting
         self.checkUnBoundPorts()
         print ("SIM: Simulator %s starting" % (VERSION))
+        self._isRunning = True
         for part in self._listParts: part.startSim()
         
         numEvents = 0
@@ -466,12 +474,19 @@ class sim:
             self._time = event.execTime
 
             #print("SIM: Exec event", event.name(), self._time)
-            event.execute()
-             
-            
-        print("SIM: Simulator stopped at",self.timeStr(self._time) )
-        for part in self._listParts: part.terminateSim()
-        
+            try:
+                # Catch model exceptions
+                event.execute()
+            except: 
+                print ("SIM: Caught exception while executing event %s" % event.name(), file=sys.stderr)
+                self.stop()
+                # re-raise model exception
+                raise
+
+        self.stop()    
+
+    def isRunning(self):
+        return self._isRunning    
 
     #
     # Tracing and display routines
