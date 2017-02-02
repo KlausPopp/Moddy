@@ -32,7 +32,7 @@ ms = 1E-3
 from moddy.simulator import sim,simPart
 
 from moddy.vthread import vThread
-from moddy.vtSchedRtos import vtSchedRtos
+from moddy.vtSchedRtos import vtSchedRtos,vSimpleProg
 
 from moddy.svgSeqD import moddyGenerateSequenceDiagram
 from moddy.traceToCsv import moddyGenerateTraceTable

@@ -280,4 +280,5 @@ class vThread(simPart, threading.Thread):
             exec('self.%s = self.newVtTimer("%s")' % (tmrName,tmrName)) 
        
     
-    
+        
+            

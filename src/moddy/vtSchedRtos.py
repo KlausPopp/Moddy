@@ -368,6 +368,16 @@ class vtSchedRtos(simPart):
         vThread._scPendingCall = None
         return vThread._scCallReturnVal
         
+class vSimpleProg(vThread):
+    ''' A special version of a vThread that has its own scheduler and no concurrency '''
+    
+    def __init__(self, sim, **vThreadArgs):
+        ''' See vThread.__init__ for arguments '''
+        vThread.__init__(self, sim, **vThreadArgs )
+        sched= vtSchedRtos(sim=sim, objName="sched", parentObj=self)
+        sched.addVThread(self, 0)
+        
+
         
 #
 # Test code
@@ -448,7 +458,7 @@ if __name__ == '__main__':
         sd.save("sched.html","svgInHtml")
 
     def testQueingPort():
-        class myThread1(vThread):
+        class myThread1(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
                 self.createPorts('QueingIn', ['inP1'])
@@ -475,7 +485,7 @@ if __name__ == '__main__':
                     self.getAllMsg()
 
 
-        class stimThread(vThread):
+        class stimThread(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Stim', parentObj=None)
                 self.createPorts('out', ['toT1Port'])
@@ -489,14 +499,10 @@ if __name__ == '__main__':
 
 
         simu = sim()
-        sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
-        schedStim = vtSchedRtos(sim=simu, objName="schedStim", parentObj=None)
                         
         t1 = myThread1(simu)
-        sched.addVThread(t1, 0)
         
         stim = stimThread(simu)
-        schedStim.addVThread(stim, 0)
         stim.toT1Port.bind(t1.inP1)
         
         simu.run(200)
@@ -618,7 +624,7 @@ if __name__ == '__main__':
         
         sd.save("sched.html","svgInHtml")        
   
-    #testQueingPort()
-    testSamplingPort()
+    testQueingPort()
+    #testSamplingPort()
     #testVtTimer()
     #testScheduling()
