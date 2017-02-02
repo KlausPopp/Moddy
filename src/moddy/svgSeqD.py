@@ -19,13 +19,16 @@ from moddy.simulator import sim
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
 
 
-def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', excludedElementList=[], **kwargs):
+def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', excludedElementList=[],
+                                  timeRange=(0,None), 
+                                  **kwargs):
     '''
     Moddy high level function to create sequence diagrams.
     sim - the simulator object
     fileName - output filename (including .svg or .html)
     fmt - either 'svg' for pure SVG or 'svgInHtml' for SVG embedded in HTML
     excludedElementList - parts or timers that should be excluded from drawing
+    timeRange - tuple with start and end time. Everything before start and after end is not drawn
     
     **kwargs - further arguments, see svgSeqD constructor for details
      timePerDiv - time per time grid division
@@ -47,7 +50,7 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', excludedElementList=
     for elem in excludedElementList:
         sd.hide(elem)
     
-    sd.draw()
+    sd.draw(timeRange[0], timeRange[1])
     sd.save(fileName, fmt)
 
 
