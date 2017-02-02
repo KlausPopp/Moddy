@@ -208,6 +208,7 @@ class simOutputPort(simBaseElement):
         self._listPendingMsg = []   # list of pending messages (not yet fired)
         self._color = color         # color for messages leaving that port
         self._ioPort = ioPort       # reference to the IOPort which contains this outPort (None if not part of IOPort)
+        self._listMsgTypes = []     # learned message types that left this port
         
     def bind(self, inputPort):
         """bind an output port to an input port"""
@@ -219,6 +220,19 @@ class simOutputPort(simBaseElement):
         """Report True if port is bound to at least one input port"""
         return len(self._listInPorts) >= 1         
  
+    def _learnMsgTypes(self, msg):
+        ''' 
+        Learn which types of messages are leaving the port.
+        Will be displayed in Structure Graphs
+        '''
+        msgType = type(msg).__name__
+        if not msgType in self._listMsgTypes:
+            self._listMsgTypes.append(msgType)
+ 
+    def learnedMsgTypes(self):
+        ''' Return list of learned message types that left the port until now. (Strings with types) '''
+        return self._listMsgTypes
+ 
     def _sendSchedule(self, event):
         event.execTime = self._sim.time() + event._flightTime
         self._sim.scheduleEvent(event)
@@ -226,6 +240,7 @@ class simOutputPort(simBaseElement):
     
     def send(self, msg, flightTime):
         """User interface to send a message"""
+        self._learnMsgTypes(msg)
         event = self.fireEvent(self._sim, self, msg, flightTime)
         if not self._listPendingMsg:
             # no pending messages, send now

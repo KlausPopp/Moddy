@@ -42,7 +42,22 @@ def portOrIoPortObjName(port):
         return port._ioPort.objName()
     else:
         return port.objName()
-    
+
+def p2pPortMsgTypes(port1,port2):
+    ''' join the message types of the two ports '''
+    msgTypes = port1.learnedMsgTypes() + port2.learnedMsgTypes()
+    l = []
+    for msgType in msgTypes:
+        if not msgType in l:
+            l.append(msgType)
+    return portMsgTypesToLabel(l) 
+
+def portMsgTypesToLabel(msgTypes):
+    s = ""
+    for msgType in msgTypes:
+        if s != "": s += ", "
+        s += msgType
+    return s    
  
 class DotStructure(object):
     '''
@@ -131,10 +146,11 @@ class DotStructure(object):
                     peer = port._ioPort.peerPort()
                     if peer is not None:
                         # Has a peer port, make bidirectional connection
-                        lines.append( [level, '%s -> %s  [dir=none penwidth=3]' % ( #[constraint=false]
+                        lines.append( [level, '%s -> %s  [dir=none penwidth=3 label="%s"]' % ( #[constraint=false]
                               moddyNameToDotName(portOrIoPortHierarchyName(port)),
-                              moddyNameToDotName(peer.hierarchyName())
-                              ) ] )
+                              moddyNameToDotName(peer.hierarchyName()),
+                              p2pPortMsgTypes(port._ioPort._outPort, peer._outPort) 
+                            )] )
 
                         # These ports are already connected, ignore them in the rest of the scan
                         ignOutPorts.append(port)
@@ -144,10 +160,10 @@ class DotStructure(object):
                     
                 for inPort in port._listInPorts:
                     if not inPort in ignInPorts:
-                        lines.append( [level, '%s -> %s ' % ( #[constraint=false]
+                        lines.append( [level, '%s -> %s [label="%s"]' % ( #[constraint=false]
                               moddyNameToDotName(portOrIoPortHierarchyName(port)),
-                              moddyNameToDotName(portOrIoPortHierarchyName(inPort))
-                              ) ] )
+                              moddyNameToDotName(portOrIoPortHierarchyName(inPort)),
+                              portMsgTypesToLabel(port.learnedMsgTypes()) ) ] )
                          
          
         return lines
@@ -160,7 +176,7 @@ class DotStructure(object):
         lines.append( [level+1, 'rankdir=LR;'] )
         lines.append( [level+1, 'graph [fontname = "helvetica" fontsize=10 fontnodesep=0.1];'] )
         lines.append( [level+1, 'node [fontname = "helvetica" fontsize=10 shape=box color=lightblue height=.1];'] )
-        lines.append( [level+1, 'edge [fontname = "helvetica" color=red ];'] )
+        lines.append( [level+1, 'edge [fontname = "helvetica" color=red fontsize=8 fontcolor=red];'] )
 
         # Structure
         for part in self._topLevelParts:
@@ -273,5 +289,5 @@ if __name__ == '__main__':
     
     ds = DotStructure(simu.topLevelParts(), simu.outputPorts())
     ds.showStructure()
-    ds.dotGen('struct')
+    ds.dotGen('struct', keepGvFile=False)
     
