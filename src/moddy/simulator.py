@@ -241,10 +241,13 @@ class simOutputPort(simBaseElement):
 
 class simIOPort(simBaseElement):
     ''' An element that contains one input and one output port '''
-    def __init__(self, sim, part, name, msgReceivedFunc):
+    def __init__(self, sim, part, name, msgReceivedFunc, specialInPort=None):
         super().__init__(sim, part, name, "IOPort")
         self._outPort = simOutputPort( sim, part, name + "-Out", ioPort=self)
-        self._inPort = simInputPort(sim, part, name + "-In", msgReceivedFunc, ioPort=self)
+        if specialInPort is None:
+            self._inPort = simInputPort(sim, part, name + "-In", msgReceivedFunc, ioPort=self)
+        else:
+            self._inPort = specialInPort
         
     def bind(self, otherIoPort):
         ''' Bind IOPort to another IOPort, in/out will be crossed '''

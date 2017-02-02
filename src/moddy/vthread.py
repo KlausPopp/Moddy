@@ -4,7 +4,7 @@ Created on 04.01.2017
 @author: Klaus Popp
 '''
 
-from moddy.simulator import simPart,simInputPort,simTimer
+from moddy.simulator import simPart,simInputPort,simTimer,simIOPort
 import threading
 
 class vtInPort(simInputPort):
@@ -28,7 +28,7 @@ class vtInPort(simInputPort):
     def wake(self):
         self._vThread._scheduler.wake(self._vThread, self)
     
-    def readMsg(self):
+    def readMsg(self, default=None):
         '''Overwritten by subclass'''
         pass
 
@@ -89,11 +89,12 @@ class vtQueingInPort(vtInPort):
             # wakeup waiting thread if queue changes from empty to one entry
             self.wake()
         
-    def readMsg(self):
+    def readMsg(self, default=None):
         ''' 
         Get first message from queue.
         The message is consumed
         Raises BufferError if no message is available 
+        <default> is ignored.
         '''
         if len(self._sampledMsg) > 0:
             return self._sampledMsg.pop(0)
@@ -103,6 +104,17 @@ class vtQueingInPort(vtInPort):
     def nMsg(self):
         ''' return number of messages in queue'''
         return len(self._sampledMsg)
+
+class vtIOPort(simIOPort):
+    '''an IOPort that combines a Sampling/Queing input port and a standard output port'''
+    def __init__(self, sim, name, vThread, inPort):
+        super().__init__(sim, vThread, name, msgReceivedFunc=None, specialInPort=inPort)
+    
+    def readMsg(self, default=None):
+        return self._inPort.readMsg(default)
+    def nMsg(self):
+        return self._inPort.nMsg()
+    
 
 class vtTimer(simTimer):
     '''
@@ -222,6 +234,17 @@ class vThread(simPart, threading.Thread):
         self.addInputPort(port) 
         return port
     
+    def newVtSamplingIOPort(self, name):
+        port = vtIOPort(self._sim, name, self, vtSamplingInPort(self._sim, name, self))
+        self.addIOPort(port)
+        return port
+
+    def newVtQueingIOPort(self, name):
+        port = vtIOPort(self._sim, name, self, vtQueingInPort(self._sim, name, self))
+        self.addIOPort(port)
+        return port
+        
+
     def newVtTimer(self, name):
         timer = vtTimer(self._sim, name, self)
         self.addTimer(timer)
@@ -230,7 +253,7 @@ class vThread(simPart, threading.Thread):
     def createPorts(self, ptype, listPortNames):
         '''
         Convinience functions to create multiple vtPorts at once.
-        <type> must be one of 'SamplingIn' or 'QueingIn' 
+        <type> must be one of 'SamplingIn', 'QueingIn', 'SamplingIO' or 'QueingIO' 
         The function creates for each port a member variable with this name in the part.
         '''
         if ptype == 'SamplingIn':
@@ -239,6 +262,12 @@ class vThread(simPart, threading.Thread):
         elif ptype == 'QueingIn':
             for portName in listPortNames:
                 exec('self.%s = self.newVtQueingInPort("%s")' % (portName,portName)) 
+        elif ptype == 'SamplingIO':
+            for portName in listPortNames:
+                exec('self.%s = self.newVtSamplingIOPort("%s")' % (portName,portName)) 
+        elif ptype == 'QueingIO':
+            for portName in listPortNames:
+                exec('self.%s = self.newVtQueingIOPort("%s")' % (portName,portName)) 
         else:
             simPart.createPorts(self, ptype, listPortNames)
             

@@ -8,13 +8,14 @@ import subprocess
 import os
 
 
-def moddyGenerateStructureGraph( sim, fileName ):
+def moddyGenerateStructureGraph( sim, fileName, keepGvFile=False ):
     ''' 
     Generate a graph of the model' structure using the GraphViz dot tool
     <fileName> should be the relative filename including '.svg'  
+    <keepGvFile> if True, don't delete graphviz input file
     '''
     ds = DotStructure(sim.topLevelParts(), sim.outputPorts())
-    ds.dotGen(fileName)
+    ds.dotGen(fileName, keepGvFile)
 
 def space(indent):
     istr = "%" + str(3*indent) + "s"
@@ -54,6 +55,7 @@ class DotStructure(object):
         '''
         <topLevelParts> must be the list of top level parts in the model
         <outputPorts> must a list of all output ports in the model
+
         '''
         self._topLevelParts = topLevelParts
         self._outputPorts = outputPorts
@@ -151,7 +153,7 @@ class DotStructure(object):
         return lines
     
     
-    def dotGen(self, fileName):
+    def dotGen(self, fileName, keepGvFile):
         level = 0
         lines=[]
         lines.append( [level, 'digraph G {'] )
@@ -179,7 +181,8 @@ class DotStructure(object):
         f.close()
         subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % fileName])
         print("saved %s"  % fileName)
-        os.unlink(dotFile)
+        if not keepGvFile:
+            os.unlink(dotFile)
 
         
 #
