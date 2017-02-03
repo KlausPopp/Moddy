@@ -74,7 +74,7 @@ class DotStructure(object):
         '''
         self._topLevelParts = topLevelParts
         self._outputPorts = outputPorts
-    
+        self._listSchedulers = []
         
     def showStructure(self):
         for part in self._topLevelParts:
@@ -115,22 +115,31 @@ class DotStructure(object):
         
     def partStructureGen(self, part, level):
         lines = []
-        lines.append( [level, 'subgraph %s {' % subgraphName(part.hierarchyName())])
-        lines.append( [level+1, 'label=<<B>%s</B>>' % part.objName()] )
         
-        # now the ports
-        listPorts = part._listPorts
-        if len(listPorts) > 0:
-            for port in listPorts:
-                lines.append( [level+1, '%s [label=%s];' % 
-                               (moddyNameToDotName(port.hierarchyName()), moddyNameToDotName(port.objName()))  ])
+        if part._typeStr == "scheduler":
+            # show schedulers as an ellipse-node, and without subparts
+            lines.append( [level, '%s [label=%s shape=ellipse];' % 
+                           (moddyNameToDotName(part.hierarchyName()), moddyNameToDotName(part.objName()))])
+            self._listSchedulers.append(part)
             
+        else:
+            # normal part is shown as a subgraph
+            lines.append( [level, 'subgraph %s {' % subgraphName(part.hierarchyName())])
+            lines.append( [level+1, 'label=<<B>%s</B>>' % part.objName()] )
+            
+            # now the ports
+            listPorts = part._listPorts
+            if len(listPorts) > 0:
+                for port in listPorts:
+                    lines.append( [level+1, '%s [label=%s];' % 
+                                   (moddyNameToDotName(port.hierarchyName()), moddyNameToDotName(port.objName()))  ])
                 
-        # now the subparts
-        for subPart in part._listSubParts:
-            lines += self.partStructureGen(subPart, level+1)
-
-        lines.append( [level, '}' ])
+                    
+            # now the subparts
+            for subPart in part._listSubParts:
+                lines += self.partStructureGen(subPart, level+1)
+    
+            lines.append( [level, '}' ])
         
         return lines
             
@@ -168,12 +177,36 @@ class DotStructure(object):
          
         return lines
     
+    def schedulerRelationsGen(self, level):
+        lines = []
+        for sched in self._listSchedulers:
+            for thread in sched._listVThreads:
+                # Dot allows only edges between nodes, so take the first port of that part
+                # if the part has no port, issue warning
+                if len(thread._listPorts) > 0:
+                    if thread != sched._parentObj:
+                        firstPort = thread._listPorts[0]
     
+                        prio = thread._scPrio
+                        destNode = moddyNameToDotName(firstPort.hierarchyName())
+    
+                        lines.append( [level, 
+                                       '%s -> %s [lhead=%s label="%s" color=lightblue fontsize=8 fontcolor=lightblue ]' % 
+                                       ( moddyNameToDotName(sched.hierarchyName()),
+                                         destNode,
+                                         "cluster_" + moddyNameToDotName(thread.hierarchyName()),
+                                         prio ) ] )
+                else:
+                    print("WARNING: Thread %s has no ports. Scheduler connection cannot be shown in structure" % 
+                          thread.hierarchyName())
+        return lines
+        
     def dotGen(self, fileName, keepGvFile):
         level = 0
         lines=[]
         lines.append( [level, 'digraph G {'] )
         lines.append( [level+1, 'rankdir=LR;'] )
+        lines.append( [level+1, 'compound=true;'] )
         lines.append( [level+1, 'graph [fontname = "helvetica" fontsize=10 fontnodesep=0.1];'] )
         lines.append( [level+1, 'node [fontname = "helvetica" fontsize=10 shape=box color=lightblue height=.1];'] )
         lines.append( [level+1, 'edge [fontname = "helvetica" color=red fontsize=8 fontcolor=red];'] )
@@ -184,6 +217,9 @@ class DotStructure(object):
         
         # Bindings
         lines += self.bindingsGen(level+1)
+        
+        # Scheduler relations
+        lines += self.schedulerRelationsGen(level+1)
         
         # finish
         lines.append( [level, '}' ])
@@ -196,7 +232,7 @@ class DotStructure(object):
             f.write("%s%s\n" % (space(line[0]), line[1]))
         f.close()
         subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % fileName])
-        print("saved %s"  % fileName)
+        print("Saved structure graph to %s"  % fileName)
         if not keepGvFile:
             os.unlink(dotFile)
 
@@ -205,15 +241,41 @@ class DotStructure(object):
 # Test Code
 #    
 if __name__ == '__main__':
+    from moddy.vtSchedRtos import vtSchedRtos
+    from moddy.vthread import vThread
+
     
+    class Cpu(simPart):
+        def __init__(self, sim, objName, parentObj = None):
+            super().__init__(sim, objName, parentObj)
+            self.sched = vtSchedRtos(sim, "schedCpu", self)
+            self.app1 = App(sim,"App1", self)
+            self.app2 = App(sim,"App2", self)
+            
+            self.sched.addVThread(self.app1, 1)
+            self.sched.addVThread(self.app2, 2)
+            
+    class App(vThread):
+        def __init__(self, sim, objName, parentObj = None):
+            super().__init__(sim, objName, parentObj )
+    
+            self.createPorts('SamplingIO', ['ecmPort'])
+
+        def runVThread(self):
+            while True:
+                pass
+        
+            
     class EcMaster(simPart):
         
         def __init__(self, sim, objName, parentObj = None):
             super().__init__(sim, objName, parentObj)
     
-            self.createPorts('io', ['ecPort'])
+            self.createPorts('io', ['appPort','ecPort'])
             
     
+        def appPortRecv(self, port, msg):
+            pass    
         def ecPortRecv(self, port, msg):
             pass    
     
@@ -275,10 +337,12 @@ if __name__ == '__main__':
     
    
     simu = sim()
+    cpu = Cpu(simu,"CPU")
     ecm = EcMaster(simu,"ECM")
     ecDev1 = EcDevice(simu,"DEV1")
     ecDev2 = EcDevice(simu,"DEV2")
     sensor = Sensor(simu,"SENSOR")
+    cpu.app1.ecmPort.bind(ecm.appPort)
     ecm.ecPort._outPort.bind(ecDev1.ecPort._inPort)
     ecDev1.ecPort._outPort.bind(ecDev2.ecPort._inPort)
     ecDev2.ecPort._outPort.bind(ecm.ecPort._inPort)
@@ -286,8 +350,8 @@ if __name__ == '__main__':
     sensor.outPort.bind(ecDev2.uc.sensPort)
     # sensless, but test that a peer-to-peer port can be bound to an additional input port
     ecDev1.uc.fpgaPort._outPort.bind(sensor.pwrPort)
+
     
-    ds = DotStructure(simu.topLevelParts(), simu.outputPorts())
-    ds.showStructure()
-    ds.dotGen('struct', keepGvFile=False)
+    
+    moddyGenerateStructureGraph(simu, 'struct', keepGvFile=True)
     

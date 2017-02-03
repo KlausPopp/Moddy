@@ -31,6 +31,7 @@ class vtSchedRtos(simPart):
                 
         # Initialize the parent class
         super().__init__(sim=sim, objName=objName, parentObj=parentObj)
+        self._typeStr = "scheduler"     # overwrite "part" (ugly)
 
         self._listVThreads  = []
         self._readyVThreads = [[] for x in range(self.numPrio)]   # create list of lists, one list for each prio 
