@@ -76,6 +76,8 @@ class vtSchedRtos(simPart):
         Then execute the syscall and possible reschedule
         ''' 
         #print("  runVThreadTilSysCall %s %d" % (vThread.objName(), vThread._scIsPythonThreadStarted))
+        vThread._scSysCallTimer.stop()
+        vThread._scWaitEvents = None
         if not vThread._scIsPythonThreadStarted:
             # first time, start python thread
             vThread._scIsPythonThreadStarted = True
@@ -85,8 +87,7 @@ class vtSchedRtos(simPart):
             assert(vThread._scReturnEvent.isSet() == False)    
             vThread._scReturnEvent.set()
 
-        vThread._scSysCallTimer.stop()
-        vThread._scWaitEvents = None
+
         #
         # wait until vThread executes syscall
         #
@@ -108,6 +109,7 @@ class vtSchedRtos(simPart):
                 timer = sysCallArg[0]
                 vThread._scAppStatus  = sysCallArg[1]
                 vThread._scRemainBusyTime = timer
+                vThread._scBusyStartTime = self._sim.time()
                 vThread._scCallReturnVal = 'ok'
                 
             elif sysCallName == 'wait':
@@ -264,7 +266,7 @@ class vtSchedRtos(simPart):
         WAITING -----------------------------------------------+
         
         '''
-        #print("  vtSmac %s %s %s" % (vThread.objName(), vThread._scState, event))
+        print("  vtSmac %s %s %s" % (vThread.objName(), vThread._scState, event))
         oldState = vThread._scState
         newState = oldState
         
@@ -283,7 +285,7 @@ class vtSchedRtos(simPart):
             elif event == 'preempt':
                 elapsed = self._sim.time() - vThread._scBusyStartTime
                 vThread._scRemainBusyTime -= elapsed
-                #print( "     preempt remain=%f %f" % (vThread._scRemainBusyTime, vThread._scBusyStartTime))
+                print( "     preempt remain=%f %f" % (vThread._scRemainBusyTime, vThread._scBusyStartTime))
                 assert(vThread._scRemainBusyTime >= 0)
                 vThread._scSysCallTimer.stop()
                 newState = 'READY'
