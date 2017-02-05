@@ -266,7 +266,7 @@ class vtSchedRtos(simPart):
         WAITING -----------------------------------------------+
         
         '''
-        print("  vtSmac %s %s %s" % (vThread.objName(), vThread._scState, event))
+        #print("  vtSmac %s %s %s" % (vThread.objName(), vThread._scState, event))
         oldState = vThread._scState
         newState = oldState
         
@@ -285,7 +285,7 @@ class vtSchedRtos(simPart):
             elif event == 'preempt':
                 elapsed = self._sim.time() - vThread._scBusyStartTime
                 vThread._scRemainBusyTime -= elapsed
-                print( "     preempt remain=%f %f" % (vThread._scRemainBusyTime, vThread._scBusyStartTime))
+                #print( "     preempt remain=%f %f" % (vThread._scRemainBusyTime, vThread._scBusyStartTime))
                 assert(vThread._scRemainBusyTime >= 0)
                 vThread._scSysCallTimer.stop()
                 newState = 'READY'
@@ -387,7 +387,8 @@ class vSimpleProg(vThread):
 #
 if __name__ == '__main__':
     from moddy.simulator import sim
-    import moddy.svgSeqD
+    from moddy.svgSeqD import moddyGenerateSequenceDiagram
+    
     busyAppearance = {'boxStrokeColor':'blue', 'boxFillColor':'green', 'textColor':'white'}
  
     
@@ -449,16 +450,13 @@ if __name__ == '__main__':
         sched.addVThread(t3, 1)
         simu.run(400)
         
-        sd = moddy.svgSeqD.svgSeqD(evList=simu.tracedEvents(), 
-                                    timePerDiv = 10, pixPerDiv = 30)
-        
-        sd.addParts([sched,t1,t2,t3])
-        
-        
-        # generate drawing
-        sd.draw()
-        
-        sd.save("sched.html","svgInHtml")
+        moddyGenerateSequenceDiagram( sim=simu, 
+                                      fileName="sched.html", 
+                                      fmt="svgInHtml", 
+                                      showPartsList=[t1,t2,t3],
+                                      excludedElementList=['allTimers'], 
+                                      timePerDiv = 10, 
+                                      pixPerDiv = 30)  
 
     def testQueingPort():
         class myThread1(vSimpleProg):
@@ -482,9 +480,9 @@ if __name__ == '__main__':
                 cycle=0
                 while True:
                     cycle += 1
-                    self.busy(33,cycle,busyAppearance)
+                    self.busy(33, cycle, busyAppearance)
                     self.getAllMsg()
-                    self.wait(20,[self.inP1])
+                    print(self.wait(20, [self.inP1]))
                     self.getAllMsg()
 
 
@@ -510,29 +508,23 @@ if __name__ == '__main__':
         
         simu.run(200)
         
-        sd = moddy.svgSeqD.svgSeqD(evList=simu.tracedEvents(), 
-                                    timePerDiv = 10, pixPerDiv = 30)
-        
-        sd.addParts([stim,t1])
-        
-        
-        # generate drawing
-        sd.draw()
-        
-        sd.save("sched.html","svgInHtml")
+        moddyGenerateSequenceDiagram( sim=simu, 
+                                      fileName="sched.html", 
+                                      fmt="svgInHtml", 
+                                      showPartsList=[stim,t1],
+                                      excludedElementList=['allTimers'], 
+                                      timePerDiv = 10, 
+                                      pixPerDiv = 30)  
     
     
     def testSamplingPort():
-        class myThread1(vThread):
+        class myThread1(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
                 self.createPorts('SamplingIn', ['inP1'])
                 
             def showMsg(self):
-                try:
-                    msg = self.inP1.readMsg()
-                except BufferError:
-                    msg = 'No message'
+                msg = self.inP1.readMsg(default='No message')
                 self.addAnnotation(msg)
                 
             def runVThread(self):
@@ -540,13 +532,13 @@ if __name__ == '__main__':
                 while True:
                     cycle += 1
                     self.showMsg()
-                    self.busy(18,cycle,busyAppearance)
+                    self.busy(18,cycle, busyAppearance)
                     self.showMsg()
-                    self.busy(14,cycle,busyAppearance)
+                    self.busy(14,cycle, busyAppearance)
                     self.wait(20,[self.inP1])
 
 
-        class stimThread(vThread):
+        class stimThread(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Stim', parentObj=None)
                 self.createPorts('out', ['toT1Port'])
@@ -555,39 +547,34 @@ if __name__ == '__main__':
                 count=0
                 while True:
                     count+=1
-                    self.wait(15,[])
+                    self.wait(15)
                     self.toT1Port.send('hello%d' % count,5)
 
 
         simu = sim()
-        sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
-        schedStim = vtSchedRtos(sim=simu, objName="schedStim", parentObj=None)
                         
         t1 = myThread1(simu)
-        sched.addVThread(t1, 0)
         
         stim = stimThread(simu)
-        schedStim.addVThread(stim, 0)
         stim.toT1Port.bind(t1.inP1)
         
         simu.run(200)
         
-        sd = moddy.svgSeqD.svgSeqD(evList=simu.tracedEvents(), 
-                                    timePerDiv = 10, pixPerDiv = 30)
+        moddyGenerateSequenceDiagram( sim=simu, 
+                                      fileName="sched.html", 
+                                      fmt="svgInHtml", 
+                                      showPartsList=[stim,t1],
+                                      excludedElementList=['allTimers'], 
+                                      timePerDiv = 10, 
+                                      pixPerDiv = 30)  
         
-        sd.addParts([stim,t1])
-        
-        
-        # generate drawing
-        sd.draw()
-        
-        sd.save("sched.html","svgInHtml")        
+     
 
     def testVtTimer():
         class myThread1(vThread):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createTimers(['tmr1'])
+                self.createVtTimers(['tmr1'])
                 
             def runVThread(self):
                 cycle=0
@@ -616,18 +603,15 @@ if __name__ == '__main__':
         
         simu.run(200)
         
-        sd = moddy.svgSeqD.svgSeqD(evList=simu.tracedEvents(), 
-                                    timePerDiv = 10, pixPerDiv = 30)
-        
-        sd.addParts([t1])
-        
-        
-        # generate drawing
-        sd.draw()
-        
-        sd.save("sched.html","svgInHtml")        
+        moddyGenerateSequenceDiagram( sim=simu, 
+                                      fileName="sched.html", 
+                                      fmt="svgInHtml", 
+                                      showPartsList=[t1],
+                                      excludedElementList=['allTimers'], 
+                                      timePerDiv = 10, 
+                                      pixPerDiv = 30)  
   
-    testQueingPort()
+    #testQueingPort()
     #testSamplingPort()
-    #testVtTimer()
+    testVtTimer()
     #testScheduling()

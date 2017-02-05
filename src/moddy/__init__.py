@@ -17,7 +17,7 @@ Moddy was written to analyze complex systems in the concept phase to validate th
 
 
 
-version = (0, 9, 3)  
+version = (1, 0, 0)  
 VERSION = '%d.%d.%d' % version
 
 AUTHOR_NAME = 'Klaus Popp'
