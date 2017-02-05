@@ -19,7 +19,7 @@ from moddy.simulator import sim
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
 
 
-def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', excludedElementList=[],
+def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, excludedElementList=[],
                                   timeRange=(0,None), 
                                   **kwargs):
     '''
@@ -27,7 +27,15 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', excludedElementList=
     sim - the simulator object
     fileName - output filename (including .svg or .html)
     fmt - either 'svg' for pure SVG or 'svgInHtml' for SVG embedded in HTML
-    excludedElementList - parts or timers that should be excluded from drawing
+
+    showPartsList - if given, show only the listed parts in that order in sequence diagram.
+                    if omitted, show all parts known by simulator, in the order of their creation
+                    
+    excludedElementList - 
+                    parts or timers that should be excluded from drawing
+                    Each list element can be the object to exclude or one of the following:
+                    - 'allTimers' - exclude all timers
+
     timeRange - tuple with start and end time. Everything before start and after end is not drawn
     
     **kwargs - further arguments, see svgSeqD constructor for details
@@ -39,9 +47,14 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', excludedElementList=
     '''
     sd = svgSeqD( evList=sim.tracedEvents(), **kwargs )
     
+    if showPartsList is None:
+        allParts = sim._listParts
+    else:
+        allParts = showPartsList 
+    
     # Get all parts from simulator. Exlude only those in excludedElementList
     partsList = []
-    for part in sim._listParts:
+    for part in allParts:
         if part not in excludedElementList:
             partsList.append(part)
 
@@ -263,7 +276,7 @@ class svgSeqD(object):
         insertPos is the absolute upper pos on the canvas.  
         '''
         d = self._d
-        d.add( d.line(start=insertPos, end=(insertPos[0], insertPos[1]+height)).stroke("black").dasharray([5,5])) 
+        d.add( d.line(start=insertPos, end=(insertPos[0], insertPos[1]+height)).stroke("grey").dasharray([5,5])) 
 
     def _arrowHeadLine(self, startPos, endPos, angle, length):
         
@@ -395,8 +408,8 @@ class svgSeqD(object):
         part = e.part
         tmr = e.subObj
         #print("drawTmrExp", e.traceTime, part.objName())
-        # draw only if both parts have been added to sd
-        if self.hasPart(part) and not tmr in self._listHiddenElements: 
+        # draw only if part shown and timer is not excluded
+        if self.hasPart(part) and not tmr in self._listHiddenElements and not 'allTimers' in self._listHiddenElements: 
             end = ( self.simPartMap(part).sdLifeLineX, self.timeYPos( e.traceTime, areaStartTime, areaStartY ))
             start = ( end[0]-50, end[1])
             if( start[1] >= areaStartY):
