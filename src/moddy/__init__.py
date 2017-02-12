@@ -34,6 +34,11 @@ from moddy.simulator import sim,simPart
 from moddy.vthread import vThread
 from moddy.vtSchedRtos import vtSchedRtos,vSimpleProg
 
+from moddy.fsm import Fsm
+from moddy.fsmPart import simFsmPart
+
 from moddy.svgSeqD import moddyGenerateSequenceDiagram
 from moddy.traceToCsv import moddyGenerateTraceTable
 from moddy.dotStructure import moddyGenerateStructureGraph
+
+from moddy.dotFsm import moddyGenerateFsmGraph
