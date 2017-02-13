@@ -139,8 +139,13 @@ class Fsm(object):
         self._event('INITIAL')     
 
     def event(self, evName):
+        '''
+        Execute an Event in the "ANY" and current state.
+        Raises AssertError if the event is not defined or the current state is None.
+        Returns True if the event causes a state change, False if not.
+        '''
         assert(self.state is not None),"Did you call startFsm?"
-        self._event(evName)
+        return self._event(evName)
         
     #
     # Internal methods
@@ -189,11 +194,13 @@ class Fsm(object):
          
     def _event(self, evName):
         '''
-        Execuzte an Event in the current state.
-        
+        Execute an Event in the "ANY" and current state.
+        Raises AssertError if the event is not defined.
+        Returns True if the event causes a state change, False if not.
         '''
         assert(evName in self._listEvents),"Event %s not defined"%evName
         # Check if there is a matching transition
+        oldState = self.state
         
         # Check all transitions in ANY state and current state 
         transLists = []
@@ -217,7 +224,7 @@ class Fsm(object):
                     print("+++ TRANS %s -> %s" % (self.state, toState))
                     self.gotoState(toState)
                     break
-
+        return oldState != self.state
 #
 # Test Code
 #         
