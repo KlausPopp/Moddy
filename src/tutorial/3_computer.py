@@ -37,7 +37,7 @@ class Computer(simFsmPart):
         # Ports & Timers
         self.createPorts('in', ['powerPort', 'powerButtonPort', 'osPort'])
         self.createPorts('io', ['kvmPort']) 
-        self.createTimers(['bootTmr', 'shutdownTmr'])
+        self.createTimers(['bootTmr', 'shutdownTmr', 'blinkCursorTmr'])
 
         
     class FSM(Fsm):
@@ -55,7 +55,8 @@ class Computer(simFsmPart):
                     [('bootTmr_Expired', 'NormalOp')],
                 'NormalOp':
                     [('powerButtonPort_Msg', 'Shutdown'),
-                     ('osPort_Msg', 'Shutdown')],
+                     ('osPort_Msg', 'Shutdown'),
+                     ('blinkCursorTmr_Expired', 'NormalOp')], # transition to self, should execute the do method
                 'Shutdown':
                     [('shutdownTmr_Expired', 'Standby')],
                 'ANY':
@@ -70,7 +71,7 @@ class Computer(simFsmPart):
             print("State_Off_Entry")
             self._part.bootTmr.stop()
             self._part.shutdownTmr.stop()
-    
+            self._part.blinkCursorTmr.stop()
         # Booting actions
         def State_Booting_Entry(self):
             print("Booting_Entry")
@@ -80,7 +81,19 @@ class Computer(simFsmPart):
         def State_Shutdown_Entry(self):
             self._part.shutdownTmr.start(5)
         
-    
+        # Cursor Blink in NormalOp state
+        def State_NormalOp_Entry(self):
+            self._cursorState = 'on'
+        
+        def State_NormalOp_Do(self):
+            self._part.blinkCursorTmr.start(3)
+            if self._cursorState == 'on':
+                self._cursorState = 'off'
+            else:
+                self._cursorState = 'on'
+                
+            self._part.kvmPort.send('cursor %s' % self._cursorState, 0.1 )
+            
         # Message handlers
         def State_ANY_powerPort_Msg(self, msg):
             if msg == 'on':
@@ -89,7 +102,7 @@ class Computer(simFsmPart):
                 self.event('PowerRemoved')
                 
         def State_NormalOp_kvmPortIn_Msg(self, msg):
-            self._part.kvmPort.send('reply',1)
+            self._part.kvmPort.send('reply',0.1)
                 
 class Stim(vSimpleProg):   
     def __init__(self, sim):
@@ -117,8 +130,8 @@ class Kvm(vSimpleProg):
         
     def runVThread(self):
         while True:
-            self.wait(2)
-            self.kvmPort.send('request',1)
+            self.wait(5)
+            self.kvmPort.send('request',0.1)
         
         
 if __name__ == '__main__':         

@@ -68,7 +68,9 @@ class simFsmPart(simPart):
         if self.fsm.hasEvent(fsmEventName):
             self.fsm.event(fsmEventName)
         else:
-            self.fsm.execAnyAndCurrentStateMethod( fsmEventName, msg)
+            if self.fsm.execAnyAndCurrentStateMethod( fsmEventName, msg) == False:
+                self.addAnnotation('%s not handled' % fsmEventName)
+                
     
     def tmrExpired(self, timer):
         # If an event name <timerName>_Expired exists in the fsm, trigger that event, 
@@ -78,7 +80,8 @@ class simFsmPart(simPart):
         if self.fsm.hasEvent(fsmEventName):
             self.fsm.event(fsmEventName)
         else:
-            self.fsm.execAnyAndCurrentStateMethod( fsmEventName )
+            if self.fsm.execAnyAndCurrentStateMethod( fsmEventName ) == False:
+                self.addAnnotation('%s not handled' % fsmEventName)
         
     def fsmStateChange(self, oldState, newState):
         ''' 

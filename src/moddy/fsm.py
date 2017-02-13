@@ -40,8 +40,7 @@ class Fsm(object):
     These methods must follow the naming convention "STATE_<statename>_<Entry/Exit>".
     They don't need to exist. They are called only if they are defined.
     
-    
-    Note that entry and exit actions are also called at self transitions (transitions to the current state)
+    Note that entry and exit actions are NOT called at self transitions (transitions to the current state)
     
         # Off actions    
         def State_Off_Entry(self):
@@ -50,8 +49,16 @@ class Fsm(object):
         def State_Off_Exit(self):
             print("State_Off_Exit")
     
+    You can also define a "do" Method that is invoked
+    - after the "Entry" methode
+    - at self transistions to the state
+    These methods must follow the naming convention "STATE_<statename>_Do".
+    
+    
     Such routines can be also defined for the special 'ANY' state. If they exist they are called at
-    the entry or exit from any state.
+    the entry or exit or self transitions to/from any state.
+
+    Note: You cannot define actions for transitions!
             
     Use the fsm as follows:
     
@@ -111,9 +118,14 @@ class Fsm(object):
         Execute the state specific methods:
          The method self.State_ANY_<methodName>(*args) is called if it exists.
          The method self.State_<stateName>_<methodName>(*args) is called if it exists.
+         Returns True if at least one method exists
         '''
-        self.execStateMethod('ANY', methodName, *args)
-        self.execStateMethod(self.state, methodName, *args)
+        handled = 0
+        if self.execStateMethod('ANY', methodName, *args) == True:
+            handled += 1
+        if self.execStateMethod(self.state, methodName, *args) == True:
+            handled += 1
+        return handled > 0
 
     def setStateChangeCallback(self, callback):
         ''' Register a method that is called whenever the state of the fsm changes '''
@@ -138,18 +150,20 @@ class Fsm(object):
         '''
         Execute a state specific method that might exist in the fsm subclass.
         
-        The method self.State_<stateName>_<methodName>(*args) is called if it exists.
-        If it doesn't exist, nothing happens.   
+        The method self.State_<stateName>_<methodName>(*args) is called if it exists, True is returned.
+        If it doesn't exist, nothing happens, but False is returned.   
         '''
         execStr = "self.State_%s_%s" % (state, methodName)
-        print("execStateMethod %s" % execStr)
+        #print("execStateMethod %s" % execStr)
         try: 
             exec( "m=" + execStr)
 
         except AttributeError:
-            return
+            print("execStateMethod cannot exec %s"%execStr)
+            return False
         
         exec(execStr + "(*args)")
+        return True
         
     def stateExists(self, state):
         return state in self._dictTransitions
@@ -157,18 +171,21 @@ class Fsm(object):
     def gotoState(self, state):
         assert(state != 'ANY' and self.stateExists(state)),"gotoState invalid state %s"%state
         
-        oldState = self.state        
-        print("+++ GOTO STATE %s" % state)
-        # exit old state
-        if self.state is not None:
-            self.execAnyAndCurrentStateMethod( 'Exit')
-        
-        # enter new state
-        self.state = state
-        self.execAnyAndCurrentStateMethod( 'Entry')
-        
-        if self._stateChangeCallback is not None:
-            self._stateChangeCallback( oldState, self.state)
+        if self.state != state: # ignore self transitions
+            oldState = self.state        
+            print("+++ GOTO STATE %s" % state)
+            # exit old state
+            if self.state is not None:
+                self.execAnyAndCurrentStateMethod( 'Exit')
+            
+            # enter new state
+            self.state = state
+            self.execAnyAndCurrentStateMethod( 'Entry')
+            
+            if self._stateChangeCallback is not None:
+                self._stateChangeCallback( oldState, self.state)
+        # in any case, execute the "Do" Method of the current state
+        self.execAnyAndCurrentStateMethod( 'Do')
          
     def _event(self, evName):
         assert(evName in self._listEvents),"Event %s not defined"%evName
