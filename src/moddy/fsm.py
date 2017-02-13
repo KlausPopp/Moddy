@@ -188,6 +188,10 @@ class Fsm(object):
         self.execAnyAndCurrentStateMethod( 'Do')
          
     def _event(self, evName):
+        '''
+        Execuzte an Event in the current state.
+        
+        '''
         assert(evName in self._listEvents),"Event %s not defined"%evName
         # Check if there is a matching transition
         
