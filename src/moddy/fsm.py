@@ -3,7 +3,7 @@ Created on 11.02.2017
 
 @author: Klaus Popp
 
-A general finite state machine
+A general finite state machine with hierarchical state support
 '''
 class Fsm(object):
     '''
@@ -79,9 +79,44 @@ class Fsm(object):
     by the designer of the fsm subclass (e.g. the simFsmPart uses it to execute the _Msg and _Expiration
     functions)
     
+    
+    Hierarchically Nested State Support
+    https://en.wikipedia.org/wiki/UML_state_machine#Hierarchically_nested_states
+    
+    Rules:
+    Nested states are defined by the user in the transition list: 
+     
+    
+    Main FSM:
+                transitions = { 
+                '':
+                    [('INITIAL', 'Off')],
+                'Off': 
+                    [('PowerApplied', 'Standby')],
+                'Standby':
+                    [('PowerButtonPressed', 'NormalOp')],
+                'NormalOp':
+                    [ 
+                    ####### NESTED FSM ('SUBFSM', Class-Name)
+                     ('SUBFSM' , subfsm),
+                     ('PowerButtonPressed', 'Standby'),
+                     ('OsShutdown', 'Standby')],
+                'ANY':
+                    [('PowerRemoved', 'Off')]
+            }
+
+    A nested FSM is instantiated when the upper level state is entered
+    A nested FSM cannot exit
+    A nested FSM receives all events from the upper level FSM. If the event is not known in the nested FSM,
+    it is directed to the upper FSM. Events that are known in the nested FSM are NOT directed to upper FSM 
+
+    If the upper state exits, the exit action of the current states (first, the state in the nested fsm, then the upper fsm) 
+    are called. Then the nested fsm is terminated.
+    
+    Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel  
     '''
     
-    def __init__(self, dictTransitions):
+    def __init__(self, dictTransitions, parentFsm=None):
         '''
         dictTransitions must be a dictionary, with the transitions (see example in class doc)
 
@@ -91,6 +126,8 @@ class Fsm(object):
         
         '''
         self.state = None
+        self._parentFsm = parentFsm
+        self._listChildFsms = [] # currently ACTUVE children
         
         self._dictTransitions = dictTransitions
         self._stateChangeCallback = None
@@ -99,14 +136,21 @@ class Fsm(object):
         # Validate transitions and build list of events
         for state, listTrans in dictTransitions.items():
             for trans in listTrans:
-                event, toState = trans
+                if self.isSubFsmSpecification(trans) is None:
+                    event, toState = trans
                 
-                if event not in self._listEvents:
-                    self._listEvents.append(event)
-                    
-                assert(self.stateExists(toState)),"toState %s doesn't exist" % toState
-                assert(toState != 'ANY'),"ANY cannot be a target state"    
-    
+                    if event not in self._listEvents:
+                        self._listEvents.append(event)
+                        
+                    assert(self.stateExists(toState)),"toState %s doesn't exist" % toState
+                    assert(toState != 'ANY'),"ANY cannot be a target state"    
+        
+        # check for initial event and remove it
+        try: idxInitial = self._listEvents.index('INITIAL')
+        except ValueError: 
+            raise Exception('INITIAL event missing')
+        
+        del self._listEvents[idxInitial]
     #
     # Public PAI
     # 
@@ -132,6 +176,7 @@ class Fsm(object):
         self._stateChangeCallback = callback
 
     def hasEvent(self,evName):
+        # ??? Also events of currently active children!
         return evName in self._listEvents
     
     def startFsm(self):
@@ -164,7 +209,7 @@ class Fsm(object):
             exec( "m=" + execStr)
 
         except AttributeError:
-            print("execStateMethod cannot exec %s"%execStr)
+            #print("%s execStateMethod cannot exec %s" % (type(self).__name__,execStr))
             return False
         
         exec(execStr + "(*args)")
@@ -181,11 +226,17 @@ class Fsm(object):
             print("+++ GOTO STATE %s" % state)
             # exit old state
             if self.state is not None:
+                # terminate subFsms
+                self.terminateSubFsms()
+                # call current state Exit method
                 self.execAnyAndCurrentStateMethod( 'Exit')
             
             # enter new state
             self.state = state
             self.execAnyAndCurrentStateMethod( 'Entry')
+            
+            # Start any possible nested fsms
+            self.startSubFsms()
             
             if self._stateChangeCallback is not None:
                 self._stateChangeCallback( oldState, self.state)
@@ -195,43 +246,85 @@ class Fsm(object):
     def _event(self, evName):
         '''
         Execute an Event in the "ANY" and current state.
-        Raises AssertError if the event is not defined.
         Returns True if the event causes a state change, False if not.
         '''
-        assert(evName in self._listEvents),"Event %s not defined"%evName
         # Check if there is a matching transition
         oldState = self.state
         
-        # Check all transitions in ANY state and current state 
-        transLists = []
-        try:
-            transLists.append(self._dictTransitions['ANY'])
-        except KeyError:
-            # ANY state may not exist
-            pass
-        
-        if self.state is not None:
-            transLists.append(self._dictTransitions[self.state])
-        else:
-            transLists.append(self._dictTransitions['']) # events in uninitialized state
-
-        print("+++ EVENT %s in state %s transList %s" % (evName, self.state, transLists))
-        
-        for transList in transLists:
-            for trans in transList:
-                event,toState = trans
-                if event == evName:
-                    print("+++ TRANS %s -> %s" % (self.state, toState))
-                    self.gotoState(toState)
-                    break
+        # first, check if the current state has subFsms which handle the event
+        # if event handled by subFsm, ignore the event for this fsm
+        if self.passEventToSubFsms( evName ) == False:
+            
+            # Check all transitions in ANY state and current state 
+            transLists = []
+            try:
+                transLists.append(self._dictTransitions['ANY'])
+            except KeyError:
+                # ANY state may not exist
+                pass
+            
+            if self.state is not None:
+                transLists.append(self._dictTransitions[self.state])
+            else:
+                transLists.append(self._dictTransitions['']) # events in uninitialized state
+    
+            print("+++ %s EVENT %s in state %s" % (type(self).__name__, evName, self.state))
+            
+            for transList in transLists:
+                for trans in transList:
+                    if self.isSubFsmSpecification(trans) is None:
+                        event,toState = trans
+                        if event == evName:
+                            print("+++ %s TRANS %s -> %s" % (type(self).__name__,self.state, toState))
+                            self.gotoState(toState)
+                            break
         return oldState != self.state
+
+    def passEventToSubFsms(self, evName):
+        ''' 
+        check if the current state has subFsms which handle the event
+        if event handled by subFsm, return True
+        '''
+        handled = False
+        for subFsm in self._listChildFsms:
+            if subFsm.hasEvent(evName):
+                subFsm.event(evName)
+                print("Event %s handled by subFsm %s" % (evName, type(subFsm).__name__))
+                handled = True
+                
+        return handled
+    
+    def isSubFsmSpecification(self, nameClsTuple):
+        name, cls = nameClsTuple
+        if type(cls) is type:
+            return cls
+        else:
+            return None
+    
+    def startSubFsms(self):
+        transList = self._dictTransitions[self.state]
+        for trans in transList:
+            subFsmCls = self.isSubFsmSpecification(trans)
+            if subFsmCls is not None: 
+                # create new fsm
+                subFsm = subFsmCls(parentFsm = self)
+                # add subFsm to list of active subFsms
+                self._listChildFsms.append(subFsm)
+                # goto initial state
+                subFsm.startFsm()
+    
+    def terminateSubFsms(self):
+        for subFsm in self._listChildFsms:
+            subFsm.execAnyAndCurrentStateMethod( 'Exit')
+        self._listChildFsms = []
+
 #
 # Test Code
 #         
 if __name__ == '__main__':
     class Computer(Fsm):
     
-        def __init__(self):
+        def __init__(self, parentFsm=None):
             
             transitions = { 
                 '':
@@ -241,13 +334,16 @@ if __name__ == '__main__':
                 'Standby':
                     [('PowerButtonPressed', 'NormalOp')],
                 'NormalOp':
-                    [('PowerButtonPressed', 'Standby'),
+                    [
+                     ('Apps' , Computer.ApplicationsFsm ),  # SUBFSM
+                     ('Vol' , Computer.VolumeFsm ),         # SUBFSM
+                     ('PowerButtonPressed', 'Standby'),
                      ('OsShutdown', 'Standby')],
                 'ANY':
                     [('PowerRemoved', 'Off')]
             }
             
-            super().__init__( dictTransitions=transitions )
+            super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
                 
         
         # Off actions    
@@ -258,6 +354,51 @@ if __name__ == '__main__':
             print("State_Off_Exit")
         
 
+        # Subfsm 
+        class ApplicationsFsm(Fsm):
+        
+            def __init__(self, parentFsm):
+                
+                transitions = { 
+                    '':
+                        [('INITIAL', 'Radio')],
+                    'Radio': 
+                        [('NaviButton', 'Navi')],
+                    'Navi':
+                        [('RadioButton', 'Navi')]
+                }
+                
+                super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
+                
+            def State_Radio_Entry(self):
+                print("State_Radio_Entry")
+        
+            def State_Radio_Exit(self):
+                print("State_Radio_Exit")
+    
+            def State_Navi_Exit(self):
+                print("State_Radio_Exit")
+                
+        class VolumeFsm(Fsm):
+        
+            def __init__(self, parentFsm):
+                
+                transitions = { 
+                    '':
+                        [('INITIAL', 'On')],
+                    'On': 
+                        [('MuteButton', 'Mute'),
+                         ('IncVol', 'On'),
+                         ('DecVol', 'On')],
+                    'Mute':
+                        [('MuteButton', 'On'),
+                         ('IncVol', 'On')]
+                }
+                
+                super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
+                
+            def State_On_Exit(self):
+                print("State_On_Exit")
     
     comp = Computer()
     #print("events ", comp._listEvents)
@@ -269,6 +410,9 @@ if __name__ == '__main__':
     print("State %s" % comp.state)
     comp.event('PowerButtonPressed')
     print("State %s" % comp.state)
+    comp.event('RadioButton')
+    comp.event('MuteButton')
+    comp.event('IncVol')
     comp.event('PowerRemoved')
     print("State %s" % comp.state)
     

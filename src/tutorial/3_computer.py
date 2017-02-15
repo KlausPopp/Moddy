@@ -54,7 +54,9 @@ class Computer(simFsmPart):
                 'Booting':
                     [('bootTmr_Expired', 'NormalOp')],
                 'NormalOp':
-                    [('powerButtonPort_Msg', 'Shutdown'),
+                    [('Apps' , Computer.ApplicationsFsm ),  # SUBFSM
+                     ('Vol' , Computer.VolumeFsm ),         # SUBFSM
+                     ('powerButtonPort_Msg', 'Shutdown'),
                      ('osPort_Msg', 'Shutdown'),
                      ('blinkCursorTmr_Expired', 'NormalOp')], # transition to self, should execute the do method
                 'Shutdown':
