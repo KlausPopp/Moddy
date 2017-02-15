@@ -19,7 +19,7 @@ def moddyGenerateTraceTable( sim, fileName, **kwargs):
      timeUnit="s" - time unit for all time stamps in table ('s', 'ms', 'us', 'ns')
      floatComma=',' - Comma character for float numbers
     '''
-    trc = TraceToCsv(sim.tracedEvents(**kwargs))
+    trc = TraceToCsv(sim.tracedEvents(),**kwargs)
     trc.save(fileName)
 
 
