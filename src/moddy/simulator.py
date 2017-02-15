@@ -166,7 +166,7 @@ class simOutputPort(simBaseElement):
         def __init__(self, sim, port, msg, flightTime):
             self._sim = sim
             self._port = port
-            self._msg = msg
+            self._msg = deepcopy(msg)
             self._flightTime = flightTime       # message transmit time
             self._requestTime = sim.time()      # time when application called send()
             self.execTime = -1;                 # when message arrives at input port
