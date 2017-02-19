@@ -31,7 +31,6 @@ class Computer(simFsmPart):
         }
         
         
-        
         super().__init__(sim=sim, objName=objName, fsm=self.FSM(self), statusBoxReprMap=statusBoxReprMap)
 
         # Ports & Timers
@@ -105,7 +104,57 @@ class Computer(simFsmPart):
                 
         def State_NormalOp_kvmPortIn_Msg(self, msg):
             self._part.kvmPort.send('reply',0.1)
-                
+        
+    # Subfsm 
+    class ApplicationsFsm(Fsm):
+    
+        def __init__(self, parentFsm):
+            self._part = parentFsm._part
+            
+            transitions = { 
+                '':
+                    [('INITIAL', 'Radio')],
+                'Radio': 
+                    [('NaviButton', 'Navi')],
+                'Navi':
+                    [('RadioButton', 'Radio')]
+            }
+            
+            super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
+            
+        def State_Radio_Entry(self):
+            print("State_Radio_Entry")
+    
+        def State_Radio_Exit(self):
+            print("State_Radio_Exit")
+
+        def State_Navi_Exit(self):
+            print("State_Radio_Exit")
+            
+    class VolumeFsm(Fsm):
+    
+        def __init__(self, parentFsm):
+            self._part = parentFsm._part
+            
+            transitions = { 
+                '':
+                    [('INITIAL', 'On')],
+                'On': 
+                    [('MuteButton', 'Mute'),
+                     ('IncVol', 'On'),
+                     ('DecVol', 'On')],
+                'Mute':
+                    [('MuteButton', 'On'),
+                     ('IncVol', 'On')]
+            }
+            
+            super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
+            
+        def State_On_Exit(self):
+            print("State_On_Exit")
+            
+        def State_On_Do(self):
+ 
 class Stim(vSimpleProg):   
     def __init__(self, sim):
         super().__init__(sim=sim, objName="Stim", parentObj=None)
@@ -134,7 +183,13 @@ class Kvm(vSimpleProg):
         while True:
             self.wait(5)
             self.kvmPort.send('request',0.1)
-        
+
+class Pa(vSimpleProg):   
+    # Simulate audio PA
+    def __init__(self, sim):
+        super().__init__(sim=sim, objName="PA", parentObj=None)
+        self.createPorts('SamplingIn', ['inPort']) 
+         
         
 if __name__ == '__main__':         
     simu = sim()
@@ -147,14 +202,14 @@ if __name__ == '__main__':
     stim.osPort.bind(comp.osPort)
     kvm.kvmPort.bind(comp.kvmPort)
     
-    moddyGenerateFsmGraph( fsm=comp.fsm, fileName='3_computer_fsm.svg')  
+    moddyGenerateFsmGraph( fsm=comp.fsm, fileName='3_computer_fsm.svg', keepGvFile=True)  
     
     simu.run(100)
     
     moddyGenerateSequenceDiagram( sim=simu, 
                               fileName="3_computer.html", 
                               fmt="svgInHtml", 
-                              showPartsList=[stim, comp, kvm], 
+                              showPartsList=[stim, comp, kvm, pa], 
                               timePerDiv = 1.0, 
                               pixPerDiv = 30) 
     
