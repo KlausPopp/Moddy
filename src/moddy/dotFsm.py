@@ -3,8 +3,8 @@ Created on 12.02.2017
 
 @author: Klaus Popp
 '''
+from moddy.fsm import isSubFsmSpecification
 
-from moddy.fsm import Fsm
 import subprocess
 import os
 
@@ -15,7 +15,7 @@ def moddyGenerateFsmGraph( fsm, fileName, keepGvFile=False ):
     <fileName> should be the relative filename including '.svg'  
     <keepGvFile> if True, don't delete graphviz input file
     '''
-    df = DotFsm(fsm.getDictTransitions())
+    df = DotFsm(fsm)
     df.dotGen(fileName, keepGvFile)
 
 def space(indent):
@@ -23,18 +23,76 @@ def space(indent):
     return istr % ""
 
 
-def mapStateNames(state):
-    if state == '': return 'INIT'
-    else: return state
- 
+def mapStateNames(name,state):
+    if state == '': s = 'INIT'
+    else: s = state
+    if name != '':
+        s = name + '_' + s
+    return s
+
 class DotFsm(object):
     '''
-    Display the model structure via the DOT language (Graphviz)
+    Display the an fsm via the DOT language (Graphviz)
     States are vizualized as nodes
+    Subfsms are drawn in separate subgraphs, an edge is drawn from the main state to the 
+    initial state in the subfsm
     '''
-    def __init__(self, dictTransitions):
-        self._dictTransitions = dictTransitions
+    def __init__(self, fsm):
+        self._fsm = fsm
+    
+    def fsmGen(self, level, fsm, name='', isSubFsm=False):
+        '''
+        generate the dot language statements for a (sub)fsm
+        return lines,initialState
+        initialState is only valid on subFsms
+        '''
+        lines = []
+        initialState = None
         
+        dictTransitions = fsm.getDictTransitions()
+        # States
+        for state, listTrans in dictTransitions.items():
+            if state == '':
+                s = '%s [style=invisible];' % mapStateNames(name,state)
+                if isSubFsm:
+                    s = None
+            elif state == 'ANY':
+                s = '%s [label="from any state" shape=none];' % mapStateNames(name,state)
+            else:
+                s = '%s [label=%s];' % (mapStateNames(name,state), state)
+            if s is not None:
+                lines.append( [level, s] )
+        
+        # Transitions
+        for fromState, listTrans in dictTransitions.items():
+            for trans in listTrans:
+                subFsmCls = isSubFsmSpecification(trans)
+                if subFsmCls is not None:
+                    subFsmName, cls = trans
+                    # subfsm specification, instantiate subfsm
+                    subFsm = subFsmCls(parentFsm = fsm)
+                    lines.append( [level, 'subgraph cluster_%s {  ' % (subFsmName)])
+                    lines.append( [level+1, 'label="%s";' % (subFsmName)])
+
+                    # draw subfsm
+                    subLines, subInitialState = self.fsmGen( level+1, subFsm, 
+                                                             name=subFsmName, isSubFsm=True )
+                    lines += subLines
+                    lines.append( [level, '}' ])
+                    
+                    # draw edge from main state to subfsm initial state
+                    lines.append( [level, '%s -> %s [color=lightgrey];' % (mapStateNames(name,fromState),
+                                                                           subInitialState)] )
+                else:
+                    # normal transition
+                    event, toState = trans
+                    if isSubFsm and event == 'INITIAL':
+                        initialState = mapStateNames(name,toState)
+                    else:
+                        lines.append( [level, '%s -> %s [label="%s"];' % (mapStateNames(name,fromState), 
+                                                                          mapStateNames(name,toState), event)] )
+        return lines, initialState        
+            
         
     def dotGen(self, fileName, keepGvFile):
         level = 0
@@ -45,25 +103,9 @@ class DotFsm(object):
         lines.append( [level+1, 'node [fontname = "helvetica" fontsize=10 shape=ellipse color=black height=.1];'] )
         lines.append( [level+1, 'edge [fontname = "helvetica" color=black fontsize=8 fontcolor=black];'] )
 
-        # States
-        for state, listTrans in self._dictTransitions.items():
-            if state == '':
-                s = '%s [style=invisible];' % mapStateNames(state)
-            elif state == 'ANY':
-                s = '%s [label="from any state" shape=none];' % mapStateNames(state)
-            else:
-                s = '%s;' % mapStateNames(state)
-            lines.append( [level+1, s] )
-        
-        # Tranisitions
-        for fromState, listTrans in self._dictTransitions.items():
-            for trans in listTrans:
-                event, toState = trans
-                
-                lines.append( [level+1, '%s -> %s [label="%s"];' % (mapStateNames(fromState), 
-                                                                    mapStateNames(toState), event)] )
-                
-                
+        subLines, initialState = self.fsmGen( level+1, self._fsm)
+        lines += subLines
+                 
         # finish
         lines.append( [level, '}' ])
         
@@ -78,27 +120,3 @@ class DotFsm(object):
         if not keepGvFile:
             os.unlink(dotFile)
             
-#
-#
-#
-if __name__ == '__main__':
-
-    transitions = { 
-        '': # FSM uninitialized
-            [('INITIAL', 'Off')],                
-        'Off': 
-            [('PowerApplied', 'Standby')],
-        'Standby':
-            [('powerButtonPort_Msg', 'Booting')],
-        'Booting':
-            [('bootTmr_Expired', 'NormalOp')],
-        'NormalOp':
-            [('powerButtonPort_Msg', 'Shutdown'),
-             ('osPort_Msg', 'Shutdown')],
-        'Shutdown':
-            [('shutdownTmr_Expired', 'Standby')],
-        'ANY':
-            [('PowerRemoved', 'Off')]
-    }
-    df = DotFsm(transitions)
-    df.dotGen('dotFsm.svg', keepGvFile=True)
