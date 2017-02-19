@@ -5,6 +5,13 @@ Created on 11.02.2017
 
 A general finite state machine with hierarchical state support
 '''
+def isSubFsmSpecification(nameClsTuple):
+    name, cls = nameClsTuple
+    if type(cls) is type:
+        return cls
+    else:
+        return None
+
 class Fsm(object):
     '''
     A finite state machine.
@@ -97,8 +104,8 @@ class Fsm(object):
                     [('PowerButtonPressed', 'NormalOp')],
                 'NormalOp':
                     [ 
-                    ####### NESTED FSM ('SUBFSM', Class-Name)
-                     ('SUBFSM' , subfsm),
+                    ####### NESTED FSM ('fsm-Name', Class-Name)
+                     ('fsm-name' , subfsm),
                      ('PowerButtonPressed', 'Standby'),
                      ('OsShutdown', 'Standby')],
                 'ANY':
@@ -127,7 +134,7 @@ class Fsm(object):
         '''
         self.state = None
         self._parentFsm = parentFsm
-        self._listChildFsms = [] # currently ACTUVE children
+        self._listChildFsms = [] # currently ACTIVE children
         
         self._dictTransitions = dictTransitions
         self._stateChangeCallback = None
@@ -136,7 +143,7 @@ class Fsm(object):
         # Validate transitions and build list of events
         for state, listTrans in dictTransitions.items():
             for trans in listTrans:
-                if self.isSubFsmSpecification(trans) is None:
+                if isSubFsmSpecification(trans) is None:
                     event, toState = trans
                 
                     if event not in self._listEvents:
@@ -152,7 +159,7 @@ class Fsm(object):
         
         del self._listEvents[idxInitial]
     #
-    # Public PAI
+    # Public API
     # 
     def getDictTransitions(self):
         return self._dictTransitions        
@@ -176,8 +183,17 @@ class Fsm(object):
         self._stateChangeCallback = callback
 
     def hasEvent(self,evName):
-        # ??? Also events of currently active children!
-        return evName in self._listEvents
+        ''' check if the event is known by the fsm or a currently active statemachine '''
+        rv = False
+        if evName in self._listEvents:
+            rv = True
+        else:
+            for subFsm in self._listChildFsms:
+                if subFsm.hasEvent(evName):
+                    rv = True
+                    break
+        return rv
+        
     
     def startFsm(self):
         assert(self.state is None)
@@ -186,7 +202,7 @@ class Fsm(object):
     def event(self, evName):
         '''
         Execute an Event in the "ANY" and current state.
-        Raises AssertError if the event is not defined or the current state is None.
+        Raises AssertError if the current state is None.
         Returns True if the event causes a state change, False if not.
         '''
         assert(self.state is not None),"Did you call startFsm?"
@@ -272,7 +288,7 @@ class Fsm(object):
             
             for transList in transLists:
                 for trans in transList:
-                    if self.isSubFsmSpecification(trans) is None:
+                    if isSubFsmSpecification(trans) is None:
                         event,toState = trans
                         if event == evName:
                             print("+++ %s TRANS %s -> %s" % (type(self).__name__,self.state, toState))
@@ -294,17 +310,12 @@ class Fsm(object):
                 
         return handled
     
-    def isSubFsmSpecification(self, nameClsTuple):
-        name, cls = nameClsTuple
-        if type(cls) is type:
-            return cls
-        else:
-            return None
+
     
     def startSubFsms(self):
         transList = self._dictTransitions[self.state]
         for trans in transList:
-            subFsmCls = self.isSubFsmSpecification(trans)
+            subFsmCls = isSubFsmSpecification(trans)
             if subFsmCls is not None: 
                 # create new fsm
                 subFsm = subFsmCls(parentFsm = self)
@@ -322,6 +333,7 @@ class Fsm(object):
 # Test Code
 #         
 if __name__ == '__main__':
+    from moddy import moddyGenerateFsmGraph
     class Computer(Fsm):
     
         def __init__(self, parentFsm=None):
@@ -365,7 +377,7 @@ if __name__ == '__main__':
                     'Radio': 
                         [('NaviButton', 'Navi')],
                     'Navi':
-                        [('RadioButton', 'Navi')]
+                        [('RadioButton', 'Radio')]
                 }
                 
                 super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
@@ -415,4 +427,6 @@ if __name__ == '__main__':
     comp.event('IncVol')
     comp.event('PowerRemoved')
     print("State %s" % comp.state)
+    
+    moddyGenerateFsmGraph(comp, fileName='computerFsm.svg', keepGvFile=True)
     
