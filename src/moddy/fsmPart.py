@@ -24,6 +24,7 @@ class simFsmPart(simPart):
         
         # reference the fsm
         self.fsm = fsm
+        fsm._moddyPart = self
         # register state change callback
         fsm.setStateChangeCallback( self.fsmStateChange )
     
@@ -68,7 +69,7 @@ class simFsmPart(simPart):
         if self.fsm.hasEvent(fsmEventName):
             self.fsm.event(fsmEventName)
         else:
-            if self.fsm.execAnyAndCurrentStateMethod( fsmEventName, msg) == False:
+            if self.fsm.execStateDependentMethod( fsmEventName, True, msg) == False:
                 self.addAnnotation('%s not handled' % fsmEventName)
                 
     
@@ -80,7 +81,7 @@ class simFsmPart(simPart):
         if self.fsm.hasEvent(fsmEventName):
             self.fsm.event(fsmEventName)
         else:
-            if self.fsm.execAnyAndCurrentStateMethod( fsmEventName ) == False:
+            if self.fsm.execStateDependentMethod( fsmEventName, True ) == False:
                 self.addAnnotation('%s not handled' % fsmEventName)
         
     def fsmStateChange(self, oldState, newState):
