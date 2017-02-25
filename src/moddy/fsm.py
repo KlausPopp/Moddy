@@ -6,6 +6,7 @@ Created on 11.02.2017
 A general finite state machine with hierarchical state support
 '''
 def isSubFsmSpecification(nameClsTuple):
+    ''' Test if the tuple from a transition list (name, classType) is a subFsm specification '''
     name, cls = nameClsTuple
     if type(cls) is type:
         return cls
@@ -82,9 +83,9 @@ class Fsm(object):
         print("State %s" % comp.state)
     
     
-    You can call execAnyAndCurrentStateMethod to execute a state specific optional if it has been defined
-    by the designer of the fsm subclass (e.g. the simFsmPart uses it to execute the _Msg and _Expiration
-    functions)
+    You can call execStateDependentMethod to execute a state specific method of the fsm.
+    e.g. execStateDependentMethod('Msg', 123) calls State_<currentStateName>_Msg( 123 )
+    (e.g. the simFsmPart uses it to execute the _Msg and _Expiration functions)
     
     
     Hierarchically Nested State Support
@@ -120,7 +121,13 @@ class Fsm(object):
     If the upper state exits, the exit action of the current states (first, the state in the nested fsm, then the upper fsm) 
     are called. Then the nested fsm is terminated.
     
-    Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel  
+    Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel. Just
+    enter multiple subFsms in the transition list of a state.
+    
+    For nested statemachines, the following methods are usefull:
+    self.topFsm() gives you the reference to the top level Fsm. E.g. to fire an event to the top Fsm.
+    self.moddyPart() gives you the moddy part where the state machine is contained, regardless of the fsm nesting level
+    
     '''
     
     def __init__(self, dictTransitions, parentFsm=None):
@@ -134,6 +141,13 @@ class Fsm(object):
         '''
         self.state = None
         self._parentFsm = parentFsm
+        
+        # set reference to top level Fsm
+        if parentFsm is None:
+            self._topFsm = self
+        else:
+            self._topFsm = parentFsm._topFsm
+            
         self._listChildFsms = [] # currently ACTIVE children
         
         self._dictTransitions = dictTransitions
@@ -164,17 +178,24 @@ class Fsm(object):
     def getDictTransitions(self):
         return self._dictTransitions        
                 
-    def execAnyAndCurrentStateMethod(self, methodName, *args):
+    def execStateDependentMethod(self, methodName, deep, *args, **kwargs):
         ''' 
         Execute the state specific methods:
-         The method self.State_ANY_<methodName>(*args) is called if it exists.
-         The method self.State_<stateName>_<methodName>(*args) is called if it exists.
+         if 'deep' is true, then for each currently active subFsm, the execStateMethod called
+         The method self.State_ANY_<methodName>(*args,**kwargs) is called if it exists.
+         The method self.State_<stateName>_<methodName>(*args,**kwargs) is called if it exists.
          Returns True if at least one method exists
         '''
         handled = 0
-        if self.execStateMethod('ANY', methodName, *args) == True:
+
+        if deep is True:
+            for subFsm in self._listChildFsms:
+                if subFsm.execStateDependentMethod( methodName, True, *args, **kwargs) == True:
+                    handled += 1
+        
+        if self._execStateMethod('ANY', methodName, *args, **kwargs) == True:
             handled += 1
-        if self.execStateMethod(self.state, methodName, *args) == True:
+        if self._execStateMethod(self.state, methodName, *args, **kwargs) == True:
             handled += 1
         return handled > 0
 
@@ -207,20 +228,37 @@ class Fsm(object):
         '''
         assert(self.state is not None),"Did you call startFsm?"
         return self._event(evName)
+    
+    def topFsm(self):
+        ''' get a reference to the topmost Fsm in the hierarchy '''
+        return self._topFsm
+    
+    def moddyPart(self):
+        ''' 
+        return a reference of the moddy part this fsm is contained in (regardless of the fsm nesting level).
+        return None if it is not included in a moddy part
+        '''
+        part = None
+        try:
+            part = self.topFsm()._moddyPart
+        except AttributeError:
+            pass
+        return part
+        
         
     #
     # Internal methods
     #
     
-    def execStateMethod(self, state, methodName, *args):
+    def _execStateMethod(self, state, methodName, *args, **kwargs):
         '''
-        Execute a state specific method that might exist in the fsm subclass.
+        Execute a state specific method that might exist in the fsm subclass 
         
         The method self.State_<stateName>_<methodName>(*args) is called if it exists, True is returned.
         If it doesn't exist, nothing happens, but False is returned.   
+        
         '''
         execStr = "self.State_%s_%s" % (state, methodName)
-        #print("execStateMethod %s" % execStr)
         try: 
             exec( "m=" + execStr)
 
@@ -228,7 +266,9 @@ class Fsm(object):
             #print("%s execStateMethod cannot exec %s" % (type(self).__name__,execStr))
             return False
         
-        exec(execStr + "(*args)")
+        print("+++ %s execStateMethod %s" % (type(self).__name__,execStr), args, **kwargs)
+        exec(execStr + "(*args,**kwargs)")
+        
         return True
         
     def stateExists(self, state):
@@ -239,17 +279,17 @@ class Fsm(object):
         
         if self.state != state: # ignore self transitions
             oldState = self.state        
-            print("+++ GOTO STATE %s" % state)
+            print("+++ %s GOTO STATE %s" % (type(self).__name__,state))
             # exit old state
             if self.state is not None:
                 # terminate subFsms
                 self.terminateSubFsms()
                 # call current state Exit method
-                self.execAnyAndCurrentStateMethod( 'Exit')
+                self.execStateDependentMethod('Exit', False)
             
             # enter new state
             self.state = state
-            self.execAnyAndCurrentStateMethod( 'Entry')
+            self.execStateDependentMethod('Entry', False)
             
             # Start any possible nested fsms
             self.startSubFsms()
@@ -257,8 +297,11 @@ class Fsm(object):
             if self._stateChangeCallback is not None:
                 self._stateChangeCallback( oldState, self.state)
         # in any case, execute the "Do" Method of the current state
-        self.execAnyAndCurrentStateMethod( 'Do')
-         
+        if self.state == state:
+            # only execute this if the state was not again changed by the Entry methods...
+            self.execStateDependentMethod( 'Do', False )
+        print("+++ RETURN FROM %s GOTO STATE %s" % (type(self).__name__,state)) 
+        
     def _event(self, evName):
         '''
         Execute an Event in the "ANY" and current state.
@@ -305,7 +348,7 @@ class Fsm(object):
         for subFsm in self._listChildFsms:
             if subFsm.hasEvent(evName):
                 subFsm.event(evName)
-                print("Event %s handled by subFsm %s" % (evName, type(subFsm).__name__))
+                #print("Event %s handled by subFsm %s" % (evName, type(subFsm).__name__))
                 handled = True
                 
         return handled
@@ -326,7 +369,7 @@ class Fsm(object):
     
     def terminateSubFsms(self):
         for subFsm in self._listChildFsms:
-            subFsm.execAnyAndCurrentStateMethod( 'Exit')
+            subFsm.execStateDependentMethod( 'Exit', False)
         self._listChildFsms = []
 
 #
@@ -383,7 +426,7 @@ if __name__ == '__main__':
                 super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
                 
             def State_Radio_Entry(self):
-                print("State_Radio_Entry")
+                print("State_Radio_Entry topFsm=%s moddyPart %s" % (self.topFsm(),self.moddyPart()))
         
             def State_Radio_Exit(self):
                 print("State_Radio_Exit")
