@@ -1,3 +1,4 @@
+
 '''
 
 Export simulator results as a sequence diagram.
@@ -113,7 +114,7 @@ class svgSeqD(object):
 
         if( timePerDiv >= 1.0): unit="s"
         elif(timePerDiv >= ms): unit="ms"
-        elif(timePerDiv >= us): unit="ms"
+        elif(timePerDiv >= us): unit="us"
         else: unit="ns" 
         self.setTimeUnit(unit)
 
