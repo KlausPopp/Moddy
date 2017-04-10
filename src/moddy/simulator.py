@@ -52,6 +52,7 @@ class simPart(simBaseElement):
         self._listPorts = []
         self._listTimers = []
         self._listSubParts = []     # child parts list
+        self._listVarWatchers = []
         if not parentObj is None:
             parentObj.addSubPart(self) 
         sim.addPart(self)
@@ -89,6 +90,19 @@ class simPart(simBaseElement):
         self.addTimer(timer)
         return timer
     
+    def newVarWatcher(self, varName, formatString ):
+        """
+        Add a variable to the watched variables.
+        A watched variables value will be checked for changes during simulation.
+        If a value change is detected, a simulator trace event is generated
+         
+        :param string varName: Variable name as seen from part's scope
+        :param string formatString: print() like format to format the value when traced  
+        """
+        watcher = simVariableWatcher(self._sim, self, varName, formatString)
+        self.addVarWatcher(watcher)
+        return watcher
+
     def addInputPort(self, port):
         self._listPorts.append(port)
         self._sim.addInputPort(port)
@@ -105,6 +119,10 @@ class simPart(simBaseElement):
     def addTimer(self, timer):
         self._listTimers.append(timer)
         self._sim.addTimer(timer)
+    
+    def addVarWatcher(self, varWatcher):
+        self._listVarWatchers.append(varWatcher)
+        self._sim.addVarWatcher(varWatcher)
     
     def createPorts(self, ptype, listPortNames):
         '''
@@ -353,7 +371,69 @@ class simTimer(simBaseElement):
         self._sim.addTraceEvent( simTraceEvent(self._parentObj, self, self.timeoutFmt(self._sim,timeout), 'T-RESTA') )
         self._stop()
         self._start(timeout)
+
+class simVariableWatcher(simBaseElement):
+    """
+    The VariableWatcher class watches a variable for changes.
+    The variable is referenced by the moddy part and its variable name within the part.
+    It can be a variable in the part itself or a subobject "obj1.subobj.a"
     
+    The class provides the checkValueChanged() method. In moddy, the simulator should call this function
+    after each event (or step) to see if the value has changed   
+    """
+    def __init__(self, sim, part, varName, formatString):
+        """
+        :param sim: simulator object
+        :param simPart part: part which contains the variable 
+        :param string varName: Variable name as seen part scope
+        :param string formatString: print format like string to format value 
+        """
+        super().__init__(sim, part, varName, "WatchedVar")
+        self._varName = varName
+        self._lastValue = None
+        self._formatString = formatString
+    
+    def currentValue(self):
+        try:
+            curVal = eval('self._parentObj.' + self._varName)
+        except:
+            curVal = None
+        return curVal
+        
+    def __str__(self):
+        curVal = self.currentValue()
+        if curVal is None:
+            s = ''
+        else:
+            s = self._formatString % (curVal)
+        return s 
+        
+    def checkValueChanged(self):
+        """
+        Check if the variable value has changed
+        :return Changed, newVal 
+        
+        Changed is True if value has changed since last call to checkValueChanged()
+        newVal is returned also if value not changed
+        
+        If the variable value cannot be evaluated (e.g. because the variable does not exist (anymore))
+        the variables value is set to None (no exception is raised) 
+        
+        """
+        oldVal = self._lastValue
+        curVal = self.currentValue()
+        changed = False
+            
+        if curVal != oldVal:
+            self._lastValue = curVal
+            changed = True
+            
+        return (changed, curVal)
+    
+    def varName(self):
+        return self._varName
+    
+        
     
 class simTraceEvent:
     ''' simTraceEvents are the objects that are added to the simulators trace buffer''' 
@@ -378,6 +458,7 @@ class sim:
         self._disTimeScale   = 1        # time scale factor
         self._disTimeScaleStr = "s"     # time scale string
         self._listTracedEvents = []     # list of all traced events during execution
+        self._listVariableWatches = []  # list of watched variables
         self._enableTracePrints = True
         self._isRunning = False
     #
@@ -422,7 +503,59 @@ class sim:
             if part._parentObj is None:
                 tlParts.append(part)
         return tlParts
-                
+    
+    def findPartByName(self, partHierarchyName):
+        '''
+        Find a part by its hierarchy name
+        :param string partHierarchyName: e.g. "part1.subpart.subsubpart"
+        :return simPart part: the found part
+        :raises ValueError: if part not found
+        '''
+        for part in self._listParts:
+            if part.hierarchyName() == partHierarchyName:
+                return part
+        raise(ValueError("Part not found %s" % partHierarchyName))
+       
+    #
+    # Variable watching
+    #
+    def addVarWatcher(self, varWatcher):
+        self._listVariableWatches.append(varWatcher)
+        
+        
+    def watchVariables(self):
+        """
+        Check all registered variables for changes.
+        Generate a trace event for all changed variables
+        """    
+        for varWatcher in self._listVariableWatches:
+            changed,newVal = varWatcher.checkValueChanged()
+            if changed == True:
+                newValStr = varWatcher.__str__() 
+                te = simTraceEvent( varWatcher._parentObj, varWatcher, newValStr, 'VC')
+                self.addTraceEvent(te)
+
+    def watchVariablesCurrentValue(self):
+        """
+        Generate a trace event for all watched variables with their current value
+        Used at start of simulator to report the initial values
+        """    
+        for varWatcher in self._listVariableWatches:
+            te = simTraceEvent( varWatcher._parentObj, varWatcher, varWatcher.__str__(), 'VC')
+            self.addTraceEvent(te)
+
+    def findWatchedVariableByName(self, variableHierarchyName):
+        '''
+        Find a watched variable by its hierarchy name
+        :param string variableHierarchyName: e.g. "part1.variable"
+        :return simVariableWatcher: the found variable watcher
+        :raises ValueError: if variable not found
+        '''
+        for varWatcher in self._listVariableWatches:
+            if varWatcher.hierarchyName() == variableHierarchyName:
+                return varWatcher
+        raise(ValueError("Watched Variable not found %s" % variableHierarchyName))
+
     
     #
     # Simulator core routines
@@ -470,8 +603,12 @@ class sim:
         self.checkUnBoundPorts()
         print ("SIM: Simulator %s starting" % (VERSION))
         self._isRunning = True
+        # report initial value of watched variables
+        self.watchVariablesCurrentValue()
         for part in self._listParts: part.startSim()
-        
+        # Check for changed variables
+        self.watchVariables()
+                   
         numEvents = 0
         
         while True:
@@ -500,7 +637,9 @@ class sim:
                 self.stop()
                 # re-raise model exception
                 raise
-
+            # Check for changed variables
+            self.watchVariables()
+            
         self.stop()    
 
     def isRunning(self):

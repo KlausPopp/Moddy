@@ -15,12 +15,14 @@ TODO Group the objects (e.g. message arrow)
 import svgwrite
 from math import *
 from moddy import ms,us,ns
-from moddy.simulator import sim
+from moddy.simulator import sim, simVariableWatcher
+from builtins import str
 
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
 
 
 def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, excludedElementList=[],
+                                  showVarList=[],
                                   timeRange=(0,None), 
                                   **kwargs):
     '''
@@ -30,12 +32,17 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, 
     fmt - either 'svg' for pure SVG or 'svgInHtml' for SVG embedded in HTML
 
     showPartsList - if given, show only the listed parts in that order in sequence diagram.
+                    Each element can be either a reference to the part or a string with the
+                    hierarchy name of the part 
                     if omitted, show all parts known by simulator, in the order of their creation
+    
+    showVarList -   List of watched variables: Strings with the variable hierarchy name
                     
     excludedElementList - 
                     parts or timers that should be excluded from drawing
                     Each list element can be the object to exclude or one of the following:
                     - 'allTimers' - exclude all timers
+                    NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported
 
     timeRange - tuple with start and end time. Everything before start and after end is not drawn
     
@@ -45,17 +52,21 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, 
      partSpacing=300 - pixels between parts
      partBoxSize = (100,60) - x,y pixel size of part box
      statusBoxWidth=20 - pixel width of status box on life line
+     variableBoxWidth=150 - pixel width of watched variable value box on life line
+     varSpacing = 180 - pixels between variables
     '''
     sd = svgSeqD( evList=sim.tracedEvents(), **kwargs )
     
+    # Make list of parts to show
     if showPartsList is None:
         allParts = sim._listParts
     else:
         allParts = showPartsList 
     
-    # Get all parts from simulator. Exlude only those in excludedElementList
     partsList = []
     for part in allParts:
+        if type(part) is str:
+            part = sim.findPartByName(part)
         if part not in excludedElementList:
             partsList.append(part)
 
@@ -63,6 +74,14 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, 
     
     for elem in excludedElementList:
         sd.hide(elem)
+
+    # Make list of variables to show
+    varList = []
+    for var in showVarList:
+        if type(var) is str:
+            var = sim.findWatchedVariableByName(var)
+        varList.append(var)
+    sd.addVars(varList)
     
     sd.draw(timeRange[0], timeRange[1])
     sd.save(fileName, fmt)
@@ -76,7 +95,15 @@ class SdPart(object):
         self.sdLifeLineX = None            # XPos of parts lifeline
         self.sdAction = sdAction
         self.sdActionTime = 0
-
+        self.lifeLineBoxWidth = 0 
+        self.lifeLineBoxTextVertical = True
+        
+    def isVarDump(self):
+        ''' return True if this sdPart belongs to a variable watcher '''
+        if type(self.simPart) is simVariableWatcher:
+            return True
+        else:
+            return False
         
 class svgSeqD(object):
     '''
@@ -91,7 +118,9 @@ class svgSeqD(object):
                  pixPerDiv=25, 
                  partSpacing=300, 
                  partBoxSize = (100,60),
-                 statusBoxWidth=20 ):  
+                 statusBoxWidth=20,
+                 variableBoxWidth=120,
+                 variableSpacing=150 ):  
         '''
         Create SVG sequence diagram
         '''
@@ -99,9 +128,12 @@ class svgSeqD(object):
         self.partSpacing = partSpacing  # horizontal space between block object rects
         self.firstPartOffset = (100,10)
         self.statusBoxWidth = statusBoxWidth
+        self.variableBoxWidth = variableBoxWidth
+        self.variableSpacing = variableSpacing
         self._disTimeScale = 1
         self._listParts = []
-        self._dictParts = {}            # dictionary that maps the simulator part name to SdParts
+        self._listVars = []
+        self._dictParts = {}            # dictionary that maps the simulator part/var name to SdParts
         self._listHiddenElements = []    # list of hidden elements (timers, ports)   
         self._evList = evList
          
@@ -138,7 +170,7 @@ class svgSeqD(object):
 
     def hasPart(self, simPart):
         ''' Test if simPart is in Drawing '''
-        return simPart in self._listParts
+        return simPart in self._listParts + self._listVars
     
     def simPartMap(self, simPart):
         ''' Map simPart to sdPart. Raise KeyError if simPart is not in drawing '''
@@ -148,7 +180,22 @@ class svgSeqD(object):
         ''' add list of parts to drawing. '''
         for part in partList:
             self._listParts.append(part)
-            self._dictParts[part.hierarchyName()] = SdPart( part, sim.StateIndTransVal("",{})) 
+            sdPart = SdPart( part, sim.StateIndTransVal("",{}))
+            self._dictParts[part.hierarchyName()] = sdPart
+            
+            sdPart.lifeLineBoxWidth = self.statusBoxWidth
+            sdPart.lifeLineBoxTextVertical = True
+
+    def addVars(self, varList):
+        ''' add list of variables to drawing. '''
+        for var in varList:
+            self._listVars.append(var)
+            sdPart = SdPart( var, sim.StateIndTransVal("",{}))
+            self._dictParts[var.hierarchyName()] = sdPart
+            
+            sdPart.lifeLineBoxWidth = self.variableBoxWidth
+            sdPart.lifeLineBoxTextVertical = False
+            
         
     def currentDrawingYPos(self):
         ''' return the highest Y Pos on cancas that was used for drawing so far '''
@@ -167,6 +214,14 @@ class svgSeqD(object):
             x += self.partSpacing
             self.partBox(sdPart.sdPos, b.hierarchyName())
             
+        # draw variable boxes
+        for b in self._listVars:
+            sdPart = self.simPartMap(b)
+            sdPart.sdPos = ( x, self.firstPartOffset[1] )
+            sdPart.sdLifeLineX = x + self.partBoxSize[0]/2
+            x += self.variableSpacing
+            self.partBox(sdPart.sdPos, b.hierarchyName())
+            
         self._rightMostPartX = x
         self._maxY = self.partBoxSize[1] + self.firstPartOffset[1]
 
@@ -183,7 +238,7 @@ class svgSeqD(object):
         areaHeight = (endTime - startTime) * self.pixPerSecond
          
         # draw life lines
-        for b in self._listParts:
+        for b in self._listParts + self._listVars:
             self.lifeLine((self.simPartMap(b).sdLifeLineX, areaStartY) , areaHeight)
         
         # draw time markers
@@ -191,7 +246,8 @@ class svgSeqD(object):
             
         # draw events (in right order, so that most important info is in front
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'STA');
-        self.drawEndObjStatus(startTime,endTime,areaStartY) # draw 
+        self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'VC');
+        self.drawLifeLineBoxEnd(startTime,endTime,areaStartY) 
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, '<MSG');
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'T-EXP');
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'ANN');
@@ -333,9 +389,10 @@ class svgSeqD(object):
         d.add(d.line(start=(startPos[0]+self.firstPartOffset[0],startPos[1]), end=(startPos[0]+width, startPos[1]), stroke_width = "0.2").stroke("grey"))
         d.add(d.text(timeText, insert = (startPos[0]+self.firstPartOffset[0]-10, startPos[1]+4), style=_fontStyle, text_anchor="end"))
 
-    def statusBox(self, upperLeft, size, text, appearance={}):
+    def statusBox(self, upperLeft, size, text, appearance={}, textVertical=True):
         '''
-        Draw status indicator box on life line with the text in vertical direction
+        Draw status indicator box on life line with the text in vertical direction, if textVertical is True, 
+        horizontal otherwise 
         
         The default appearance is orange border, solid white background and orange text.
         You can override with <appearance> as dictionary. e.g.{ 'boxFillColor':'blue', 'textColor': 'white'} 
@@ -354,13 +411,23 @@ class svgSeqD(object):
                             stroke_width = "1",
                             stroke = boxStrokeColor,
                             fill = boxFillColor))
-        textPos = (upperLeft[0]+5, upperLeft[1] )
-        if size[1] > 15:
-            # only add text if there is a miminum of space
-            t = d.text(text, insert = textPos, style=_fontStyle)
-            t.rotate(str("90") + "," + str(textPos[0]) + "," + str(textPos[1]))
-            t.fill(textColor)
-            d.add(t)
+
+        if textVertical == True:
+            if size[1] > 15:
+                # only add text if there is a miminum of space
+                textPos = (upperLeft[0]+5, upperLeft[1] )
+                t = d.text(text, insert = textPos, style=_fontStyle)
+                t.rotate(str("90") + "," + str(textPos[0]) + "," + str(textPos[1]))
+                t.fill(textColor)
+                d.add(t)
+        else:
+            # horizontal
+            if size[1] > 12:
+                textPos = (upperLeft[0]+5, upperLeft[1]+10 )
+                t = d.text(text, insert = textPos, style=_fontStyle)
+                t.fill(textColor)
+                d.add(t)
+            
         #print(t.tostring())
         
 
@@ -424,25 +491,47 @@ class svgSeqD(object):
             if( pos[1] >= areaStartY):
                 self.annotation(pos, e.transVal)
         
+
+    def drawLifeLineBox(self, sdPart, traceTime, transVal, areaStartTime, areaStartY):
+        ind = sdPart.sdAction
+        if ind.text != "":
+            minTime = sdPart.sdActionTime
+            if( minTime < areaStartTime):
+                minTime = areaStartTime
+            upperLeft = ( sdPart.sdLifeLineX - sdPart.lifeLineBoxWidth/2, self.timeYPos( minTime, areaStartTime, areaStartY ))
+            size = (sdPart.lifeLineBoxWidth, (traceTime - minTime) * self.pixPerSecond)
+            self.statusBox(upperLeft, size, ind.text, ind.appearance, sdPart.lifeLineBoxTextVertical)
+        sdPart.sdAction = transVal
+        sdPart.sdActionTime = traceTime
+    
     def drawObjStatus(self, e, areaStartTime, areaStartY):
         part = e.part
         #print("drawAct", e.traceTime, e.transVal)
         if self.hasPart(part):
             sdPart = self.simPartMap(part)
-            ind = sdPart.sdAction
-            if ind.text != "":
-                minTime = sdPart.sdActionTime
-                if( minTime < areaStartTime):
-                    minTime = areaStartTime
-                upperLeft = ( sdPart.sdLifeLineX - self.statusBoxWidth/2, self.timeYPos( minTime, areaStartTime, areaStartY ))
-                size = (self.statusBoxWidth, (e.traceTime - minTime) * self.pixPerSecond)
-                self.statusBox(upperLeft, size, ind.text, ind.appearance)
-            sdPart.sdAction = e.transVal
-            sdPart.sdActionTime = e.traceTime
+            self.drawLifeLineBox(sdPart, e.traceTime, e.transVal, 
+                                 areaStartTime=areaStartTime, areaStartY=areaStartY)
+
     
-    def drawEndObjStatus(self,areaStartTime,areaEndTime,areaStartY):
+    def drawVarChange(self, e, areaStartTime, areaStartY):
+        varObj = e.subObj
+        if self.hasPart(varObj):
+            sdPart = self.simPartMap(varObj)
+            
+            if e.transVal is None:
+                tvString = ""
+            else:
+                tvString = e.transVal
+            
+            transVal = sim.StateIndTransVal(tvString,{'boxFillColor':'black', 'boxStrokeColor':'white', 'textColor': 'white'})
+            self.drawLifeLineBox(sdPart, e.traceTime, transVal,  
+                                 areaStartTime=areaStartTime, areaStartY=areaStartY)
+            
+        
+    
+    def drawLifeLineBoxEnd(self,areaStartTime,areaEndTime,areaStartY):
         # on each part, draw a status box from the last event to the end of the area
-        for part in self._listParts:
+        for part in self._listParts + self._listVars:
             sdPart = self.simPartMap(part)
             #print("drawEndObjStatus %s %s" % (part.objName(), sdPart.sdAction))
             ind = sdPart.sdAction
@@ -450,17 +539,19 @@ class svgSeqD(object):
                 minTime = sdPart.sdActionTime
                 if( minTime < areaStartTime):
                     minTime = areaStartTime
-                upperLeft = ( sdPart.sdLifeLineX - self.statusBoxWidth/2, self.timeYPos( minTime, areaStartTime, areaStartY ))
-                size = (self.statusBoxWidth, (areaEndTime - minTime) * self.pixPerSecond)
-                self.statusBox(upperLeft, size, ind.text, ind.appearance)
+                upperLeft = ( sdPart.sdLifeLineX - sdPart.lifeLineBoxWidth/2, self.timeYPos( minTime, areaStartTime, areaStartY ))
+                size = (sdPart.lifeLineBoxWidth, (areaEndTime - minTime) * self.pixPerSecond)
+                self.statusBox(upperLeft, size, ind.text, ind.appearance, sdPart.lifeLineBoxTextVertical)
              
-    
+   
+        
     def drawEvent(self, e, areaStartTime, areaStartY):
         #print("drawEvent", e.action)
         if e.action == "<MSG": self.drawMsg(e, areaStartTime, areaStartY )
         elif e.action == "T-EXP": self.drawTmrExp(e, areaStartTime, areaStartY )
         elif e.action == "ANN": self.drawAnnotation(e, areaStartTime, areaStartY)
         elif e.action == "STA": self.drawObjStatus(e, areaStartTime, areaStartY)
+        elif e.action == "VC": self.drawVarChange(e, areaStartTime, areaStartY)
     
     def drawAllSelectedEvents(self, startTime, endTime, areaStartY, action):
         print( "Drawing", action, "events") 
