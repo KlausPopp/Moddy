@@ -19,7 +19,7 @@ from moddy.simulator import sim, simVariableWatcher
 from builtins import str
 
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
-
+_fontStyleTitle = "font: 20pt Verdana, Helvetica, Arial, sans-serif"
 
 def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, excludedElementList=[],
                                   showVarList=[],
@@ -47,6 +47,7 @@ def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, 
     timeRange - tuple with start and end time. Everything before start and after end is not drawn
     
     **kwargs - further arguments, see svgSeqD constructor for details
+     title = Sequence Diagram title
      timePerDiv - time per time grid division
      pixPerDiv=25 - pixels per time grid division
      partSpacing=300 - pixels between parts
@@ -115,6 +116,7 @@ class svgSeqD(object):
     
     def __init__(self, evList, 
                  timePerDiv, 
+                 title=None,
                  pixPerDiv=25, 
                  partSpacing=300, 
                  partBoxSize = (100,60),
@@ -124,9 +126,10 @@ class svgSeqD(object):
         '''
         Create SVG sequence diagram
         '''
+        self._title = title
         self.partBoxSize = partBoxSize
         self.partSpacing = partSpacing  # horizontal space between block object rects
-        self.firstPartOffset = (100,10)
+        self.firstPartOffset = (100,10 if title is None else 50)
         self.statusBoxWidth = statusBoxWidth
         self.variableBoxWidth = variableBoxWidth
         self.variableSpacing = variableSpacing
@@ -201,6 +204,12 @@ class svgSeqD(object):
         ''' return the highest Y Pos on cancas that was used for drawing so far '''
         return self._maxY
     
+    def drawTitle(self):
+        if self._title is not None:
+            d = self._d
+            d.add(d.text(self._title, insert = (self.firstPartOffset[0],25), fill="black", style=_fontStyleTitle))
+            
+    
     def drawParts(self):
         '''
         Draw the part boxes for all registered parts
@@ -256,6 +265,7 @@ class svgSeqD(object):
         
     def draw(self, startTime=0, endTime=None):
         ''' Draw the parts and the specified time range '''
+        self.drawTitle()
         self.drawParts()
         self.drawTimeRange(startTime, endTime, self.currentDrawingYPos())
 
@@ -352,7 +362,7 @@ class svgSeqD(object):
          
         return (x,y)
 
-    def msgLine(self, startPos, endPos, msgText, color="black", showText=True, showLine=True):
+    def baseMsgLine(self, startPos, endPos, msgText, color, showText, showLine):
         '''
         Create a message line with an arrow at the end
         startPos and endPos are absolute on canvas
@@ -379,7 +389,37 @@ class svgSeqD(object):
             alpha= degrees(atan(dy/dx))
             t.rotate(str(alpha) + "," + str(textPos[0]) + "," + str(textPos[1]))
             d.add(t)
+    
+    def lostMsgLine(self, startPos, endPos, msgText, color, showText, showLine):
+        '''
+        Create a lost message line
+        Same as message line, but length of line shortened to 80% and a bubble added at the end 
+        '''
+        # draw shortened line
+        dx = endPos[0] - startPos[0]
+        dy = endPos[1] - startPos[1]
+        endPos = (endPos[0] - dx * 0.2, endPos[1] - dy * 0.2 )
+        self.baseMsgLine(startPos, endPos, msgText, color, showText, showLine)
         
+        # draw bubble
+        d = self._d
+        theta = atan2(dy, dx)
+        bubbleRadius = 5
+        x = endPos[0] + bubbleRadius * cos(theta)
+        y = endPos[1] + bubbleRadius * sin(theta)
+        
+        d.add(d.circle(center=(x,y),r=bubbleRadius, fill = color))
+        
+    def msgLine(self, startPos, endPos, msgText, color="black", showText=True, showLine=True, lostMsg=False):
+        '''
+        Create a message line with an arrow at the end. If lostMsg=True, shorten line and create bubble at the end
+        startPos and endPos are absolute on canvas
+        '''
+        if lostMsg == False:
+            self.baseMsgLine(startPos, endPos, msgText, color, showText, showLine)
+        else:
+            self.lostMsgLine(startPos, endPos, msgText, color, showText, showLine)
+            
     def timeMarkerLine(self, startPos, width, timeText):
         '''
         Create a horizontal time marker line
@@ -463,14 +503,14 @@ class svgSeqD(object):
             end = ( self.simPartMap(toPart).sdLifeLineX, self.timeYPos( fireEvent.execTime, areaStartTime, areaStartY ))
             if( start[1] >= areaStartY):
                 # only show line if it begins within the current area
-                self.msgLine(start, end, fireEvent._msg.__str__(), color=msgColor)
+                self.msgLine(start, end, fireEvent._msg.__str__(), color=msgColor, lostMsg=fireEvent._isLost)
             elif end[1] >= areaStartY:
                 # message line only Partly on the area. Show only the Part in the area
                 # Don't show message text
                 dx = end[0]-start[0]
                 dy = end[1]-start[1]
                 start = (end[0] - ( ((end[1]-areaStartY)/dy) * dx), areaStartY)
-                self.msgLine(start, end, fireEvent._msg.__str__(), showText=False, color=msgColor)
+                self.msgLine(start, end, fireEvent._msg.__str__(), showText=False, color=msgColor, lostMsg=fireEvent._isLost)
     
     def drawTmrExp(self, e, areaStartTime, areaStartY):
         part = e.part

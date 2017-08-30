@@ -5,6 +5,7 @@ Moddy - Python system simulator
 from copy import deepcopy
 from moddy import ms,us,ns,VERSION
 import sys
+from heapq import heappush, heappop
 
 def timeUnit2Factor(unit):
     """Convert time unit to factor"""
@@ -188,10 +189,12 @@ class simOutputPort(simBaseElement):
             self._flightTime = flightTime       # message transmit time
             self._requestTime = sim.time()      # time when application called send()
             self.execTime = -1;                 # when message arrives at input port
+            self._isLost = False                # Flags that message is a lost message
         
         def __str__(self):
             """Create a user readable form of the event. Used by tracer"""
-            return "req=%s beg=%s end=%s dur=%s msg=[%s]" % (self._sim.timeStr(self._requestTime), 
+            return "%s req=%s beg=%s end=%s dur=%s msg=[%s]" % ("(LOST)" if self._isLost else "",  
+                                                                    self._sim.timeStr(self._requestTime), 
                                                                     self._sim.timeStr(self.execTime - self._flightTime),
                                                                     self._sim.timeStr(self.execTime),
                                                                     self._sim.timeStr(self._flightTime),
@@ -203,12 +206,18 @@ class simOutputPort(simBaseElement):
             return self._port.objName() + "#fireEvent"
         
         def execute(self):
+            # check if the message is marked as lost
+            self._isLost = self._port.isLostMessage()
+
             # pass the message to all bound input ports
             for inport in self._port._listInPorts:
+                    
                 self._sim.addTraceEvent( simTraceEvent(self._port._parentObj, inport, self, '<MSG') )
-                # make a deep copy of the message, so that application can modify the message
-                msgCopy = deepcopy(self._msg)
-                inport.msgEvent(msgCopy)
+
+                if not self._isLost:
+                    # make a deep copy of the message, so that application can modify the message
+                    msgCopy = deepcopy(self._msg)
+                    inport.msgEvent(msgCopy)
                 
             # remove me from pending queue
             #print(self.name(), "exec", len(self._port._listPendingMsg))
@@ -218,7 +227,7 @@ class simOutputPort(simBaseElement):
                 event = self._port._listPendingMsg[0]
                 self._port._sendSchedule(event)
                 self._sim.addTraceEvent( simTraceEvent(self._port._parentObj, self._port, event, '>MSG(Q)') )
-                
+            self._port._seqNo += 1    
     
     def __init__(self, sim, part, name, color=None, ioPort=None):
         super().__init__(sim, part, name, "OutPort")
@@ -227,6 +236,8 @@ class simOutputPort(simBaseElement):
         self._color = color         # color for messages leaving that port
         self._ioPort = ioPort       # reference to the IOPort which contains this outPort (None if not part of IOPort)
         self._listMsgTypes = []     # learned message types that left this port
+        self._seqNo = 0             # next message sequence number (for lost messages)
+        self._lostSeqHeap = []      # heap with message sequence numbers that will be lost 
         
     def bind(self, inputPort):
         """bind an output port to an input port"""
@@ -272,6 +283,30 @@ class simOutputPort(simBaseElement):
         ''' Set color for messages leaving that port '''
         self._color = color
 
+    def injectLostMessageErrorBySequence(self, nextSeq):
+        ''' Inject error. Force one of the next messages sent via this port to be lost
+        If nextSeq is 0, the next message sent via this port will be lost, if it is 1 the next but one
+        message is lost etc.
+        ''' 
+        lostSeq = self._seqNo + nextSeq;
+        
+        # add the sequence number to be lost to the _lostSeqHeap, if this sequence is not already there
+        # this maintains the heap sequence.
+        if not lostSeq in self._lostSeqHeap: 
+            heappush(self._lostSeqHeap, lostSeq )
+        print("lostSeqHeap=", self._lostSeqHeap)
+    
+    def isLostMessage(self):
+        ''' 
+        Test if the current message is marked to be lost. 
+        Return True if so and remove the current sequence from the lost sequence heap 
+        '''
+        if len(self._lostSeqHeap) > 0 and self._seqNo == self._lostSeqHeap[0]:
+            heappop(self._lostSeqHeap)
+            return True    
+        else:
+            return False    
+        
 class simIOPort(simBaseElement):
     ''' An element that contains one input and one output port '''
     def __init__(self, sim, part, name, msgReceivedFunc, specialInPort=None):
