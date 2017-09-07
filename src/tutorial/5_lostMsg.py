@@ -64,3 +64,7 @@ if __name__ == '__main__':
                                       title="Lost Message Demo",
                                       timePerDiv = 50*us, 
                                       pixPerDiv = 30)    
+
+        # Output trace table
+        moddyGenerateTraceTable(simu, '5_lostMsg.csv', timeUnit="us" )
+        

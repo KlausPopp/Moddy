@@ -63,7 +63,7 @@ class TraceToCsv():
                 if(te.action.find('MSG') != -1):
                     # print request, begin, end, flightTime and msg in separate columns
                     fireEvent = te.transVal
-                    row.append(fireEvent._msg)
+                    row.append("(***LOST***)" if fireEvent._isLost else fireEvent._msg)
                     row.append(self.timeFmt(fireEvent._requestTime))
                     row.append(self.timeFmt(fireEvent.execTime - fireEvent._flightTime))
                     row.append(self.timeFmt(fireEvent.execTime))
