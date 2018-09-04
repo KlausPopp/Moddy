@@ -218,6 +218,7 @@ if __name__ == '__main__':
         
     moddyGenerateFsmGraph( fsm=cis.fsm, fileName='3_carinfo_fsm.svg', keepGvFile=True)  
     
+    
     simu.run(100)
     
     moddyGenerateSequenceDiagram( sim=simu, 

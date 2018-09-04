@@ -485,10 +485,10 @@ class svgSeqD(object):
     def drawMsg(self, e, areaStartTime, areaStartY):
         fromPart = e.part
         toPart = e.subObj._parentObj
-        assert(fromPart != toPart)
+        #assert(fromPart != toPart)
         #print("drawMsg", e.traceTime, fromPart.objName(), toPart.objName())
         # draw only if both Parts have been added to sd
-        if self.hasPart(fromPart) and self.hasPart(toPart):
+        if fromPart != toPart and self.hasPart(fromPart) and self.hasPart(toPart):
             msgColor = "black"
             # Take the color of the output port sending this message
             if e.subObj._outPort._color is not None:

@@ -321,6 +321,10 @@ class simIOPort(simBaseElement):
         ''' Bind IOPort to another IOPort, in/out will be crossed '''
         self._outPort.bind(otherIoPort._inPort)
         otherIoPort._outPort.bind(self._inPort)
+        
+    def loopBind(self):
+        ''' Loop in/out ports of an IO port together '''
+        self._outPort.bind(self._inPort)
     
     
     # delegation methods to output port     
