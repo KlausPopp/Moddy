@@ -1,0 +1,492 @@
+<html>
+	<head>
+
+		<script src="https://d3js.org/d3.v5.min.js"></script>
+		<style>
+			body {
+				font: 12px Arial;
+			}
+			.axis path, .axis line {
+				fill: none;
+				stroke: grey;
+				stroke-width: 1;
+				shape-rendering: crispEdges;
+			}
+
+		</style>
+	</head>
+
+<body>
+<p>Test text</p>
+<script>
+'use strict'
+
+var margin = {
+    top: 30,
+    right: 20,
+    bottom: 30,
+    left: 50
+};
+var width = 600 - margin.left - margin.right;
+var height = 2000 - margin.top - margin.bottom;
+
+var yFull = 5000;
+var xFull = 500;
+
+var x_scale = d3.scaleLinear().range([0, width]);
+x_scale.domain([0, xFull]);
+var y_scale = d3.scaleLinear().range([0, height]);
+y_scale.domain([0, yFull]);
+
+//var xAxis = d3.svg.axis().scale(x)
+//    .orient("bottom").ticks(5);
+
+
+
+// create SVG	
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+	
+svg.append('svg:defs').append('marker')
+	.attr('id', 'arrow')
+    .attr('refX', 10)
+	.attr('refY', 6)
+	.attr('markerWidth', 13)
+	.attr('markerHeight', 13)
+	.attr('orient', 'auto')
+	.append('svg:path')
+	.attr('d', 'M2,2 L2,11 L10,6 L2,2')
+	.style("fill", "#000");
+
+var yAxisFunc = d3.axisLeft().scale(y_scale)
+.ticks(20);
+
+var yAxis = svg.append("g") // Add the Y Axis
+	.attr("class", "y axis")
+    .call(yAxisFunc);
+    
+
+var dataArea = svg.append('g')
+	.attr("class", 'dataArea')
+var labelBoxArea = svg.append('g')
+	.attr("class", 'labelBoxArea')
+for(var i=0;i<4; i++)
+	labelBoxArea.append('g').attr("id", 'Line' + i)
+	
+var linedata = [];
+
+function fillLineData(n) {
+
+	var yOff = 0
+	for (var i=0; i<n; i++){
+		yOff += Math.random()*5;
+		var y = yOff + Math.random()*20;
+		linedata.push( {'x1': 0, 'y1': yOff, 'x2': xFull, 'y2':y });
+		y = y + Math.random()*20 - 10;
+		yOff = y + Math.random()*20;
+		linedata.push( {'x1': xFull, 'y1': y, 'x2': 0, 'y2':yOff });
+	}
+	
+}
+fillLineData(10);
+
+//Converts from radians to degrees.
+var degrees = function(radians) {
+  	return radians * 180 / Math.PI;
+}
+// Convert from degrees to radians
+function radians(degrees)
+{
+  	return degrees * (Math.PI/180);
+}
+
+/**
+ * Rotate a point around a center point
+ * @param {Point} 	point 		point to rotate (Object with .x and .y members)
+ * @param {Point} 	center 		center point (Object with .x and .y members)
+ * @param {Float}	theta		angle to rotate (in radians, i.e. 2*PI=360 degrees)
+ * @return {Point}  rotated point
+ */ 
+function rotatePoint( point, center, theta ){
+	// translate point to origin
+	var tempX = point.x - center.x;
+	var tempY = point.y - center.y;
+	
+	// now apply rotation
+	var rotatedX = tempX * Math.cos(theta) - tempY * Math.sin(theta);
+	var rotatedY = tempX * Math.sin(theta) + tempY * Math.cos(theta);
+	
+	// translate back
+	var rv = {}
+	rv.x = rotatedX + center.x;
+	rv.y = rotatedY + center.y;
+	return rv;
+}
+
+
+/**
+ * Constructor for sequence diagram label. For labels that shall be auto-positioned
+ * to avoid collisions
+ * @param {Array} 	refLine 	line on which the text can be moved to get out of the way
+ *							   	with indexes [x1,y1,x2,y2] in css pixels
+ * @param {Number} 	idealPos 	ideal label position on the refLine 0..1 (0=begin 1=end)
+ * @param {String} 	anchor	 	text alignment ("left", "middle", "center")
+ * @param {String} 	text		label text
+ * @param {D3Scale} xScale		x-scaling function
+ * @param {D3Scale} yScale		y-scaling function 
+ */ 
+function SdLabel( refLine, idealPos, anchor, text, xScale, yScale ) {
+	
+	this.pos = idealPos;	// actual pos
+	
+	this.getText = function() { return text; }
+	this.getAnchor = function() { return anchor }
+	
+	this.setNode = function( domNode ) {
+		this.domNode = domNode;
+	}
+	this.getTextWidth = function() {
+		return this.domNode.getComputedTextLength();
+	}
+	this.getTextHeight = function() {
+		//TODO: Use window.devicePixelRatio???
+		var sz = window.getComputedStyle(this.domNode).getPropertyValue("font-size");
+		if (sz.substr(-2) == "px") {
+			return sz.substr( 0, sz.length-2);
+		}
+		throw "font-size not in pixel" + sz;
+	}
+	
+	this.move = function( deltaPos ){
+		this.pos += deltaPos;
+		var wp = this.getTextWidthPercent();
+		
+		switch(anchor){
+		case 'left':
+			// TODO
+			if (this.pos < 0) this.pos = 0;
+			if (this.pos > (1-wp)) this.pos = (1-wp);
+			break;
+		case 'middle':
+			if (this.pos < wp/2) this.pos = wp/2;
+			if (this.pos > (1-wp/2)) this.pos = (1-wp/2);
+			break;
+		case 'right':
+			// TODO
+			if (this.pos < wp) this.pos = wp;
+			if (this.pos > 1) this.pos = 1;
+			break;
+		}
+		console.log("%s new pos %f", text, this.pos*100)
+	}
+	
+	// compute polygon covering the label text
+	// @param hpos: relative position on reference line (0=begin, 1=end)
+	// @param height: text height
+	// @param width: text width
+	// @return {Array} with polygon points (scaled)
+	this.getScaledTextPolygon = function( hpos, height, width ) {
+		var rv =  [];
+		
+		var center = this.getScaledCenter(hpos);
+		var theta = this.getCurrentScaledRotation()
+		
+		rv.push( rotatePoint( { x: center.x - width/2, y: center.y }, 			center, theta));
+		rv.push( rotatePoint( { x: center.x - width/2, y: center.y-height }, 	center, theta));
+		rv.push( rotatePoint( { x: center.x + width/2, y: center.y-height }, 	center, theta));
+		rv.push( rotatePoint( { x: center.x + width/2, y: center.y }, 			center, theta));
+		return rv;
+	}
+	
+	this.getCurrentScaledTextPolygon = function(){
+		return this.getScaledTextPolygon( this.pos, this.getTextHeight(), this.getTextWidth())
+	}
+	
+	// compute how much percent of reference line the text covers (0..1)
+	this.getTextWidthPercent = function(){
+		// compute lenght of refline scaled
+		var a = xScale(refLine['x2'] - refLine['x1']);
+		var b = yScale(refLine['y2'] - refLine['y1']);
+		var c = Math.sqrt(a*a + b*b);
+		
+		var p = this.getTextWidth() / c;
+		//console.log("getTextWidthPercent %s %f%", text, p * 100);
+		return p;
+	}
+	
+	// return {x:,y:} coordinates of text anchor (considering current pos on refLine)
+	this.getCurrentScaledCenter = function() {
+		return this.getScaledCenter(this.pos);
+	}
+
+	// return {x:,y:} coordinates of text anchor (considering pos parameter)
+	this.getScaledCenter = function(pos) {
+		var rv = {};
+		rv.x = xScale( refLine['x1'] + (refLine['x2'] - refLine['x1']) * pos);
+		rv.y = yScale( refLine['y1'] + (refLine['y2'] - refLine['y1']) * pos) /*- 3*/;
+		return rv;
+	}
+
+	// return: rotation of scaled refLine in radians
+	this.getCurrentScaledRotation = function() {
+		return Math.atan( 
+				(yScale(refLine['y2'] - refLine['y1'])) / 
+				(xScale(refLine['x2'] - refLine['x1'])))
+	}
+	
+	this.getCurrentRotateStr = function() {
+		return 'rotate(' + degrees( this.getCurrentScaledRotation() ) + ',' 
+				+ this.getCurrentScaledCenter().x + ',' + this.getCurrentScaledCenter().y + ')'; 
+	}
+	
+	
+	this.checkOverlap = function( labelArray ){
+		var thisPolygon = this.getCurrentScaledTextPolygon();
+		var that = this; // this is not available in the forEach function
+		var idx = 0;
+		
+		for(let otherLabel of labelArray) {
+			
+			if( otherLabel != that){
+				if(doPolygonsIntersect( thisPolygon, otherLabel.getCurrentScaledTextPolygon())){
+					console.log("intersect with label " + idx);
+					return true;
+				}
+			}
+			idx++;
+		}
+		return false;
+	}
+}
+
+var labeldata = [];
+
+linedata.forEach(function(l,idx) {
+	
+	var text = "Text" + idx + " ekokgoekgoke ermophmoprhmoprhorh khrkhrokohkrokho".substr(0, Math.floor(Math.random() * 30)); 
+	labeldata.push( new SdLabel( l, 0.5, 'middle', text, x_scale, y_scale));
+})
+	 
+function update(data) {
+	// update Y Axis according to scale
+	yAxis.call(yAxisFunc);
+	
+	// Update msg Lines
+	var lines = dataArea.selectAll('line').data(data);
+	
+
+	// add entered lines
+	lines.enter().append('line')
+		.style("marker-end", "url(#arrow)")
+		.attr('stroke', '#000')
+	   .merge(lines)		// this merges the update and enter section
+		.attr('x1', function(d) { return x_scale(d['x1'])} )
+		.attr('y1', function(d) { return y_scale(d['y1'])} )
+		.attr('x2', function(d) { return x_scale(d['x2'])} )
+		.attr('y2', function(d) { return y_scale(d['y2'])} )
+		;
+	
+	// remove old elements
+	lines.exit().remove();
+
+
+	// Update msg Text
+	var labels = dataArea.selectAll('text').data(labeldata);
+	
+	// add entered labels
+	labels.enter().append('text')
+		.text( function(d) { return d.getText()})
+		.attr('text-anchor', function(d) { return d.getAnchor()})
+	   .merge(labels)		// this merges the update and enter section
+		.attr('x', function(d) { return d.getCurrentScaledCenter().x} )
+		.attr('y', function(d) { return d.getCurrentScaledCenter().y} )
+		.attr('transform', function(d) { return d.getCurrentRotateStr()} )
+		.each( function(d) {d.setNode(d3.select(this).node())} )
+		;
+	
+	// remove old elements
+	labels.exit().remove();
+
+	// Visualize label boxes
+	for(var i=0; i<4; i++){
+		var labelBoxes = labelBoxArea.select('#Line'+i).selectAll("line").data(labeldata);
+		
+		//labelBoxes.data(labeldata);
+		
+		labelBoxes.enter().append('line')
+			.attr('stroke', '#ff0000')
+		   .merge(labelBoxes)		// this merges the update and enter section
+			.attr('x1', function(d) { return d.getCurrentScaledTextPolygon()[i].x } )
+			.attr('y1', function(d) { return d.getCurrentScaledTextPolygon()[i].y } )
+			.attr('x2', function(d) { return d.getCurrentScaledTextPolygon()[(i+1)%4].x } )
+			.attr('y2', function(d) { return d.getCurrentScaledTextPolygon()[(i+1)%4].y } )
+			;
+		labelBoxes.exit().remove();
+	}
+	
+
+/*	labels.each( function(d) {
+		d.move(-0.2);
+	} )
+
+	labels
+	.attr('x', function(d) { return d.getCurrentScaledCenter().x} )
+	.attr('y', function(d) { return d.getCurrentScaledCenter().y} )
+	.attr('transform', function(d) { return d.getRotateStr()} )
+	;
+	*/
+}
+
+ 
+ 
+ 
+
+update(linedata);
+
+
+
+function getVisibleTimeRange() {
+	
+	
+	var bRect = svg.node().getBoundingClientRect();
+	//console.log("SVG Brect y=%d height=%d", bRect['y'], bRect['height']);
+	
+	/*winYOffset = window.pageYOffset;
+	winHeight = window.height;
+	console.log("Win y=%d height=%d", winYOffset, winHeight);*/
+	
+	/*console.log("visualVP offtop %d height %d scale %f ", 
+			window.visualViewport.offsetTop,
+			window.visualViewport.height,
+			window.visualViewport.scale);*/
+	
+	// visualViewport may work on chrome only!!!
+	
+	var rangeEnd = (window.visualViewport.height - bRect['y']) / bRect['height'] * y_scale.domain()[1]
+	var rangeStart = (- bRect['y']) / bRect['height'] * y_scale.domain()[1]
+	console.log("range Start %d End %d", rangeStart, rangeEnd)
+	
+}
+
+function windowChanged(){
+	getVisibleTimeRange();
+}
+
+// Redraw based on the new size whenever the browser window is resized or scrolled or zoomed.
+window.addEventListener("resize", windowChanged);
+window.addEventListener("scroll", windowChanged);
+window.addEventListener("zoom", windowChanged);
+
+
+var g_mouseScaleFlag = false;
+var g_mouseScaleYOrg = 0;
+var g_mouseScaleStartScale = 0;
+
+function dataAreaMouseMove(e) {
+	
+	if (e.shiftKey){
+		if (g_mouseScaleFlag === false){
+			g_mouseScaleYOrg = e.clientY;
+			g_mouseScaleFlag = true;
+			g_mouseScaleStartScale = y_scale.domain()[1]
+		}
+		
+		var newscale = g_mouseScaleStartScale + (e.clientY - g_mouseScaleYOrg) * -20
+		//newscale = y_scale.domain()[1] * (1.0 + (e.clientY - g_mouseScaleYOrg) / 10000)
+		console.log( "mm newscale %d", newscale)
+		if (newscale > 1){
+			y_scale.domain([0, newscale]);
+		  	update(linedata);
+		}
+	}
+	else {
+		g_mouseScaleFlag = false;
+	}
+	
+}
+
+window.addEventListener("mousemove", dataAreaMouseMove);
+
+
+getVisibleTimeRange();
+
+function isUndefined(v){
+	return v === undefined;
+}
+
+
+/**
+ * From https://stackoverflow.com/questions/10962379/how-to-check-intersection-between-2-rotated-rectangles
+ * Helper function to determine whether there is an intersection between the two polygons described
+ * by the lists of vertices. Uses the Separating Axis Theorem
+ *
+ * @param a an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+ * @param b an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+ * @return true if there is any intersection between the 2 polygons, false otherwise
+ */
+function doPolygonsIntersect (a, b) {
+    var polygons = [a, b];
+    var minA, maxA, projected, i, i1, j, minB, maxB;
+
+    for (i = 0; i < polygons.length; i++) {
+
+        // for each polygon, look at each edge of the polygon, and determine if it separates
+        // the two shapes
+        var polygon = polygons[i];
+        for (i1 = 0; i1 < polygon.length; i1++) {
+
+            // grab 2 vertices to create an edge
+            var i2 = (i1 + 1) % polygon.length;
+            var p1 = polygon[i1];
+            var p2 = polygon[i2];
+
+            // find the line perpendicular to this edge
+            var normal = { x: p2.y - p1.y, y: p1.x - p2.x };
+
+            minA = maxA = undefined;
+            // for each vertex in the first shape, project it onto the line perpendicular to the edge
+            // and keep track of the min and max of these values
+            for (j = 0; j < a.length; j++) {
+                projected = normal.x * a[j].x + normal.y * a[j].y;
+                if (isUndefined(minA) || projected < minA) {
+                    minA = projected;
+                }
+                if (isUndefined(maxA) || projected > maxA) {
+                    maxA = projected;
+                }
+            }
+
+            // for each vertex in the second shape, project it onto the line perpendicular to the edge
+            // and keep track of the min and max of these values
+            minB = maxB = undefined;
+            for (j = 0; j < b.length; j++) {
+                projected = normal.x * b[j].x + normal.y * b[j].y;
+                if (isUndefined(minB) || projected < minB) {
+                    minB = projected;
+                }
+                if (isUndefined(maxB) || projected > maxB) {
+                    maxB = projected;
+                }
+            }
+
+            // if there is no overlap between the projects, the edge we are looking at separates the two
+            // polygons, and we know there is no overlap
+            if (maxA < minB || maxB < minA) {
+                //CONSOLE("polygons don't intersect!");
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
+
+</script>
+</body>
+</html>
