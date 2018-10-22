@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<script src="https://d3js.org/d3.v5.min.js"></script>
+		<style>
+			body {
+				font: 9pt Verdana, Helvetica, Arial, sans-serif;
+			}
+			.lifeline {
+				stroke: grey;
+				stroke-dasharray: 5,5;
+			}
+			.axis path, .axis line {
+				fill: none;
+				stroke: grey;
+				stroke-width: 0.2;
+				shape-rendering: crispEdges;
+			}
+			div.tooltip {	
+			    position: absolute;			
+			    text-align: center;			
+			    width: auto;					
+			    height: auto;					
+			    padding: 2px;				
+			    font: 12px sans-serif;		
+			    background: lightsteelblue;	
+			    border: 0px;		
+			    border-radius: 8px;			
+			    pointer-events: none;			
+			}
+			.active {
+  				stroke-width: 2px;
+  				cursor: pointer;
+			}
+			.controls {
+				position: fixed;
+				top: 50%;
+				height: auto;
+				left: 90%;
+				width: auto;
+				font: 20pt Verdana, Helvetica, Arial, sans-serif;
+			}
+			.controls text {	
+				/* don't change mouse pointer/disable text select on button text */
+				pointer-events: none;
+				-moz-user-select: none;
+  				-webkit-user-select: none;
+  				-ms-user-select: none;
+  				fill: white;
+  				text-anchor: middle;
+			}
+			.parts {
+				position: fixed;
+				top: 0px;
+				height: auto;
+				width: 100%;
+				background-color: white;
+			}
+			.diagram {
+				top: 200px;
+				width: 100%;
+			}
+			
+		</style>
+	</head>
+
+<body>
+	<div class="controls">
+		<svg>
+					
+		</svg>
+	
+	</div>
+	<div class="parts">
+	</div>
+	<div class='diagram'>
+	</div>
+<script src="simOutput.js"></script>
+<script>
+'use strict'
+
+/*
+ * TODO
+ * Y-Axis in background
+ * VC
+ * tmrLines in blue
+ * text automove only on visible labels
+ * colored status
+ * colored messages
+ * zoom possibilities
+ *   button
+ *	 scrollwheel
+ *	 keys
+ * Keep time on zoom
+ * draggable lifelines/parts
+ */
+
+
+var g_margin = {
+    top: 0,	// set later
+    right: 20,
+    bottom: 30,
+    left: 80
+};
+
+//---------------------------------------------------------------------------------
+// Diagram formatting options
+//
+function getDiagramArgs( overrideValues ) {
+	var defaults = {
+		title: '',
+		timePerDiv: 1.0,
+		pixPerDiv: 25,
+		partSpacing: 300,
+		partBoxSize: {w: 100, h:60},
+		statusBoxWidth: 20,
+		variableBoxWidth: 150,
+		varSpacing: 180, 
+	}	
+
+	for(let key of Object.keys(overrideValues)) {
+		defaults[key] = overrideValues[key]
+	}
+	return defaults;
+}
+var g_diagramArgs = getDiagramArgs( g_moddyDiagramArgs );
+
+
+//---------------------------------------------------------------------------------
+// Part scanning
+//
+
+// compute width based on the parts
+// set x position of all partArray entries
+function getDrawingWidth( partArray ){
+	
+	var width = 0;
+	var idx = 0;
+	
+	for(let part of partArray){
+		if( idx == 0)
+		 	width += g_diagramArgs.partBoxSize.w/2;
+		else {
+			if(part.tp == "Part")
+			 	width += g_diagramArgs.partSpacing;
+			else if(part.tp == "Var")
+			 	width += g_diagramArgs.varSpacing;
+			else
+				throw 'Invalid part type ' + part.tp;
+		}
+		part.centerX = width;
+		
+		idx++;	
+	}
+	width += g_diagramArgs.partSpacing + g_margin.right;
+	return width;
+} 
+var g_svgTotalWidth = getDrawingWidth(g_moddyDiagramParts);
+
+// create SVG for part boxes
+var g_partSvg = d3.select("body").select(".parts")
+	.append("svg")
+    .attr("width", g_svgTotalWidth)
+    .attr("height", g_diagramArgs.partBoxSize.h)
+	.attr("transform", "translate(" + g_margin.left + ")");
+// draw the part boxes
+function updatePartBoxes(){
+	
+	var rects = g_partSvg.selectAll('rect').data(g_moddyDiagramParts);
+	
+	rects.enter().append('rect')
+		.attr('stroke', 'black')
+		.attr('stroke_width', 1)
+		.attr('fill', 'none')
+	   .merge(rects)		// this merges the update and enter section
+		.attr('x', function(d) { return d.centerX - g_diagramArgs.partBoxSize.w/2; } )
+		.attr('y', function(d) { return 0;} )
+		.attr('width', function(d) { return g_diagramArgs.partBoxSize.w; } )
+		.attr('height', function(d) { return g_diagramArgs.partBoxSize.h;} )
+		;
+	
+	var labels = g_partSvg.selectAll('text').data(g_moddyDiagramParts);
+
+	labels.enter().append('text')
+	 .attr('text-anchor', function(d) { return 'middle'; })
+    .merge(labels)		// this merges the update and enter section
+	 .text( function(d) { return d.name; })
+	.attr('x', function(d) { return d.centerX; } )
+	.attr('y', function(d) { return g_diagramArgs.partBoxSize.h/2; } );
+	
+}
+
+
+updatePartBoxes();
+
+
+//---------------------------------------------------------------------------------
+
+g_margin.top = d3.select("body").select(".parts").node().offsetTop;
+g_margin.top += d3.select("body").select(".parts").node().offsetHeight + 20;
+
+//---------------------------------------------------------------------------------
+// Compute initial height and scaling
+//
+function initialYParams()
+{
+	var height = 0;
+	var lastTs = 0;
+	
+	if( g_moddyTracedEvents.length > 0 ){
+		var timePerPx = g_diagramArgs.timePerDiv / g_diagramArgs.pixPerDiv;
+		lastTs = g_moddyTracedEvents[g_moddyTracedEvents.length -1].t;
+		
+		height = lastTs / timePerPx;
+		
+	}
+	return { svgHeight: height, maxT: lastTs };
+}
+
+
+var g_initialY = initialYParams();
+
+var g_svgWidth = g_svgTotalWidth - g_margin.left - g_margin.right;
+var g_svgHeight = g_initialY.svgHeight - g_margin.top - g_margin.bottom;
+
+var g_yFull = g_initialY.maxT;
+var g_timeScaleFactor = 1.0; 	// scale, 1.0 is the initial scale 
+
+var y_scale = d3.scaleLinear().range([0, g_svgHeight]).domain([0, g_yFull]);
+
+
+
+// Data arrays for d3
+var g_traceData = {
+	msgLines: { data: [] },	// data for message lines (<MSG, T-EXP), refs to g_moddyTracedEvents
+	boxes:    { data: [] },	// data for boxes (STA, VC), refs to g_moddyTracedEvents
+	annLines: { data: [] },	// data for annotation lines (ANN, ASSFAIL), refs to g_moddyTracedEvents
+	labels:   { data: [] },	// data for labels (all types), SdLabel objects
+	lifelines: { }
+}
+	
+
+// create SVG root element	
+var g_svgRoot = d3.select("body").select(".diagram")
+    .append("svg")
+    .attr("width", g_svgWidth + g_margin.left + g_margin.right)
+    .attr("height", g_svgHeight + g_margin.top + g_margin.bottom)
+    
+// create the arrow head for message lines as an SVG marker	
+g_svgRoot.append('svg:defs').append('marker')
+	.attr('id', 'arrow')
+    .attr('refX', 10)
+	.attr('refY', 6)
+	.attr('markerWidth', 13)
+	.attr('markerHeight', 13)
+	.attr('orient', 'auto')
+	.append('svg:path')
+	.attr('d', 'M2,2 L2,11 L10,6 L2,2')
+	.style("fill", "#000");
+
+// create group with some margin
+var g_svg = g_svgRoot.append("g")
+    .attr("transform", "translate(" + g_margin.left + "," + g_margin.top + ")");
+
+
+// create group for different D3 objects  
+g_traceData.lifelines.svg = g_svg.append('g').attr("class", 'lifelines')
+g_traceData.boxes.svg = g_svg.append('g').attr("class", 'boxes')
+g_traceData.msgLines.svg = g_svg.append('g').attr("class", 'msgLines')
+g_traceData.annLines.svg = g_svg.append('g').attr("class", 'annLines')
+g_traceData.labels.svg = g_svg.append('g').attr("class", 'labels')
+
+//---------------------------------------------------------------------------------
+//draw the part life lines
+function updatePartLifeLines(){
+	var lines = g_traceData.lifelines.svg.selectAll('line').data(g_moddyDiagramParts);
+	
+	// add entered lines
+	lines.enter().append('line')
+		.attr("class", "lifeline")
+	   .merge(lines)		// this merges the update and enter section
+		.attr('x1', function(d) { return d.centerX; } )
+		.attr('y1', function(d) { return -50; } )
+		.attr('x2', function(d) { return d.centerX; } )
+		.attr('y2', function(d) { return g_svgHeight; } )
+		;
+	
+}
+updatePartLifeLines();
+
+
+
+//---------------------------------------------------------------------------------
+// Parse moddy trace data
+
+function partCenterX( partNo ){
+	if (partNo == -1)
+		return 0;	// "global" part 
+	if (partNo >= g_moddyDiagramParts.length)
+		return g_svgTotalWidth;
+	return g_moddyDiagramParts[partNo].centerX;
+}
+
+
+// Distribute g_moddyTracedEvents into the different g_traceData objects so that
+// there is a 1:1 relation between the data and the traced objects
+function distributeTraceData(){
+	g_traceData.msgLines.data = [];
+	g_traceData.boxes.data = [];
+	g_traceData.annLines.data = [];
+	g_traceData.labels.data = [];
+	
+	for( let e of g_moddyTracedEvents){
+		
+		
+		var refLine = {}, anchor="middle", color="black", allowBelowLine=false;
+		var partX = partCenterX(e.p), targetPoint = null;
+		
+		// create the label object
+		switch(e.tp){
+		case "<MSG":
+			refLine.x1 = partX;
+			refLine.y1 = e.b;
+			refLine.x2 = partCenterX(e.s);
+			refLine.y2 = e.t;
+			allowBelowLine = true;
+			break;
+		case "T-EXP":
+			refLine.x1 = partX-150;
+			refLine.x2 = partX;
+			refLine.y1 = refLine.y2 = e.t;
+			allowBelowLine = true;
+			color = "blue";
+			anchor="end";
+			break;
+		case "STA":
+			refLine.x1 = refLine.x2 = partX-5;
+			refLine.y1 = e.b; 
+			refLine.y2 = e.t;
+			color = "orange";
+			anchor="start";
+			break;
+		case "VC":
+			refLine.x1 = partX-50;
+			refLine.x2 = partX;
+			refLine.y1 = refLine.y2 = e.t;
+			color = "white";
+			break;
+		case "ANN":
+		case "ASSFAIL":
+			refLine.x1 = partX+22;
+			refLine.x2 = (e.p == -1) ? g_svgTotalWidth : partCenterX(e.p+1); 
+			refLine.y1 = refLine.y2 = e.t;
+			color = "red";
+			anchor="start";
+			targetPoint = {x: partX, y: e.t}
+			break;
+		}
+		if( 'c' in e)
+			color = e.c;
+		
+		var sdl = new SdLabel( refLine, anchor, e.txt, color, y_scale, targetPoint );
+		g_traceData.labels.data.push( sdl );
+
+		switch(e.tp){
+		case "<MSG":
+		case "T-EXP":
+			g_traceData.msgLines.data.push(e);
+			break;
+		case "STA":
+		case "VC":
+			g_traceData.boxes.data.push(e);
+			break;
+		case "ANN":
+		case "ASSFAIL":
+			g_traceData.annLines.data.push(sdl);
+			break;
+		}
+
+	}
+}
+
+distributeTraceData();
+
+//---------------------------------------------------------------------------------
+/// YAxis
+
+function yAxisTickSteps(){
+	var timeUnitsPerDiv = (g_yFull*1E9)/g_svgHeight*30;	// How much time in 30px
+	var logTuPerDiv = Math.log10(timeUnitsPerDiv);
+	var floorlogTuPerDiv = Math.floor(logTuPerDiv);
+	var rv;
+	
+	if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(5)))
+		rv = Math.pow(10,floorlogTuPerDiv) * 5;
+	else if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(2)))
+		rv = Math.pow(10,floorlogTuPerDiv) * 2;
+	else
+		rv = Math.pow(10,floorlogTuPerDiv);
+
+	rv /= 1E9;
+	//console.log ("yAxisTickSteps %f timeUnitsPerDiv %.3f logTuPerDiv %.3f ",  rv, timeUnitsPerDiv, logTuPerDiv);
+	return rv;
+	
+}
+
+function yAxisformatTickValue(time)
+{
+	var steps = yAxisTickSteps();
+	var rv;
+	var fmt = ".0f"
+	if( steps >= 1.0) rv = d3.format(fmt)(time) + " s";	
+	else if( steps >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
+	else if( steps >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
+	else if( steps >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
+	else if( steps >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
+	return rv;
+}
+
+var yAxisFunc = d3.axisRight(y_scale)
+	.tickSize(g_svgWidth)
+	.scale(y_scale)
+	.tickFormat(function(d){
+		return yAxisformatTickValue(d);
+	})
+	.tickValues( d3.range(0, g_yFull, yAxisTickSteps()));
+
+function customYAxis(g) {
+	g.call(yAxisFunc);
+	g.select(".domain").remove();	// remove x and y line
+	g.selectAll(".tick text").attr("dy", 4).attr("x", -5).attr("text-anchor", "end")
+}
+
+
+var g_yAxis = g_svg.append("g") // Add the Y Axis
+	.attr("class", "y axis")
+    .call(customYAxis);
+    
+// Define the div for the label tooltip
+var g_tooltipDiv = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+    
+    
+//--------------------------------------------------------------------------
+// Helpers
+
+//Converts from radians to degrees.
+var degrees = function(radians) {
+  	return radians * 180 / Math.PI;
+}
+// Convert from degrees to radians
+function radians(degrees)
+{
+  	return degrees * (Math.PI/180);
+}
+
+/**-------------------------------------------------------------------------
+ * Rotate counterclockwise a point around a center point
+ * @param {Point} 	point 		point to rotate (Object with .x and .y members)
+ * @param {Point} 	center 		center point (Object with .x and .y members)
+ * @param {Float}	theta		angle to rotate (in radians, i.e. 2*PI=360 degrees) 
+ * 						 
+ * @return {Point}  rotated point
+ */ 
+function rotatePoint( point, center, theta ){
+	// translate point to origin
+	var tempX = point.x - center.x;
+	var tempY = point.y - center.y;
+	
+	// now apply rotation
+	var rotatedX = tempX * Math.cos(theta) - tempY * Math.sin(theta);
+	var rotatedY = tempX * Math.sin(theta) + tempY * Math.cos(theta);
+	
+	// translate back
+	var rv = {}
+	rv.x = rotatedX + center.x;
+	rv.y = rotatedY + center.y;
+	return rv;
+}
+
+
+/**
+ * Constructor for sequence diagram label. For labels that shall be auto-positioned
+ * to avoid collisions
+ * @param {Array} 	refLine 	line on which the text can be moved to get out of the way
+ *							   	with indexes [x1,y1,x2,y2] unscaled!
+ * @param {String} 	anchor	 	text alignment ("left", "middle", "center")
+ * @param {String} 	text		label text
+ * @param {String} 	color		text color
+ * @param {D3Scale} yScale		y-scaling function 
+ * @param {Point}	targetPoint	Point where the label belongs to (may be null)
+ */ 
+function SdLabel( refLine, anchor, text, color, yScale, targetPoint ) {
+	
+	this.vDist = -3;			// pixels above the line
+	this.curText = text;
+	this.curTextWidth = null;
+	this.curTextHeight = null;
+	this.domNode = null;
+	this.targetLineDomNode = null;
+	this.fullText = text;
+	this.color = color;
+	this.targetPoint = targetPoint;
+	
+	this.getText = function() { return this.curText; }
+
+	this.setText = function(newText){
+		this.curText = newText;
+		if(this.domNode === null ) throw "domNode not set";
+		this.domNode.textContent = newText;
+		this.curTextWidth = this.domNode.getComputedTextLength();
+		this.curTextHeight = this.obtainTextHeight();
+	}
+
+	this.getTextWidth = function() {
+		if(this.curTextWidth == null ) 
+			this.curTextWidth = this.domNode.getComputedTextLength();
+		return this.curTextWidth;
+	}
+	this.getTextHeight = function(){
+		if( this.curTextHeight == null)
+			this.curTextHeight = this.obtainTextHeight();
+
+		return this.curTextHeight;
+	}
+	
+	this.idealHPos = function() {
+		var hPos; 
+		switch(anchor){
+		case "start": hPos = 0; break;
+		case "middle": hPos = 0.5; break;
+		case "end": hPos = 1; break;
+		default: throw "bad anchor" + anchor;
+		}
+		return hPos;
+	}
+	this.hpos = this.idealHPos();	// relative position on the refLine 0..1 (0=begin 1=end)
+	
+	this.getAnchor = function() { return anchor }
+	
+	// set the domNode of the label text
+	this.setNode = function( domNode ) {
+		this.domNode = domNode;
+	}
+	// set the domNode of the label text
+	this.setTargetLineNode = function( domNode ) {
+		this.targetLineDomNode = domNode;
+	}
+	
+	this.obtainTextHeight = function() {
+		var sz = window.getComputedStyle(this.domNode).getPropertyValue("font-size");
+		if (sz.substr(-2) == "px") {
+			return parseInt(sz.substr( 0, sz.length-2), 10);
+		}
+		throw "font-size not in pixel" + sz;
+	}
+	
+	
+	// compute polygon covering the label text
+	// @param hpos: relative position on reference line (0=begin, 1=end)
+	// @param height: text height
+	// @param width: text width
+	// @return {Array} with polygon points (scaled)
+	this.getTextPolygon = function( hpos, vDist, height, width ) {
+		var rv =  [];
+		
+		var center = this.getCenter(hpos, vDist);
+		var theta = this.getCurrentRotation()
+		
+		switch(anchor){
+		case "start":		
+			rv.push( rotatePoint( { x: center.x, y: center.y }, 					center, theta));
+			rv.push( rotatePoint( { x: center.x, y: center.y-height }, 				center, theta));
+			rv.push( rotatePoint( { x: center.x + width, y: center.y-height }, 		center, theta));
+			rv.push( rotatePoint( { x: center.x + width, y: center.y }, 			center, theta));
+			break;
+		case "middle":		
+			rv.push( rotatePoint( { x: center.x - width/2, y: center.y }, 			center, theta));
+			rv.push( rotatePoint( { x: center.x - width/2, y: center.y-height }, 	center, theta));
+			rv.push( rotatePoint( { x: center.x + width/2, y: center.y-height }, 	center, theta));
+			rv.push( rotatePoint( { x: center.x + width/2, y: center.y }, 			center, theta));
+			break;
+		case "end":		
+			rv.push( rotatePoint( { x: center.x - width, y: center.y }, 			center, theta));
+			rv.push( rotatePoint( { x: center.x - width, y: center.y-height }, 		center, theta));
+			rv.push( rotatePoint( { x: center.x, y: center.y-height }, 				center, theta));
+			rv.push( rotatePoint( { x: center.x, y: center.y }, 					center, theta));
+			break;
+		}
+			
+		return rv;
+	}
+	
+	this.getCurrentTextPolygon = function(){
+		return this.getTextPolygon( this.hpos, this.vDist, this.getTextHeight(), this.getTextWidth())
+	}
+	
+	// return length of refLine scaled
+	this.getRefLineLength = function(){
+		// compute lenght of refline scaled
+		var a = (refLine.x2 - refLine.x1);
+		var b = yScale(refLine.y2 - refLine.y1);
+		return Math.sqrt(a*a + b*b);		
+	}
+
+	
+	// compute how much percent of reference line the text covers (0..1)
+	this.getTextWidthPercent = function(){
+		var p = this.getTextWidth() / this.getRefLineLength();
+		//console.log("getTextWidthPercent %s %f%", text, p * 100);
+		return p;
+	}
+	
+	// return {x:,y:} coordinates of text anchor (considering current pos on refLine)
+	this.getCurrentCenter = function() {
+		return this.getCenter(this.hpos, this.vDist);
+	}
+
+	// compute text center
+	// @param hpos: relative position on reference line (0=begin, 1=end)
+	// @param vDistPx: vertical distance from line in css px (positive=below line, negative=above line)
+	// @return {x:,y:} coordinates of center point (perpendicular point to refLine)  
+	this.getCenter = function( hPos, vDistPx){
+		var refLinePoint = this.getCenterOnRefLine(hPos);
+		var a = this.getCurrentRotation();
+		return rotatePoint( {x: refLinePoint.x+vDistPx, y:refLinePoint.y}, refLinePoint, Math.PI/2 + a );
+	}
+
+	// return {x:,y:} coordinates of text anchor (considering pos parameter)
+	this.getCenterOnRefLine = function(hpos) {
+		var rv = {};
+		rv.x = ( refLine.x1 + (refLine.x2 - refLine.x1) * hpos);
+		rv.y = yScale( refLine.y1 + (refLine.y2 - refLine.y1) * hpos);
+		return rv;
+	}
+
+	// return: rotation of scaled refLine in radians
+	this.getCurrentRotation = function() {
+		return Math.atan( 
+				(yScale(refLine.y2 - refLine.y1)) / 
+				((refLine.x2 - refLine.x1)))
+	}
+	
+	this.getCurrentRotateStr = function() {
+		return 'rotate(' + degrees( this.getCurrentRotation() ) + ',' 
+				+ this.getCurrentCenter().x + ',' + this.getCurrentCenter().y + ')'; 
+	}
+	
+	
+	this._trimTry = function( nChars, ellipsis ) {
+		var newText = text.substr(0,nChars);
+		if( ellipsis ) newText += "\u2026";
+		this.setText(newText);
+		return this.getTextWidth();		
+	}
+	
+	// trim text to <maxPx> pixels. Store trimmed text in self.curText 
+	this.trimTextToPx = function( maxPx ){
+		var nChars;
+		var px;
+		const tolerancePx = 15; // must be more than the max width of a character 
+		if( this._trimTry( text.length, false ) > maxPx ){
+			if( maxPx <= 0) return;
+			
+			
+			// try linear shrink (not exact due to non-monospaced font)
+			nChars = (text.length * (maxPx / this.getTextWidth())).toFixed(0);
+			px = this._trimTry( nChars, true );
+			
+			//console.log( "trim linshrink nc "+ nChars + " px " + px);			
+			if( px > maxPx+tolerancePx ){
+				while( px > maxPx+tolerancePx && nChars > 1){
+					nChars--;
+					px = this._trimTry( nChars, true );
+				}
+			}
+			else if( px < maxPx-tolerancePx){
+				while( px < maxPx-tolerancePx ){
+					nChars++;
+					px = this._trimTry( nChars, true );
+				}				
+			}
+			//console.log( "trim finetune nc "+ nChars + " px " + px);			
+		}
+	}
+	
+	this.checkOverlap = function( labelArray, hpos, vDist, height, width ){
+		var thisPolygon = this.getTextPolygon(hpos, vDist, height, width);
+		var idx = 0;
+		var nCollisions = 0;
+		
+		for(let otherLabel of labelArray) {
+			
+			if( otherLabel != this){
+				if(doPolygonsIntersect( thisPolygon, otherLabel.getCurrentTextPolygon())){
+					nCollisions += 1;
+				}
+			}
+			idx++;
+		}
+		return nCollisions;
+	}
+	
+	this.clipHPos = function( desiredHPos, actualWidth ){ 
+		var widthPercent = actualWidth / this.getRefLineLength();
+
+		switch(anchor){
+		case "start": 
+			if( desiredHPos < 0) desiredHPos = 0;
+			else if( widthPercent + desiredHPos > 1) desiredHPos = 1 - widthPercent;
+			break;
+		case "middle":
+			if( desiredHPos < widthPercent/2) desiredHPos = widthPercent/2;
+			else if( widthPercent/2 + desiredHPos > 1) desiredHPos = 1 - widthPercent/2;
+			break;
+		case "end": 
+			if( desiredHPos < widthPercent) desiredHPos = widthPercent;
+			else if( desiredHPos > 1) desiredHPos = 1;
+			break;
+		default: throw "bad anchor" + anchor;
+		}
+		
+		return desiredHPos;
+	}
+	
+	// Virtually move text label and check how many collisions with other labels occur
+	// @param algoType - Type of movement see below
+	// @param algoIter - Algorithm iteration number 0..n
+	// @return { result: result, nCollisions: nCollisions, hPos: hPos, vDist: vDist, width: width }
+	// 	result: "ok" - move ok, "nok" - cannot move (out of limits), "break" - reach end of possible iterations
+	//  nCollisions: number of collisions occured
+	//	hPos, vDist, width: Applied parameters
+	//
+	// AlgoTypes:
+	//	{ where: "aboveLine"/"belowLine", textWidth: "normal"/"half"}
+	this.tryMove = function( labelArray, algoType, algoIter ){
+		var hMoveAlgo = {
+			'start':  [0.2, 0.4, 0.6, 0.8],
+			'middle': [0.4, 0.6, 0.2, 0.8],
+			'end':    [0.8, 0.6, 0.4, 0.2],
+		}
+		var nCollisions=0, hPos=0, vDist=0, width=0, result="nok";
+		
+		if( algoType.where == "aboveLine" || algoType.where == "default")
+			vDist = -3;
+		else if (algoType.where == "belowLine")
+			vDist = this.getTextHeight() + 1;
+		else
+			throw "bad algoType" + algoType.where; 
+		
+		const margin = 30;
+		var tWidth = Math.min( this.getTextWidth(), Math.max(this.getRefLineLength() - margin, 0));
+		if( algoType.textWidth == "half" )
+			width = tWidth / 2;
+		else if( algoType.textWidth == "normal" )
+			width = tWidth;
+		else
+			throw "bad algoType" + algoType.textWidth; 
+		
+		
+		if( algoType.where == "default" ){
+			hPos = this.idealHPos();
+			if( algoIter > 0)
+				result = "break";
+			else
+				result = "ok";
+		}
+		else {
+			var hMoveArr = hMoveAlgo[anchor];
+			if( algoIter >= hMoveArr.length)
+				result = "break";
+			else {
+				hPos = hMoveArr[algoIter];
+				hPos = this.clipHPos( hPos, width);
+				result = "ok";
+			}
+		}		
+		if ( result == "ok" ){
+			nCollisions = this.checkOverlap( labelArray, hPos, vDist, this.getTextHeight(), width);
+		} 
+		
+		return { result: result, nCollisions: nCollisions, hPos: hPos, vDist: vDist, width: width };
+	}
+	
+	// find the best position for the label (minimize collisions)
+	this.findBestPosition = function( labelArray ){
+		var algos = [
+			{ where: "default", textWidth: "normal" },
+			{ where: "aboveLine", textWidth: "normal" },
+			{ where: "belowLine", textWidth: "normal" },
+			{ where: "default", textWidth: "half" },
+			{ where: "aboveLine", textWidth: "half" },
+			{ where: "belowLine", textWidth: "half" }];
+		
+		var bestAlgo = { result: null, algoType: null, algoIter: -1};
+		this.setText(text);
+		
+		for(let algo of algos) {
+			var algoIter = 0;
+			
+			while(true){
+				var moveResult = this.tryMove( labelArray, algo, algoIter );
+				
+				if( moveResult.result == 'break')
+					break;
+				
+				else if( moveResult.result == 'ok'){
+					/*console.log( "fbP " + algo.where + " " + algo.textWidth 
+							+ " #" + algoIter + " coll=" + moveResult.nCollisions);*/
+					
+					
+					if( (bestAlgo.result) === null || 
+							(moveResult.nCollisions < bestAlgo.result.nCollisions)){
+						
+						bestAlgo.result = moveResult;
+						bestAlgo.algoType = algo;
+						bestAlgo.algoIter = algoIter;
+						
+						if( moveResult.nCollisions == 0)
+							break;	// we can stop if no collisions
+					}
+				}
+				algoIter += 1;
+			}
+			if( moveResult.result == 'ok' && moveResult.nCollisions == 0)
+				break;	// we can stop if no collisions
+			
+		}
+		
+		// apply best algo
+		this.hpos = bestAlgo.result.hPos;
+		this.vDist = bestAlgo.result.vDist;
+		this.trimTextToPx( bestAlgo.result.width);
+		
+		return bestAlgo;		
+	}
+}
+
+function updateMsgLines(msgLinesData){
+
+	// Update msg Lines
+	var lines = msgLinesData.svg.selectAll('line').data(msgLinesData.data);
+	
+	// add entered lines
+	lines.enter().append('line')
+		.style("marker-end", "url(#arrow)")
+	   .merge(lines)		// this merges the update and enter section
+		.attr('stroke', function(d) { return ('c' in d) ? d.c : 'black'})
+		.attr('x1', function(d) { return (d.tp=="T-EXP") ? partCenterX(d.p)-50 : partCenterX(d.p)} )
+		.attr('y1', function(d) { return y_scale((d.tp=="T-EXP") ? d.t : d.b)} )
+		.attr('x2', function(d) { return (d.tp=="T-EXP") ? partCenterX(d.p) : partCenterX(d.s)} )
+		.attr('y2', function(d) { return y_scale(d.t)} )
+		;
+	
+	// remove old elements
+	lines.exit().remove();
+	
+	
+}
+
+function updateBoxes(boxesData){
+	var rects = boxesData.svg.selectAll('rect').data(boxesData.data);
+
+	rects.enter().append('rect')
+   	   .merge(rects)		// this merges the update and enter section
+		.attr('fill', function(d) { return ('fc' in d) ? d.fc : 'white'})
+		.attr('stroke', function(d) { return ('c' in d) ? d.c : 'orange'})
+		.attr('x', function(d) { return partCenterX(d.p) - g_diagramArgs.statusBoxWidth/2} )
+		.attr('y', function(d) { return y_scale(d.b)} )
+		.attr('width', function(d) { return g_diagramArgs.statusBoxWidth} )
+		.attr('height', function(d) { return y_scale(d.t - d.b)} )
+	;
+
+	rects.exit().remove();
+	
+}
+
+function updateAnnLines(annLinesData){
+
+	var lines = annLinesData.svg.selectAll('line').data(annLinesData.data);
+	
+	// add entered lines
+	lines.enter().append('line')
+		.each( function(d) {d.setTargetLineNode(d3.select(this).node())} )
+	   .merge(lines)		// this merges the update and enter section
+		.attr('stroke', function(d) { return d.color})
+		.attr('x1', function(d) { return d.targetPoint.x } )
+		.attr('y1', function(d) { return y_scale(d.targetPoint.y) } )
+		.attr('x2', function(d) { return d.getCurrentCenter().x - 1} )
+		.attr('y2', function(d) { return d.getCurrentCenter().y - 4 } )
+		;
+	
+	// remove old elements
+	lines.exit().remove();
+	
+	
+}
+
+function updateLabels(labelsData){
+	var labels = labelsData.svg.selectAll('text').data(labelsData.data);
+	
+	// add entered labels
+	labels.enter().append('text')
+		.each( function(d) {d.setNode(d3.select(this).node())} )
+        .on("mouseover", function(d) {	// tooltip	
+	        	if( /*d.fullText != d.getText()*/true) {
+		            g_tooltipDiv.transition()		
+		                .duration(200)		
+		                .style("opacity", .9);		
+		            g_tooltipDiv.html(d.fullText)	
+		                .style("left", (d3.event.pageX) + "px")		
+		                .style("top", (d3.event.pageY) + "px");
+	        	}
+            })					
+        .on("mouseout", function(d) {		
+        	g_tooltipDiv.transition()		
+                .duration(500)		
+                .style("opacity", 0)
+        	})
+	    .call(d3.drag()
+    	    .on("start", dragstarted)
+        	.on("drag", dragged)
+        	.on("end", dragended))
+        
+	   .merge(labels)		// this merges the update and enter section
+		.each( function(d) {d.findBestPosition(labelsData.data)} )
+		.attr('text-anchor', function(d) { return d.getAnchor()})
+		.attr('fill', function(d) { return d.color})
+		.text( function(d) { return d.getText()})
+		.attr('x', function(d) { return d.getCurrentCenter().x} )
+		.attr('y', function(d) { return d.getCurrentCenter().y} )
+		.attr('transform', function(d) { return d.getCurrentRotateStr()} )
+		;
+
+	// remove old elements
+	labels.exit().remove();
+
+	
+	
+}
+	 
+function updateDrawing(traceData) {
+	// update Y Axis according to scale
+	yAxisFunc.tickValues( d3.range(0, g_yFull, yAxisTickSteps()));
+	g_yAxis.call(customYAxis);
+	
+	// Update life lines
+	updatePartLifeLines()
+	
+	// Update msg Lines
+	updateMsgLines( traceData.msgLines );
+	
+	// Update Boxes 
+	updateBoxes( traceData.boxes );
+
+	// Update labels 
+	updateLabels( traceData.labels );
+	// Update Ann lines 
+	updateAnnLines( traceData.annLines );
+
+}
+
+
+function dragstarted(d) {
+	d3.select(this).raise().classed("active", true);
+}
+
+function dragged(d) {
+	d3.select(this).attr("x", d3.event.x).attr("y", d3.event.y);
+}
+
+function dragended(d) {
+	d3.select(this).classed("active", false);
+}
+ 
+ 
+
+updateDrawing( g_traceData);
+
+
+//-----------------------------------------------------------------------------
+// Time scaling Controls
+//
+
+var g_controlsSvg = d3.select('body').select('.controls').select("svg")
+var g_controlsCircleData = [
+	{ x: 50, y: 30, r: 20, color: 'black', text: "+"},
+	{ x: 50, y: 120, r: 20, color: 'black', text: "-"},
+];
+
+function createControls(){
+	
+	var circles = g_controlsSvg.selectAll("circle").data(g_controlsCircleData)
+	
+	circles.enter().append("circle")	
+		.on("click", function(d) {
+			var selected = d3.select(this);
+			console.log("button clicked %s", d.text);
+			timeScaleRelativeChange( d.text );
+		})
+	   .merge(circles) 
+		.attr("cx", function (d) { return d.x; })
+		.attr("cy", function (d) { return d.y; })
+		.attr("r", function (d) { return d.r; })
+	    .style("fill", function(d) { return d.color; });
+	
+	var labels = g_controlsSvg.selectAll("text").data(g_controlsCircleData);
+
+	labels.enter().append('text')
+	   .merge(labels) 
+		.text( function(d) { return d.text})
+		.attr('x', function(d) { return d.x} )
+		.attr('y', function(d) { return d.y + 8} )
+
+	d3.select("body").on("keydown", function() {
+		var key = d3.event.key;
+
+		console.log( "key code %s", d3.event.key );
+		if( (key == '+' || key == '-') && d3.event.repeat == false )
+			timeScaleRelativeChange( key );
+	});
+		
+}
+createControls();
+
+// Change the time scale 
+// @param scale the new scale (1.0=original scale)
+// @param yPos 
+function setTimeScale( scaleFactor, yPos){
+	if( scaleFactor > 0 ){
+		console.log("setTimeScale %f", scaleFactor)
+		g_timeScaleFactor = scaleFactor;
+		g_svgHeight = scaleFactor * g_initialY.svgHeight;
+		g_svgRoot.attr('height', g_svgHeight + g_margin.top + g_margin.bottom);
+		y_scale.range([0, g_svgHeight]).domain([0,g_yFull]);
+	  	updateDrawing(g_traceData);
+	}	
+}
+
+// Change the time scale relative
+// @param direction "+" (zoom in) / "-" (zoom out)
+function timeScaleRelativeChange( direction ){
+	var mod = 0;
+	
+	switch( direction ){
+	case '+':
+		mod = 1.1;
+		break;
+	case '-':
+		mod = 0.9;
+		break;
+	default:
+		throw "bad direction " + direction;
+	}
+
+	setTimeScale(g_timeScaleFactor * mod); 
+	
+}
+
+function getVisibleTimeRange() {
+	
+	
+	var bRect = g_svg.node().getBoundingClientRect();
+	//console.log("SVG Brect y=%d height=%d", bRect['y'], bRect['height']);
+	
+	/*winYOffset = window.pageYOffset;
+	winHeight = window.height;
+	console.log("Win y=%d height=%d", winYOffset, winHeight);*/
+	
+	/*console.log("visualVP offtop %d height %d scale %f ", 
+			window.visualViewport.offsetTop,
+			window.visualViewport.height,
+			window.visualViewport.scale);*/
+	
+	// visualViewport may work on chrome only!!!
+	
+	var rangeEnd = (window.visualViewport.height - bRect['y']) / bRect['height'] * y_scale.domain()[1]
+	var rangeStart = (- bRect['y']) / bRect['height'] * y_scale.domain()[1]
+	console.log("range Start %f End %f", rangeStart, rangeEnd)
+	
+}
+
+function windowChanged(){
+	getVisibleTimeRange();
+	//update(linedata);
+}
+
+// Redraw based on the new size whenever the browser window is resized or scrolled or zoomed.
+window.addEventListener("resize", windowChanged);
+window.addEventListener("scroll", windowChanged);
+window.addEventListener("zoom", windowChanged);
+
+
+var g_mouseScaleFlag = false;
+var g_mouseScaleYOrg = 0;
+var g_mouseScaleStartScale = 0;
+
+function dataAreaMouseMove(e) {
+	console.log("mm %f", e.clientY);
+	if (e.shiftKey){
+		if (g_mouseScaleFlag === false){
+			g_mouseScaleYOrg = e.clientY;
+			g_mouseScaleFlag = true;
+			g_mouseScaleStartScale = g_svgHeight; //y_scale.domain()[1]
+		}
+		
+		var newscale = g_mouseScaleStartScale + (e.clientY - g_mouseScaleYOrg) * -20
+		//newscale = y_scale.domain()[1] * (1.0 + (e.clientY - g_mouseScaleYOrg) / 10000)
+		console.log( "mm newscale %d", newscale)
+		if (newscale > 1){
+			//y_scale.domain([0, newscale]);
+			g_svgHeight = newscale;
+			g_svgRoot.attr('height', g_svgHeight + g_margin.top + g_margin.bottom);
+			y_scale.range([0, g_svgHeight]).domain([0,g_yFull]);
+		  	updateDrawing(g_traceData);
+		}
+	}
+	else {
+		g_mouseScaleFlag = false;
+	}
+	
+}
+
+window.addEventListener("mousemove", dataAreaMouseMove);
+
+
+getVisibleTimeRange();
+
+function isUndefined(v){
+	return v === undefined;
+}
+
+
+/**
+ * From https://stackoverflow.com/questions/10962379/how-to-check-intersection-between-2-rotated-rectangles
+ * Helper function to determine whether there is an intersection between the two polygons described
+ * by the lists of vertices. Uses the Separating Axis Theorem
+ *
+ * @param a an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+ * @param b an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+ * @return true if there is any intersection between the 2 polygons, false otherwise
+ */
+function doPolygonsIntersect (a, b) {
+    var polygons = [a, b];
+    var minA, maxA, projected, i, i1, j, minB, maxB;
+
+    for (i = 0; i < polygons.length; i++) {
+
+        // for each polygon, look at each edge of the polygon, and determine if it separates
+        // the two shapes
+        var polygon = polygons[i];
+        for (i1 = 0; i1 < polygon.length; i1++) {
+
+            // grab 2 vertices to create an edge
+            var i2 = (i1 + 1) % polygon.length;
+            var p1 = polygon[i1];
+            var p2 = polygon[i2];
+
+            // find the line perpendicular to this edge
+            var normal = { x: p2.y - p1.y, y: p1.x - p2.x };
+
+            minA = maxA = undefined;
+            // for each vertex in the first shape, project it onto the line perpendicular to the edge
+            // and keep track of the min and max of these values
+            for (j = 0; j < a.length; j++) {
+                projected = normal.x * a[j].x + normal.y * a[j].y;
+                if (isUndefined(minA) || projected < minA) {
+                    minA = projected;
+                }
+                if (isUndefined(maxA) || projected > maxA) {
+                    maxA = projected;
+                }
+            }
+
+            // for each vertex in the second shape, project it onto the line perpendicular to the edge
+            // and keep track of the min and max of these values
+            minB = maxB = undefined;
+            for (j = 0; j < b.length; j++) {
+                projected = normal.x * b[j].x + normal.y * b[j].y;
+                if (isUndefined(minB) || projected < minB) {
+                    minB = projected;
+                }
+                if (isUndefined(maxB) || projected > maxB) {
+                    maxB = projected;
+                }
+            }
+
+            // if there is no overlap between the projects, the edge we are looking at separates the two
+            // polygons, and we know there is no overlap
+            if (maxA < minB || maxB < minA) {
+                //CONSOLE("polygons don't intersect!");
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
+
+</script>
+</body>
+</html>
