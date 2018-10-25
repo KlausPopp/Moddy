@@ -82,18 +82,15 @@
 
 /*
  * TODO
- * Y-Axis in background
  * VC
  * tmrLines in blue
  * text automove only on visible labels
  * colored status
  * colored messages
- * zoom possibilities
- *   button
- *	 scrollwheel
- *	 keys
  * Keep time on zoom
  * draggable lifelines/parts
+ * message line arrows ->
+ * +/- buttons repeat
  */
 
 
@@ -227,7 +224,6 @@ var g_svgHeight = g_initialY.svgHeight - g_margin.top - g_margin.bottom;
 var g_yFull = g_initialY.maxT;
 var g_timeScaleFactor = 1.0; 	// scale, 1.0 is the initial scale 
 
-var y_scale = d3.scaleLinear().range([0, g_svgHeight]).domain([0, g_yFull]);
 
 
 
@@ -263,6 +259,85 @@ g_svgRoot.append('svg:defs').append('marker')
 var g_svg = g_svgRoot.append("g")
     .attr("transform", "translate(" + g_margin.left + "," + g_margin.top + ")");
 
+//---------------------------------------------------------------------------------
+/// YAxis
+
+var g_yAxixTickSteps = 1;
+var y_scale = d3.scaleLinear();
+
+function yAxisTickSteps(){
+	var divPx = 30; 
+	
+	// avoid too many tix in drawing, slows down rendering...
+	if( (g_svgHeight / divPx) > 300 )
+		divPx = g_svgHeight / 300;	
+	
+	var timeUnitsPerDiv = (g_yFull)/g_svgHeight*divPx;	// How much time in one div
+	var logTuPerDiv = Math.log10(timeUnitsPerDiv);
+	var floorlogTuPerDiv = Math.floor(logTuPerDiv);
+	var rv;
+	
+	if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(5)))
+		rv = Math.pow(10,floorlogTuPerDiv) * 5;
+	else if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(2)))
+		rv = Math.pow(10,floorlogTuPerDiv) * 2;
+	else
+		rv = Math.pow(10,floorlogTuPerDiv);
+
+	//console.log ("yAxisTickSteps %f timeUnitsPerDiv %.3f logTuPerDiv %.3f ",  rv, timeUnitsPerDiv, logTuPerDiv);
+	return rv;
+	
+}
+
+
+function yAxisformatTickValue(time)
+{
+	var steps = g_yAxixTickSteps;
+	var rv;
+	var fmt = ".0f"
+	if( steps >= 1.0) rv = d3.format(fmt)(time) + " s";	
+	else if( steps >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
+	else if( steps >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
+	else if( steps >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
+	else if( steps >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
+	return rv;
+}
+
+var yAxisFunc = d3.axisRight(y_scale)
+	.tickSize(g_svgWidth)
+	.scale(y_scale)
+	.tickFormat(function(d){
+		return yAxisformatTickValue(d);
+	})
+	.tickValues( d3.range(0, g_yFull, g_yAxixTickSteps));
+
+function customYAxis(g) {
+	g.call(yAxisFunc);
+	g.select(".domain").remove();	// remove x and y line
+	g.selectAll(".tick text").attr("dy", 4).attr("x", -5).attr("text-anchor", "end")
+}
+
+
+var g_yAxis = g_svg.append("g") // Add the Y Axis
+	.attr("class", "y axis")
+  .call(customYAxis);
+
+function yAxisChangeScale()
+{
+	y_scale.range([0, g_svgHeight]).domain([0,g_yFull]);
+	g_yAxixTickSteps = yAxisTickSteps();
+	// update Y Axis according to scale
+	yAxisFunc.tickValues( d3.range(0, g_yFull, g_yAxixTickSteps));
+	g_yAxis.call(customYAxis);
+}
+
+yAxisChangeScale();
+  
+//Define the div for the label tooltip
+var g_tooltipDiv = d3.select("body").append("div")	
+  .attr("class", "tooltip")				
+  .style("opacity", 0);
+  
 
 // create group for different D3 objects  
 g_traceData.lifelines.svg = g_svg.append('g').attr("class", 'lifelines')
@@ -383,65 +458,6 @@ function distributeTraceData(){
 
 distributeTraceData();
 
-//---------------------------------------------------------------------------------
-/// YAxis
-
-function yAxisTickSteps(){
-	var timeUnitsPerDiv = (g_yFull*1E9)/g_svgHeight*30;	// How much time in 30px
-	var logTuPerDiv = Math.log10(timeUnitsPerDiv);
-	var floorlogTuPerDiv = Math.floor(logTuPerDiv);
-	var rv;
-	
-	if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(5)))
-		rv = Math.pow(10,floorlogTuPerDiv) * 5;
-	else if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(2)))
-		rv = Math.pow(10,floorlogTuPerDiv) * 2;
-	else
-		rv = Math.pow(10,floorlogTuPerDiv);
-
-	rv /= 1E9;
-	//console.log ("yAxisTickSteps %f timeUnitsPerDiv %.3f logTuPerDiv %.3f ",  rv, timeUnitsPerDiv, logTuPerDiv);
-	return rv;
-	
-}
-
-function yAxisformatTickValue(time)
-{
-	var steps = yAxisTickSteps();
-	var rv;
-	var fmt = ".0f"
-	if( steps >= 1.0) rv = d3.format(fmt)(time) + " s";	
-	else if( steps >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
-	else if( steps >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
-	else if( steps >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
-	else if( steps >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
-	return rv;
-}
-
-var yAxisFunc = d3.axisRight(y_scale)
-	.tickSize(g_svgWidth)
-	.scale(y_scale)
-	.tickFormat(function(d){
-		return yAxisformatTickValue(d);
-	})
-	.tickValues( d3.range(0, g_yFull, yAxisTickSteps()));
-
-function customYAxis(g) {
-	g.call(yAxisFunc);
-	g.select(".domain").remove();	// remove x and y line
-	g.selectAll(".tick text").attr("dy", 4).attr("x", -5).attr("text-anchor", "end")
-}
-
-
-var g_yAxis = g_svg.append("g") // Add the Y Axis
-	.attr("class", "y axis")
-    .call(customYAxis);
-    
-// Define the div for the label tooltip
-var g_tooltipDiv = d3.select("body").append("div")	
-    .attr("class", "tooltip")				
-    .style("opacity", 0);
-    
     
 //--------------------------------------------------------------------------
 // Helpers
@@ -941,24 +957,28 @@ function updateLabels(labelsData){
 	
 }
 	 
-function updateDrawing(traceData) {
-	// update Y Axis according to scale
-	yAxisFunc.tickValues( d3.range(0, g_yFull, yAxisTickSteps()));
-	g_yAxis.call(customYAxis);
+//
+// Update the whole szene after
+// Y-scale change, scrolling, resizing
+// @param traceData usually g_traceData
+// @param updateOptions { hideNonVisible: true/false, reposLabels: true/false  }
+//
+function updateDrawing(traceData, 
+		updateOptions = { hideNonVisible: true, reposLabels: false}) {
 	
 	// Update life lines
-	updatePartLifeLines()
+	updatePartLifeLines(updateOptions)
 	
 	// Update msg Lines
-	updateMsgLines( traceData.msgLines );
+	updateMsgLines( traceData.msgLines, updateOptions );
 	
 	// Update Boxes 
-	updateBoxes( traceData.boxes );
+	updateBoxes( traceData.boxes, updateOptions );
 
 	// Update labels 
-	updateLabels( traceData.labels );
+	updateLabels( traceData.labels, updateOptions );
 	// Update Ann lines 
-	updateAnnLines( traceData.annLines );
+	updateAnnLines( traceData.annLines, updateOptions );
 
 }
 
@@ -977,7 +997,7 @@ function dragended(d) {
  
  
 
-updateDrawing( g_traceData);
+updateDrawing( g_traceData, { hideNonVisible: true, reposLabels: true});
 
 
 //-----------------------------------------------------------------------------
@@ -1017,25 +1037,43 @@ function createControls(){
 	d3.select("body").on("keydown", function() {
 		var key = d3.event.key;
 
-		console.log( "key code %s", d3.event.key );
-		if( (key == '+' || key == '-') && d3.event.repeat == false )
+		//console.log( "key code %s", d3.event.key );
+		if( (key == '+' || key == '-')  )
 			timeScaleRelativeChange( key );
 	});
 		
 }
 createControls();
 
-// Change the time scale 
+var g_changeTimeScaleanimationFrameRequested = false;
+var g_screenZoomCenter = { screenY: 0, time: 0 };
+
+function drawChangedTimeScale(timestamp){
+	g_changeTimeScaleanimationFrameRequested = false;
+	g_svgRoot.attr('height', g_svgHeight + g_margin.top + g_margin.bottom);
+	yAxisChangeScale(g_svgHeight);
+  	updateDrawing(g_traceData, { hideNonVisible: true, reposLabels: true});
+	
+  	var scrollY = g_svgHeight/g_yFull * g_screenZoomCenter.time
+	console.log("drawChangeTimeScale " + timestamp + " zoomCenter " + g_screenZoomCenter.time + " scrollY " + scrollY);
+  	window.scroll( window.scrollX, scrollY);
+}
+
+// Change the time scale, do update decoupled via requestAnmiationFrame 
 // @param scale the new scale (1.0=original scale)
-// @param yPos 
-function setTimeScale( scaleFactor, yPos){
-	if( scaleFactor > 0 ){
-		console.log("setTimeScale %f", scaleFactor)
+// @param screenZoomY zoom around this y screen position 
+function setTimeScale( scaleFactor, screenZoomY){
+	if( scaleFactor > 0.01 && scaleFactor < 100){
 		g_timeScaleFactor = scaleFactor;
 		g_svgHeight = scaleFactor * g_initialY.svgHeight;
-		g_svgRoot.attr('height', g_svgHeight + g_margin.top + g_margin.bottom);
-		y_scale.range([0, g_svgHeight]).domain([0,g_yFull]);
-	  	updateDrawing(g_traceData);
+
+		g_screenZoomCenter.screenY = screenZoomY;
+		g_screenZoomCenter.time = timeOfScreenYPos(screenZoomY);
+		console.log("setTimeScale %f %f %f", scaleFactor, screenZoomY, g_screenZoomCenter.time);
+		
+		if( ! g_changeTimeScaleanimationFrameRequested)
+			requestAnimationFrame(drawChangedTimeScale);
+		g_changeTimeScaleanimationFrameRequested = true;	
 	}	
 }
 
@@ -1055,36 +1093,60 @@ function timeScaleRelativeChange( direction ){
 		throw "bad direction " + direction;
 	}
 
-	setTimeScale(g_timeScaleFactor * mod); 
+	setTimeScale(g_timeScaleFactor * mod, visualViewPortHeight()/2); 
 	
 }
 
-function getVisibleTimeRange() {
+var g_mouseScale = { flag: false, startY: 0, startScale: null };
+
+// Support time scale changing by SHIFT+Mousemove
+function drawingMouseMove(e) {
+	//console.log("mm %f", e.clientY);
+	if (e.shiftKey){
+		if (g_mouseScale.flag === false){
+			g_mouseScale.startY = e.clientY;
+			g_mouseScale.flag = true;
+			g_mouseScale.startScale = g_timeScaleFactor; 
+		}
+		
+		var newscale = g_mouseScale.startScale * Math.pow(1.02, (e.clientY - g_mouseScale.startY));
+		//console.log( "mm newscale %f", newscale)
+		setTimeScale(newscale, g_mouseScale.startY);
+	}
+	else {
+		g_mouseScale.flag = false;
+	}
 	
-	
-	var bRect = g_svg.node().getBoundingClientRect();
-	//console.log("SVG Brect y=%d height=%d", bRect['y'], bRect['height']);
-	
-	/*winYOffset = window.pageYOffset;
-	winHeight = window.height;
-	console.log("Win y=%d height=%d", winYOffset, winHeight);*/
-	
-	/*console.log("visualVP offtop %d height %d scale %f ", 
-			window.visualViewport.offsetTop,
-			window.visualViewport.height,
-			window.visualViewport.scale);*/
-	
+}
+
+window.addEventListener("mousemove", drawingMouseMove);
+
+function visualViewPortHeight(){
 	// visualViewport may work on chrome only!!!
 	
-	var rangeEnd = (window.visualViewport.height - bRect['y']) / bRect['height'] * y_scale.domain()[1]
-	var rangeStart = (- bRect['y']) / bRect['height'] * y_scale.domain()[1]
-	console.log("range Start %f End %f", rangeStart, rangeEnd)
-	
+	return window.visualViewport.height;
+}
+
+// Get the drawing time at screenY position
+// @param screenY - viewport Y position  
+// @return (simulation) time
+function timeOfScreenYPos( screenY ){
+	var bRect = g_svg.node().getBoundingClientRect();
+
+	var time = (screenY - bRect.y) / bRect.height * g_yFull;
+	return time;
+}
+
+function getVisibleTimeRange() {
+	var rangeEnd = timeOfScreenYPos(visualViewPortHeight());
+	var rangeStart = timeOfScreenYPos(0);
+	//console.log("range Start %f End %f", rangeStart, rangeEnd)
+	return {start: rangeStart, end: rangeEnd }
 }
 
 function windowChanged(){
 	getVisibleTimeRange();
-	//update(linedata);
+  	updateDrawing(g_traceData, { hideNonVisible: true, reposLabels: false});
 }
 
 // Redraw based on the new size whenever the browser window is resized or scrolled or zoomed.
@@ -1093,40 +1155,7 @@ window.addEventListener("scroll", windowChanged);
 window.addEventListener("zoom", windowChanged);
 
 
-var g_mouseScaleFlag = false;
-var g_mouseScaleYOrg = 0;
-var g_mouseScaleStartScale = 0;
 
-function dataAreaMouseMove(e) {
-	console.log("mm %f", e.clientY);
-	if (e.shiftKey){
-		if (g_mouseScaleFlag === false){
-			g_mouseScaleYOrg = e.clientY;
-			g_mouseScaleFlag = true;
-			g_mouseScaleStartScale = g_svgHeight; //y_scale.domain()[1]
-		}
-		
-		var newscale = g_mouseScaleStartScale + (e.clientY - g_mouseScaleYOrg) * -20
-		//newscale = y_scale.domain()[1] * (1.0 + (e.clientY - g_mouseScaleYOrg) / 10000)
-		console.log( "mm newscale %d", newscale)
-		if (newscale > 1){
-			//y_scale.domain([0, newscale]);
-			g_svgHeight = newscale;
-			g_svgRoot.attr('height', g_svgHeight + g_margin.top + g_margin.bottom);
-			y_scale.range([0, g_svgHeight]).domain([0,g_yFull]);
-		  	updateDrawing(g_traceData);
-		}
-	}
-	else {
-		g_mouseScaleFlag = false;
-	}
-	
-}
-
-window.addEventListener("mousemove", dataAreaMouseMove);
-
-
-getVisibleTimeRange();
 
 function isUndefined(v){
 	return v === undefined;
