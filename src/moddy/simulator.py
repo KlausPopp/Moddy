@@ -505,6 +505,7 @@ class sim:
         self._listTracedEvents = []     # list of all traced events during execution
         self._listVariableWatches = []  # list of watched variables
         self._enableTracePrints = True
+        self._stopOnAssertionFailure = False
         self._isRunning = False
     #
     # Port Management
@@ -601,6 +602,23 @@ class sim:
                 return varWatcher
         raise(ValueError("Watched Variable not found %s" % variableHierarchyName))
 
+    #
+    # Model Assertions
+    #
+    def assertionFailed(self, part, assertionStr):
+        '''
+        Add an assertion failure trace event
+        Increment global assertion failure counter
+        Stop simulator if configured so
+        
+        :param part the related simPart. None if global assertion
+        :param assertionStr error message to display
+        '''
+        te = simTraceEvent( part, None, assertionStr, 'ASSFAIL')
+        self.addTraceEvent(te)
+        
+        if self._stopOnAssertionFailure:
+            raise RuntimeError('Assertion Failed %s' % assertionStr)
     
     #
     # Simulator core routines
@@ -638,13 +656,15 @@ class sim:
         print("SIM: Simulator stopped at",self.timeStr(self._time) )
         for part in self._listParts: part.terminateSim()
         
-    def run(self, stopTime, maxEvents=10000, enableTracePrinting=True):
+    def run(self, stopTime, maxEvents=10000, enableTracePrinting=True, 
+            stopOnAssertionFailure=False):
         '''
         run the simulator until <stopTime>
         <maxEvents> is there to prevent the simulator to run for a too long time
         <enableTracePrinting> - if set to false, simulator will not display events as they are executing
         '''
         self._enableTracePrints = enableTracePrinting
+        self._stopOnAssertionFailure = stopOnAssertionFailure
         self.checkUnBoundPorts()
         print ("SIM: Simulator %s starting" % (VERSION))
         self._isRunning = True
@@ -698,13 +718,13 @@ class sim:
         te.traceTime = self._time
         self._listTracedEvents.append(te)
         
-        traceStr = "TRC: %10s %-8s" %  (self.timeStr(te.traceTime), te.action)
-        if te.subObj is not None:
-            traceStr += te.subObj.hierarchyNameWithType() 
-        if te.transVal is not None:
-            traceStr += " // %s" % te.transVal.__str__()
-        
         if self._enableTracePrints:
+            traceStr = "TRC: %10s %-8s" %  (self.timeStr(te.traceTime), te.action)
+            if te.subObj is not None:
+                traceStr += te.subObj.hierarchyNameWithType() 
+            if te.transVal is not None:
+                traceStr += " // %s" % te.transVal.__str__()
+        
             print (traceStr)
 
     def tracedEvents(self):
