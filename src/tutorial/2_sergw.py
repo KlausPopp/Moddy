@@ -161,14 +161,15 @@ if __name__ == '__main__':
     finally:
         # create SVG drawing
         moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="2_sergw.html", 
-                                      fmt="svgInHtml", 
+                                      fileName="output/2_sergw.html", 
+                                      fmt="iaViewerRef", 
                                       timeRange=(1.0*ms,None),
                                       showPartsList=[client, gateway.rxThread, gateway.txThread, serDev],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 50*us, 
-                                      pixPerDiv = 30)    
+                                      pixPerDiv = 30,
+                                      title = "Serial Gateway Demo")    
     
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, '2_sergw_structure.svg')
+    moddyGenerateStructureGraph(simu, 'output/2_sergw_structure.svg')
         

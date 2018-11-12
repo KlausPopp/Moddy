@@ -17,7 +17,7 @@ Moddy was written to analyze complex systems in the concept phase to validate th
 
 
 
-version = (1, 3, 0)  
+version = (1, 3, 99)  
 VERSION = '%d.%d.%d' % version
 
 AUTHOR_NAME = 'Klaus Popp'
@@ -37,7 +37,7 @@ from moddy.vtSchedRtos import vtSchedRtos,vSimpleProg
 from moddy.fsm import Fsm
 from moddy.fsmPart import simFsmPart
 
-from moddy.svgSeqD import moddyGenerateSequenceDiagram
+from moddy.seqDiagInteractiveGen import moddyGenerateSequenceDiagram
 from moddy.traceToCsv import moddyGenerateTraceTable
 from moddy.dotStructure import moddyGenerateStructureGraph
 

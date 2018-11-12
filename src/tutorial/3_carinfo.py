@@ -216,15 +216,16 @@ if __name__ == '__main__':
     cis.visualPort.bind(stim.visualPort)
     cis.audioPort.bind(stim.audioPort)
         
-    moddyGenerateFsmGraph( fsm=cis.fsm, fileName='3_carinfo_fsm.svg', keepGvFile=True)  
+    moddyGenerateFsmGraph( fsm=cis.fsm, fileName='output/3_carinfo_fsm.svg', keepGvFile=True)  
     
     
     simu.run(100)
     
     moddyGenerateSequenceDiagram( sim=simu, 
-                              fileName="3_carinfo.html", 
-                              fmt="svgInHtml", 
+                              fileName="output/3_carinfo.html", 
+                              fmt="iaViewerRef", 
                               showPartsList=[stim, cis], 
                               timePerDiv = 0.3, 
-                              pixPerDiv = 30) 
+                              pixPerDiv = 30,
+                              title = "Car Info FSM Demo") 
     

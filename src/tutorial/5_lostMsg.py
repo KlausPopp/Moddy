@@ -57,8 +57,8 @@ if __name__ == '__main__':
     finally:
         # create SVG drawing
         moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="5_lostMsg.html", 
-                                      fmt="svgInHtml", 
+                                      fileName="output/5_lostMsg.html", 
+                                      fmt="iaViewerRef", 
                                       showPartsList=["Producer","Consumer"],
                                       excludedElementList=['allTimers'], 
                                       title="Lost Message Demo",
@@ -66,5 +66,5 @@ if __name__ == '__main__':
                                       pixPerDiv = 30)    
 
         # Output trace table
-        moddyGenerateTraceTable(simu, '5_lostMsg.csv', timeUnit="us" )
+        moddyGenerateTraceTable(simu, 'output/5_lostMsg.csv', timeUnit="us" )
         

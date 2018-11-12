@@ -35,13 +35,14 @@ if __name__ == '__main__':
     var2watch = vc.newVarWatcher('var2', "%s")
         
     simu.run(10)
-    moddyGenerateTraceTable( simu, '4_varwatch.csv')
+    moddyGenerateTraceTable( simu, 'output/4_varwatch.csv')
 
     moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="4_varwatch.html", 
-                                  fmt="svgInHtml", 
+                                  fileName="output/4_varwatch.html", 
+                                  fmt="iaViewerRef", 
                                   showPartsList=['VC'],
                                   showVarList=['VC.var1', 'VC.var2'],
                                   excludedElementList=['allTimers'], 
                                   timePerDiv = 0.5, 
-                                  pixPerDiv = 30)    
+                                  pixPerDiv = 30,
+                                  title="Variable Watcher Demo")    

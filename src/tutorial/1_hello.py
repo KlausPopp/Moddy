@@ -82,15 +82,16 @@ if __name__ == '__main__':
     
     # create SVG drawing
     moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="1_hello.html", 
-                                  fmt="svgInHtml", 
+                                  fileName="output/1_hello.html", 
+                                  fmt="iaViewerRef", 
                                   excludedElementList=[], 
                                   timePerDiv = 1.0, 
-                                  pixPerDiv = 30)    
+                                  pixPerDiv = 30,
+                                  title = "Hello Demo")    
 
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, '1_hello_structure.svg')
+    moddyGenerateStructureGraph(simu, 'output/1_hello_structure.svg')
     
     # Output trace table
-    moddyGenerateTraceTable(simu, '1_hello.csv' )
+    moddyGenerateTraceTable(simu, 'output/1_hello.csv' )
 

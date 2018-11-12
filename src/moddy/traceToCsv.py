@@ -54,7 +54,13 @@ class TraceToCsv():
         writer.writerow(row)
         
         for te in self._evList:
-            row = [self.timeFmt(te.traceTime), te.action, te.part.hierarchyName()]
+            row = [self.timeFmt(te.traceTime), te.action]
+            if te.part is None:
+                p = 'Global'
+            else:
+                p = te.part.hierarchyName()
+            row.append(p)
+            
             if te.subObj is not None:
                 row.append(te.subObj.hierarchyNameWithType())
             else:
