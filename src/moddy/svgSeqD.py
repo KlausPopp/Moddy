@@ -9,8 +9,7 @@ Created on 18.12.2016
 @author: Klaus Popp
 
 TODO Inkskape Zoom factor wrong when no size in svg
-TODO Auto place text to avoid overlap(!)
-TODO Group the objects (e.g. message arrow)
+
 '''
 import svgwrite
 from math import *
@@ -21,7 +20,7 @@ from builtins import str
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
 _fontStyleTitle = "font: 20pt Verdana, Helvetica, Arial, sans-serif"
 
-def moddyGenerateSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, excludedElementList=[],
+def moddyGenerateSvgSequenceDiagram( sim, fileName, fmt='svg', showPartsList=None, excludedElementList=[],
                                   showVarList=[],
                                   timeRange=(0,None), 
                                   **kwargs):
@@ -169,7 +168,7 @@ class svgSeqD(object):
         if(fmt=="svg"): self.saveSvg(fileName)
         elif(fmt=="svgInHtml"): self.saveSvgInHtml(fileName)
         else: raise AttributeError("format %s not supported." % fmt)
-        print("saved %s as %s" % (fileName, fmt))
+        print("saved sequence diagram in %s as %s" % (fileName, fmt))
 
     def hasPart(self, simPart):
         ''' Test if simPart is in Drawing '''
@@ -260,6 +259,7 @@ class svgSeqD(object):
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, '<MSG');
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'T-EXP');
         self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'ANN');
+        self.drawAllSelectedEvents(startTime, endTime, areaStartY, 'ASSFAIL');
         
         self._maxY = self.timeYPos( endTime, startTime, areaStartY )
         
@@ -336,6 +336,12 @@ class svgSeqD(object):
         d = self._d
         d.add(d.text(text, insert = (insertPos[0]+22,insertPos[1]), fill="red", style=_fontStyle))
         d.add(d.line(start=insertPos, end=(insertPos[0]+20,insertPos[1]-4), stroke="red"))
+
+    def assertionFail(self,insertPos, withLine, text):
+        d = self._d
+        d.add(d.text(text, insert = (insertPos[0]+22,insertPos[1]), fill="purple", style=_fontStyle))
+        if withLine:
+            d.add(d.line(start=insertPos, end=(insertPos[0]+20,insertPos[1]-4), stroke="purple"))
 
     def lifeLine(self, insertPos, height):
         '''
@@ -530,6 +536,23 @@ class svgSeqD(object):
             pos = ( self.simPartMap(part).sdLifeLineX, self.timeYPos( e.traceTime, areaStartTime, areaStartY ))
             if( pos[1] >= areaStartY):
                 self.annotation(pos, e.transVal)
+
+    def drawAssertionFail(self, e, areaStartTime, areaStartY):
+        part = e.part
+        
+        print("drawAssFail", e.traceTime, e.transVal)
+        text = '### ASSERTION FAIL:' + e.transVal
+        if part is None or not self.hasPart(part):
+            x = self.firstPartOffset[0]
+            withLine = False
+            
+        else:
+            x = self.simPartMap(part).sdLifeLineX
+            withLine = True
+             
+        pos = ( x, self.timeYPos( e.traceTime, areaStartTime, areaStartY ))
+        if( pos[1] >= areaStartY):
+            self.assertionFail(pos, withLine, text)
         
 
     def drawLifeLineBox(self, sdPart, traceTime, transVal, areaStartTime, areaStartY):
@@ -590,6 +613,7 @@ class svgSeqD(object):
         if e.action == "<MSG": self.drawMsg(e, areaStartTime, areaStartY )
         elif e.action == "T-EXP": self.drawTmrExp(e, areaStartTime, areaStartY )
         elif e.action == "ANN": self.drawAnnotation(e, areaStartTime, areaStartY)
+        elif e.action == "ASSFAIL": self.drawAssertionFail(e, areaStartTime, areaStartY)
         elif e.action == "STA": self.drawObjStatus(e, areaStartTime, areaStartY)
         elif e.action == "VC": self.drawVarChange(e, areaStartTime, areaStartY)
     
