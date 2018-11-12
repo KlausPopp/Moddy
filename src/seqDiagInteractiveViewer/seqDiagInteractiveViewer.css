@@ -1,0 +1,73 @@
+@CHARSET "ISO-8859-1";
+body {
+	font: 9pt Verdana, Helvetica, Arial, sans-serif;
+	margin-left: 8px;
+	margin-top: 0px;
+	
+}
+
+.hiddenCanvas{
+	display: none;
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: auto;					
+    height: auto;					
+    padding: 2px;				
+    /*font: 12px sans-serif;*/		
+    background: yellow;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+
+#controls {
+	position: fixed;
+	top: 100px;
+	height: auto;
+	width: 40px;
+	font: 9pt Verdana, Helvetica, Arial, sans-serif;
+	z-index: 100;
+	background-color: black;
+	color: white;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+.slider-wrapper {
+  display: inline-block;
+  width: 20px;
+  height: 150px;
+  padding: 0;
+}
+.slider-wrapper input {
+  width: 150px;
+  height: 20px;
+  margin: 0;
+  transform-origin: 75px 75px;
+  transform: rotate(-90deg);
+}
+
+#title {
+	position: fixed;
+	top: 0px;
+	height: auto;
+	width: 100%;
+	background-color: black;
+	color: white;
+}
+#parts {
+	position: fixed;
+	padding-top: 5px;
+	top: 35px;
+	height: auto;
+	width: 20000px; /* hack */
+}
+#diagram {
+	position: fixed;
+	width: 100%;
+}
+#scrollDummy {
+	z-index: -10;
+}
