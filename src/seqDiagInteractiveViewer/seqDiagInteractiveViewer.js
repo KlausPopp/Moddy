@@ -1209,7 +1209,7 @@ function TimeScaleControl(lay, traceData) {
 	// position slider on the right
 	this.positionSlider = function(){
 		let left = Math.min(lay.canvas.left + lay.canvas.fullWidth);
-		let rightMargin = 50;
+		let rightMargin = 70;
 		
 		left = Math.min(left, window.innerWidth - rightMargin);
 		
