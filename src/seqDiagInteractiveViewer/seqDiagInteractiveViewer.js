@@ -14,7 +14,7 @@
  * draggable lifelines/parts
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.1";
+const g_version = "0.2";
 
 
 // Check if browser is compatible
@@ -555,8 +555,8 @@ function distributeTraceData(){
  * @param {Bool}	allowBelowLine if true, positioning below refLine is allowed
  */ 
 function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine ) {
-	
-	this.vDist = -3;			// pixels above the line
+	const vDistAboveLine = -3;
+	this.vDist = vDistAboveLine;			// pixels above the line
 	this.curText = text;
 	this.curTextWidth = null;
 	this.curTextHeight = null;
@@ -871,6 +871,13 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 		
 		return bestAlgo;		
 	}
+	
+	this.setDefaultPosAndText = function(){
+		this.hpos = this.idealHPos();
+		this.vDist = vDistAboveLine;
+		this.setText(this.fullText);
+	}
+		
 }
 
 
@@ -1091,8 +1098,14 @@ function updateLabels(labelsData, updateOptions){
 
 	for( let d of data){
 		
-		// virtually move around label to avoid overlapping text
-		d.findBestPosition(data);
+		if( data.length < 100){
+			// virtually move around label to avoid overlapping text
+			d.findBestPosition(data);
+		}
+		else {
+			// too many objects... Avoid placing labels
+			d.setDefaultPosAndText();
+		}
 		
 		// just for debugging 
 		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), "pink"); 
@@ -1288,13 +1301,13 @@ function TimeScaleControl(lay, traceData) {
 			
 			requestedScale = scaleFactor;
 			zoomCenterY = screenZoomY
-			//console.log("setTimeScale %f %f", scaleFactor, screenZoomY, hasAnimFrameRequested);
+			console.debug("setTimeScale %f %f", scaleFactor, screenZoomY, hasAnimFrameRequested);
 			if( ! hasAnimFrameRequested){
+				hasAnimFrameRequested = true;
 				
 				window.requestAnimationFrame(function() {
 					that.draw();
 			    });
-				hasAnimFrameRequested = true;
 			}
 		}	
 	}
@@ -1313,8 +1326,8 @@ function TimeScaleControl(lay, traceData) {
 		sceneYAfterChange = lay.scaling.yScale(timeZoomY);
 		scrollDelta = sceneYAfterChange - sceneYBeforeChange;
 
-		//console.log("draw factor " + requestedScale);
-		//console.log("draw yz " + zoomCenterY + "/" + lay.screen2CanvasY(zoomCenterY) + " t " + timeZoomY + " yac " + sceneYAfterChange + " sd " + scrollDelta + " scrollY " + window.scrollY);
+		console.debug("tsdraw factor " + requestedScale);
+		console.debug(" tsdraw yz " + zoomCenterY + "/" + lay.screen2CanvasY(zoomCenterY) + " t " + timeZoomY + " yac " + sceneYAfterChange + " sd " + scrollDelta + " scrollY " + window.scrollY);
 		if( Math.floor(scrollDelta) != 0 && 
 				(sceneHeightBeforeChange > lay.canvas.height) && 
 				(window.scrollY+scrollDelta >= 0) &&
@@ -1325,13 +1338,8 @@ function TimeScaleControl(lay, traceData) {
 		else {
 			updateDrawing(lay, traceData, { reposLabels: true });
 			hasAnimFrameRequested = false;
-			if( requestedScale != lay.scaling.scaleFactor ){
-				//console.log("draw redo")
-				this.setTimeScale( requestedScale, zoomCenterY)
-			}
-			else {
+			if( !this.redoSetTimeScale())
 				requestedScale = undefined;
-			}
 		}
 			
 	}
@@ -1339,12 +1347,17 @@ function TimeScaleControl(lay, traceData) {
 	this.scrollDone = function(){
 		//console.log("scrolldone", requestedScale, lay.scaling.scaleFactor )
 		hasAnimFrameRequested = false;
-		if( requestedScale != undefined && requestedScale != lay.scaling.scaleFactor ){
-			//console.log("scrolldone redo")
-			this.setTimeScale( requestedScale, zoomCenterY)
-		}
+		this.redoSetTimeScale();
 	}
 	
+	this.redoSetTimeScale = function(){
+		if( requestedScale != undefined && requestedScale.toFixed(2) != lay.scaling.scaleFactor.toFixed(2) ){
+			console.debug("redoSetTimeScale ", requestedScale, lay.scaling.scaleFactor)
+			this.setTimeScale( requestedScale, zoomCenterY)
+			return true;
+		}
+		return false;
+	}
 	
 	window.addEventListener("mousemove", this.mouseMove);
 	this.positionSlider();
@@ -1362,7 +1375,7 @@ function WindowChangeControl(lay, timeScaleControl, traceData) {
 	
 	this.scrolled = function(){
 		requestTimeOffset = lay.y2Time(window.scrollY); 
-		//console.log("scroll ", window.scrollY, " ",  requestTimeOffset);
+		console.debug("scrolled ", window.scrollY, " ",  requestTimeOffset);
 		
 		that.requestAnim();
 		// adjust horizontal position of parts and diagram div
@@ -1385,13 +1398,13 @@ function WindowChangeControl(lay, timeScaleControl, traceData) {
 
 	this.requestAnim = function(){
 		if( ! hasAnimFrameRequested ){
-			requestAnimationFrame(that.draw);
 			hasAnimFrameRequested = true;
+			requestAnimationFrame(that.draw);
 		}
 	}
 	
 	this.draw = function(){
-		//console.log("wcDraw requestTimeOffset ", requestTimeOffset);
+		console.debug("wcDraw requestTimeOffset ", requestTimeOffset);
 		if( requestTimeOffset !== undefined)
 			lay.setTimeOffset(requestTimeOffset);
 		
