@@ -341,6 +341,13 @@ class TraceGenDynamicViewer(object):
             out += "<script>\n"
             out += self.readseqDiagInteractiveViewerFile(scriptFile)
             out += "</script>\n"
+            
+        # generate code to check alert if browser is not compatible with ECMA6
+        out += '''<script>
+                if (typeof getDiagramArgs !== "function") {
+                    alert("Sorry, your browser does not support ecmascript 6. Please use Chrome, Firefox, Edge...");
+                }
+                </script>\n'''
         return out
         
     
