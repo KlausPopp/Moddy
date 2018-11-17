@@ -64,10 +64,21 @@ div.tooltip {
 	height: auto;
 	width: 20000px; /* hack */
 }
+#parts g {
+	cursor: col-resize;
+}
+
 #diagram {
 	position: fixed;
 	width: 100%;
 }
 #scrollDummy {
 	z-index: -10;
+	/*background-color: lightblue;*/
+}
+
+
+
+.active {
+  stroke-width: 3px;
 }

@@ -8,21 +8,11 @@
 
 /*
  * TODO
-
- * browser check: Ok with Chrome, Firefox, Edge. NOK with IE
- * Warn if not supported browser
- * draggable lifelines/parts
+ * Support time range
+ * 
  */
 const g_viewerName = "moddy sd interactive viewer";
 const g_version = "0.2";
-
-
-// Check if browser is compatible
-// ??? Does not work in IE....
-if (!isBrowserCompatible()){
-	document.getElementsByTagName("body")[0].innerText = "Sorry, your browser is not supported by " + g_viewerName;
-	fail;
-}
 
 
 var g_diagramArgs = getDiagramArgs( g_moddyDiagramArgs );
@@ -66,13 +56,11 @@ function getDiagramArgs( overrideValues ) {
 	return defaults;
 }
 
-
 //---------------------------------------------------------------------------------
-// Part scanning
+// Layout Engine.
 //
-
-//layout parameters
 function DrawingLayout( partArray, moddyTracedEvents ) {
+	var that = this;
 	
 	this.diagram = {
 		div 	: undefined			// diagram div d3 object
@@ -102,7 +90,9 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	
 	this.parts = {
 		div: undefined,				// parts div d3 object
-		svg: undefined,				// parts svg d3 object 	
+		svg: undefined,				// parts svg d3 object 
+		dragLastX: undefined,		// last mouse X during dragging
+		maxNameWidth: undefined,	// max text width for part name
 	}
 	this.scrollDummy = {
 		div: undefined,				// scrolldummy div d3 object
@@ -122,7 +112,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	
 	// set x position of all partArray entries
 	// @return compute width based on the parts
-	this.computePartXCenter = function ( partArray )	{
+	this.computePartXCenter = function ()	{
 		
 		var width = 0;
 		var idx = 0;
@@ -142,10 +132,32 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 			
 			idx++;	
 		}
-		width += g_diagramArgs.partSpacing + this.canvas.margin.right;
+		width += this.spacingAfterLastPart();
 		return width;
 	} 
 
+	this.spacingAfterLastPart = function(){
+		return g_diagramArgs.partSpacing + this.canvas.margin.right;
+	}
+	
+	// add <dx> to the centerX of part <idx> and all parts on the right to part  
+	this.modifyPartCenter = function( idx, dx){
+		
+		let leftLimit = (idx == 0) ? 50 : partArray[idx-1].centerX + 50;
+		
+		if( partArray[idx].centerX + dx >= leftLimit){
+			
+			for( ; idx < partArray.length; idx++){
+				let part = partArray[idx];
+				part.centerX += dx;
+			}
+			
+			this.setLogicalCanvasWidth( partArray.slice(-1)[0].centerX + this.spacingAfterLastPart() )
+			return true;
+		}
+		return false;
+	}
+	
 	this.partCenterX = function( partNo ){
 		if (partNo == -1)
 			return 0;	// "global" part 
@@ -166,30 +178,75 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	}
 	
 	// Draw part boxes using d3 
-	this.updatePartBoxes = function(){
-		var rects = this.parts.svg.selectAll('rect').data(g_moddyDiagramParts);
-		
-		rects.enter().append('rect')
-			.attr('stroke', 'black')
-			.attr('stroke_width', 1)
-			.attr('fill', 'none')
-		   .merge(rects)		// this merges the update and enter section
-			.attr('x', function(d) { return d.centerX - g_diagramArgs.partBoxSize.w/2; } )
-			.attr('y', function(d) { return 0;} )
-			.attr('width', function(d) { return g_diagramArgs.partBoxSize.w; } )
-			.attr('height', function(d) { return g_diagramArgs.partBoxSize.h;} )
+	this.initPartBoxes = function(){
+		var groups = this.parts.svg.selectAll('g').data(partArray)
+			.enter().append('g')
+		   	.call(d3.drag()
+		        .on("start", this.partDragStarted)
+		        .on("drag", this.partDragged)
+		        .on("end", this.partDragEnded))
 			;
 		
-		var labels = this.parts.svg.selectAll('text').data(partArray);
+		
+		groups.append('rect')
+			.attr('stroke', 'black')
+			.attr('stroke_width', 1)
+			.attr('fill', 'ghostwhite')
+			.attr('x', function(d) { return 0; } )
+			.attr('y', function(d) { return 0;} )
+			.attr('height', function(d) { return g_diagramArgs.partBoxSize.h;} );
+		
+		this.parts.maxNameWidth = g_diagramArgs.partBoxSize.w;
 
-		labels.enter().append('text')
-		 .attr('text-anchor', function(d) { return 'middle'; })
-	    .merge(labels)		// this merges the update and enter section
-		 .text( function(d) { return d.name; })
-		.attr('x', function(d) { return d.centerX; } )
-		.attr('y', function(d) { return g_diagramArgs.partBoxSize.h/2; } );
-	}	
+		groups.append('text')
+		.text( function(d) { return d.name; })
+		.attr('text-anchor', function(d) { return 'middle'; })
+		.each( this.determineMaxPartNameWidth )
+		;
+		
+		this.updatePartBoxes();
+	}
+	
+	this.determineMaxPartNameWidth = function(d,i){
+		//console.log( "determineMaxPartNameWidth", d.name, d3.select(this).node().getComputedTextLength());
+		let width = d3.select(this).node().getComputedTextLength() + 8;
+		that.parts.maxNameWidth = Math.max( that.parts.maxNameWidth, width);
+	}
+	
+	// Update part boxes with possibly modified data (in partArray) 
+	this.updatePartBoxes = function(){
+		var groups = this.parts.svg.selectAll('g')
+		.attr("transform", function(d) { return "translate(" + (d.centerX - that.parts.maxNameWidth/2) +",0)" })
+		;
+		
+		groups.selectAll('rect')
+			.attr('width', this.parts.maxNameWidth );
+		
+		groups.selectAll('text')
+			.text( function(d) { return d.name; })
+			.attr('x', function(d) { return that.parts.maxNameWidth/2; } )
+			.attr('y', function(d) { return g_diagramArgs.partBoxSize.h/2; } )
 
+	}
+
+	// Part dragging
+	this.partDragStarted = function(d,i) {
+		console.debug("partDragStarted ", d, i, d3.event.x)
+		that.parts.dragLastX = d3.event.x;
+		d3.select(this).raise().classed("active", true);
+	}
+	this.partDragged = function(d,i) {
+		let dx = d3.event.x - that.parts.dragLastX;	// compute how much dragged in X direction
+		that.parts.dragLastX = d3.event.x;
+		that.modifyPartCenter( i, dx );					// update part and all parts on the right
+		that.updatePartBoxes();
+		g_windowChangeControl.resized();
+
+	}
+
+	this.partDragEnded = function(d){
+		d3.select(this).classed("active", false);
+	}
 	
 	// Parts and Diagram are "fixed" divs. Do scrolling manually...
 	this.setHorizontalScroll = function(scrollX){
@@ -272,6 +329,10 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		return canvasY + this.canvas.top;
 	}
 	
+	this.setLogicalCanvasWidth = function( width ){
+		this.canvas.width = width;
+		this.canvas.fullWidth = width + this.canvas.margin.left;		
+	}
 	//--------------------------------------------------
 	// SCROLLDUMMY
 
@@ -284,6 +345,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		// the browser shows the scrollbar accordingly
 		var height = this.scaling.sceneHeight + this.canvas.top + this.canvas.margin.top;
 		this.scrollDummy.div.style("height", height + "px");
+		this.scrollDummy.div.style("width", this.canvas.fullWidth + "px");
 	}
 		
 	
@@ -374,10 +436,9 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	
 	/// INIT
 	this.initTitle();
-	this.canvas.width = this.computePartXCenter( partArray );
-	this.canvas.fullWidth = this.canvas.width + this.canvas.margin.left;
+	this.setLogicalCanvasWidth(this.computePartXCenter());
 	this.initParts();
-	this.updatePartBoxes();
+	this.initPartBoxes();
 	
 	this.initDiagram();
 	this.canvas.yT0 = this.canvas.top + this.canvas.margin.top;
@@ -472,47 +533,48 @@ function distributeTraceData(){
 	for( let e of g_moddyTracedEvents){
 		
 		
-		var refLine = {}, anchor="center", color="black", allowBelowLine=false;
-		var partX = g_lay.partCenterX(e.p), targetPoint = null;
+		var refLine = { xo1:0, xo2:0}, anchor="center", color="black", allowBelowLine=false;
+		var targetPoint = null;
 		
 		// create the label object
 		switch(e.tp){
 		case "<MSG":
-			refLine.x1 = partX;
+			refLine.p1 = e.p;
 			refLine.y1 = e.b;
-			refLine.x2 = g_lay.partCenterX(e.s);
+			refLine.p2 = e.s;
 			refLine.y2 = e.t;
 			allowBelowLine = true;
 			break;
 		case "T-EXP":
-			refLine.x1 = partX-150;
-			refLine.x2 = partX;
+			refLine.p1 = refLine.p2 = e.p;
+			refLine.xo1 = -150;
 			refLine.y1 = refLine.y2 = e.t;
 			allowBelowLine = true;
 			color = "blue";
 			anchor="end";
 			break;
 		case "STA":
-			refLine.x1 = refLine.x2 = partX-10;
+			refLine.p1 = refLine.p2 = e.p; 
+			refLine.xo1 = refLine.xo2 = -10;
 			refLine.y1 = e.b; 
 			refLine.y2 = e.t;
-			//color = "orange";
 			anchor="start";
 			break;
 		case "VC":
-			refLine.x1 = partX-g_diagramArgs.variableBoxWidth/2;
-			refLine.x2 = partX+g_diagramArgs.variableBoxWidth/2;
+			refLine.p1 = refLine.p2 = e.p; 
+			refLine.xo1 = -g_diagramArgs.variableBoxWidth/2;
+			refLine.xo2 = +g_diagramArgs.variableBoxWidth/2;
 			refLine.y1 = refLine.y2 = e.b + (e.t-e.b)/2;
-			//color = "white";
 			break;
 		case "ANN":
 		case "ASSFAIL":
-			refLine.x1 = partX+22;
-			refLine.x2 = (e.p == -1) ? g_canvasTotalWidth : g_lay.partCenterX(e.p+1); 
+			refLine.p1 = e.p;
+			refLine.xo1 = +22;
+			refLine.p2 = e.p+1; 
 			refLine.y1 = refLine.y2 = e.t;
 			color = "red";
 			anchor="start";
-			targetPoint = {x: partX, y: e.t}
+			targetPoint = {p: e.p, xo: 0, y: e.t}
 			allowBelowLine = true;
 			break;
 		}
@@ -546,12 +608,14 @@ function distributeTraceData(){
  * Constructor for sequence diagram label. For labels that shall be auto-positioned
  * to avoid collisions
  * @param {Array} 	refLine 	line on which the text can be moved to get out of the way
- *							   	with indexes [x1,y1,x2,y2] unscaled!
+ *							   	with indexes [p1,xo1,y1,p2,xo2,y2] y=unscaled. 
+ *								p1/p2 are the part numbers in the scene 
+ *								xo1/xo2 are the x offsets from the part center
  * @param {String} 	anchor	 	text alignment ("start", "center", "end")
  * @param {String} 	text		label text
  * @param {String} 	color		text color
  * @param {Object}	lay			layout object 
- * @param {Point}	targetPoint	Point where the label belongs to (may be null)
+ * @param {Point}	targetPoint	Point where the label belongs to (may be null) {p, xo, y}
  * @param {Bool}	allowBelowLine if true, positioning below refLine is allowed
  */ 
 function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine ) {
@@ -564,6 +628,10 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 	this.color = color;
 	this.targetPoint = targetPoint;
 	this.refLine = refLine;
+	
+	this.currentTextPolygonCache = undefined;
+	this.currentRefLinePolygonCache = undefined;
+	
 	
 	this.getText = function() { return this.curText; }
 
@@ -633,14 +701,47 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 		return rv;
 	}
 	
+	this.resetPolygonCache = function() {
+		this.currentTextPolygonCache = undefined;
+		this.currentRefLinePolygonCache = undefined;
+	}
+	
 	this.getCurrentTextPolygon = function(){
-		return this.getTextPolygon( this.hpos, this.vDist, this.getTextHeight(), this.getTextWidth())
+		if( this.currentTextPolygonCache == undefined ){		
+			this.currentTextPolygonCache = this.getTextPolygon( this.hpos, this.vDist, this.getTextHeight(), this.getTextWidth())
+		}
+		return this.currentTextPolygonCache
+	}
+	
+	
+	// get the polygon that the whole refLine covers including space for text below (if allowBelowLine is set)
+	// and above line
+	this.getCurrentRefLinePolygon = function(){
+		if( this.currentRefLinePolygonCache == undefined ){		
+			var rv =  [];
+			let center = this.getCenter(0.5, (allowBelowLine ? this.getTextHeight() : 0));
+			let theta = this.getCurrentRotation();
+			let height = (this.getTextHeight()* (allowBelowLine ? 2 : 1)) - vDistAboveLine;
+			let width = this.getRefLineLength();
+	
+			rv.push( rotatePoint( { x: center.x - width/2, y: center.y }, 			center, theta));
+			rv.push( rotatePoint( { x: center.x - width/2, y: center.y-height }, 	center, theta));
+			rv.push( rotatePoint( { x: center.x + width/2, y: center.y-height }, 	center, theta));
+			rv.push( rotatePoint( { x: center.x + width/2, y: center.y }, 			center, theta));
+			this.currentRefLinePolygonCache = rv;
+		}
+		return this.currentRefLinePolygonCache;
+	}
+	
+	// compute the x-position of <partNo> considering xOffset to the partNo center
+	this.xPos = function( partNo, xOffset ){
+		return lay.partCenterX( partNo ) + xOffset;
 	}
 	
 	// return length of refLine scaled
 	this.getRefLineLength = function(){
 		// compute lenght of refline scaled
-		var a = (refLine.x2 - refLine.x1);
+		var a = (this.xPos(refLine.p2, refLine.xo2)  - this.xPos(refLine.p1, refLine.xo1));
 		var b = lay.scaling.yScale(refLine.y2 - refLine.y1);
 		return Math.sqrt(a*a + b*b);		
 	}
@@ -671,7 +772,10 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 	// return {x:,y:} coordinates of text anchor (considering pos parameter)
 	this.getCenterOnRefLine = function(hpos) {
 		var rv = {};
-		rv.x = ( refLine.x1 + (refLine.x2 - refLine.x1) * hpos);
+		let x1 = this.xPos( refLine.p1, refLine.xo1 ); 
+		let x2 = this.xPos( refLine.p2, refLine.xo2 ); 
+
+		rv.x = ( x1 + (x2 - x1) * hpos);
 		rv.y = lay.time2CanvasY( refLine.y1 + (refLine.y2 - refLine.y1) * hpos);
 		return rv;
 	}
@@ -680,7 +784,7 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 	this.getCurrentRotation = function() {
 		return Math.atan( 
 				(lay.scaling.yScale(refLine.y2 - refLine.y1)) / 
-				((refLine.x2 - refLine.x1)))
+				((this.xPos( refLine.p2, refLine.xo2 ) - this.xPos( refLine.p1, refLine.xo1 ))))
 	}
 	
 	this._trimTry = function( nChars, ellipsis ) {
@@ -735,6 +839,13 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 			idx++;
 		}
 		return nCollisions;
+	}
+	
+	this.checkRefLinesMayCollide = function( otherSdLabel ){
+		if( otherSdLabel == this ) return false;
+		
+		return doPolygonsIntersect( this.getCurrentRefLinePolygon(), otherSdLabel.getCurrentRefLinePolygon());
+
 	}
 	
 	this.clipHPos = function( desiredHPos, actualWidth ){ 
@@ -868,6 +979,7 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 		this.hpos = bestAlgo.result.hPos;
 		this.vDist = bestAlgo.result.vDist;
 		this.trimTextToPx( bestAlgo.result.width);
+		this.resetPolygonCache();
 		
 		return bestAlgo;		
 	}
@@ -876,6 +988,7 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 		this.hpos = this.idealHPos();
 		this.vDist = vDistAboveLine;
 		this.setText(this.fullText);
+		this.resetPolygonCache();
 	}
 		
 }
@@ -1051,7 +1164,7 @@ function updateAnnLines(annLinesData, updateOptions){
 	
 	for( let d of annLinesData.data ){
 		if (isShapeVisible( visibleRange, d.refLine.y1, d.refLine.y2 )){
-			var from = { x: d.targetPoint.x, y: g_lay.time2CanvasY(d.targetPoint.y) };
+			var from = { x: d.xPos(d.targetPoint.p, d.targetPoint.xo), y: g_lay.time2CanvasY(d.targetPoint.y) };
 			var to   = { x: d.getCurrentCenter().x - 1, y: d.getCurrentCenter().y - 4 };
 			
 			drawAnnLine( g_lay.canvas.mh.main.ctx, from, to, d.color );
@@ -1088,19 +1201,29 @@ function drawLabelPolygon( ctx, polygon, fillStyle ){
 
 function updateLabels(labelsData, updateOptions){
 
+	//console.time('updateLabels');
 	// filter visible labels
 	var visibleRange = g_lay.getVisibleTimeRange();	
-	var data = [];
+	var visibleLabels = [];
 	for( let sdl of labelsData.data ){
-		if (isShapeVisible( visibleRange, sdl.refLine.y1, sdl.refLine.y2 ))
-			data.push(sdl);
+		if (isShapeVisible( visibleRange, sdl.refLine.y1, sdl.refLine.y2 )){
+			sdl.resetPolygonCache();
+			visibleLabels.push(sdl);
+		}
 	}
-
-	for( let d of data){
+	
+	for( let d of visibleLabels){
+		let possiblyCollidingLabels = [];
 		
-		if( data.length < 100){
+		if( visibleLabels.length < 100){
+
+			// determine which labels may possibly collide (using the polygons around the labels refLine)
+			for( let otherLabel of visibleLabels )
+				if( d.checkRefLinesMayCollide( otherLabel ))
+					possiblyCollidingLabels.push(otherLabel);
+			
 			// virtually move around label to avoid overlapping text
-			d.findBestPosition(data);
+			d.findBestPosition(possiblyCollidingLabels);
 		}
 		else {
 			// too many objects... Avoid placing labels
@@ -1109,6 +1232,7 @@ function updateLabels(labelsData, updateOptions){
 		
 		// just for debugging 
 		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), "pink"); 
+		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentRefLinePolygon(), "pink"); 
 		drawLabel( g_lay.canvas.mh.main.ctx, 
 				d.getText(),
 				d.getCurrentCenter(),
@@ -1122,6 +1246,7 @@ function updateLabels(labelsData, updateOptions){
 		if( rgb != undefined)
 			drawLabelPolygon( g_lay.canvas.mh.hidden.ctx, d.getCurrentTextPolygon(), rgb);
 	}
+	//console.timeEnd('updateLabels');
 	
 }
 	 
@@ -1230,24 +1355,6 @@ function TimeScaleControl(lay, traceData) {
 		
 	}
 	
-	/*d3.select(".controls")
-		.call(d3.drag()
-	        .on("start", dragstarted)
-	        .on("drag", dragged)
-	        .on("end", dragended));
-	
-	function dragstarted(d) {
-		  d3.select(this).raise().classed("active", true);
-		}
-
-		function dragged(d) {
-		  d3.select(this).attr("x", d3.event.x).attr("y", d3.event.y);
-		}
-
-		function dragended(d) {
-		  d3.select(this).classed("active", false);
-		}*/
-
 	// Callback for mousemove event. 
 	// Support time scale changing by SHIFT+Mousemove
 	this.mouseMove = function(e) {
@@ -1690,24 +1797,4 @@ function numToRgbString( num ){
 	  ${g}, 
 	  ${b} 
 	  )`; 
-}
-
-// from https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser/9851769
-function isBrowserCompatible(){
-	//Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-	var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-	// Firefox 1.0+
-	var isFirefox = typeof InstallTrigger !== 'undefined';
-	// Safari 3.0+
-	var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification);
-	// Internet Explorer 6-11
-	var isIE = /*@cc_on!@*/false || !!document.documentMode;
-	// Edge 20+
-	var isEdge = !isIE && !!window.StyleMedia;
-	// Chrome 1+
-	var isChrome = !!window.chrome && !!window.chrome.webstore;
-	// Blink engine detection
-	var isBlink = (isChrome || isOpera) && !!window.CSS;
-	
-	return isChrome || isFirefox || isEdge; 
 }
