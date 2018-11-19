@@ -167,7 +167,7 @@ class simInputPort(simBaseElement):
         super().__init__(sim, part, name, "InPort")
         self._outPort = None        # connected output port
         self._msgReceivedFunc = msgReceivedFunc # function that gets called when message arrives
-        self._ioPort = ioPort       # reference to the IOPort which contains this outPort (None if not part of IOPort)
+        self._ioPort = ioPort       # reference to the IOPort which contains this inPort (None if not part of IOPort)
         
     def msgEvent(self,msg):
         """called from bound outport when a new message is received"""
@@ -316,6 +316,7 @@ class simIOPort(simBaseElement):
             self._inPort = simInputPort(sim, part, name + "In", msgReceivedFunc, ioPort=self)
         else:
             self._inPort = specialInPort
+            self._inPort._ioPort = self
         
     def bind(self, otherIoPort):
         ''' Bind IOPort to another IOPort, in/out will be crossed '''
