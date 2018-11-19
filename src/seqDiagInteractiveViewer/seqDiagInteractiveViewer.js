@@ -210,7 +210,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	this.determineMaxPartNameWidth = function(d,i){
 		//console.log( "determineMaxPartNameWidth", d.name, d3.select(this).node().getComputedTextLength());
 		let width = d3.select(this).node().getComputedTextLength() + 8;
-		that.parts.maxNameWidth = Math.max( that.parts.maxNameWidth, width);
+		that.parts.maxNameWidth = Math.min(Math.max( that.parts.maxNameWidth, width), g_diagramArgs.partSpacing + 6 );
 	}
 	
 	// Update part boxes with possibly modified data (in partArray) 
