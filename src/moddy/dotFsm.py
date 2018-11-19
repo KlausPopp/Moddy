@@ -4,6 +4,7 @@ Created on 12.02.2017
 @author: Klaus Popp
 '''
 from moddy.fsm import isSubFsmSpecification
+from moddy.utils import moddyCreateDirsAndOpenOutputFile
 
 import subprocess
 import os
@@ -111,7 +112,7 @@ class DotFsm(object):
         
         # Output the DOT file as filename.dot e.g. test.svg.gv
         dotFile = "%s.gv" % fileName
-        f = open(dotFile, 'w')
+        f = moddyCreateDirsAndOpenOutputFile(dotFile)
         for line in lines:
             f.write("%s%s\n" % (space(line[0]), line[1]))
         f.close()

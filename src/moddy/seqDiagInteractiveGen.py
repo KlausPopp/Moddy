@@ -10,6 +10,7 @@ TODO
 
 import seqDiagInteractiveViewer
 from moddy.svgSeqD import moddyGenerateSvgSequenceDiagram
+from moddy.utils import moddyCreateDirsAndOpenOutputFile
 import os
 import sys
 
@@ -107,7 +108,7 @@ def moddyGenerateSequenceDiagram( sim,
     out += dv.genHtmlTail()
     
     # write file
-    f = open(fileName, "w")
+    f = moddyCreateDirsAndOpenOutputFile(fileName)
     f.write(out)
     f.close()
     print("saved sequence diagram in %s as %s" % (fileName, fmt))

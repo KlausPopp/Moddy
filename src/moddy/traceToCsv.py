@@ -8,6 +8,8 @@ Created on 26.12.2016
 
 import csv
 from moddy.simulator import timeUnit2Factor
+from moddy.utils import moddyCreateDirsAndOpenOutputFile
+
 
 def moddyGenerateTraceTable( sim, fileName, **kwargs):
     '''
@@ -35,7 +37,7 @@ class TraceToCsv():
         return ("%.6f" % (time / self._timeUnitFactor )).replace(".",self._floatComma)
                  
     def save(self, fileName):
-        f = open(fileName, "w")
+        f = moddyCreateDirsAndOpenOutputFile(fileName)
         
         csv.register_dialect(
             'mydialect',

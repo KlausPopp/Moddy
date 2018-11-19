@@ -4,6 +4,8 @@ Created on 24.01.2017
 @author: Klaus Popp
 '''
 from moddy.simulator import sim, simPart
+from moddy.utils import moddyCreateDirsAndOpenOutputFile
+
 import subprocess
 import os
 
@@ -227,7 +229,7 @@ class DotStructure(object):
         # Output the DOT file as filename.dot e.g. test.svg.gv
         dotFile = "%s.gv" % fileName
         #print("fileName=%s" % dotFile )
-        f = open(dotFile, 'w')
+        f = moddyCreateDirsAndOpenOutputFile(dotFile)
         for line in lines:
             f.write("%s%s\n" % (space(line[0]), line[1]))
         f.close()
