@@ -10,5 +10,6 @@ def moddyCreateDirsAndOpenOutputFile( filePath ):
     Create missing directories to <filePath> and open <filePath> for writing
     @return: file descriptor
     '''
-    os.makedirs(os.path.dirname(filePath), exist_ok=True);
+    if os.path.dirname(filePath) != "":
+        os.makedirs(os.path.dirname(filePath), exist_ok=True);
     return open(filePath, 'w')

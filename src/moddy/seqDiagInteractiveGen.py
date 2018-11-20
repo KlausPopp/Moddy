@@ -152,7 +152,10 @@ class TraceGenDynamicViewer(object):
     def shallEventBeShown(self, te):
         if te.action == ">MSG" or te.action == "T-START": return False
         if te.part is None: return True     # global event
-        if not self.hasPart(te.part): return False
+        if te.action == "VC":
+            if not self.hasPart(te.subObj): return False
+        else:    
+            if not self.hasPart(te.part): return False
         if te.action == "<MSG":
             if not self.hasPart(te.subObj._parentObj): return False
         return True     
@@ -205,10 +208,11 @@ class TraceGenDynamicViewer(object):
         for e in evList:
             
             if self.shallEventBeShown(e):
-                partNo = self.partNo(e.part)
                 if e.action == "VC": 
                     partNo = self.partNo(e.subObj)
-                
+                else:
+                    partNo = self.partNo(e.part)
+
                 hdr = '{ tp: "%s", t: %g, p: %d, ' % (
                     e.action, e.traceTime, partNo)
                 
