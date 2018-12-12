@@ -12,13 +12,12 @@
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.2";
+const g_version = "0.3";
 
 
 var g_diagramArgs = getDiagramArgs( g_moddyDiagramArgs );
 var g_lay = new DrawingLayout(g_moddyDiagramParts, g_moddyTracedEvents);
 var g_tooltipControl = new TooltipControl(g_lay);
-//Data arrays for d3
 var g_traceData = {
 	msgLines: { data: [] },	// data for message lines (<MSG, T-EXP), refs to g_moddyTracedEvents
 	boxes:    { data: [] },	// data for boxes (STA, VC), refs to g_moddyTracedEvents
@@ -28,11 +27,15 @@ var g_traceData = {
 }
   
 distributeTraceData();
-
-var g_timeScaleControl = new TimeScaleControl(g_lay, g_traceData);
-updateDrawing( g_lay, g_traceData, { hideNonVisible: true, reposLabels: true});
-	
-var g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_traceData);
+var g_labelMgr = new LabelMgr(g_lay, g_traceData.labels, 40 /*ms*/);
+var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, g_traceData, g_labelMgr )
+var g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
+var g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_drawingUpdateMgr);
+g_drawingUpdateMgr.requestParam({
+	timeScale: g_lay.scaling.timeScale, 
+	timeOffset: g_lay.scaling.timeOffset, 
+	canvasFullWidth: g_lay.canvas.fullWidth,
+	canvasHeight: g_lay.canvas.height});
 
 //---------------------------------------------------------------------------------
 // Diagram formatting options
@@ -240,8 +243,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		that.parts.dragLastX = d3.event.x;
 		that.modifyPartCenter( i, dx );					// update part and all parts on the right
 		that.updatePartBoxes();
-		g_windowChangeControl.resized();
-
+		g_drawingUpdateMgr.requestParam({ canvasFullWidth: that.canvas.fullWidth });
 	}
 
 	this.partDragEnded = function(d){
@@ -284,7 +286,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		return rv;
 	}
 	
-	this.canvasResize = function (){
+	this.canvasResize = function (){	//TODO: pass parameters
 		var width = this.canvas.fullWidth;
 		var height = this.canvas.height = visualViewPortHeight() - this.canvas.top;
 		
@@ -1203,33 +1205,8 @@ function updateLabels(labelsData, updateOptions){
 
 	//console.time('updateLabels');
 	// filter visible labels
-	var visibleRange = g_lay.getVisibleTimeRange();	
-	var visibleLabels = [];
-	for( let sdl of labelsData.data ){
-		if (isShapeVisible( visibleRange, sdl.refLine.y1, sdl.refLine.y2 )){
-			sdl.resetPolygonCache();
-			visibleLabels.push(sdl);
-		}
-	}
 	
-	for( let d of visibleLabels){
-		let possiblyCollidingLabels = [];
-		
-		if( visibleLabels.length < 100){
-
-			// determine which labels may possibly collide (using the polygons around the labels refLine)
-			for( let otherLabel of visibleLabels )
-				if( d.checkRefLinesMayCollide( otherLabel ))
-					possiblyCollidingLabels.push(otherLabel);
-			
-			// virtually move around label to avoid overlapping text
-			d.findBestPosition(possiblyCollidingLabels);
-		}
-		else {
-			// too many objects... Avoid placing labels
-			d.setDefaultPosAndText();
-		}
-		
+	for( let d of g_labelMgr.visibleLabels){ // TODO
 		// just for debugging 
 		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), "pink"); 
 		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentRefLinePolygon(), "pink"); 
@@ -1255,16 +1232,16 @@ function updateLabels(labelsData, updateOptions){
 // Y-scale change, scrolling, resizing
 // @param lay DrawingLayout
 // @param traceData usually g_traceData
-// @param updateOptions { reposLabels: true/false  }
+// @param updateOptions { NONE at the moment  }
 //
 function updateDrawing(
 		lay,
 		traceData, 
-		updateOptions = { hideNonVisible: true, reposLabels: false}
+		updateOptions = {}
 	) {
 	//console.log("updateDrawing");
 	
-	g_tooltipControl.resetObjMgr();	//???
+	g_tooltipControl.resetObjMgr();
 	
 	// clear canvas
 	lay.canvasClear();
@@ -1296,7 +1273,88 @@ function updateDrawing(
 	g_timeScaleControl.setSliderValue(lay.scaling.scaleFactor);
 }
  
+//-----------------------------------------------------------------------------
+// Label Manager
+//
 
+function LabelMgr( lay, labelsData, maxPlacementTime ) {
+	
+	this.positioningQ = new Queue();
+	this.visibleLabels = [];
+	
+	// get array of currently visible labels
+	// store array to this.visibleLabels
+	this.computeVisibleLabels = function(){
+		let visibleLabels = [];
+		let visibleRange = lay.getVisibleTimeRange();	
+
+		for( let sdl of labelsData.data ){
+			if (isShapeVisible( visibleRange, sdl.refLine.y1, sdl.refLine.y2 )){
+				sdl.resetPolygonCache();
+				visibleLabels.push(sdl);
+			}
+		}
+		
+		this.visibleLabels = visibleLabels;	
+		return visibleLabels;
+	}
+	
+	// sceneChanged - to be called when the scene has changed in a way
+	// that labels may have to be repositioned
+	// 
+	// adds all visible labels to the positioningQ, which are not already in Q
+	this.sceneChanged = function(){
+		this.computeVisibleLabels();
+		
+		for( let sdl of this.visibleLabels ){
+			if( !this.positioningQ.includes( sdl )){
+				this.positioningQ.push(sdl);
+			}
+		}
+	}
+	this.positioningQEmpty = function(){
+		return this.positioningQ.length() == 0;		
+	}
+
+	// take labels out of the positioningQ, and perform autopositioning 
+	// until max placement time is over.
+	// @return: false if not all labels from Q could be positioned, true if so
+	this.placeLabels = function(){
+		
+		let startTime = performance.now();
+		let numPlacedLabels = 0;
+		
+		while(true){
+			let sdl = this.positioningQ.shift();	// get label from positioningQ
+			if( sdl == undefined )
+				break;
+			
+			this.placeLabel(sdl);
+			numPlacedLabels += 1;
+			
+			if( (numPlacedLabels > 2) && (performance.now() - startTime > maxPlacementTime) )
+				break;
+		}
+		return this.positioningQEmpty();
+	}
+
+	
+	// Place a single label
+	this.placeLabel = function(sdl){
+		let possiblyCollidingLabels = [];
+		
+		// make list of labels with which there might be a collision
+		// use the reference line area for this check
+		for( let otherLabel of this.visibleLabels )
+			if( sdl.checkRefLinesMayCollide( otherLabel ))
+				possiblyCollidingLabels.push(otherLabel);
+		
+		// virtually move around label to avoid overlapping text
+		sdl.findBestPosition(possiblyCollidingLabels);
+	}
+	
+
+}
 
 
 //-----------------------------------------------------------------------------
@@ -1305,16 +1363,13 @@ function updateDrawing(
 
 
 // Time scale control object 
-function TimeScaleControl(lay, traceData) {
-	var hasAnimFrameRequested = false;
+function TimeScaleControl(lay, drawingUpdateMgr) {
+	let hasAnimFrameRequested = false;
 	
-	var mouseFlag = false;			// shift-mouse scale change in progress
-	var mouseStartY = undefined;	// mouse Y at beginning of scaling progress
-	var startScale = undefined; 	// scale at beginning of scaling progress 
-	
-	var requestedScale = undefined;	// current requested scale factor
-	var zoomCenterY = undefined;
-	var that = this;
+	let mouseFlag = false;			// shift-mouse scale change in progress
+	let mouseStartY = undefined;	// mouse Y at beginning of scaling progress
+	let startScale = undefined; 	// scale at beginning of scaling progress 
+	let that = this;
 
 	// key press events
 	d3.select("body").on("keydown", function() {
@@ -1388,14 +1443,8 @@ function TimeScaleControl(lay, traceData) {
 		default:
 			throw "bad direction " + direction;
 		}
-
-		// if animation already running, use last requested scaling factor
-		if( ! hasAnimFrameRequested)
-			newScale = lay.scaling.scaleFactor;
-		else
-			newScale = requestedScale;
 		
-		this.setTimeScale(newScale * mod, visualViewPortHeight()/2);	//??? 
+		this.setTimeScale(lay.scaling.scaleFactor * mod, visualViewPortHeight()/2);	//??? 
 		
 	}
 
@@ -1404,67 +1453,19 @@ function TimeScaleControl(lay, traceData) {
 	// @param scale the new scale (1.0=original scale)
 	// @param screenZoomY zoom around this y screen position 
 	this.setTimeScale = function( scaleFactor, screenZoomY){
-		if( scaleFactor > 0.01 && scaleFactor < 100){ //???
-			
-			requestedScale = scaleFactor;
-			zoomCenterY = screenZoomY
-			console.debug("setTimeScale %f %f", scaleFactor, screenZoomY, hasAnimFrameRequested);
-			if( ! hasAnimFrameRequested){
-				hasAnimFrameRequested = true;
-				
-				window.requestAnimationFrame(function() {
-					that.draw();
-			    });
-			}
-		}	
+		
+		// determine which time is at screenZoomY
+		let timeZoomY = Math.min(lay.screenY2Time(screenZoomY), lay.scaling.maxTs);	
+		let curTimeSlice = timeZoomY - lay.scaling.timeOffset;
+		let newTimeSlice = curTimeSlice * lay.scaling.scaleFactor / scaleFactor;
+		let newTimeOffset = Math.max(timeZoomY - newTimeSlice, 0);
+		
+		console.debug( "setTimeScale timeZoomY %f curOffset %f newOffset %f", 
+				timeZoomY, lay.scaling.timeOffset, newTimeOffset);
+		
+		drawingUpdateMgr.requestParam( {timeScale:scaleFactor, timeOffset:newTimeOffset} );
 	}
 	
-	// callback for requestAnmiationFrame
-	this.draw = function(){
-		var timeZoomY, sceneYBeforeChange, sceneYAfterChange, scrollDelta;
-		
-		timeZoomY = lay.screenY2Time(zoomCenterY); 
-		sceneYBeforeChange = lay.scaling.yScale(timeZoomY);
-		let sceneHeightBeforeChange = lay.scaling.sceneHeight;
-		// change scaling
-		lay.sceneChangeTimeScale(requestedScale);
-		
-		// compute the Y position of the zoomCenter would be after scaling
-		sceneYAfterChange = lay.scaling.yScale(timeZoomY);
-		scrollDelta = sceneYAfterChange - sceneYBeforeChange;
-
-		console.debug("tsdraw factor " + requestedScale);
-		console.debug(" tsdraw yz " + zoomCenterY + "/" + lay.screen2CanvasY(zoomCenterY) + " t " + timeZoomY + " yac " + sceneYAfterChange + " sd " + scrollDelta + " scrollY " + window.scrollY);
-		if( Math.floor(scrollDelta) != 0 && 
-				(sceneHeightBeforeChange > lay.canvas.height) && 
-				(window.scrollY+scrollDelta >= 0) &&
-				(window.scrollY+scrollDelta < sceneHeightBeforeChange - lay.canvas.height)){
-			//console.log(" draw scrollTo " + (window.scrollY+scrollDelta));
-			window.scroll( window.scrollX, window.scrollY+scrollDelta);
-		}
-		else {
-			updateDrawing(lay, traceData, { reposLabels: true });
-			hasAnimFrameRequested = false;
-			if( !this.redoSetTimeScale())
-				requestedScale = undefined;
-		}
-			
-	}
-
-	this.scrollDone = function(){
-		//console.log("scrolldone", requestedScale, lay.scaling.scaleFactor )
-		hasAnimFrameRequested = false;
-		this.redoSetTimeScale();
-	}
-	
-	this.redoSetTimeScale = function(){
-		if( requestedScale != undefined && requestedScale.toFixed(2) != lay.scaling.scaleFactor.toFixed(2) ){
-			console.debug("redoSetTimeScale ", requestedScale, lay.scaling.scaleFactor)
-			this.setTimeScale( requestedScale, zoomCenterY)
-			return true;
-		}
-		return false;
-	}
 	
 	window.addEventListener("mousemove", this.mouseMove);
 	this.positionSlider();
@@ -1474,61 +1475,147 @@ function TimeScaleControl(lay, traceData) {
 //-------------------------------------------------------------------------------------
 // Scroll/Zoom/Resize Handling
 //
-function WindowChangeControl(lay, timeScaleControl, traceData) {
-	var hasAnimFrameRequested = false;
-	var doResize = false;
-	var that = this;
-	var requestTimeOffset = undefined;
+function WindowChangeControl(lay, timeScaleControl, drawingUpdateMgr) {
+	let that = this;
+	let scrollMasked = false;
+	let scrollMaskTimer;
 	
 	this.scrolled = function(){
-		requestTimeOffset = lay.y2Time(window.scrollY); 
-		console.debug("scrolled ", window.scrollY, " ",  requestTimeOffset);
-		
-		that.requestAnim();
+		let timeOffset = lay.y2Time(window.scrollY); 
+
 		// adjust horizontal position of parts and diagram div
 		lay.setHorizontalScroll(window.scrollX);
+		if( !scrollMasked ){
+			console.debug("scrolled ", window.scrollY, " ",  timeOffset);
+			drawingUpdateMgr.requestParam( {timeOffset} );
+		}
 	}
 	
 	this.zoomed = function(){
+		let canvasHeight = visualViewPortHeight() - lay.canvas.top;
+		drawingUpdateMgr.requestParam( {canvasHeight} );
+
 		//console.log("zoom ");
-		doResize = true;
-		that.requestAnim();
 		timeScaleControl.positionSlider();
 	}
 
 	this.resized = function(){
-		//console.log("resized");
-		doResize = true;
-		that.requestAnim();
-		timeScaleControl.positionSlider();
-	}
-
-	this.requestAnim = function(){
-		if( ! hasAnimFrameRequested ){
-			hasAnimFrameRequested = true;
-			requestAnimationFrame(that.draw);
-		}
+		that.zoomed();
 	}
 	
-	this.draw = function(){
-		console.debug("wcDraw requestTimeOffset ", requestTimeOffset);
-		if( requestTimeOffset !== undefined)
-			lay.setTimeOffset(requestTimeOffset);
-		
-		if( doResize )
-			lay.canvasResize();
-		
-	  	updateDrawing(lay, traceData, { reposLabels: true });
-		
-		hasAnimFrameRequested = false;
-		timeScaleControl.scrollDone();
-		doResize = false;
-		requestTimeOffset = undefined;
+	function scrollMaskTimeout(){
+		console.debug("scrollMaskTimeout");
+		scrollMasked = false;
+		scrollMaskTimer = undefined;
+	}
+	function scrollEventMaskCallback(){
+		scrollMasked = true;
+		if( scrollMaskTimer != undefined){
+			window.clearTimeout(scrollMaskTimer);
+		}
+		scrollMaskTimer = window.setTimeout(scrollMaskTimeout, 500);
 	}
 
+	drawingUpdateMgr.setScrollEventMaskCallback(scrollEventMaskCallback);
 	window.addEventListener("resize", this.resized);
 	window.addEventListener("zoom", this.zoomed);
 	window.addEventListener("scroll", this.scrolled);
+}
+
+
+//-------------------------------------------------------------------------------------
+// Drawing update manager
+//
+function DrawingUpdateMgr(lay, traceData, labelMgr){
+	// these variables store the currently shown and the requested parameters:
+	// timeScale, timeOffset, canvasFullWidth, canvasHeight 
+	let shown = {};		 
+	let requested = {};
+	let animFrameRequested = false;
+	let scrollEventMaskCallback;
+
+	
+	this.requestParam = function( params ){
+		for( let param of Object.keys(params)){
+			requested[param] = params[param]; 
+		}
+		checkAnimation();
+	}
+	
+	function checkAnimation(){
+		
+		if( shown.timeScale != requested.timeScale ||
+			shown.timeOffset != requested.timeOffset ||
+			shown.canvasFullWidth != requested.canvasFullWidth ||
+			shown.canvasHeight != requested.canvasHeight ||
+			labelMgr.positioningQEmpty() == false){
+			
+			if( !animFrameRequested ){
+				requestAnimationFrame(draw);
+				animFrameRequested = true;
+			}
+		}
+	}
+	
+	function draw(){
+		let doLabelRepositioning = false;
+		animFrameRequested = false;
+		
+		if( shown.timeScale != requested.timeScale ){
+			// change scene time scale
+			lay.sceneChangeTimeScale(requested.timeScale);
+			
+			// adjust the browsers scrollbar
+			// disable temporarily scroll events 
+			let scrollY = lay.scaling.yScale(requested.timeOffset);
+			scrollEventMaskCallback();			
+			window.scroll( window.scrollX, scrollY);
+			console.debug( "draw: timeScaleChanged %f %f scrollTo %f/%d", 
+					shown.timeScale, requested.timeScale, lay.y2Time(scrollY), scrollY);
+			shown.timeScale = requested.timeScale;
+			doLabelRepositioning = true;
+		}
+		
+		if( shown.timeOffset != requested.timeOffset ){
+			console.debug("draw: timeOffset changed %f %f", shown.timeOffset, requested.timeOffset );
+			lay.setTimeOffset(requested.timeOffset);
+			shown.timeOffset = requested.timeOffset;
+			doLabelRepositioning = true;
+
+		}
+
+		if( shown.canvasFullWidth != requested.canvasFullWidth ||
+			shown.canvasHeight != requested.canvasHeight){
+			console.debug("draw: resize");
+			//console.time('canvasResize');
+			lay.canvasResize();
+			//console.timeEnd('canvasResize');
+			shown.canvasFullWidth = requested.canvasFullWidth;
+			shown.canvasHeight = requested.canvasHeight;
+			doLabelRepositioning = true;
+		}	
+
+		if( doLabelRepositioning ){
+			//console.time('labelMgrSceneChanged');
+			labelMgr.sceneChanged();
+			//console.timeEnd('labelMgrSceneChanged');
+		}
+		console.debug("draw: labels in q %d", labelMgr.positioningQ.length());
+
+		//console.time('labelMgrPlace');
+		labelMgr.placeLabels();
+		//console.timeEnd('labelMgrPlace');
+		
+		//console.time('updateDrawing');
+		updateDrawing(lay, traceData);
+		//console.timeEnd('updateDrawing');
+		
+		checkAnimation();
+	}
+	this.setScrollEventMaskCallback = function(cb){
+		scrollEventMaskCallback = cb;
+	}
+	
 }
 
 
@@ -1634,6 +1721,18 @@ function TooltipControl(lay) {
 		.duration(500)		
 		.style("opacity", 0);	
 	}
+	function numToRgbString( num ){
+		let r = (num & 0x00ff0000) >> 16;
+		let g = (num & 0x0000ff00) >> 8;
+		let b = (num & 0x000000ff);
+		
+		return `rgb(
+		  ${r}, 
+		  ${g}, 
+		  ${b} 
+		  )`; 
+	}
+
 	
 	window.addEventListener("mousemove", this.mouseMove);
 }
@@ -1787,14 +1886,56 @@ function rotatePoint( point, center, theta ){
 	return rv;
 }
 
-function numToRgbString( num ){
-	let r = (num & 0x00ff0000) >> 16;
-	let g = (num & 0x0000ff00) >> 8;
-	let b = (num & 0x000000ff);
+
+//----------------------------------------------------------------------------
+// A Queue
+
+function Queue() {
+	this.elements = [];	// the queue elements
 	
-	return `rgb(
-	  ${r}, 
-	  ${g}, 
-	  ${b} 
-	  )`; 
-}
+	//@param: variable number of objects to push to queue 
+	this.push = function(){
+		Array.prototype.push.apply( this.elements, Array.from(arguments));
+	}
+	
+	//@param: arr Array of objects to push to queue 
+	this.pushArray = function(arr){
+		Array.prototype.push.apply( this.elements, arr);
+	}
+	// remove first element from queue
+	//@return: first element in queue or undefined
+	this.shift = function(){
+		return this.elements.shift();
+	}
+	
+	//@return: Number of elements in queue
+	this.length = function(){
+		return this.elements.length;
+	}
+	
+	//test if elem is in queue
+	//@return: true if so
+	this.includes = function(elem){
+		return this.elements.includes(elem);
+	}
+	
+	this.elements = Array.from(arguments);	
+};
+
+
+/*function QueueTest(){
+	var q = new Queue(1,2,3,4), e;
+	
+	console.log("q length %d", q.length())
+	q.push(5);
+	console.log("q length %d", q.length())
+	console.log("q includes 3 %s", q.includes(3))
+	while( (e=q.shift()) != undefined)
+		console.log(e);
+	q.pushArray([8,9]);
+	console.log("q length %d", q.length())
+	console.log("q includes 3 %s", q.includes(3))
+	while( (e=q.shift()) != undefined)
+		console.log(e);
+				
+}*/
