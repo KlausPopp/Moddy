@@ -1,7 +1,7 @@
 /**
  * Moddy sequence diagram interactive viewer
  * Author: klauspopp@gmx.de
- * Licence: GPLV2
+ * License: GPLV2
  */
 
 'use strict'
@@ -12,23 +12,225 @@
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.3";
+const g_version = "0.4";
 
+//-----------------------------------------------------------------------------------
+// Shape classes. Must appear in source code before their usage
+
+//base class for drawing shapes
+class Shape {
+	constructor( objData ){
+		this.objData = objData;
+	}
+	isVisible(visibleRange){
+		return false;
+	}
+	draw(){
+	}
+}
+
+class MsgLineShape extends Shape {
+	constructor( objData){
+		super(objData);
+	}
+	isVisible(visibleRange){
+		let d = this.objData;
+		return isShapeVisible( visibleRange, (d.tp=="T-EXP") ? d.t : d.b, d.t );
+	}
+	draw(){
+		let d = this.objData;
+		let from = {}, to = {};
+		from.x = (d.tp=="T-EXP") ? g_lay.partCenterX(d.p)-50 : g_lay.partCenterX(d.p);
+		from.y = g_lay.time2CanvasY((d.tp=="T-EXP") ? d.t : d.b);
+		to.x = (d.tp=="T-EXP") ? g_lay.partCenterX(d.p) : g_lay.partCenterX(d.s);
+		to.y = g_lay.time2CanvasY(d.t);
+		this.drawMsgLine( g_lay.canvas.mh.main.ctx, from, to, 
+				('c' in d) ? d.c : (d.tp=="T-EXP") ? 'blue':'black',
+				d.l == "t" ? true : false);
+
+	}
+
+	drawMsgLine( ctx, from, to, color, lost ){
+		
+		if( lost ){
+			// shorten line if a lost message shall be drawn
+			let dx = to.x - from.x;
+			let dy = to.y - from.y;
+			to.x = to.x - dx * 0.2;
+			to.y = to.y - dy * 0.2;
+		}
+		ctx.beginPath();
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 1;
+		ctx.moveTo( from.x, from.y);
+		ctx.lineTo( to.x, to.y);
+		
+		if( !lost ){
+			// draw arrowhead
+			const angle = 18;
+			const arrowLen = 10;
+			var point = this.msgLineArrowHead( from, to, angle, arrowLen);
+			ctx.lineTo( point.x, point.y );
+			ctx.moveTo( to.x, to.y);
+			point = this.msgLineArrowHead( from, to, -angle, arrowLen);
+			ctx.lineTo( point.x, point.y );
+		}
+		else {
+			// draw "x" at end of line
+			const angle = 45;
+			const arrowLen = 6;
+			var point = this.msgLineArrowHead( from, to, angle, arrowLen);
+			ctx.lineTo( point.x, point.y );
+			point = this.msgLineArrowHead( from, to, angle+180, arrowLen);
+			ctx.lineTo( point.x, point.y );
+			ctx.moveTo( to.x, to.y);
+			point = this.msgLineArrowHead( from, to, -angle, arrowLen);
+			ctx.lineTo( point.x, point.y );
+			point = this.msgLineArrowHead( from, to, -angle+180, arrowLen);
+			ctx.lineTo( point.x, point.y );
+			
+		}
+		ctx.stroke();
+	}
+	msgLineArrowHead( from, to, angle, length){
+		var dx = to.x - from.x;
+		var dy = to.y - from.y;
+		var theta = Math.atan2(dy, dx);
+		var rad = radians(angle);
+		return { x: to.x - length * Math.cos(theta + rad), 
+			     y: to.y - length * Math.sin(theta + rad)};
+	}
+
+} 
+
+class BoxShape extends Shape {
+	constructor( objData){
+		super(objData);
+	}
+	isVisible(visibleRange){
+		let d = this.objData;
+		return isShapeVisible( visibleRange, d.b, d.t );
+	}
+	draw(){
+		let d = this.objData;
+		let from = {}, to = {};
+		let strokeStyle = ('sc' in d) ? d.sc : 'orange';
+		let fillStyle = ('fc' in d) ? d.fc : 'white';
+		let width = (d.tp=="STA") ? g_diagramArgs.statusBoxWidth : g_diagramArgs.variableBoxWidth;
+		let x = g_lay.partCenterX(d.p) - width/2;
+		let y = g_lay.time2CanvasY(d.b);
+		let height = g_lay.scaling.yScale(d.t - d.b);
+		this.drawBox( g_lay.canvas.mh.main.ctx, x, y, width, height, strokeStyle, fillStyle);
+
+		// draw box into hidden canvas, so that tooltip can identify status
+		let rgb = g_tooltipControl.registerObj( d.txt );
+		
+		if( rgb != undefined)
+			this.drawBox( g_lay.canvas.mh.hidden.ctx, x, y, width, height, undefined, rgb);
+
+	}
+	drawBox( ctx, x, y, width, height, strokeStyle, fillStyle ){
+		ctx.fillStyle = fillStyle;
+		ctx.fillRect( x, y, width, height);
+		if( strokeStyle != undefined){
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = strokeStyle;
+			ctx.strokeRect( x, y, width, height);
+		}
+	}
+}
+
+class AnnLineShape extends Shape {
+	constructor( objData){	// sdl
+		super(objData);
+	}
+	isVisible(visibleRange){
+		let d = this.objData;
+		return isShapeVisible( visibleRange, d.refLine.y1, d.refLine.y2 );
+	}
+	draw(){
+		let d = this.objData;
+		let from = { x: d.xPos(d.targetPoint.p, d.targetPoint.xo), y: g_lay.time2CanvasY(d.targetPoint.y) };
+		let to   = { x: d.getCurrentCenter().x - 1, y: d.getCurrentCenter().y - 4 };
+		
+		this.drawAnnLine( g_lay.canvas.mh.main.ctx, from, to, d.color );
+	}
+	drawAnnLine( ctx, from, to, color ){
+		ctx.save();
+		ctx.beginPath();
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 0.5;
+		ctx.moveTo( from.x, from.y);
+		ctx.lineTo( to.x, to.y);
+		ctx.stroke();
+		ctx.restore();
+	}
+}
+
+class LabelShape extends Shape {
+	constructor( objData){	// sdl
+		super(objData);
+	}
+	isVisible(visibleRange){
+		let d = this.objData;
+		return isShapeVisible( visibleRange, d.refLine.y1, d.refLine.y2 );
+	}
+	draw(ctx){
+		let d = this.objData;
+
+		// just for debugging 
+		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), "pink"); 
+		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentRefLinePolygon(), "pink"); 
+		this.drawLabel( g_lay.canvas.mh.main.ctx, 
+				d.getText(),
+				d.getCurrentCenter(),
+				d.getAnchor(),
+				d.getCurrentRotation(),
+				d.color);
+		// draw label polygon into hidden canvas, so that tooltip can identify label
+		let rgb = g_tooltipControl.registerObj( d.fullText );
+		
+		if( rgb != undefined)
+			this.drawLabelPolygon( g_lay.canvas.mh.hidden.ctx, d.getCurrentTextPolygon(), rgb);
+	}
+	
+	drawLabel(ctx, text, anchorPoint, textAlign, rotation, fillStyle){
+		
+		ctx.save();
+		ctx.translate(anchorPoint.x, anchorPoint.y);
+		ctx.rotate( rotation );
+		ctx.textAlign = textAlign;
+		ctx.fillStyle = fillStyle;
+		ctx.fillText( text, 0, 0);
+		ctx.restore();
+	}
+	drawLabelPolygon( ctx, polygon, fillStyle ){
+		ctx.fillStyle = fillStyle;
+		//console.log("fillStyle ", fillStyle)
+		ctx.beginPath();
+		ctx.moveTo( polygon[0].x, polygon[0].y);
+		ctx.lineTo( polygon[1].x, polygon[1].y);
+		ctx.lineTo( polygon[2].x, polygon[2].y);
+		ctx.lineTo( polygon[3].x, polygon[3].y);
+		ctx.closePath();
+		ctx.fill();	
+	}
+}
+
+//---------------------------------------------------------------------------------------------------
+// STARTUP
+// 
 
 var g_diagramArgs = getDiagramArgs( g_moddyDiagramArgs );
 var g_lay = new DrawingLayout(g_moddyDiagramParts, g_moddyTracedEvents);
 var g_tooltipControl = new TooltipControl(g_lay);
-var g_traceData = {
-	msgLines: { data: [] },	// data for message lines (<MSG, T-EXP), refs to g_moddyTracedEvents
-	boxes:    { data: [] },	// data for boxes (STA, VC), refs to g_moddyTracedEvents
-	annLines: { data: [] },	// data for annotation lines (ANN, ASSFAIL), refs to g_moddyTracedEvents
-	labels:   { data: [] },	// data for labels (all types), SdLabel objects
-	lifelines: { }
-}
   
-distributeTraceData();
-var g_labelMgr = new LabelMgr(g_lay, g_traceData.labels, 40 /*ms*/);
-var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, g_traceData, g_labelMgr )
+let drawObjs = distributeTraceData(g_moddyTracedEvents);
+let _shapes = drawObjs.shapes;
+let _labels = drawObjs.labels;
+
+var g_labelMgr = new LabelMgr(g_lay, _labels, 40 /*ms*/);
+var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ )
 var g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
 var g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_drawingUpdateMgr);
 g_drawingUpdateMgr.requestParam({
@@ -144,7 +346,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	}
 	
 	// add <dx> to the centerX of part <idx> and all parts on the right to part  
-	this.modifyPartCenter = function( idx, dx){
+	this.modifyPartCenterToRight = function( idx, dx){
 		
 		let leftLimit = (idx == 0) ? 50 : partArray[idx-1].centerX + 50;
 		
@@ -161,6 +363,25 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		return false;
 	}
 	
+	// 
+	this.modifyPartCenterDistance = function( idx, dx){
+		
+		let leftLimit = (idx == 0) ? 50 : partArray[idx-1].centerX + 50;
+		
+		if( idx > 0 && partArray[idx].centerX + dx >= leftLimit){
+			let baseDx = idx==0 ? dx : dx/idx
+					
+			
+			for( let i=1; i < partArray.length; i++){
+				let part = partArray[i];
+				part.centerX += baseDx * i;
+			}
+			
+			this.setLogicalCanvasWidth( partArray.slice(-1)[0].centerX + this.spacingAfterLastPart() )
+			return true;
+		}
+		return false;
+	}
 	this.partCenterX = function( partNo ){
 		if (partNo == -1)
 			return 0;	// "global" part 
@@ -241,7 +462,11 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	this.partDragged = function(d,i) {
 		let dx = d3.event.x - that.parts.dragLastX;	// compute how much dragged in X direction
 		that.parts.dragLastX = d3.event.x;
-		that.modifyPartCenter( i, dx );					// update part and all parts on the right
+		if (d3.event.sourceEvent.shiftKey){
+			that.modifyPartCenterDistance( i, dx );					// update distance between all parts
+		} else {
+			that.modifyPartCenterToRight( i, dx );					// update part and all parts on the right
+		}
 		that.updatePartBoxes();
 		g_drawingUpdateMgr.requestParam({ canvasFullWidth: that.canvas.fullWidth });
 	}
@@ -459,52 +684,6 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 //---------------------------------------------------------------------------------
 /// YAxis
 
-function yAxisTickSteps(){
-	var divPx = 60; 	
-	
-	var timeUnitsPerDiv = g_lay.scaling.maxTs*1E15/g_lay.scaling.sceneHeight*divPx;	// How much time in one div
-	var logTuPerDiv = Math.log10(timeUnitsPerDiv);
-	var floorlogTuPerDiv = Math.floor(logTuPerDiv);
-	var rv;
-	
-	if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(5)))
-		rv = Math.pow(10,floorlogTuPerDiv) * 5;
-	else if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(2)))
-		rv = Math.pow(10,floorlogTuPerDiv) * 2;
-	else
-		rv = Math.pow(10,floorlogTuPerDiv);
-	rv /= 1E15;
-	//console.log ("yAxisTickSteps %f timeUnitsPerDiv %.3f logTuPerDiv %.3f ",  rv, timeUnitsPerDiv, logTuPerDiv);
-	return rv;
-	
-}
-function yAxisformatTickValue(time, steps)
-{
-	var rv;
-	var fmt = ".0f"
-	if( steps >= 1.0) rv = d3.format(fmt)(time) + " s";	
-	else if( steps >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
-	else if( steps >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
-	else if( steps >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
-	else if( steps >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
-	return rv;
-}
-
-function drawYAxisTick(ctx, y, width){
-	ctx.beginPath();
-	ctx.lineWidth = 0.3;
-	ctx.strokeStyle = "grey";
-	ctx.moveTo( 0, y);
-	ctx.lineTo( width, y);
-	ctx.stroke();
-}
-
-function drawYAxisText(ctx, time, steps, y){
-	ctx.textAlign = "end";
-	ctx.fillStyle = "grey";
-	ctx.fillText( yAxisformatTickValue(time, steps), -5, y+5);
-}
-
 function yAxisRedraw()
 {
 	var timerange = g_lay.getVisibleTimeRange();
@@ -515,26 +694,64 @@ function yAxisRedraw()
 		drawYAxisTick(g_lay.canvas.mh.main.ctx, g_lay.time2CanvasY(t), g_lay.canvas.width);
 		drawYAxisText(g_lay.canvas.mh.main.ctx, t, steps, g_lay.time2CanvasY(t));
 	}
+	
+	function drawYAxisTick(ctx, y, width){
+		ctx.beginPath();
+		ctx.lineWidth = 0.3;
+		ctx.strokeStyle = "grey";
+		ctx.moveTo( 0, y);
+		ctx.lineTo( width, y);
+		ctx.stroke();
+	}
+	function drawYAxisText(ctx, time, steps, y){
+		ctx.textAlign = "end";
+		ctx.fillStyle = "grey";
+		ctx.fillText( yAxisformatTickValue(time, steps), -5, y+5);
+
+		function yAxisformatTickValue(time, steps)
+		{
+			var rv;
+			var fmt = ".0f"
+			if( steps >= 1.0) rv = d3.format(fmt)(time) + " s";	
+			else if( steps >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
+			else if( steps >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
+			else if( steps >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
+			else if( steps >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
+			return rv;
+		}
+	}
+	function yAxisTickSteps(){
+		var divPx = 60; 	
+		
+		var timeUnitsPerDiv = g_lay.scaling.maxTs*1E15/g_lay.scaling.sceneHeight*divPx;	// How much time in one div
+		var logTuPerDiv = Math.log10(timeUnitsPerDiv);
+		var floorlogTuPerDiv = Math.floor(logTuPerDiv);
+		var rv;
+		
+		if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(5)))
+			rv = Math.pow(10,floorlogTuPerDiv) * 5;
+		else if( logTuPerDiv > (floorlogTuPerDiv + Math.log10(2)))
+			rv = Math.pow(10,floorlogTuPerDiv) * 2;
+		else
+			rv = Math.pow(10,floorlogTuPerDiv);
+		rv /= 1E15;
+		//console.log ("yAxisTickSteps %f timeUnitsPerDiv %.3f logTuPerDiv %.3f ",  rv, timeUnitsPerDiv, logTuPerDiv);
+		return rv;
+		
+	}
+
 }
 
 
   
 //---------------------------------------------------------------------------------
 // Parse moddy trace data
-
-
-
-// Distribute g_moddyTracedEvents into the different g_traceData objects so that
-// there is a 1:1 relation between the data and the traced objects
-function distributeTraceData(){
-	g_traceData.msgLines.data = [];
-	g_traceData.boxes.data = [];
-	g_traceData.annLines.data = [];
-	g_traceData.labels.data = [];
+// Create from allEvents the drawing shape objects and the SdLabel Objects
+function distributeTraceData(allEvents){
+	let shapes = { msgLines:[], boxes:[], annLines:[], labels:[]};
+	let labels = [];
 	
-	for( let e of g_moddyTracedEvents){
-		
-		
+	for( let e of allEvents){
 		var refLine = { xo1:0, xo2:0}, anchor="center", color="black", allowBelowLine=false;
 		var targetPoint = null;
 		
@@ -584,24 +801,29 @@ function distributeTraceData(){
 			color = e.c;
 		
 		var sdl = new SdLabel( refLine, anchor, e.txt, color, g_lay, targetPoint, allowBelowLine );
-		g_traceData.labels.data.push( sdl );
+		labels.push( sdl );
 
+		shapes.labels.push(new LabelShape(sdl));
+		
 		switch(e.tp){
 		case "<MSG":
 		case "T-EXP":
-			g_traceData.msgLines.data.push(e);
+			shapes.msgLines.push(new MsgLineShape(e));
 			break;
 		case "STA":
 		case "VC":
-			g_traceData.boxes.data.push(e);
+			shapes.boxes.push(new BoxShape(e));
 			break;
 		case "ANN":
 		case "ASSFAIL":
-			g_traceData.annLines.data.push(sdl);
+			shapes.annLines.push(new AnnLineShape(sdl));
 			break;
 		}
 
 	}
+	// combine all shapes into one array. Draw boxes first, annLines last
+	let allShapes = shapes.boxes.concat(shapes.msgLines).concat(shapes.labels).concat(shapes.annLines);
+	return { shapes: allShapes, labels: labels}
 }
 
     
@@ -1006,21 +1228,7 @@ function isShapeVisible( visibleRange, beginY, endY ){
 }
 
 //---------------------------------------------------------------------------------
-//draw the part life lines
-
-function drawLifeLine( ctx, from, to ){
-	ctx.save();
-	ctx.beginPath();
-	ctx.setLineDash([5,5]);
-	ctx.strokeStyle = "grey";
-	ctx.lineWidth = 0.5;
-	ctx.moveTo( from.x, from.y);
-	ctx.lineTo( to.x, to.y);
-	ctx.stroke();
-	ctx.restore();
-}
-
-
+// Draw the part life lines
 function updatePartLifeLines(){
 	var visibleRange = g_lay.getVisibleTimeRange();
 	var y0=g_lay.time2CanvasY(visibleRange.start);
@@ -1032,252 +1240,24 @@ function updatePartLifeLines(){
 		
 		drawLifeLine( g_lay.canvas.mh.main.ctx, from, to );
 	}
-}
-
-
-
-//---------------------------------------------------------------------------------
-/// Message line drawing
-
-function msgLineArrowHead( from, to, angle, length){
-	var dx = to.x - from.x;
-	var dy = to.y - from.y;
-	var theta = Math.atan2(dy, dx);
-	var rad = radians(angle);
-	return { x: to.x - length * Math.cos(theta + rad), 
-		     y: to.y - length * Math.sin(theta + rad)};
-}
-
-function drawMsgLine( ctx, from, to, color, lost ){
-	
-	if( lost ){
-		// shorten line if a lost message shall be drawn
-		let dx = to.x - from.x;
-		let dy = to.y - from.y;
-		to.x = to.x - dx * 0.2;
-		to.y = to.y - dy * 0.2;
+	function drawLifeLine( ctx, from, to ){
+		ctx.save();
+		ctx.beginPath();
+		ctx.setLineDash([5,5]);
+		ctx.strokeStyle = "grey";
+		ctx.lineWidth = 0.5;
+		ctx.moveTo( from.x, from.y);
+		ctx.lineTo( to.x, to.y);
+		ctx.stroke();
+		ctx.restore();
 	}
-	ctx.beginPath();
-	ctx.strokeStyle = color;
-	ctx.lineWidth = 1;
-	ctx.moveTo( from.x, from.y);
-	ctx.lineTo( to.x, to.y);
-	
-	if( !lost ){
-		// draw arrowhead
-		const angle = 18;
-		const arrowLen = 10;
-		var point = msgLineArrowHead( from, to, angle, arrowLen);
-		ctx.lineTo( point.x, point.y );
-		ctx.moveTo( to.x, to.y);
-		point = msgLineArrowHead( from, to, -angle, arrowLen);
-		ctx.lineTo( point.x, point.y );
-	}
-	else {
-		// draw "x" at end of line
-		const angle = 45;
-		const arrowLen = 6;
-		var point = msgLineArrowHead( from, to, angle, arrowLen);
-		ctx.lineTo( point.x, point.y );
-		point = msgLineArrowHead( from, to, angle+180, arrowLen);
-		ctx.lineTo( point.x, point.y );
-		ctx.moveTo( to.x, to.y);
-		point = msgLineArrowHead( from, to, -angle, arrowLen);
-		ctx.lineTo( point.x, point.y );
-		point = msgLineArrowHead( from, to, -angle+180, arrowLen);
-		ctx.lineTo( point.x, point.y );
-		
-	}
-	ctx.stroke();
+
 }
 
-function updateMsgLines(msgLinesData, updateOptions){
-	var visibleRange = g_lay.getVisibleTimeRange();
-	
-	for( let d of msgLinesData.data ){
-		if (isShapeVisible( visibleRange, (d.tp=="T-EXP") ? d.t : d.b, d.t )){
-		
-			var from = {}, to = {};
-			from.x = (d.tp=="T-EXP") ? g_lay.partCenterX(d.p)-50 : g_lay.partCenterX(d.p);
-			from.y = g_lay.time2CanvasY((d.tp=="T-EXP") ? d.t : d.b);
-			to.x = (d.tp=="T-EXP") ? g_lay.partCenterX(d.p) : g_lay.partCenterX(d.s);
-			to.y = g_lay.time2CanvasY(d.t);
-			drawMsgLine( g_lay.canvas.mh.main.ctx, from, to, 
-					('c' in d) ? d.c : (d.tp=="T-EXP") ? 'blue':'black',
-					d.l == "t" ? true : false);
-		}
-	} 
-}
-
-
-//---------------------------------------------------------------------------------
-/// Boxes drawing
-
-function drawBox( ctx, x, y, width, height, strokeStyle, fillStyle ){
-	ctx.fillStyle = fillStyle;
-	ctx.fillRect( x, y, width, height);
-	if( strokeStyle != undefined){
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = strokeStyle;
-		ctx.strokeRect( x, y, width, height);
-	}
-}
-
-function updateBoxes(boxesData, updateOptions){
-	var visibleRange = g_lay.getVisibleTimeRange();
-	
-	for( let d of boxesData.data ){
-		if (isShapeVisible( visibleRange, d.b, d.t )){
-			let strokeStyle = ('sc' in d) ? d.sc : 'orange';
-			let fillStyle = ('fc' in d) ? d.fc : 'white';
-			let width = (d.tp=="STA") ? g_diagramArgs.statusBoxWidth : g_diagramArgs.variableBoxWidth;
-			let x = g_lay.partCenterX(d.p) - width/2;
-			let y = g_lay.time2CanvasY(d.b);
-			let height = g_lay.scaling.yScale(d.t - d.b);
-			drawBox( g_lay.canvas.mh.main.ctx, x, y, width, height, strokeStyle, fillStyle);
-
-			// draw box into hidden canvas, so that tooltip can identify status
-			let rgb = g_tooltipControl.registerObj( d.txt );
-			
-			if( rgb != undefined)
-				drawBox( g_lay.canvas.mh.hidden.ctx, x, y, width, height, undefined, rgb);
-
-		}
-	}
-}
-
-//---------------------------------------------------------------------------------
-/// Annotation lines drawing
-
-function drawAnnLine( ctx, from, to, color ){
-	ctx.save();
-	ctx.beginPath();
-	ctx.strokeStyle = color;
-	ctx.lineWidth = 0.5;
-	ctx.moveTo( from.x, from.y);
-	ctx.lineTo( to.x, to.y);
-	ctx.stroke();
-	ctx.restore();
-}
-
-function updateAnnLines(annLinesData, updateOptions){
-	
-	var visibleRange = g_lay.getVisibleTimeRange();
-	
-	for( let d of annLinesData.data ){
-		if (isShapeVisible( visibleRange, d.refLine.y1, d.refLine.y2 )){
-			var from = { x: d.xPos(d.targetPoint.p, d.targetPoint.xo), y: g_lay.time2CanvasY(d.targetPoint.y) };
-			var to   = { x: d.getCurrentCenter().x - 1, y: d.getCurrentCenter().y - 4 };
-			
-			drawAnnLine( g_lay.canvas.mh.main.ctx, from, to, d.color );
-		}
-	}	
-}
-
-//---------------------------------------------------------------------------------
-/// Label drawing
-
-function drawLabel(ctx, text, anchorPoint, textAlign, rotation, fillStyle){
-	
-	ctx.save();
-	ctx.translate(anchorPoint.x, anchorPoint.y);
-	ctx.rotate( rotation );
-	ctx.textAlign = textAlign;
-	ctx.fillStyle = fillStyle;
-	ctx.fillText( text, 0, 0);
-	ctx.restore();
-}
-
-function drawLabelPolygon( ctx, polygon, fillStyle ){
-	ctx.fillStyle = fillStyle;
-	//console.log("fillStyle ", fillStyle)
-	ctx.beginPath();
-	ctx.moveTo( polygon[0].x, polygon[0].y);
-	ctx.lineTo( polygon[1].x, polygon[1].y);
-	ctx.lineTo( polygon[2].x, polygon[2].y);
-	ctx.lineTo( polygon[3].x, polygon[3].y);
-	ctx.closePath();
-	ctx.fill();	
-}
-
-
-function updateLabels(labelsData, updateOptions){
-
-	//console.time('updateLabels');
-	// filter visible labels
-	
-	for( let d of g_labelMgr.visibleLabels){ // TODO
-		// just for debugging 
-		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), "pink"); 
-		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentRefLinePolygon(), "pink"); 
-		drawLabel( g_lay.canvas.mh.main.ctx, 
-				d.getText(),
-				d.getCurrentCenter(),
-				d.getAnchor(),
-				d.getCurrentRotation(),
-				d.color);
-		
-		// draw label polygon into hidden canvas, so that tooltip can identify label
-		let rgb = g_tooltipControl.registerObj( d.fullText );
-		
-		if( rgb != undefined)
-			drawLabelPolygon( g_lay.canvas.mh.hidden.ctx, d.getCurrentTextPolygon(), rgb);
-	}
-	//console.timeEnd('updateLabels');
-	
-}
-	 
-//
-// Update the whole szene after
-// Y-scale change, scrolling, resizing
-// @param lay DrawingLayout
-// @param traceData usually g_traceData
-// @param updateOptions { NONE at the moment  }
-//
-function updateDrawing(
-		lay,
-		traceData, 
-		updateOptions = {}
-	) {
-	//console.log("updateDrawing");
-	
-	g_tooltipControl.resetObjMgr();
-	
-	// clear canvas
-	lay.canvasClear();
-	
-	lay.canvasCallCtx( "save" );
-	lay.canvasCallCtx( "translate", g_lay.canvas.margin.left, 0);
-
-
-	// Update Y Axis
-	yAxisRedraw();
-
-	// Update life lines
-	updatePartLifeLines()
-	
-	// Update Boxes 
-	updateBoxes( traceData.boxes, updateOptions );
-
-	// Update msg Lines
-	updateMsgLines( traceData.msgLines, updateOptions );
-	
-	// Update labels 
-	updateLabels( traceData.labels, updateOptions );
-	// Update Ann lines 
-	updateAnnLines( traceData.annLines, updateOptions );
-
-	lay.canvasCallCtx( "restore" );
-	
-	lay.scrollDummyUpdate();
-	g_timeScaleControl.setSliderValue(lay.scaling.scaleFactor);
-}
- 
 //-----------------------------------------------------------------------------
 // Label Manager
 //
-
-function LabelMgr( lay, labelsData, maxPlacementTime ) {
+function LabelMgr( lay, labels, maxPlacementTime ) {
 	
 	this.positioningQ = new Queue();
 	this.visibleLabels = [];
@@ -1288,7 +1268,7 @@ function LabelMgr( lay, labelsData, maxPlacementTime ) {
 		let visibleLabels = [];
 		let visibleRange = lay.getVisibleTimeRange();	
 
-		for( let sdl of labelsData.data ){
+		for( let sdl of labels ){
 			if (isShapeVisible( visibleRange, sdl.refLine.y1, sdl.refLine.y2 )){
 				sdl.resetPolygonCache();
 				visibleLabels.push(sdl);
@@ -1360,9 +1340,6 @@ function LabelMgr( lay, labelsData, maxPlacementTime ) {
 //-----------------------------------------------------------------------------
 // Time scaling Controls
 //
-
-
-// Time scale control object 
 function TimeScaleControl(lay, drawingUpdateMgr) {
 	let hasAnimFrameRequested = false;
 	
@@ -1449,7 +1426,7 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 	}
 
 	
-	// Change the time scale, do update decoupled via requestAnmiationFrame 
+	// Change the time scale, do update decoupled via drawingMgr
 	// @param scale the new scale (1.0=original scale)
 	// @param screenZoomY zoom around this y screen position 
 	this.setTimeScale = function( scaleFactor, screenZoomY){
@@ -1526,14 +1503,15 @@ function WindowChangeControl(lay, timeScaleControl, drawingUpdateMgr) {
 //-------------------------------------------------------------------------------------
 // Drawing update manager
 //
-function DrawingUpdateMgr(lay, traceData, labelMgr){
+function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 	// these variables store the currently shown and the requested parameters:
 	// timeScale, timeOffset, canvasFullWidth, canvasHeight 
 	let shown = {};		 
 	let requested = {};
+	
 	let animFrameRequested = false;
 	let scrollEventMaskCallback;
-
+	let redrawShapeIdx = 0;
 	
 	this.requestParam = function( params ){
 		for( let param of Object.keys(params)){
@@ -1548,7 +1526,8 @@ function DrawingUpdateMgr(lay, traceData, labelMgr){
 			shown.timeOffset != requested.timeOffset ||
 			shown.canvasFullWidth != requested.canvasFullWidth ||
 			shown.canvasHeight != requested.canvasHeight ||
-			labelMgr.positioningQEmpty() == false){
+			labelMgr.positioningQEmpty() == false ||
+			redrawShapeIdx < shapes.length-1){
 			
 			if( !animFrameRequested ){
 				requestAnimationFrame(draw);
@@ -1558,7 +1537,7 @@ function DrawingUpdateMgr(lay, traceData, labelMgr){
 	}
 	
 	function draw(){
-		let doLabelRepositioning = false;
+		let doCompleteRedraw = false;
 		animFrameRequested = false;
 		
 		if( shown.timeScale != requested.timeScale ){
@@ -1573,15 +1552,14 @@ function DrawingUpdateMgr(lay, traceData, labelMgr){
 			console.debug( "draw: timeScaleChanged %f %f scrollTo %f/%d", 
 					shown.timeScale, requested.timeScale, lay.y2Time(scrollY), scrollY);
 			shown.timeScale = requested.timeScale;
-			doLabelRepositioning = true;
+			doCompleteRedraw = true;
 		}
 		
 		if( shown.timeOffset != requested.timeOffset ){
 			console.debug("draw: timeOffset changed %f %f", shown.timeOffset, requested.timeOffset );
 			lay.setTimeOffset(requested.timeOffset);
 			shown.timeOffset = requested.timeOffset;
-			doLabelRepositioning = true;
-
+			doCompleteRedraw = true;
 		}
 
 		if( shown.canvasFullWidth != requested.canvasFullWidth ||
@@ -1592,13 +1570,15 @@ function DrawingUpdateMgr(lay, traceData, labelMgr){
 			//console.timeEnd('canvasResize');
 			shown.canvasFullWidth = requested.canvasFullWidth;
 			shown.canvasHeight = requested.canvasHeight;
-			doLabelRepositioning = true;
+			doCompleteRedraw = true;
 		}	
 
-		if( doLabelRepositioning ){
-			//console.time('labelMgrSceneChanged');
+		if( doCompleteRedraw ){
 			labelMgr.sceneChanged();
-			//console.timeEnd('labelMgrSceneChanged');
+			beginRedraw();
+		}
+		else {
+			beginPartialDraw();
 		}
 		console.debug("draw: labels in q %d", labelMgr.positioningQ.length());
 
@@ -1606,16 +1586,63 @@ function DrawingUpdateMgr(lay, traceData, labelMgr){
 		labelMgr.placeLabels();
 		//console.timeEnd('labelMgrPlace');
 		
-		//console.time('updateDrawing');
-		updateDrawing(lay, traceData);
-		//console.timeEnd('updateDrawing');
-		
+		//console.time('drawShapes');
+		drawShapes();
+		//console.timeEnd('drawShapes');
+		endRedraw();
 		checkAnimation();
 	}
 	this.setScrollEventMaskCallback = function(cb){
 		scrollEventMaskCallback = cb;
 	}
+
+	function beginRedraw(){
+		g_tooltipControl.resetObjMgr();
+		
+		// clear canvas
+		lay.canvasClear();
+		
+		beginPartialDraw();
+
+		// Update Y Axis
+		yAxisRedraw();
+
+		// Update life lines
+		updatePartLifeLines();
+		
+		redrawShapeIdx = 0;
+	}
 	
+	function beginPartialDraw(){
+		lay.canvasCallCtx( "save" );
+		lay.canvasCallCtx( "translate", g_lay.canvas.margin.left, 0);
+	}
+	function drawShapes(){
+		let startTime = performance.now();
+		let numDrawnShapes = 0;
+		let visibleRange = lay.getVisibleTimeRange();
+		let shapeIdx;
+		
+		for( shapeIdx = redrawShapeIdx; shapeIdx < shapes.length; shapeIdx++){
+			let shape = shapes[shapeIdx];
+			if( shape.isVisible(visibleRange) ){
+				shape.draw();
+				numDrawnShapes += 1;
+			}
+			if( (numDrawnShapes > 10) && (performance.now() - startTime > maxShapeDrawTime) ){
+				shapeIdx++;
+				break;
+			}
+		}
+		redrawShapeIdx = shapeIdx;
+	}
+	
+	function endRedraw(){
+		lay.canvasCallCtx( "restore" );
+		
+		lay.scrollDummyUpdate();
+		g_timeScaleControl.setSliderValue(lay.scaling.scaleFactor);		
+	}
 }
 
 
@@ -1922,20 +1949,3 @@ function Queue() {
 	this.elements = Array.from(arguments);	
 };
 
-
-/*function QueueTest(){
-	var q = new Queue(1,2,3,4), e;
-	
-	console.log("q length %d", q.length())
-	q.push(5);
-	console.log("q length %d", q.length())
-	console.log("q includes 3 %s", q.includes(3))
-	while( (e=q.shift()) != undefined)
-		console.log(e);
-	q.pushArray([8,9]);
-	console.log("q length %d", q.length())
-	console.log("q includes 3 %s", q.includes(3))
-	while( (e=q.shift()) != undefined)
-		console.log(e);
-				
-}*/
