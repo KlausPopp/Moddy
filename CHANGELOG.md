@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.5.0] - 2018-12-19
 ### Changed
-- iaViewer 0.4: Improved responsitivity: Handles now huge drawings by using deferred drawing. Support assertion failures.
+- iaViewer 0.5: Improved responsitivity: Handles now huge drawings by using deferred drawing. Support assertion failures. Fixed vScroll bug.
 
 ### Added
 - support for model assertions: models can call assertionFailed(). Simulator by default stops on assertionFailure. Use sim.run(stopOnAssertionFailure=False) to override this. Simulator displays a list of all assertion failures at end of simulation  
