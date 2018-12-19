@@ -4,6 +4,11 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.90] - 2018-12-18
+### Changed
+- iaViewer 0.4: Improved responsitivity: Handles now huge drawings by using deferred drawing
+-  
+
 ## [1.4.2] - 2018-12-12
 ### Changed
 - iaViewer 0.3: Improved responsitivity: Removed limitation where labels are no more placed when more than 100 labels visible. Only a few Labels are now placed in each animationframe.
