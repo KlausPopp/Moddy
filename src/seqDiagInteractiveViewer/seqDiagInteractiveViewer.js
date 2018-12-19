@@ -8,7 +8,11 @@
 
 /*
  * TODO
+ * vscrolling not exact
+ * Search text function
+ * Time markers
  * Support time range
+ * 
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
@@ -791,7 +795,7 @@ function distributeTraceData(allEvents){
 			refLine.xo1 = +22;
 			refLine.p2 = e.p+1; 
 			refLine.y1 = refLine.y2 = e.t;
-			color = "red";
+			color = e.tp == "ANN" ? "red" : "purple";
 			anchor="start";
 			targetPoint = {p: e.p, xo: 0, y: e.t}
 			allowBelowLine = true;
