@@ -8,7 +8,6 @@
 
 /*
  * TODO
- * vscrolling not exact
  * Search text function
  * Time markers
  * Support time range
@@ -16,7 +15,7 @@
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.4";
+const g_version = "0.5";
 
 //-----------------------------------------------------------------------------------
 // Shape classes. Must appear in source code before their usage
@@ -574,7 +573,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	this.scrollDummyUpdate = function(){
 		// adjust the height of the scrollDummy div to the new height so 
 		// the browser shows the scrollbar accordingly
-		var height = this.scaling.sceneHeight + this.canvas.top + this.canvas.margin.top;
+		var height = this.scaling.sceneHeight + this.canvas.top + 50/*add some bottom space*/;
 		this.scrollDummy.div.style("height", height + "px");
 		this.scrollDummy.div.style("width", this.canvas.fullWidth + "px");
 	}
@@ -1561,6 +1560,12 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 		
 		if( shown.timeOffset != requested.timeOffset ){
 			console.debug("draw: timeOffset changed %f %f", shown.timeOffset, requested.timeOffset );
+			if( lay.scaling.sceneHeight <= lay.canvas.height ){
+				// The total scene fits into the visible area, it makes no sense to hide parts before timeoffset
+				console.debug("draw: timeOffset forced to 0");
+				requested.timeOffset = 0;
+			}
+				
 			lay.setTimeOffset(requested.timeOffset);
 			shown.timeOffset = requested.timeOffset;
 			doCompleteRedraw = true;
@@ -1675,7 +1680,7 @@ function TooltipControl(lay) {
 		
 		if( canvasX > 0 && canvasY > 0 && canvasX < lay.canvas.fullWidth && canvasY < lay.canvas.height){
 			let iData = ctx.getImageData( canvasX, canvasY, 1, 1).data;
-			//console.log("mm x=%d y=%d cx=%d cy=%d data ", e.clientX, e.clientY, canvasX, canvasY, that.rgba2Num(iData)  );
+			console.debug("mm x=%d y=%d cx=%d cy=%d data ", e.clientX, e.clientY, canvasX, canvasY, that.rgba2Num(iData)  );
 			
 			let objNum;
 			if( (objNum = that.rgba2Num(iData)) != undefined ){
