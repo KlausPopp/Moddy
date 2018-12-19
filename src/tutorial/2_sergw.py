@@ -9,12 +9,6 @@ Created on 04.02.2017
 from moddy import *
 
 
-# Status indicator color defs
-whiteOnGreen = {'boxStrokeColor':'black', 'boxFillColor':'green', 'textColor':'white'}
-whiteOnRed = {'boxStrokeColor':'black', 'boxFillColor':'red', 'textColor':'white'}
-whiteOnBlue = {'boxStrokeColor':'blue', 'boxFillColor':'blue', 'textColor':'white'}
-
-
 class Gateway(simPart):
     def __init__(self, sim):
         # Initialize the parent class
@@ -60,10 +54,10 @@ class Gateway(simPart):
                     msgStr = msgStr[:nChars]
                     
                 # Simulate reading from HW Fifo takes time (20us per char, really slow CPU...)
-                self.busy( nChars * 20 *us, 'RFIFO', whiteOnRed)
+                self.busy( nChars * 20 *us, 'RFIFO', bcWhiteOnRed)
                 
                 # push data to network
-                self.busy( 150*us, 'TXNET', whiteOnGreen)
+                self.busy( 150*us, 'TXNET', bcWhiteOnGreen)
                 
                 self.netPort.send( msgStr, 100*us)
 
@@ -82,12 +76,12 @@ class Gateway(simPart):
                 if self.netPort.nMsg() == 0:
                     self.wait( timeout=None, evList=[self.netPort])
                 
-                self.busy( 100*us, 'RXNET', whiteOnGreen)
+                self.busy( 100*us, 'RXNET', bcWhiteOnGreen)
                 
                 # read one message
                 msg = self.netPort.readMsg()
 
-                self.busy( len(msg) * 20*us, 'TXFIFO', whiteOnRed)
+                self.busy( len(msg) * 20*us, 'TXFIFO', bcWhiteOnRed)
             
                 # push to serial port
                 for c in msg:
@@ -102,12 +96,12 @@ class Client(vSimpleProg):
         while True:
             self.wait(1.2*ms)
             self.netPort.send('test', 100*us)
-            self.busy(100*us, 'TX1', whiteOnBlue)
+            self.busy(100*us, 'TX1', bcWhiteOnBlue)
             self.netPort.send('test1', 100*us)
-            self.busy(100*us, 'TX2', whiteOnRed)
+            self.busy(100*us, 'TX2', bcWhiteOnRed)
             self.wait(2.3*ms)
             self.netPort.send('Data1', 100*us)
-            self.busy(100*us, 'TX3', whiteOnGreen)
+            self.busy(100*us, 'TX3', bcWhiteOnGreen)
 
 class SerialDevice(vSimpleProg):
     def __init__(self, sim):
@@ -163,7 +157,6 @@ if __name__ == '__main__':
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/2_sergw.html", 
                                       fmt="iaViewerRef", 
-                                      timeRange=(1.0*ms,None),
                                       showPartsList=[client, gateway.rxThread, gateway.txThread, serDev],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 50*us, 

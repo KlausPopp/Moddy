@@ -15,20 +15,16 @@ The Stim part simulates user events.
 '''
 
 from moddy import *
-whiteOnGreen = {'boxStrokeColor':'black', 'boxFillColor':'green', 'textColor':'white'}
-whiteOnRed = {'boxStrokeColor':'black', 'boxFillColor':'red', 'textColor':'white'}
-whiteOnBlue = {'boxStrokeColor':'blue', 'boxFillColor':'blue', 'textColor':'white'}
-blackOnWhite = {'boxStrokeColor':'black', 'boxFillColor':'white', 'textColor':'black'}
 
 class CarInfoSystem(simFsmPart):
 
     def __init__(self, sim, objName):
         statusBoxReprMap = {
-            'Off':      (None, blackOnWhite),
-            'Standby':  ('SBY', whiteOnRed),
-            'Booting':  ('BOOT', whiteOnBlue),
-            'NormalOp': ('NORM', whiteOnGreen),
-            'Shutdown':  ('SD', whiteOnRed)
+            'Off':      (None, bcBlackOnWhite),
+            'Standby':  ('SBY', bcWhiteOnRed),
+            'Booting':  ('BOOT', bcWhiteOnBlue),
+            'NormalOp': ('NORM', bcWhiteOnGreen),
+            'Shutdown':  ('SD', bcWhiteOnRed)
         }
         
         
@@ -200,7 +196,7 @@ class Stim(vSimpleProg):
             self.ignitionPort.send('off',1)
             self.wait(2)
             self.powerPort.send('off',1)
-            self.wait(1000)
+            self.wait(None)
     
          
         

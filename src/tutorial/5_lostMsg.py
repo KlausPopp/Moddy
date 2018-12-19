@@ -7,10 +7,6 @@ test lost messages
 '''
 
 from moddy import *
-# Status indicator color defs
-whiteOnGreen = {'boxStrokeColor':'black', 'boxFillColor':'green', 'textColor':'white'}
-whiteOnRed = {'boxStrokeColor':'black', 'boxFillColor':'red', 'textColor':'white'}
-whiteOnBlue = {'boxStrokeColor':'blue', 'boxFillColor':'blue', 'textColor':'white'}
 
 class Producer(vSimpleProg):
     def __init__(self, sim):
@@ -24,12 +20,12 @@ class Producer(vSimpleProg):
         while True:
             self.wait(100*us)
             self.netPort.send('test', 100*us)
-            self.busy(100*us, 'TX1', whiteOnBlue)
+            self.busy(100*us, 'TX1', bcWhiteOnBlue)
             self.netPort.send('test1', 100*us)
-            self.busy(100*us, 'TX2', whiteOnRed)
+            self.busy(100*us, 'TX2', bcWhiteOnRed)
             self.wait(100*us)
             self.netPort.send('Data1', 100*us)
-            self.busy(100*us, 'TX3', whiteOnGreen)
+            self.busy(100*us, 'TX3', bcWhiteOnGreen)
 
 class Consumer(simPart):
     def __init__(self, sim):
