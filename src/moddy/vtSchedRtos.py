@@ -39,7 +39,14 @@ class vtSchedRtos(simPart):
         self._runningVThread = None                                 # currently running vThread
     
     def addVThread(self, vThread, prio):
-        # TODO: Check if the thread is already added
+        '''
+        @param vThread: thread to be added
+        @param prio: priority of the thread 0..15 (0=highest)
+        
+        Checks vThread.remoteControl: if True, allow thread state to be controlled through a moddy port "threadControlPort".
+            Those threads are not started automatically, but only via explicit "start" message to the "threadControlPort".
+            Those threads can be killed via "kill" and restarted via "start". 
+        '''
         if vThread in self._listVThreads:
             raise ValueError('vThread already added')
         
@@ -50,7 +57,6 @@ class vtSchedRtos(simPart):
         vThread._scheduler = self
         vThread._scPrio = prio
         vThread._scState = 'INIT'
-        vThread._scIsPythonThreadStarted = False
         vThread._scRemainBusyTime = 0
         vThread._scBusyStartTime = None
         vThread._scAppStatus = ('',{})              # for status indicator   
@@ -64,7 +70,8 @@ class vtSchedRtos(simPart):
         vThread._scSysCallTimer = vThread.newTimer(vThread.objName() + "ScTmr" , self.sysCallTmrExpired)
         vThread._scSysCallTimer._scVThread= vThread
     
-        self.vtStateMachine(vThread, 'init')
+        if not vThread.remoteControlled:
+            self.vtStateMachine(vThread, 'start')
     
     def startSim(self):
         self.schedule()  
@@ -78,10 +85,9 @@ class vtSchedRtos(simPart):
         #print("  runVThreadTilSysCall %s %d" % (vThread.objName(), vThread._scIsPythonThreadStarted))
         vThread._scSysCallTimer.stop()
         vThread._scWaitEvents = None
-        if not vThread._scIsPythonThreadStarted:
+        if not vThread.pythonThreadRunning:
             # first time, start python thread
-            vThread._scIsPythonThreadStarted = True
-            vThread.start()
+            vThread.startThread()
         else:
             # wake python thread up from syscall
             assert(vThread._scReturnEvent.isSet() == False)    
@@ -118,6 +124,11 @@ class vtSchedRtos(simPart):
                 self.vtStateMachine(vThread, 'wait')
                 vThread._scCallReturnVal = '?'
                 
+            elif sysCallName == 'term':
+                self.vtStateMachine(vThread, 'term')
+                # if thread terminated due to an exception, raise also an exception in simulator
+                if sysCallArg == 'exception':
+                    raise RuntimeError("vThread %s terminated due to an exception" % (vThread.objName()))
             else:
                 raise ValueError('Illegal syscall %s' % sysCallName)
     
@@ -127,11 +138,11 @@ class vtSchedRtos(simPart):
         else:
             # Timeout waiting for thread to issue sysCall
             print("Timeout waiting for vThread %s to issue sysCall" % vThread.objName())
-            if vThread.is_alive():
+            if vThread.pythonThreadRunning:
                 raise RuntimeError("Timeout waiting for vThread %s to issue sysCall" % vThread.objName())
             else:
                 # VThread stopped
-                vThread.setStateIndicator("TERM")
+                self.vtStateMachine(vThread, 'term')
 
     def updateAllStateIndicators(self):
         readyStatusAppearance = {'boxStrokeColor':'grey', 'boxFillColor':'white', 'textColor':'grey'}
@@ -143,6 +154,8 @@ class vtSchedRtos(simPart):
                 newAppStatus = ('waiting', '', {})
             elif vt._scState == 'READY':
                 newAppStatus = ('ready', 'PE', readyStatusAppearance)
+            elif vt._scState == 'INIT':
+                newAppStatus = ('init',  '',  {})
 
             if vt._scLastAppStatus is None or vt._scLastAppStatus != newAppStatus:
                 vt.setStateIndicator(newAppStatus[1], newAppStatus[2] )
@@ -246,39 +259,41 @@ class vtSchedRtos(simPart):
         '''
         Change state of vThread based on <event>
         <event> is one of
+            "start"
             "run"
             "wait"
             "preempt"
             "wake"
+            "term"
             
         Return True if state changed
 
         vThread State Machine
 
-         INIT
-          v  <init>
-        READY <--------------------------+<--------------------+
-          | <run>                        |                     |
-          v                              |<preempt>            | <wake>
-        RUNNING--------------------------+                     |
-          | <wait>                                             |
-          v                                                    |
-        WAITING -----------------------------------------------+
-        
+            +-------->INIT
+            |          | <start>
+            |          v  
+            |<-<term>-READY <--------------------------+<--------------------+
+            |          | <run>                         |                     |
+            |          v                               |<preempt>            | <wake>
+            |<-<term>-RUNNING--------------------------+                     |
+            |          | <wait>                                              |
+            |          v                                                     |
+            |<-<term>-WAITING -----------------------------------------------+
+                                  
         '''
         #print("  vtSmac %s %s %s" % (vThread.objName(), vThread._scState, event))
         oldState = vThread._scState
         newState = oldState
         
         if oldState == 'INIT':
-            if event == 'init':
+            if event == 'start':
                 newState = 'READY'
         
         if oldState == 'READY':
             if event == 'run':
                 newState = 'RUNNING'
                 vThread._scBusyStartTime = self._sim.time()
-                
         elif oldState == 'RUNNING':
             if event == 'wait':
                 newState = 'WAITING'
@@ -293,11 +308,20 @@ class vtSchedRtos(simPart):
         elif oldState == 'WAITING':
             if event == 'wake':
                 newState = 'READY'
+
+        if oldState == 'READY' or oldState == 'RUNNING' or oldState == 'WAITING':
+            if event == 'term':
+                newState= 'INIT'
+        
         
         #
         # Perform State entry/exit actions
         #
         if oldState != newState:
+
+            # INIT entry
+            if newState == 'INIT':
+                self.terminateVThread(vThread, 'kill')
 
             # RUNNING entry
             if newState == 'RUNNING':
@@ -331,17 +355,38 @@ class vtSchedRtos(simPart):
     def terminateSim(self):
         ''' terminate simulation. stop all python processes executing vThreads '''
         for vt in self._listVThreads:
-            if vt._scIsPythonThreadStarted is True:
-                vt._scCallReturnVal = 'exit'    # tell vThreads to exit. Causes a TerminateException() in user code
-                vt._scReturnEvent.set()
+            self.terminateVThread(vt)
             
+
+    def terminateVThread(self, vThread, returnCode='exit'):
+        '''
+        Terminate a vthread
+        '''
+        if vThread.pythonThreadRunning:
+            #print("Terminate %s" % vThread.objName())
+            # tell vThreads to exit. Causes a TerminateException() or KillException in user code
+            vThread._scCallReturnVal = returnCode    
+            vThread._scReturnEvent.set()
+            vThread.waitUntilThreadTerminated()
+        
+    
+    def vtRemoteControl(self, vThread, action):
+        if action == 'start':
+            self.vtStateMachine(vThread, 'start')
+        elif action == 'kill':
+            self.vtStateMachine(vThread, 'term')
+        else:
+            raise RuntimeError("vTRemoteControl %s bad action %s" % (vThread.objName(), action))
+        self.schedule()
+        self.updateAllStateIndicators()
+    
     #
     # Methods to be called from a vThread thread context
     #
     def sysCall(self, vThread, call, args):
         '''
         Called in vThread context to execute a system call, which may cause re-scheduling
-        call -- string with system call 'busy', 'wait'
+        call -- string with system call 'busy', 'wait', 'term'
         args -- list of arguments to system call
         returns when scheduler schedules vThread again
         returns the list of return values from scheduler
@@ -350,7 +395,7 @@ class vtSchedRtos(simPart):
         assert(vThread._scPendingCall is None)
         vThread._scPendingCall = (call, args)
         vThread._scCallReturnVal = None
-        #print("  VT:sysCall exec",call,args)
+        #print("  VT:sysCall exec",vThread.objName(), call,args)
         self._scCallEvent.set()
         
         # wait until scheduler completed syscall
@@ -364,11 +409,18 @@ class vtSchedRtos(simPart):
                 raise RuntimeError("Timeout waiting for scheduler to return from sysCall")
         
         vThread._scReturnEvent.clear()
-        #print("  VT:sysCall ret",call,vThread._scCallReturnVal)
-        if vThread._scCallReturnVal == 'exit':
-            raise vThread.TerminateException()
+        #print("  VT:sysCall ret",vThread.objName(), call,vThread._scCallReturnVal)
+        pendCall = vThread._scPendingCall[0]
+        vThread._scPendingCall = None        
         
-        vThread._scPendingCall = None
+        if pendCall != 'term':
+            if vThread._scCallReturnVal == 'exit':
+                #print("  VT:sysCall raising TerminateException %s %s" % (vThread.objName(),vThread._scPendingCall))
+                raise vThread.TerminateException()
+            elif vThread._scCallReturnVal == 'kill':
+                #print("  VT:sysCall raising KillException %s %s" % (vThread.objName(),vThread._scPendingCall))
+                raise vThread.KillException()
+        
         return vThread._scCallReturnVal
         
 class vSimpleProg(vThread):
@@ -387,7 +439,7 @@ class vSimpleProg(vThread):
 #
 if __name__ == '__main__':
     from moddy.simulator import sim
-    from moddy.svgSeqD import moddyGenerateSequenceDiagram
+    from moddy.seqDiagInteractiveGen import moddyGenerateSequenceDiagram
     
     busyAppearance = {'boxStrokeColor':'blue', 'boxFillColor':'green', 'textColor':'white'}
  
@@ -435,9 +487,10 @@ if __name__ == '__main__':
                 print("   VtLoB2")
                 self.wait(20,[])
                 print("   VtLoB3")
-                self.busy(100,'2',busyAppearance)
-                print("   VtLoB4")
-                self.busy(250,'3',busyAppearance)
+                raise RuntimeError
+                #self.busy(100,'2',busyAppearance)
+                #print("   VtLoB4")
+                #self.busy(250,'3',busyAppearance)
     
         simu = sim()
         sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
@@ -452,7 +505,7 @@ if __name__ == '__main__':
         
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="sched.html", 
-                                      fmt="svgInHtml", 
+                                      fmt="iaViewerRef", 
                                       showPartsList=[t1,t2,t3],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 10, 
@@ -510,7 +563,7 @@ if __name__ == '__main__':
         
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="sched.html", 
-                                      fmt="svgInHtml", 
+                                      fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 10, 
@@ -562,7 +615,7 @@ if __name__ == '__main__':
         
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="sched.html", 
-                                      fmt="svgInHtml", 
+                                      fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 10, 
@@ -605,7 +658,7 @@ if __name__ == '__main__':
         
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="sched.html", 
-                                      fmt="svgInHtml", 
+                                      fmt="iaViewerRef", 
                                       showPartsList=[t1],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 10, 
@@ -613,5 +666,5 @@ if __name__ == '__main__':
   
     #testQueingPort()
     #testSamplingPort()
-    testVtTimer()
-    #testScheduling()
+    #testVtTimer()
+    testScheduling()

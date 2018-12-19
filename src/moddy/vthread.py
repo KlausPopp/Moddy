@@ -36,6 +36,10 @@ class vtInPort(simInputPort):
         '''Overwritten by subclass'''
         pass
 
+    def clear(self):
+        '''clear input port'''
+        self._sampledMsg = []
+
 class vtSamplingInPort(vtInPort):
     '''
     Sampling input port for vThreads
@@ -48,8 +52,9 @@ class vtSamplingInPort(vtInPort):
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
         #print("vtSamplingInPort inRecv %s %s" % (self,msg))
-        self._sampledMsg = [msg]
-        self.wake()
+        if self._vThread.pythonThreadRunning:
+            self._sampledMsg = [msg]
+            self.wake()
         
     def readMsg(self, default=None):
         ''' 
@@ -84,10 +89,11 @@ class vtQueingInPort(vtInPort):
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
         #print("vtQueingInPort inRecv %s %s" % (self,msg))
-        self._sampledMsg.append(msg)
-        if len(self._sampledMsg) == 1:
-            # wakeup waiting thread if queue changes from empty to one entry
-            self.wake()
+        if self._vThread.pythonThreadRunning:
+            self._sampledMsg.append(msg)
+            if len(self._sampledMsg) == 1:
+                # wakeup waiting thread if queue changes from empty to one entry
+                self.wake()
         
     def readMsg(self, default=None):
         ''' 
@@ -104,6 +110,8 @@ class vtQueingInPort(vtInPort):
     def nMsg(self):
         ''' return number of messages in queue'''
         return len(self._sampledMsg)
+    
+
 
 class vtIOPort(simIOPort):
     '''an IOPort that combines a Sampling/Queing input port and a standard output port'''
@@ -114,7 +122,8 @@ class vtIOPort(simIOPort):
         return self._inPort.readMsg(default)
     def nMsg(self):
         return self._inPort.nMsg()
-    
+    def clear(self):
+        self._inPort.clear()
 
 class vtTimer(simTimer):
     '''
@@ -150,7 +159,7 @@ class vtTimer(simTimer):
         super().restart(timeout)
 
     
-class vThread(simPart, threading.Thread):
+class vThread(simPart):
     '''
     A virtual thread simulating a software running on an operating system
     The scheduler of the operating system schedules the vthreads
@@ -168,33 +177,91 @@ class vThread(simPart, threading.Thread):
         - nMsg() - determine how many messages are pending
         
     - the simPart timers are indirectly available to vThreads via vtTimers (set a flag on timeout)
+    
+                
+    <remoteControl>: if True, allow thread state to be controlled through a moddy port "threadControlPort".
+            Those threads are not started automatically, but only via explicit "start" message to the "threadControlPort".
+            Those threads can be killed via "kill" and restarted via "start". 
+            
     '''
 
 
-    def __init__(self, sim, objName, parentObj):
+    def __init__(self, sim, objName, parentObj, remoteControlled=False):
         '''
         Constructor
         '''
-        threading.Thread.__init__(self)
         simPart.__init__(self,sim=sim, objName=objName, parentObj=parentObj)
+        self.remoteControlled = remoteControlled
+        self.pythonThreadRunning = False;
+        self.thread = None
         
+        if remoteControlled:
+            self.createPorts('in', ['threadControlPort'])
         
+    def startThread(self):
+        if self.thread is not None and self.thread.is_alive():
+            raise RuntimeError("startThread: old vThread %s still running" % self.objName())
+        self.thread = threading.Thread(target=self.run)
+        self.pythonThreadRunning = True;
+        self.thread.start()
+    
+    def waitUntilThreadTerminated(self):
+        '''
+        To be called from scheduler when it has told the thread to terminate
+        @raise RuntimeError: if the thread did not terminate within the timeout 
+        '''
+        if self.thread is not None and self.thread.is_alive():
+            self.thread.join(3.0)
+            if self.thread.is_alive():
+                raise RuntimeError("waitUntilThreadTerminated: Thread %s did not terminate" % self.objName())
+
     class TerminateException(Exception):
         pass
 
+    class KillException(Exception):
+        pass
+    
     def run(self):
-        # overrides threading.Thread.run
-        # runs the vthread code
-        # Silently terminates when thread code throws TerminateException
+        '''
+        runs the vthread code
+        '''
+        if self.remoteControlled: self.addAnnotation('vThread started')
+        termReason = None
         try:
             self.runVThread()
+            # normal exit
+            termReason = "exited normally"
+            self.term("exit") # tell scheduler that thread has terminated
         except self.TerminateException:
-            print("vThread %s exiting" % self.objName())
-            return
+            # simulator is about to terminate
+            termReason = "Terminated"
+        except self.KillException:
+            # killed by another thread
+            termReason = "Killed"
+        except:
+            termReason = "Exception in runVThread"
+            # catch all exceptions coming from the thread's model code
+            self.term("exception") # tell scheduler that thread has terminated
+            raise # re-raise exception, so that it's printed
+        finally:
+            self.stopAllTimers()
+            self.clearPorts()
+            self.pythonThreadRunning = False;
+            if termReason != "Terminated":
+                self.addAnnotation('vThread %s' % termReason)
     
     def runVThread(self):
         ''' Model code of the VThread. must be overridden by subclass'''
         pass 
+    
+    def stopAllTimers(self):
+        for tmr in self._listTimers:
+            tmr.stop()
+            
+    def clearPorts(self):
+        for port in self._listPorts:
+            if hasattr(port, 'clear'):
+                port.clear()
 
     def wait(self, timeout, evList=[]):
         '''
@@ -223,6 +290,12 @@ class vThread(simPart, threading.Thread):
         Raise vThread.TerminateException if simulator stopped
         '''
         return self._scheduler.sysCall(self, 'busy', (time, (status, statusAppearance)))
+    
+    def term(self, termReason):
+        '''
+        Terminate thread
+        '''
+        return self._scheduler.sysCall( self, 'term', (termReason) )
     
     def newVtSamplingInPort(self, name):
         port = vtSamplingInPort(self._sim, name, self)
@@ -280,5 +353,8 @@ class vThread(simPart, threading.Thread):
             exec('self.%s = self.newVtTimer("%s")' % (tmrName,tmrName)) 
        
     
-        
+    def threadControlPortRecv(self, port, msg):
+        self._scheduler.vtRemoteControl(self,msg)
+            
+            
             
