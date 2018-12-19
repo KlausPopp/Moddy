@@ -4,7 +4,7 @@ Moddy - Python system simulator
 '''
 from copy import deepcopy
 from moddy import ms,us,ns,VERSION
-import sys
+import sys, inspect, os
 from heapq import heappush, heappop
 
 def timeUnit2Factor(unit):
@@ -66,6 +66,17 @@ class simPart(simBaseElement):
     def addAnnotation(self,text):
         """Add annotation from model at current simulation time"""
         self._sim.addAnnotation(self, text)
+        
+    def assertionFailed(self, assertionStr, frameIdx=1):
+        '''
+        Add an assertion failure trace event
+        Increment simulator global assertion failure counter
+        Stop simulator if configured so
+        
+        :param assertionStr error message to display
+        :param frame traceback frame index (1 if caller's frame, 2 if caller-caller's frame...)
+        '''
+        self._sim.assertionFailed(self, assertionStr, frameIdx+1 )
         
     def setStateIndicator(self,text,appearance={}):
         """set part's state from model at simulation time"""
@@ -160,6 +171,10 @@ class simPart(simBaseElement):
     def terminateSim(self):
         '''Called from simulator when simulation stops. Terminate block (e.g. stop threads)'''
         pass
+    
+    def time(self):
+        '''Get current simulation time'''
+        return self._sim.time()
    
 class simInputPort(simBaseElement):
     """Simulator input port"""
@@ -507,6 +522,7 @@ class sim:
         self._listVariableWatches = []  # list of watched variables
         self._enableTracePrints = True
         self._stopOnAssertionFailure = False
+        self._numAssertionFailures = 0
         self._isRunning = False
     #
     # Port Management
@@ -606,7 +622,7 @@ class sim:
     #
     # Model Assertions
     #
-    def assertionFailed(self, part, assertionStr):
+    def assertionFailed(self, part, assertionStr, frameIdx=1):
         '''
         Add an assertion failure trace event
         Increment global assertion failure counter
@@ -614,12 +630,15 @@ class sim:
         
         :param part the related simPart. None if global assertion
         :param assertionStr error message to display
+        :param frame traceback frame index (1 if caller's frame, 2 if caller-caller's frame...)
         '''
-        te = simTraceEvent( part, None, assertionStr, 'ASSFAIL')
+        _,fileName,lineNumber,functionName,_,_ = inspect.stack()[frameIdx]
+
+        s = "%s: in %s, (%s::%d)" %(assertionStr, functionName, os.path.basename(fileName), lineNumber)
+        te = simTraceEvent( part, part, s, 'ASSFAIL')
         self.addTraceEvent(te)
+        self._numAssertionFailures += 1
         
-        if self._stopOnAssertionFailure:
-            raise RuntimeError('Assertion Failed %s' % assertionStr)
     
     #
     # Simulator core routines
@@ -656,13 +675,23 @@ class sim:
         self._isRunning = False
         print("SIM: Simulator stopped at",self.timeStr(self._time) )
         for part in self._listParts: part.terminateSim()
+        self.printAssertionFailures()
         
     def run(self, stopTime, maxEvents=10000, enableTracePrinting=True, 
-            stopOnAssertionFailure=False):
+            stopOnAssertionFailure=True):
         '''
-        run the simulator until <stopTime>
-        <maxEvents> is there to prevent the simulator to run for a too long time
-        <enableTracePrinting> - if set to false, simulator will not display events as they are executing
+        run the simulator until 
+            - stopTime reached
+            - no more events to execute
+            - maxEvents reached 
+            - model called assertionFailed() and stopOnAssertionFailure==True
+            - a model exception (including exceptions from vThreads) has been caught
+        :param maxEvents - (default: 10000) maximum number of simulator events to process. Can be set to None for infinite events 
+        :param enableTracePrinting - (default: True) if set to False, simulator will not display events as they are executing
+        :param stopOnAssertionFailure - (default: True) if set to False, don't stop when model calls assertionFailed(). 
+                                        Just print info at end of simulation
+        :raise exceptions coming from model or simulator
+        
         '''
         self._enableTracePrints = enableTracePrinting
         self._stopOnAssertionFailure = stopOnAssertionFailure
@@ -681,17 +710,11 @@ class sim:
             if not self._listEvents:
                 print("SIM: Simulator has no more events")
                 break   # no more events, stop
-        
-            if numEvents >= maxEvents:
-                print("SIM: Simulator has got too many events")
-                break   
                 
             # get next event to execute
             event = self._listEvents.pop(0)
             numEvents += 1
             assert( self._time <= event.execTime),"time can't go backward"
-            if event.execTime > stopTime:
-                break
             self._time = event.execTime
 
             #print("SIM: Exec event", event.name(), self._time)
@@ -705,6 +728,22 @@ class sim:
                 raise
             # Check for changed variables
             self.watchVariables()
+            
+            #
+            # Check for stop conditions
+            #        
+            if maxEvents is not None and numEvents >= maxEvents:
+                print("SIM: Simulator has got too many events (pass a higher number to run(maxEvents=n)")
+                break   
+
+            if event.execTime >= stopTime:
+                print("SIM: Stops because stopTime reached")
+                break
+            
+            if self._stopOnAssertionFailure and self._numAssertionFailures > 0:
+                print("SIM: Stops due to Assertion Failure")
+                break
+            
             
         self.stop()    
 
@@ -770,6 +809,13 @@ class sim:
         tmfmt = "%.1f" % (time / self._disTimeScale)
         return tmfmt + self._disTimeScaleStr
 
+    def printAssertionFailures(self):
+        '''Print all traced assertion failures to stderr'''
+        if self._numAssertionFailures > 0:
+            print("%d Assertion failures during simulation" % self._numAssertionFailures, file=sys.stderr)
+            for te in self._listTracedEvents: 
+                if te.action == "ASSFAIL":
+                    print ("%10s %s" %  (self.timeStr(te.traceTime), te.transVal.__str__()), file=sys.stderr)
 
     
 
