@@ -9,13 +9,12 @@
 /*
  * TODO
  * Search text function
- * Time markers
  * Support time range
  * 
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.5";
+const g_version = "0.6";
 
 //-----------------------------------------------------------------------------------
 // Shape classes. Must appear in source code before their usage
@@ -232,6 +231,8 @@ let drawObjs = distributeTraceData(g_moddyTracedEvents);
 let _shapes = drawObjs.shapes;
 let _labels = drawObjs.labels;
 
+var g_markerLines = [];
+
 var g_labelMgr = new LabelMgr(g_lay, _labels, 40 /*ms*/);
 var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ )
 var g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
@@ -240,7 +241,8 @@ g_drawingUpdateMgr.requestParam({
 	timeScale: g_lay.scaling.timeScale, 
 	timeOffset: g_lay.scaling.timeOffset, 
 	canvasFullWidth: g_lay.canvas.fullWidth,
-	canvasHeight: g_lay.canvas.height});
+	canvasHeight: g_lay.canvas.height,
+	markerLineRedraw: false});
 
 //---------------------------------------------------------------------------------
 // Diagram formatting options
@@ -278,7 +280,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 
 		mh : {
 			main : { },					// main canvas d3 object and ctx
-			hidden : { }				// hidden canvas d3 object and ctx
+			hidden : { },				// hidden canvas d3 object and ctx
 		},
 		
 		// in pixels
@@ -1408,6 +1410,39 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 		else mouseFlag = false;
 	}
 	
+	// Callback for mouseclick event: Set time markers
+	this.mouseClick = function(e) {
+		let line = {};
+		let ctx = g_lay.canvas.mh.main.ctx;		
+		let timerange = g_lay.getVisibleTimeRange();
+		
+		//console.log(timerange.start, " ; ", timerange.end);
+		
+		if( (e.clientX < g_lay.canvas.fullWidth) && (e.which == 1 /* left mouse button*/) ) {
+			var timeAtY = g_lay.screenY2Time(e.clientY);
+			
+			// check, if time is in timerange
+			if( timeAtY <= timerange.end && timeAtY >= 0.0) {
+				line.time = timeAtY;
+				// create tooltip text with exact time
+				line.text = markerFormatTime(timeAtY);
+		
+				// detect which watchline to be drawn
+				if( !(e.ctrlKey)) {
+					line.color = "green";
+					g_markerLines[0] = line;
+					console.debug("set marker 0 to %f", timeAtY);
+				} 
+				else {
+					line.color = "red";
+					g_markerLines[1] = line;
+					console.debug("set marker 1 to %f", timeAtY);
+				}
+				drawingUpdateMgr.requestParam( {markerLinesRedraw:true} );
+			} 
+		}
+	}
+	
 	// Change the time scale relative
 	// @param direction "+" (zoom in) / "-" (zoom out)
 	this.setPlusMinus = function( direction ){
@@ -1448,6 +1483,7 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 	
 	
 	window.addEventListener("mousemove", this.mouseMove);
+	window.addEventListener("click", this.mouseClick);
 	this.positionSlider();
 }
 
@@ -1502,6 +1538,73 @@ function WindowChangeControl(lay, timeScaleControl, drawingUpdateMgr) {
 	window.addEventListener("scroll", this.scrolled);
 }
 
+//Update the marker lines
+function updateMarkerLines() {
+	
+	let ctx = g_lay.canvas.mh.main.ctx;		
+	let canvasWidth = g_lay.canvas.fullWidth;
+	const maxTextWidth = 100;
+	
+	// draw marker lines
+	for(let markerLine of g_markerLines) {
+		console.debug("draw markerLine %f", markerLine.time)
+		if( isShapeVisible( g_lay.getVisibleTimeRange(), markerLine.time, markerLine.time) ) {			
+			let drawPosition = g_lay.time2CanvasY(markerLine.time);
+
+			// draw colored bar
+			ctx.beginPath();
+			ctx.lineWidth = 5.0;
+			ctx.strokeStyle = markerLine.color;
+			ctx.moveTo( 0, drawPosition);
+			ctx.lineTo( canvasWidth, drawPosition);
+			ctx.stroke();
+			
+			// draw black bar inside the colored bar
+			ctx.beginPath();
+			ctx.lineWidth = 2.0;
+			ctx.strokeStyle = "black";			
+			ctx.moveTo( 0, drawPosition);
+			ctx.lineTo( canvasWidth, drawPosition);
+			ctx.stroke();
+			
+			// write time of bar in color of bar
+			ctx.save();
+			ctx.fillStyle = markerLine.color;	
+			ctx.font = g_diagramArgs.font;
+			ctx.textAlign = "right";
+			ctx.translate(canvasWidth - maxTextWidth, drawPosition + 15);	
+			ctx.fillText( markerLine.text, 0, 0);
+			ctx.restore();
+		}
+	}
+	// calculate time difference and display it
+	if( g_markerLines[0] !== undefined && g_markerLines[1] !== undefined) {;
+		let absDiff = Math.abs(g_markerLines[0].time - g_markerLines[1].time);
+		let diffText = markerFormatTime(absDiff);
+		
+		// draw Delta between marker lines
+		diffText = "TM Delta: " + diffText;
+		ctx.save();
+		ctx.fillStyle = "black";	
+		ctx.font = g_diagramArgs.font;
+		ctx.textAlign = "right";
+		ctx.translate(canvasWidth - maxTextWidth, 15);
+		ctx.fillText( diffText, 0, 0);
+		ctx.restore();
+	}
+}
+
+function markerFormatTime(time)
+{
+	var rv;
+	var fmt = ".4f"
+	if( time >= 1.0) rv = d3.format(fmt)(time) + " s";	
+	else if( time >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
+	else if( time >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
+	else if( time >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
+	else if( time >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
+	return rv;
+}
 
 //-------------------------------------------------------------------------------------
 // Drawing update manager
@@ -1530,7 +1633,8 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 			shown.canvasFullWidth != requested.canvasFullWidth ||
 			shown.canvasHeight != requested.canvasHeight ||
 			labelMgr.positioningQEmpty() == false ||
-			redrawShapeIdx < shapes.length-1){
+			redrawShapeIdx < shapes.length-1 ||
+			requested.markerLinesRedraw == true){
 			
 			if( !animFrameRequested ){
 				requestAnimationFrame(draw);
@@ -1580,7 +1684,11 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 			shown.canvasFullWidth = requested.canvasFullWidth;
 			shown.canvasHeight = requested.canvasHeight;
 			doCompleteRedraw = true;
-		}	
+		}
+		if( requested.markerLinesRedraw == true ) {
+			doCompleteRedraw = true;
+			requested.markerLinesRedraw = false;
+		}
 
 		if( doCompleteRedraw ){
 			labelMgr.sceneChanged();
@@ -1598,6 +1706,10 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 		//console.time('drawShapes');
 		drawShapes();
 		//console.timeEnd('drawShapes');
+		
+		// Update marker lines
+		updateMarkerLines();
+		
 		endRedraw();
 		checkAnimation();
 	}
@@ -1665,6 +1777,7 @@ function TooltipControl(lay) {
 	var activeObjNum; 				// currently tooltip'ed object, undefined if none
 	var objIdx = undefined;
 	var objs = [];
+	var markerLineActive = false;
 	const maxObjs = 1<<24;
 
 	//Define the div for the label tooltip
@@ -1680,8 +1793,25 @@ function TooltipControl(lay) {
 		
 		if( canvasX > 0 && canvasY > 0 && canvasX < lay.canvas.fullWidth && canvasY < lay.canvas.height){
 			let iData = ctx.getImageData( canvasX, canvasY, 1, 1).data;
-			console.debug("mm x=%d y=%d cx=%d cy=%d data ", e.clientX, e.clientY, canvasX, canvasY, that.rgba2Num(iData)  );
+			//console.debug("mm x=%d y=%d cx=%d cy=%d data ", e.clientX, e.clientY, canvasX, canvasY, that.rgba2Num(iData)  );
 			
+			// check, if mouse is over watchline
+			for(let markerLine of g_markerLines) {
+				var markerLinePosition = g_lay.time2CanvasY(markerLine.time);
+				var markerLineTop = markerLinePosition + 5;
+				var markerLineBottom = markerLinePosition - 10;
+				var markerLineLeft = lay.canvas.margin.left;
+				if(canvasY > markerLineBottom && canvasY < markerLineTop && canvasX > markerLineLeft ) { 
+					that.tooltipStart( e.clientX + window.scrollX, e.clientY + window.scrollY, markerLine.text);
+					markerLineActive = true;
+					break;
+				} else if( markerLineActive === true ){
+					that.tooltipEnd();
+					markerLineActive = false;
+				}
+			}
+			
+			// check if mouse is over label
 			let objNum;
 			if( (objNum = that.rgba2Num(iData)) != undefined ){
 				let startToolTip = true;
@@ -1794,7 +1924,64 @@ function isUndefined(v){
 function doPolygonsIntersect (a, b) {
     var polygons = [a, b];
     var minA, maxA, projected, i, i1, j, minB, maxB;
-
+    
+    /*
+    // different approach for testing polygon intersection
+    // create bounding box around polygon and test box intersection
+    var xMinA = 1000000, xMaxA = 0, yMinA = 1000000, yMaxA = 0; // bounding box of polygon a
+    var xMinB = 1000000, xMaxB = 0, yMinB = 1000000, yMaxB = 0; // bounding box of polygon b
+    
+    var iA;
+    var iB;
+    
+    // create bounding box of a
+    for(iA = 0; iA < a.length; ++iA) {
+    	if( a[iA].x < xMinA ) {
+    		xMinA = a[iA].x;
+    	}
+    	if( a[iA].x > xMaxA ) {
+    		xMaxA = a[iA].x;
+    	}
+    	if( a[iA].y < yMinA ) {
+    		yMinA = a[iA].y;
+    	}
+    	if( a[iA].y > yMaxA ) {
+    		yMaxA = a[iA].y;
+    	}
+    }
+    
+    // create bounding box of b
+    for(iB = 0; iB < b.length; ++iB) {
+    	if( b[iB].x < xMinB ) {
+    		xMinB = b[iB].x;
+    	}
+    	if( b[iB].x > xMaxB ) {
+    		xMaxB = b[iB].x;
+    	}
+    	if( b[iB].y < yMinB ) {
+    		yMinB = b[iB].y;
+    	}
+    	if( b[iB].y > yMaxB ) {
+    		yMaxB = b[iB].y;
+    	}
+    }
+    
+    // test intersection of boxes a and b
+    if( (xMinA <= xMinB) && (xMinB <= xMaxA) || (xMinA <= xMaxB) && (xMaxB <= xMaxA) 
+    		|| (xMinB <= xMinA) && (xMinA <= xMaxB) || (xMinB <= xMaxA) && (xMaxA <= xMaxB)) {
+        if( (yMinB <= yMinA) && (yMinA <= yMaxB) || (yMinB <= yMaxA) && (yMaxA <= yMaxB) 
+        		|| (yMinA <= yMinB) && (yMinB <= yMaxA) || (yMinA <= yMaxB) && (yMaxB <= yMaxA)) {
+        	//console.log("intersect!");
+        	//console.log(xMinA, xMaxA, yMinA, yMaxA);
+            //console.log(xMinB, xMaxB, yMinB, yMaxB);
+        	return true;
+        } else {
+        	return false;
+        }
+    } else {
+    	return false;
+    }
+	*/
     for (i = 0; i < polygons.length; i++) {
 
         // for each polygon, look at each edge of the polygon, and determine if it separates
