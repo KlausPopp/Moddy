@@ -10,9 +10,9 @@ import threading
 class vtInPort(simInputPort):
     '''
     An input port for vThreads which extends the standard input port:
-    - buffers the incoming message: vtInport can be a sampling or queing port
+    - buffers the incoming message: vtInport can be a sampling or queuing port
         - a sampling port buffers only the last received message
-        - a queing port buffers all messages
+        - a queuing port buffers all messages
     - wakes up the vThread from wait() if the vThread is waiting for input on that port
     - provides an API to read the messages from the buffer 
     '''
@@ -77,10 +77,10 @@ class vtSamplingInPort(vtInPort):
         ''' return 1 if message is available, or 0 if not'''
         return len(self._sampledMsg) > 0
 
-class vtQueingInPort(vtInPort):
+class vtQueuingInPort(vtInPort):
     '''
-    Queing input port for vThreads
-    A queing port buffers all messages in a fifo queue. The queue depth is infinite
+    Queuing input port for vThreads
+    A queuing port buffers all messages in a fifo queue. The queue depth is infinite
     A read from the buffer consumes the first message
     '''
     def __init__(self, sim, name, vThread):
@@ -88,7 +88,7 @@ class vtQueingInPort(vtInPort):
 
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
-        #print("vtQueingInPort inRecv %s %s" % (self,msg))
+        #print("vtQueuingInPort inRecv %s %s" % (self,msg))
         if self._vThread.pythonThreadRunning:
             self._sampledMsg.append(msg)
             if len(self._sampledMsg) == 1:
@@ -114,7 +114,7 @@ class vtQueingInPort(vtInPort):
 
 
 class vtIOPort(simIOPort):
-    '''an IOPort that combines a Sampling/Queing input port and a standard output port'''
+    '''an IOPort that combines a Sampling/Queuing input port and a standard output port'''
     def __init__(self, sim, name, vThread, inPort):
         super().__init__(sim, vThread, name, msgReceivedFunc=None, specialInPort=inPort)
     
@@ -171,7 +171,7 @@ class vThread(simPart):
     A vthread is a simPart part, which can exchange messages with other simulation parts, but unlike pure simPart parts,
     - the input ports are vtInPorts that buffer incoming messages
         - a sampling input port buffers always the latest message
-        - a queing input port buffers all messages
+        - a queuing input port buffers all messages
         vThreads can wait() for messages. They can read messages from the input ports via
         - readMsg() - read one message from port
         - nMsg() - determine how many messages are pending
@@ -302,8 +302,8 @@ class vThread(simPart):
         self.addInputPort(port)
         return port
         
-    def newVtQueingInPort(self, name):
-        port = vtQueingInPort(self._sim, name, self)
+    def newVtQueuingInPort(self, name):
+        port = vtQueuingInPort(self._sim, name, self)
         self.addInputPort(port) 
         return port
     
@@ -312,8 +312,8 @@ class vThread(simPart):
         self.addIOPort(port)
         return port
 
-    def newVtQueingIOPort(self, name):
-        port = vtIOPort(self._sim, name, self, vtQueingInPort(self._sim, name, self))
+    def newVtQueuingIOPort(self, name):
+        port = vtIOPort(self._sim, name, self, vtQueuingInPort(self._sim, name, self))
         self.addIOPort(port)
         return port
         
@@ -326,21 +326,21 @@ class vThread(simPart):
     def createPorts(self, ptype, listPortNames):
         '''
         Convinience functions to create multiple vtPorts at once.
-        <type> must be one of 'SamplingIn', 'QueingIn', 'SamplingIO' or 'QueingIO' 
+        <type> must be one of 'SamplingIn', 'QueuingIn', 'SamplingIO' or 'QueuingIO' 
         The function creates for each port a member variable with this name in the part.
         '''
         if ptype == 'SamplingIn':
             for portName in listPortNames:
                 exec('self.%s = self.newVtSamplingInPort("%s")' % (portName,portName)) 
-        elif ptype == 'QueingIn':
+        elif ptype == 'QueuingIn' or ptype == 'QueingIn': # support also the old, mis-spelled name
             for portName in listPortNames:
-                exec('self.%s = self.newVtQueingInPort("%s")' % (portName,portName)) 
+                exec('self.%s = self.newVtQueuingInPort("%s")' % (portName,portName)) 
         elif ptype == 'SamplingIO':
             for portName in listPortNames:
                 exec('self.%s = self.newVtSamplingIOPort("%s")' % (portName,portName)) 
-        elif ptype == 'QueingIO':
+        elif ptype == 'QueuingIO' or ptype == 'QueingIO': # support also the old, mis-spelled name
             for portName in listPortNames:
-                exec('self.%s = self.newVtQueingIOPort("%s")' % (portName,portName)) 
+                exec('self.%s = self.newVtQueuingIOPort("%s")' % (portName,portName)) 
         else:
             simPart.createPorts(self, ptype, listPortNames)
             

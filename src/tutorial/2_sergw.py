@@ -28,8 +28,8 @@ class Gateway(simPart):
     class RxThread(vThread):
         def __init__(self, sim, gateway ):
             super().__init__(sim=sim, objName="RxThr", parentObj=gateway)
-            # Create serial port for serial input (with queing) 
-            self.createPorts('QueingIn', ['serPort']) 
+            # Create serial port for serial input (with Queuing) 
+            self.createPorts('QueuingIn', ['serPort']) 
             # Create a network output port (interface to network client)
             self.createPorts('out', ['netPort']) 
             
@@ -65,10 +65,10 @@ class Gateway(simPart):
     class TxThread(vThread):
         def __init__(self, sim, gateway ):
             super().__init__(sim=sim, objName="TxThr", parentObj=gateway)
-            # Create serial port for serial output (with queing) 
+            # Create serial port for serial output (with Queuing) 
             self.createPorts('out', ['serPort']) 
             # Create a network output input (interface to network client)
-            self.createPorts('QueingIn', ['netPort']) 
+            self.createPorts('QueuingIn', ['netPort']) 
             
         
         def runVThread(self):
@@ -90,7 +90,7 @@ class Gateway(simPart):
 class Client(vSimpleProg):
     def __init__(self, sim):
         super().__init__(sim=sim, objName="Client", parentObj=None)
-        self.createPorts('QueingIO', ['netPort']) 
+        self.createPorts('QueuingIO', ['netPort']) 
 
     def runVThread(self):
         while True:
@@ -106,7 +106,7 @@ class Client(vSimpleProg):
 class SerialDevice(vSimpleProg):
     def __init__(self, sim):
         super().__init__(sim=sim, objName="SerDev", parentObj=None)
-        self.createPorts('QueingIO', ['serPort']) 
+        self.createPorts('QueuingIO', ['serPort']) 
         
     def runVThread(self):
         while True:

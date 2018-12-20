@@ -515,7 +515,7 @@ if __name__ == '__main__':
         class myThread1(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('QueingIn', ['inP1'])
+                self.createPorts('QueuingIn', ['inP1'])
             
             def getAllMsg(self):
                 lstMsg = []
@@ -664,7 +664,7 @@ if __name__ == '__main__':
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-    #testQueingPort()
+    #testQueuingPort()
     #testSamplingPort()
     #testVtTimer()
     testScheduling()
