@@ -22,7 +22,7 @@ class vtSchedRtos(simPart):
     
     '''
     numPrio = 16
-    schedVThreadComTimeout = 2.0 # seconds
+    schedVThreadComTimeout = 20.0 # seconds
 
     #
     # Methods to be called from the Simulator thread
