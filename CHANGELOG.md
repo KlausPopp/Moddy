@@ -4,6 +4,16 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2018-12-21
+### Changed
+- vThread communication timeout increased to 20s (was 2s, too short for heavily loaded systems)
+- vThread: Corrected term "queing" -> "queuing" in port names and method names. The old miss-spelled name is still supported in queue names (not method names)
+
+### Added
+- iaViewer 0.6: Support time markers.
+- support for model assertions: models can call assertionFailed(). Simulator by default stops on assertionFailure. Use 
+- Update User Manual 
+
 ## [1.5.0] - 2018-12-19
 ### Changed
 - iaViewer 0.5: Improved responsitivity: Handles now huge drawings by using deferred drawing. Support assertion failures. Fixed vScroll bug.
