@@ -278,6 +278,22 @@ class vThread(simPart):
         '''
         return self._scheduler.sysCall( self, 'wait', (timeout, evList))
     
+    def waitUntil(self, time, evList=[]):
+        '''
+        Suspend vThread until one of the events in <evList> occurs or until specified time
+        
+        <time> is the target time. Must be >= current simulation time, otherwise ValueError is thrown
+        <evList> same as wait() 
+            
+        Return: same as wait()
+
+        Raise vThread.TerminateException if simulator stopped
+        Raise ValueError if target time already gone 
+        '''
+        if time < self.time():
+            raise ValueError("waitUntil: target time already gone")
+        return self.wait( time-self.time(), evList)
+    
     def busy(self, time, status, statusAppearance={}):
         '''
         tell the scheduler how much time the current operation takes
