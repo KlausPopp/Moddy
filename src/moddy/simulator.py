@@ -4,8 +4,11 @@ Moddy - Python system simulator
 '''
 from copy import deepcopy
 from moddy import ms,us,ns,VERSION
-import sys, inspect, os
 from heapq import heappush, heappop
+from collections import deque  
+from datetime import datetime
+import sys, inspect, os
+import pickle
 
 def timeUnit2Factor(unit):
     """Convert time unit to factor"""
@@ -145,13 +148,13 @@ class simPart(simBaseElement):
         '''
         if ptype == 'in':
             for portName in listPortNames:
-                exec('self.%s = self.newInputPort("%s", self.%sRecv)' % (portName,portName,portName)) 
+                setattr(self, portName, self.newInputPort(portName, getattr(self,"%sRecv"%portName)))
         elif ptype == 'out':
             for portName in listPortNames:
-                exec('self.%s = self.newOutputPort("%s")' % (portName,portName)) 
+                setattr(self, portName, self.newOutputPort(portName))
         elif ptype == 'io':
             for portName in listPortNames:
-                exec('self.%s = self.newIOPort("%s", self.%sRecv)' % (portName,portName,portName)) 
+                setattr(self, portName, self.newIOPort(portName, getattr(self,"%sRecv"%portName)))
         else:
             raise(ValueError("Unknown port type %s" % ptype))
             
@@ -175,7 +178,15 @@ class simPart(simBaseElement):
     def time(self):
         '''Get current simulation time'''
         return self._sim.time()
-   
+
+
+class simEvent(object):
+    def __init__(self):
+        self._cancelled = False
+    
+    def __lt__(self, other):
+        return self.execTime < other.execTime
+        
 class simInputPort(simBaseElement):
     """Simulator input port"""
     def __init__(self, sim, part, name, msgReceivedFunc, ioPort=None):
@@ -195,12 +206,14 @@ class simInputPort(simBaseElement):
 class simOutputPort(simBaseElement):
     """Simulator output port"""
    
-    class fireEvent:
+    class fireEvent(simEvent):
         """ Event that is passed to scheduler to send a message """
         def __init__(self, sim, port, msg, flightTime):
+            super().__init__()
             self._sim = sim
             self._port = port
-            self._msg = deepcopy(msg)
+            self._serializedMsg = self.__class__.msgSerialize(msg)
+            self._msgColor = msg.msgColor if hasattr(msg, 'msgColor') else None
             self._flightTime = flightTime       # message transmit time
             self._requestTime = sim.time()      # time when application called send()
             self.execTime = -1;                 # when message arrives at input port
@@ -213,12 +226,16 @@ class simOutputPort(simBaseElement):
                                                                     self._sim.timeStr(self.execTime - self._flightTime),
                                                                     self._sim.timeStr(self.execTime),
                                                                     self._sim.timeStr(self._flightTime),
-                                                                    self._msg.__str__())
+                                                                    self.msgText())
                                                                     
                 
             
-        def name(self):
+        def __repr__(self):
             return self._port.objName() + "#fireEvent"
+        
+        def msgText(self):
+            ''' return message's __str__ '''
+            return self.__class__.msgUnserialize(self._serializedMsg).__str__()
         
         def execute(self):
             # check if the message is marked as lost
@@ -230,13 +247,13 @@ class simOutputPort(simBaseElement):
                 self._sim.addTraceEvent( simTraceEvent(self._port._parentObj, inport, self, '<MSG') )
 
                 if not self._isLost:
-                    # make a deep copy of the message, so that application can modify the message
-                    msgCopy = deepcopy(self._msg)
+                    # make a deep copy (by using pickle) of the message, so that application can modify the message
+                    msgCopy = self.__class__.msgUnserialize(self._serializedMsg)
                     inport.msgEvent(msgCopy)
                 
             # remove me from pending queue
-            #print(self.name(), "exec", len(self._port._listPendingMsg))
-            del self._port._listPendingMsg[0]
+            #print(self, "exec", len(self._port._listPendingMsg))
+            self._port._listPendingMsg.popleft()
             # and send next message in queue
             if self._port._listPendingMsg:
                 event = self._port._listPendingMsg[0]
@@ -244,10 +261,19 @@ class simOutputPort(simBaseElement):
                 self._sim.addTraceEvent( simTraceEvent(self._port._parentObj, self._port, event, '>MSG(Q)') )
             self._port._seqNo += 1    
     
+        @staticmethod
+        def msgSerialize(msg):
+            return pickle.dumps(msg, pickle.HIGHEST_PROTOCOL)
+
+        @staticmethod
+        def msgUnserialize(stream):
+            return pickle.loads(stream)
+        
+    
     def __init__(self, sim, part, name, color=None, ioPort=None):
         super().__init__(sim, part, name, "OutPort")
         self._listInPorts = []      # list of all input ports
-        self._listPendingMsg = []   # list of pending messages (not yet fired)
+        self._listPendingMsg = deque() # list of pending messages (not yet fired)
         self._color = color         # color for messages leaving that port
         self._ioPort = ioPort       # reference to the IOPort which contains this outPort (None if not part of IOPort)
         self._listMsgTypes = []     # learned message types that left this port
@@ -292,7 +318,7 @@ class simOutputPort(simBaseElement):
             self._sim.addTraceEvent( simTraceEvent(self._parentObj, self, event, '>MSG') )
 
         self._listPendingMsg.append(event)
-        #print(self.name(), "sendlp", len(self._listPendingMsg))
+        #print(self, "sendlp", len(self._listPendingMsg))
         
     def setColor(self, color):
         ''' Set color for messages leaving that port '''
@@ -376,14 +402,15 @@ class simTimer(simBaseElement):
     timer is either running or stopped
     timer can be canceled, and restarted"""
     
-    class timerEvent:
+    class timerEvent(simEvent):
         """ Event that is passed to scheduler for timer """
         def __init__(self, sim, timer, execTime):
+            super().__init__()
             self._sim = sim
             self._timer = timer
             self.execTime = execTime;
             
-        def name(self):
+        def __repr__(self):
             return self._timer.hierarchyName() + "#timerEvent"
         
         
@@ -505,20 +532,27 @@ class simTraceEvent:
         self.transVal       = tv        # Transport value (e.g. message)
         self.action         = act       # action string
         
+    def __repr__(self):
+        traceStr = "%-8s" %  (self.action)
+        if self.subObj is not None:
+            traceStr += self.subObj.hierarchyNameWithType() 
+        if self.transVal is not None:
+            traceStr += " // %s" % self.transVal.__str__()
+        return traceStr
 
 class sim:
     """Simulator main class"""
            
     def __init__(self):
         self._listParts  = []       # list of all parts
-        self._listEvents     = []       # list of pending events, takes pendingEvent objects, sorted by execTime
+        self._listEvents     = []       # a heapq with list of pending events takes pendingEvent objects, sorted by execTime
         self._time           = 0.0      # current simulator time
         self._listInPorts    = []
         self._listOutPorts   = []
         self._listTimers     = []
         self._disTimeScale   = 1        # time scale factor
         self._disTimeScaleStr = "s"     # time scale string
-        self._listTracedEvents = []     # list of all traced events during execution
+        self._listTracedEvents = deque()# list of all traced events during execution
         self._listVariableWatches = []  # list of watched variables
         self._enableTracePrints = True
         self._stopOnAssertionFailure = False
@@ -651,29 +685,21 @@ class sim:
         """schedule a new event for execution. 
         Event must have members
         - execTime
+        - cancelled
         - execute()
-        - name()
+        - __lt__()
         """
-        #print("scheduleEvent",event.name())
-        inserted = False
+        heappush(self._listEvents, event)
         
-        for i in range(len(self._listEvents)):
-            if event.execTime <= self._listEvents[i].execTime:
-                self._listEvents.insert(i, event)
-                #print("inserting event",event.execTime,i)
-                inserted = True
-                break
-        if inserted == False:
-            self._listEvents.append(event)         
-            #print("inserting event at end",event.execTime)
-            
     def cancelEvent(self,event):
         """Cancel an already scheduled event"""
-        self._listEvents.remove(event)
+        event._cancelled = True
         
     def stop(self):
         self._isRunning = False
-        print("SIM: Simulator stopped at",self.timeStr(self._time) )
+        elapsedTime = datetime.now() - self._startRealTime 
+        print("SIM: Simulator stopped at",self.timeStr(self._time) + 
+              ". Executed %d events in %.3f seconds"%(self._numEvents, elapsedTime.total_seconds()) ) #TODO
         for part in self._listParts: part.terminateSim()
         self.printAssertionFailures()
         
@@ -697,6 +723,7 @@ class sim:
         self._stopOnAssertionFailure = stopOnAssertionFailure
         self.checkUnBoundPorts()
         print ("SIM: Simulator %s starting" % (VERSION))
+        self._startRealTime = datetime.now()
         self._isRunning = True
         # report initial value of watched variables
         self.watchVariablesCurrentValue()
@@ -704,7 +731,7 @@ class sim:
         # Check for changed variables
         self.watchVariables()
                    
-        numEvents = 0
+        self._numEvents = 0
         
         while True:
             if not self._listEvents:
@@ -712,17 +739,21 @@ class sim:
                 break   # no more events, stop
                 
             # get next event to execute
-            event = self._listEvents.pop(0)
-            numEvents += 1
+            # heap is a priority queue. heappop extracts the event with the smallest execution time
+            event = heappop(self._listEvents)
+            if event._cancelled == True:
+                continue
+            
+            self._numEvents += 1
             assert( self._time <= event.execTime),"time can't go backward"
             self._time = event.execTime
 
-            #print("SIM: Exec event", event.name(), self._time)
+            #print("SIM: Exec event", event, self._time)
             try:
                 # Catch model exceptions
                 event.execute()
             except: 
-                print ("SIM: Caught exception while executing event %s" % event.name(), file=sys.stderr)
+                print ("SIM: Caught exception while executing event %s" % event, file=sys.stderr)
                 self.stop()
                 # re-raise model exception
                 raise
@@ -732,7 +763,7 @@ class sim:
             #
             # Check for stop conditions
             #        
-            if maxEvents is not None and numEvents >= maxEvents:
+            if maxEvents is not None and self._numEvents >= maxEvents:
                 print("SIM: Simulator has got too many events (pass a higher number to run(maxEvents=n)")
                 break   
 
@@ -759,12 +790,7 @@ class sim:
         self._listTracedEvents.append(te)
         
         if self._enableTracePrints:
-            traceStr = "TRC: %10s %-8s" %  (self.timeStr(te.traceTime), te.action)
-            if te.subObj is not None:
-                traceStr += te.subObj.hierarchyNameWithType() 
-            if te.transVal is not None:
-                traceStr += " // %s" % te.transVal.__str__()
-        
+            traceStr = "TRC: %10s %s" %  (self.timeStr(te.traceTime), te)
             print (traceStr)
 
     def tracedEvents(self):
