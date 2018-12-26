@@ -40,7 +40,7 @@ class vtInPort(simInputPort):
 
     def clear(self):
         '''clear input port'''
-        self._sampledMsg = []
+        self._sampledMsg.clear()
 
 class vtSamplingInPort(vtInPort):
     '''
