@@ -502,21 +502,21 @@ class svgSeqD(object):
                         
             fireEvent = e.transVal
             # if message specifies a specific color, take this color
-            if hasattr(fireEvent._msg, 'msgColor'):
-                msgColor = fireEvent._msg.msgColor
+            if fireEvent._msgColor is not None:
+                msgColor = fireEvent._msgColor
             
             start = ( self.simPartMap(fromPart).sdLifeLineX, self.timeYPos( fireEvent.execTime - fireEvent._flightTime, areaStartTime, areaStartY ))
             end = ( self.simPartMap(toPart).sdLifeLineX, self.timeYPos( fireEvent.execTime, areaStartTime, areaStartY ))
             if( start[1] >= areaStartY):
                 # only show line if it begins within the current area
-                self.msgLine(start, end, fireEvent._msg.__str__(), color=msgColor, lostMsg=fireEvent._isLost)
+                self.msgLine(start, end, fireEvent.msgText(), color=msgColor, lostMsg=fireEvent._isLost)
             elif end[1] >= areaStartY:
                 # message line only Partly on the area. Show only the Part in the area
                 # Don't show message text
                 dx = end[0]-start[0]
                 dy = end[1]-start[1]
                 start = (end[0] - ( ((end[1]-areaStartY)/dy) * dx), areaStartY)
-                self.msgLine(start, end, fireEvent._msg.__str__(), showText=False, color=msgColor, lostMsg=fireEvent._isLost)
+                self.msgLine(start, end, fireEvent.msgText(), showText=False, color=msgColor, lostMsg=fireEvent._isLost)
     
     def drawTmrExp(self, e, areaStartTime, areaStartY):
         part = e.part

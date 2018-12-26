@@ -206,7 +206,6 @@ class TraceGenDynamicViewer(object):
         lastEventTs =  None
         
         for e in evList:
-            
             if self.shallEventBeShown(e):
                 if e.action == "VC": 
                     partNo = self.partNo(e.subObj)
@@ -227,13 +226,14 @@ class TraceGenDynamicViewer(object):
                     mid = 's: %d, b: %g, txt: "%s", l:%s' % (
                         self.partNo(e.subObj._parentObj),
                         fireEvent.execTime - fireEvent._flightTime,
-                        fireEvent._msg,
+                        fireEvent.msgText(),
                         '"t"' if fireEvent._isLost else '"f"')
                     
                     # generate colored messages
                     msgColor = None
                     if e.subObj._outPort._color is not None: msgColor = e.subObj._outPort._color
-                    if hasattr(fireEvent._msg, 'msgColor'): msgColor = fireEvent._msg.msgColor
+                    if fireEvent._msgColor is not None:
+                        msgColor = fireEvent._msgColor
                     if msgColor is not None: mid += ', c:"%s"' % msgColor 
                     
                     doOutput = True
