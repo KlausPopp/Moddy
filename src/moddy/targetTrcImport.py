@@ -70,7 +70,8 @@ class TargetTrace(object):
         def __init__(self, sim, port, msg, flightTime, execTime):
             self._sim = sim
             self._port = port
-            self._msg = msg
+            self._msgStr = msg # TODO: WILL NOT WORK
+            self._msgColor = None
             self._flightTime = flightTime       # message transmit time
             self._requestTime = execTime-flightTime      # time when application called send()
             self.execTime = execTime;                 # when message arrives at input port
@@ -80,7 +81,7 @@ class TargetTrace(object):
                                                                     self._sim.timeStr(self.execTime - self._flightTime),
                                                                     self._sim.timeStr(self.execTime),
                                                                     self._sim.timeStr(self._flightTime),
-                                                                    self._msg.__str__())
+                                                                    self.msgText())
 
     
     def msgRecvEvent(self, timeStamp, srcPartName, dstPartName, messageContent, flightTime):
