@@ -249,7 +249,6 @@ class Fsm(object):
     #
     # Internal methods
     #
-    
     def _execStateMethod(self, state, methodName, *args, **kwargs):
         '''
         Execute a state specific method that might exist in the fsm subclass 
@@ -258,19 +257,15 @@ class Fsm(object):
         If it doesn't exist, nothing happens, but False is returned.   
         
         '''
-        execStr = "self.State_%s_%s" % (state, methodName)
-        try: 
-            exec( "m=" + execStr)
-
-        except AttributeError:
-            #print("%s execStateMethod cannot exec %s" % (type(self).__name__,execStr))
+        fullMethodName = "State_%s_%s" % (state, methodName)
+        
+        func = getattr(self, fullMethodName, None)
+        if func is None:
             return False
-        
-        #print("+++ %s execStateMethod %s" % (type(self).__name__,execStr), args, **kwargs)
-        exec(execStr + "(*args,**kwargs)")
-        
+
+        func( *args,**kwargs )
         return True
-        
+
     def stateExists(self, state):
         return state in self._dictTransitions
         
@@ -372,153 +367,3 @@ class Fsm(object):
             subFsm.execStateDependentMethod( 'Exit', False)
         self._listChildFsms = []
 
-#
-# Test Code
-#         
-if __name__ == '__main__':
-    from moddy import moddyGenerateFsmGraph
-    def test1():
-        class Computer(Fsm):
-        
-            def __init__(self, parentFsm=None):
-                
-                transitions = { 
-                    '':
-                        [('INITIAL', 'Off')],
-                    'Off': 
-                        [('PowerApplied', 'Standby')],
-                    'Standby':
-                        [('PowerButtonPressed', 'NormalOp')],
-                    'NormalOp':
-                        [
-                         ('PowerButtonPressed', 'Standby'),
-                         ('OsShutdown', 'Standby')],
-                    'ANY':
-                        [('PowerRemoved', 'Off')]
-                }
-                
-                super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
-                    
-            
-            # Off actions    
-            def State_Off_Entry(self):
-                print("State_Off_Entry")
-        
-            def State_Off_Exit(self):
-                print("State_Off_Exit")
-            
-    
-        comp = Computer()
-        #print("events ", comp._listEvents)
-        #print("trans ", comp._dictTransitions)
-    
-        comp.startFsm()
-        
-        comp.event('PowerApplied')
-        print("State %s" % comp.state)
-        comp.event('PowerButtonPressed')
-        print("State %s" % comp.state)
-        comp.event('PowerRemoved')
-        print("State %s" % comp.state)
-        
-        moddyGenerateFsmGraph(comp, fileName='computerFsm.svg', keepGvFile=True)
-
-    def test2():
-        class Computer(Fsm):
-        
-            def __init__(self, parentFsm=None):
-                
-                transitions = { 
-                    '':
-                        [('INITIAL', 'Off')],
-                    'Off': 
-                        [('PowerApplied', 'Standby')],
-                    'Standby':
-                        [('PowerButtonPressed', 'NormalOp')],
-                    'NormalOp':
-                        [
-                         ('Apps' , Computer.ApplicationsFsm ),  # SUBFSM
-                         ('Vol' , Computer.VolumeFsm ),         # SUBFSM
-                         ('PowerButtonPressed', 'Standby'),
-                         ('OsShutdown', 'Standby')],
-                    'ANY':
-                        [('PowerRemoved', 'Off')]
-                }
-                
-                super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
-                    
-            
-            # Off actions    
-            def State_Off_Entry(self):
-                print("State_Off_Entry")
-        
-            def State_Off_Exit(self):
-                print("State_Off_Exit")
-            
-    
-            # Subfsm 
-            class ApplicationsFsm(Fsm):
-            
-                def __init__(self, parentFsm):
-                    
-                    transitions = { 
-                        '':
-                            [('INITIAL', 'Radio')],
-                        'Radio': 
-                            [('NaviButton', 'Navi')],
-                        'Navi':
-                            [('RadioButton', 'Radio')]
-                    }
-                    
-                    super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
-                    
-                def State_Radio_Entry(self):
-                    print("State_Radio_Entry topFsm=%s moddyPart %s" % (self.topFsm(),self.moddyPart()))
-            
-                def State_Radio_Exit(self):
-                    print("State_Radio_Exit")
-        
-                def State_Navi_Exit(self):
-                    print("State_Radio_Exit")
-                    
-            class VolumeFsm(Fsm):
-            
-                def __init__(self, parentFsm):
-                    
-                    transitions = { 
-                        '':
-                            [('INITIAL', 'On')],
-                        'On': 
-                            [('MuteButton', 'Mute'),
-                             ('IncVol', 'On'),
-                             ('DecVol', 'On')],
-                        'Mute':
-                            [('MuteButton', 'On'),
-                             ('IncVol', 'On')]
-                    }
-                    
-                    super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
-                    
-                def State_On_Exit(self):
-                    print("State_On_Exit")
-        
-        comp = Computer()
-        #print("events ", comp._listEvents)
-        #print("trans ", comp._dictTransitions)
-    
-        comp.startFsm()
-        
-        comp.event('PowerApplied')
-        print("State %s" % comp.state)
-        comp.event('PowerButtonPressed')
-        print("State %s" % comp.state)
-        comp.event('RadioButton')
-        comp.event('MuteButton')
-        comp.event('IncVol')
-        comp.event('PowerRemoved')
-        print("State %s" % comp.state)
-        
-        moddyGenerateFsmGraph(comp, fileName='computerFsm.svg', keepGvFile=True)
-    
-    test1()
-    
