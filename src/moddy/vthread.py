@@ -5,7 +5,9 @@ Created on 04.01.2017
 '''
 
 from moddy.simulator import simPart,simInputPort,simTimer,simIOPort
+from collections import deque
 import threading
+
 
 class vtInPort(simInputPort):
     '''
@@ -16,14 +18,14 @@ class vtInPort(simInputPort):
     - wakes up the vThread from wait() if the vThread is waiting for input on that port
     - provides an API to read the messages from the buffer 
     '''
-    def __init__(self, sim, name, vThread):
+    def __init__(self, sim, name, vThread, qDepth):
         '''
         Constructor
         '''
         # no msgReceived function, because msgEvent() is overwritten in subclasses 
         super().__init__( sim, vThread, name, msgReceivedFunc=None)  
         self._vThread = vThread
-        self._sampledMsg = []
+        self._sampledMsg = deque(maxlen=qDepth)
         
     def wake(self):
         self._vThread._scheduler.wake(self._vThread, self)
@@ -47,13 +49,13 @@ class vtSamplingInPort(vtInPort):
     A read from the sampling buffer does not consume the buffered message
     '''
     def __init__(self, sim, name, vThread):
-        super().__init__(sim, name,vThread)
+        super().__init__(sim, name,vThread,qDepth=1)
 
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
         #print("vtSamplingInPort inRecv %s %s" % (self,msg))
         if self._vThread.pythonThreadRunning:
-            self._sampledMsg = [msg]
+            self._sampledMsg.append(msg)
             self.wake()
         
     def readMsg(self, default=None):
@@ -75,7 +77,7 @@ class vtSamplingInPort(vtInPort):
 
     def nMsg(self):
         ''' return 1 if message is available, or 0 if not'''
-        return len(self._sampledMsg) > 0
+        return 1 if len(self._sampledMsg) > 0 else 0
 
 class vtQueuingInPort(vtInPort):
     '''
@@ -84,7 +86,7 @@ class vtQueuingInPort(vtInPort):
     A read from the buffer consumes the first message
     '''
     def __init__(self, sim, name, vThread):
-        super().__init__(sim, name, vThread)
+        super().__init__(sim, name, vThread,qDepth=None)
 
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
@@ -103,7 +105,7 @@ class vtQueuingInPort(vtInPort):
         <default> is ignored.
         '''
         if len(self._sampledMsg) > 0:
-            return self._sampledMsg.pop(0)
+            return self._sampledMsg.popleft()
         else:
             raise BufferError("No msg in queue")
 
@@ -347,16 +349,16 @@ class vThread(simPart):
         '''
         if ptype == 'SamplingIn':
             for portName in listPortNames:
-                exec('self.%s = self.newVtSamplingInPort("%s")' % (portName,portName)) 
+                setattr(self, portName, self.newVtSamplingInPort(portName))
         elif ptype == 'QueuingIn' or ptype == 'QueingIn': # support also the old, mis-spelled name
             for portName in listPortNames:
-                exec('self.%s = self.newVtQueuingInPort("%s")' % (portName,portName)) 
+                setattr(self, portName, self.newVtQueuingInPort(portName))
         elif ptype == 'SamplingIO':
             for portName in listPortNames:
-                exec('self.%s = self.newVtSamplingIOPort("%s")' % (portName,portName)) 
+                setattr(self, portName, self.newVtSamplingIOPort(portName))
         elif ptype == 'QueuingIO' or ptype == 'QueingIO': # support also the old, mis-spelled name
             for portName in listPortNames:
-                exec('self.%s = self.newVtQueuingIOPort("%s")' % (portName,portName)) 
+                setattr(self, portName, self.newVtQueuingIOPort(portName))
         else:
             simPart.createPorts(self, ptype, listPortNames)
             
