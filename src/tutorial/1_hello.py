@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # let simulator run
     simu.run(stopTime=12.0)
     
-    # create SVG drawing
+    # Output sequence diagram
     moddyGenerateSequenceDiagram( sim=simu, 
                                   fileName="output/1_hello.html", 
                                   fmt="iaViewerRef", 

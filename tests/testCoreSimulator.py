@@ -6,7 +6,6 @@ Created on 23.12.2018
 
 
 import unittest
-import os
 from moddy import *
 from tests.utils import *
 
@@ -71,7 +70,7 @@ class TestSimulatorMsgPassing(unittest.TestCase):
 
         moddyGenerateSequenceDiagram( sim=simu, 
                                   showPartsList=["Prod","Cons1","Cons2"],
-                                  fileName="output/%s.html" % funcName(), 
+                                  fileName="output/%s_%s.html" % (baseFileName(), funcName()), 
                                   fmt="iaViewerRef", 
                                   timePerDiv = 1.0, 
                                   pixPerDiv = 30)
