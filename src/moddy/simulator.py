@@ -558,6 +558,9 @@ class sim:
         self._stopOnAssertionFailure = False
         self._numAssertionFailures = 0
         self._isRunning = False
+        self._hasRun = False
+        self._stopEvent = None
+        
     #
     # Port Management
     #
@@ -698,12 +701,15 @@ class sim:
     def stop(self):
         self._isRunning = False
         elapsedTime = datetime.now() - self._startRealTime 
+        for part in self._listParts: part.terminateSim()
         print("SIM: Simulator stopped at",self.timeStr(self._time) + 
               ". Executed %d events in %.3f seconds"%(self._numEvents, elapsedTime.total_seconds()) ) #TODO
-        for part in self._listParts: part.terminateSim()
         self.printAssertionFailures()
         
-    def run(self, stopTime, maxEvents=10000, enableTracePrinting=True, 
+    def run(self, 
+            stopTime, 
+            maxEvents=100000, 
+            enableTracePrinting=True, 
             stopOnAssertionFailure=True):
         '''
         run the simulator until 
@@ -712,19 +718,32 @@ class sim:
             - maxEvents reached 
             - model called assertionFailed() and stopOnAssertionFailure==True
             - a model exception (including exceptions from vThreads) has been caught
-        :param maxEvents - (default: 10000) maximum number of simulator events to process. Can be set to None for infinite events 
-        :param enableTracePrinting - (default: True) if set to False, simulator will not display events as they are executing
-        :param stopOnAssertionFailure - (default: True) if set to False, don't stop when model calls assertionFailed(). 
+        @param stopTime - simulation time at which the simulator shall stop latest
+        @param maxEvents - (default: 100000) maximum number of simulator events to process. Can be set to None for infinite events 
+        @param enableTracePrinting - (default: True) if set to False, simulator will not display events as they are executing
+        @param stopOnAssertionFailure - (default: True) if set to False, don't stop when model calls assertionFailed(). 
                                         Just print info at end of simulation
-        :raise exceptions coming from model or simulator
+        @raise exceptions coming from model or simulator
         
         '''
         self._enableTracePrints = enableTracePrinting
         self._stopOnAssertionFailure = stopOnAssertionFailure
+        
+        if self._hasRun:
+            print("SIM: run() can be called only once", file=sys.stderr)
+            return 
+        
         self.checkUnBoundPorts()
         print ("SIM: Simulator %s starting" % (VERSION))
         self._startRealTime = datetime.now()
+        
+        # create stop event that fires at stop time
+        self._stopEvent = simEvent()
+        self._stopEvent.execTime = stopTime
+        self.scheduleEvent(self._stopEvent)
+        
         self._isRunning = True
+        self._hasRun = True
         # report initial value of watched variables
         self.watchVariablesCurrentValue()
         for part in self._listParts: part.startSim()
@@ -733,50 +752,47 @@ class sim:
                    
         self._numEvents = 0
         
-        while True:
-            if not self._listEvents:
-                print("SIM: Simulator has no more events")
-                break   # no more events, stop
+        try:
+            while True:
+                if not self._listEvents:
+                    print("SIM: Simulator has no more events")
+                    break   # no more events, stop
+                    
+                # get next event to execute
+                # heap is a priority queue. heappop extracts the event with the smallest execution time
+                event = heappop(self._listEvents)
+                if event._cancelled == True:
+                    continue
                 
-            # get next event to execute
-            # heap is a priority queue. heappop extracts the event with the smallest execution time
-            event = heappop(self._listEvents)
-            if event._cancelled == True:
-                continue
-            
-            self._numEvents += 1
-            assert( self._time <= event.execTime),"time can't go backward"
-            self._time = event.execTime
+                
+                self._numEvents += 1
+                assert( self._time <= event.execTime),"time can't go backward"
+                self._time = event.execTime
 
-            #print("SIM: Exec event", event, self._time)
-            try:
-                # Catch model exceptions
-                event.execute()
-            except: 
-                print ("SIM: Caught exception while executing event %s" % event, file=sys.stderr)
-                self.stop()
-                # re-raise model exception
-                raise
-            # Check for changed variables
-            self.watchVariables()
-            
-            #
-            # Check for stop conditions
-            #        
-            if maxEvents is not None and self._numEvents >= maxEvents:
-                print("SIM: Simulator has got too many events (pass a higher number to run(maxEvents=n)")
-                break   
-
-            if event.execTime >= stopTime:
-                print("SIM: Stops because stopTime reached")
-                break
-            
-            if self._stopOnAssertionFailure and self._numAssertionFailures > 0:
-                print("SIM: Stops due to Assertion Failure")
-                break
-            
-            
-        self.stop()    
+                if event == self._stopEvent:
+                    print("SIM: Stops because stopTime reached")
+                    break
+    
+                #print("SIM: Exec event", event, self._time)
+                try:
+                    # Catch model exceptions
+                    event.execute()
+                except: 
+                    print ("SIM: Caught exception while executing event %s" % event, file=sys.stderr)
+                    # re-raise model exception
+                    raise
+                # Check for changed variables
+                self.watchVariables()
+                
+                if maxEvents is not None and self._numEvents >= maxEvents:
+                    print("SIM: Simulator has got too many events (pass a higher number to run(maxEvents=n)")
+                    break   
+    
+                if self._stopOnAssertionFailure and self._numAssertionFailures > 0:
+                    print("SIM: Stops due to Assertion Failure")
+                    break
+        finally:
+            self.stop()    
 
     def isRunning(self):
         return self._isRunning    
