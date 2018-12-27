@@ -7,10 +7,17 @@ Some utils used in tests
 '''
 
 import traceback
+import os
+
 def funcName():
     stack = traceback.extract_stack()
     filename, codeline, funcName, text = stack[-2]
     return funcName
+def baseFileName():
+    stack = traceback.extract_stack()
+    filename, codeline, funcName, text = stack[-2]
+    return os.path.basename(filename).replace(".py","")
+
 def searchTrc( trc, time, subObj, action, nthMatch=1):
     nMatches = 0
     for e in trc:

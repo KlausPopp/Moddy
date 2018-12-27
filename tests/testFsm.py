@@ -210,7 +210,7 @@ class TestFsm(unittest.TestCase):
         simu.run(100)
         
         moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="output/%s.html" % funcName(),  
+                                  fileName="output/%s_%s.html" % (baseFileName(), funcName()),  
                                   fmt="iaViewerRef", 
                                   showPartsList=[stim, cis], 
                                   timePerDiv = 0.3, 
