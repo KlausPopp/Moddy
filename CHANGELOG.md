@@ -4,6 +4,17 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2019-01-06
+
+### Changed
+- iaViewer 0.7: Fix time marker handling. Markers toggle their appearance with every click. Time delta now displayed in headline.
+
+- Simulator speed improved by approx factor 4..5: Replaced msg-passing deepcopy by pickle. Use specialized queues and heaps, replaced slow exec() calls.
+
+### Added
+- waitUntil() API for vThreads
+- Allow vThread wait() API to wait for IOPorts (not only input ports) 
+
 ## [1.5.1] - 2018-12-21
 ### Changed
 - vThread communication timeout increased to 20s (was 2s, too short for heavily loaded systems)
