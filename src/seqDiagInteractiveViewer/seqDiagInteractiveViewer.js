@@ -14,7 +14,7 @@
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.6";
+const g_version = "0.7";
 
 //-----------------------------------------------------------------------------------
 // Shape classes. Must appear in source code before their usage
@@ -175,6 +175,7 @@ class LabelShape extends Shape {
 	}
 	isVisible(visibleRange){
 		let d = this.objData;
+		if(d === undefined) return false;
 		return isShapeVisible( visibleRange, d.refLine.y1, d.refLine.y2 );
 	}
 	draw(ctx){
@@ -219,6 +220,40 @@ class LabelShape extends Shape {
 	}
 }
 
+class MarkerLineShape extends Shape {
+	constructor( objData){	
+		super(objData);
+	}
+	isVisible(visibleRange){
+		let markerLine = this.objData;
+		return markerLine.isActive && isShapeVisible( visibleRange, markerLine.time, markerLine.time );
+	}
+	draw(ctx){
+		let markerLine = this.objData;
+		let canvasWidth = g_lay.canvas.fullWidth;
+		const maxTextWidth = 100;
+		
+		let drawPosition = g_lay.time2CanvasY(markerLine.time);
+
+		// draw visible line
+		this.drawMarker(g_lay.canvas.mh.main.ctx, markerLine.color, 1, 0, canvasWidth, drawPosition );
+		
+		// draw hidden line for tooltip
+		let rgb = g_tooltipControl.registerObj( markerLine.sdl.fullText );
+		if( rgb != undefined) {
+			this.drawMarker(g_lay.canvas.mh.hidden.ctx, rgb, 10, 0, canvasWidth, drawPosition );
+		}
+	}
+	
+	drawMarker( ctx, color, width, x1, x2, y){
+		ctx.beginPath();
+		ctx.lineWidth = width;
+		ctx.strokeStyle = color;
+		ctx.moveTo( x1, y);
+		ctx.lineTo( x2, y);
+		ctx.stroke();
+	}
+}
 //---------------------------------------------------------------------------------------------------
 // STARTUP
 // 
@@ -231,10 +266,12 @@ let drawObjs = distributeTraceData(g_moddyTracedEvents);
 let _shapes = drawObjs.shapes;
 let _labels = drawObjs.labels;
 
-var g_markerLines = [];
-
 var g_labelMgr = new LabelMgr(g_lay, _labels, 40 /*ms*/);
-var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ )
+
+var g_markerLineManager = new MarkerLineManager(g_lay, g_labelMgr);
+_shapes = _shapes.concat(g_markerLineManager.createShapes());
+
+var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ );
 var g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
 var g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_drawingUpdateMgr);
 g_drawingUpdateMgr.requestParam({
@@ -242,7 +279,7 @@ g_drawingUpdateMgr.requestParam({
 	timeOffset: g_lay.scaling.timeOffset, 
 	canvasFullWidth: g_lay.canvas.fullWidth,
 	canvasHeight: g_lay.canvas.height,
-	markerLineRedraw: false});
+	});
 
 //---------------------------------------------------------------------------------
 // Diagram formatting options
@@ -292,7 +329,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		margin: {
 			top: 20,				// Y-offset to begin of drawing area 
 			right: 20,				// X right border of drawing area
-			left: 80				// X-offset to begin of drawing area
+			left: 120				// X-offset to begin of drawing area
 		},
 		yT0 : undefined,			// screen Y position of time=0 when no scrolling is applied
 
@@ -390,7 +427,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 	this.partCenterX = function( partNo ){
 		if (partNo == -1)
 			return 0;	// "global" part 
-		if (partNo >= partArray.length)
+		if (partNo === undefined || partNo >= partArray.length)
 			return this.canvas.width;
 		return partArray[partNo].centerX;
 	}
@@ -659,6 +696,11 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 			.html(g_diagramArgs.title == "" ? "(Untitled)" : g_diagramArgs.title);
 
 		titleDiv.append("div")
+			.style("float", "left")
+			.style("margin-left", "20px")
+			.append("p").attr("id","TimeMarkerDelta")
+
+		titleDiv.append("div")
 			.style("float", "right")
 			.style("padding-right", "20px")
 			.append("p")
@@ -721,14 +763,14 @@ function yAxisRedraw()
 			else if( steps >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
 			else if( steps >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
 			else if( steps >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
-			else if( steps >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
+			else /*if( steps >= 1E-12)*/ rv = d3.format(fmt)(time*1E12) + " ps";
 			return rv;
 		}
 	}
 	function yAxisTickSteps(){
 		var divPx = 60; 	
 		
-		var timeUnitsPerDiv = g_lay.scaling.maxTs*1E15/g_lay.scaling.sceneHeight*divPx;	// How much time in one div
+		var timeUnitsPerDiv = g_lay.scaling.maxTs/g_lay.scaling.sceneHeight*divPx;	// How much time in one div
 		var logTuPerDiv = Math.log10(timeUnitsPerDiv);
 		var floorlogTuPerDiv = Math.floor(logTuPerDiv);
 		var rv;
@@ -739,7 +781,6 @@ function yAxisRedraw()
 			rv = Math.pow(10,floorlogTuPerDiv) * 2;
 		else
 			rv = Math.pow(10,floorlogTuPerDiv);
-		rv /= 1E15;
 		//console.log ("yAxisTickSteps %f timeUnitsPerDiv %.3f logTuPerDiv %.3f ",  rv, timeUnitsPerDiv, logTuPerDiv);
 		return rv;
 		
@@ -1267,6 +1308,17 @@ function LabelMgr( lay, labels, maxPlacementTime ) {
 	this.positioningQ = new Queue();
 	this.visibleLabels = [];
 	
+	this.addLabel = function(sdl){
+		labels.push(sdl);
+	}
+	
+	this.removeLabel = function(sdl){
+		let i;
+		if((i=labels.indexOf(sdl)) !== -1){
+			labels.splice(i, 1);
+		}
+	}
+	
 	// get array of currently visible labels
 	// store array to this.visibleLabels
 	this.computeVisibleLabels = function(){
@@ -1346,8 +1398,6 @@ function LabelMgr( lay, labels, maxPlacementTime ) {
 // Time scaling Controls
 //
 function TimeScaleControl(lay, drawingUpdateMgr) {
-	let hasAnimFrameRequested = false;
-	
 	let mouseFlag = false;			// shift-mouse scale change in progress
 	let mouseStartY = undefined;	// mouse Y at beginning of scaling progress
 	let startScale = undefined; 	// scale at beginning of scaling progress 
@@ -1403,45 +1453,16 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 				startScale = lay.scaling.scaleFactor; 
 			}
 			
-			var newscale = startScale * Math.pow(1.02, (e.clientY - mouseStartY));
+			let newscale = startScale * Math.pow(1.02, (e.clientY - mouseStartY));
+			newscale = Math.max(0.1, newscale);
+			newscale = Math.min(100, newscale);
+			
 			//console.log( "mm newscale %f", newscale)
 			that.setTimeScale(newscale, mouseStartY);
 		}
 		else mouseFlag = false;
 	}
 	
-	// Callback for mouseclick event: Set time markers
-	this.mouseClick = function(e) {
-		let line = {};
-		let ctx = g_lay.canvas.mh.main.ctx;		
-		let timerange = g_lay.getVisibleTimeRange();
-		
-		//console.log(timerange.start, " ; ", timerange.end);
-		
-		if( (e.clientX < g_lay.canvas.fullWidth) && (e.which == 1 /* left mouse button*/) ) {
-			var timeAtY = g_lay.screenY2Time(e.clientY);
-			
-			// check, if time is in timerange
-			if( timeAtY <= timerange.end && timeAtY >= 0.0) {
-				line.time = timeAtY;
-				// create tooltip text with exact time
-				line.text = markerFormatTime(timeAtY);
-		
-				// detect which watchline to be drawn
-				if( !(e.ctrlKey)) {
-					line.color = "green";
-					g_markerLines[0] = line;
-					console.debug("set marker 0 to %f", timeAtY);
-				} 
-				else {
-					line.color = "red";
-					g_markerLines[1] = line;
-					console.debug("set marker 1 to %f", timeAtY);
-				}
-				drawingUpdateMgr.requestParam( {markerLinesRedraw:true} );
-			} 
-		}
-	}
 	
 	// Change the time scale relative
 	// @param direction "+" (zoom in) / "-" (zoom out)
@@ -1468,6 +1489,9 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 	// @param scale the new scale (1.0=original scale)
 	// @param screenZoomY zoom around this y screen position 
 	this.setTimeScale = function( scaleFactor, screenZoomY){
+
+		scaleFactor = Math.max(0.1, scaleFactor);
+		scaleFactor = Math.min(100, scaleFactor);
 		
 		// determine which time is at screenZoomY
 		let timeZoomY = Math.min(lay.screenY2Time(screenZoomY), lay.scaling.maxTs);	
@@ -1483,7 +1507,6 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 	
 	
 	window.addEventListener("mousemove", this.mouseMove);
-	window.addEventListener("click", this.mouseClick);
 	this.positionSlider();
 }
 
@@ -1538,73 +1561,109 @@ function WindowChangeControl(lay, timeScaleControl, drawingUpdateMgr) {
 	window.addEventListener("scroll", this.scrolled);
 }
 
-//Update the marker lines
-function updateMarkerLines() {
+//-----------------------------------------------------------------------------
+// Marker Line manager
+//
+function MarkerLineManager(lay, labelMgr) {
+	let that = this;
 	
-	let ctx = g_lay.canvas.mh.main.ctx;		
-	let canvasWidth = g_lay.canvas.fullWidth;
-	const maxTextWidth = 100;
+	// members of each markerline: 
+	let markerLine = { 
+		t1: { isActive:false, time:0, color:'green', sdl:undefined, labelShape:undefined}, 
+		t2: { isActive:false, time:0, color:'red', sdl:undefined, labelShape:undefined}, 		
+	};
 	
-	// draw marker lines
-	for(let markerLine of g_markerLines) {
-		console.debug("draw markerLine %f", markerLine.time)
-		if( isShapeVisible( g_lay.getVisibleTimeRange(), markerLine.time, markerLine.time) ) {			
-			let drawPosition = g_lay.time2CanvasY(markerLine.time);
+	this.createShapes = function() {
+		let shapes = [];
+		
+		shapes.push(new MarkerLineShape(markerLine.t1));
+		shapes.push(new MarkerLineShape(markerLine.t2));
+		markerLine.t1.labelShape = new LabelShape(undefined);
+		markerLine.t2.labelShape = new LabelShape(undefined);
+		shapes.push(markerLine.t1.labelShape);
+		shapes.push(markerLine.t2.labelShape);
+		return shapes;
+	}
+	
+	function setActive( markerName, time ){
+		let line = markerLine[markerName];
+		let refLine = {}
+		refLine.p1 = -1;
+		refLine.xo1 = 0; //???
+		refLine.p2 = undefined; // indicate rightmost position 
+		refLine.xo2 = 0; 
+		refLine.y1 = refLine.y2 = time;
 
-			// draw colored bar
-			ctx.beginPath();
-			ctx.lineWidth = 5.0;
-			ctx.strokeStyle = markerLine.color;
-			ctx.moveTo( 0, drawPosition);
-			ctx.lineTo( canvasWidth, drawPosition);
-			ctx.stroke();
+		let sdl = new SdLabel( refLine, "start", markerFormatTime(time), line.color, g_lay, null, true);
+		line.time = time;
+		line.sdl = sdl;
+		line.labelShape.objData = sdl;
+		line.isActive = true;
+		
+		labelMgr.addLabel(sdl);
+	} 
+	function setInactive( markerName ){
+		let line = markerLine[markerName];
+		labelMgr.removeLabel(line.sdl);
+		line.isActive = false;
+		line.labelShape.objData = undefined;
+	}
+	
+	function updateDelta(){
+		let text;
+		if(markerLine.t1.isActive && markerLine.t2.isActive){  
+			text = "\u0394T: " + markerFormatTime(markerLine.t1.time - markerLine.t2.time);
+		}
+		else {
+			text = "";
+		}
+		console.debug("updateDelta %s", text)
+		d3.select("#TimeMarkerDelta").node().textContent = text;
+	}
+	
+
+	function markerFormatTime(time)
+	{
+		let rv;
+		let fmt = ".4f"
+		let absTime = Math.abs(time);
+		if( absTime >= 1.0) rv = d3.format(fmt)(time) + " s";	
+		else if( absTime >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
+		else if( absTime >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
+		else if( absTime >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
+		else /*if( absTime >= 1E-12)*/ rv = d3.format(fmt)(time*1E12) + " ps";
+		return rv;
+	}
+	
+	// Callback for mouseclick event: Set time markers
+	this.mouseClick = function(e) {
+		let line = {};
+		let timerange = g_lay.getVisibleTimeRange();
+		
+		if( (e.clientX < g_lay.canvas.fullWidth) && (e.which == 1 /* left mouse button*/) ) {
+			var timeAtY = g_lay.screenY2Time(e.clientY);
 			
-			// draw black bar inside the colored bar
-			ctx.beginPath();
-			ctx.lineWidth = 2.0;
-			ctx.strokeStyle = "black";			
-			ctx.moveTo( 0, drawPosition);
-			ctx.lineTo( canvasWidth, drawPosition);
-			ctx.stroke();
-			
-			// write time of bar in color of bar
-			ctx.save();
-			ctx.fillStyle = markerLine.color;	
-			ctx.font = g_diagramArgs.font;
-			ctx.textAlign = "right";
-			ctx.translate(canvasWidth - maxTextWidth, drawPosition + 15);	
-			ctx.fillText( markerLine.text, 0, 0);
-			ctx.restore();
+			if( timeAtY <= timerange.end && timeAtY >= 0.0) {
+				
+				let markerName = e.ctrlKey ? "t2" : "t1";
+				let line = markerLine[markerName];
+				
+				if(line.isActive){
+					setInactive(markerName);
+				}
+				else {
+					setActive(markerName, timeAtY);					
+				}
+				updateDelta();
+				g_drawingUpdateMgr.requestParam( {doRedraw:true} );
+			} 
 		}
 	}
-	// calculate time difference and display it
-	if( g_markerLines[0] !== undefined && g_markerLines[1] !== undefined) {;
-		let absDiff = Math.abs(g_markerLines[0].time - g_markerLines[1].time);
-		let diffText = markerFormatTime(absDiff);
-		
-		// draw Delta between marker lines
-		diffText = "TM Delta: " + diffText;
-		ctx.save();
-		ctx.fillStyle = "black";	
-		ctx.font = g_diagramArgs.font;
-		ctx.textAlign = "right";
-		ctx.translate(canvasWidth - maxTextWidth, 15);
-		ctx.fillText( diffText, 0, 0);
-		ctx.restore();
-	}
+	
+	window.addEventListener("click", this.mouseClick);
 }
 
-function markerFormatTime(time)
-{
-	var rv;
-	var fmt = ".4f"
-	if( time >= 1.0) rv = d3.format(fmt)(time) + " s";	
-	else if( time >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
-	else if( time >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
-	else if( time >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
-	else if( time >= 1E-12) rv = d3.format(fmt)(time*1E12) + " ps";
-	return rv;
-}
+
 
 //-------------------------------------------------------------------------------------
 // Drawing update manager
@@ -1634,7 +1693,7 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 			shown.canvasHeight != requested.canvasHeight ||
 			labelMgr.positioningQEmpty() == false ||
 			redrawShapeIdx < shapes.length-1 ||
-			requested.markerLinesRedraw == true){
+			requested.doRedraw == true){
 			
 			if( !animFrameRequested ){
 				requestAnimationFrame(draw);
@@ -1685,9 +1744,9 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 			shown.canvasHeight = requested.canvasHeight;
 			doCompleteRedraw = true;
 		}
-		if( requested.markerLinesRedraw == true ) {
+		if( requested.doRedraw == true ) {
 			doCompleteRedraw = true;
-			requested.markerLinesRedraw = false;
+			requested.doRedraw = false;
 		}
 
 		if( doCompleteRedraw ){
@@ -1706,9 +1765,6 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 		//console.time('drawShapes');
 		drawShapes();
 		//console.timeEnd('drawShapes');
-		
-		// Update marker lines
-		updateMarkerLines();
 		
 		endRedraw();
 		checkAnimation();
@@ -1794,22 +1850,6 @@ function TooltipControl(lay) {
 		if( canvasX > 0 && canvasY > 0 && canvasX < lay.canvas.fullWidth && canvasY < lay.canvas.height){
 			let iData = ctx.getImageData( canvasX, canvasY, 1, 1).data;
 			//console.debug("mm x=%d y=%d cx=%d cy=%d data ", e.clientX, e.clientY, canvasX, canvasY, that.rgba2Num(iData)  );
-			
-			// check, if mouse is over watchline
-			for(let markerLine of g_markerLines) {
-				var markerLinePosition = g_lay.time2CanvasY(markerLine.time);
-				var markerLineTop = markerLinePosition + 5;
-				var markerLineBottom = markerLinePosition - 10;
-				var markerLineLeft = lay.canvas.margin.left;
-				if(canvasY > markerLineBottom && canvasY < markerLineTop && canvasX > markerLineLeft ) { 
-					that.tooltipStart( e.clientX + window.scrollX, e.clientY + window.scrollY, markerLine.text);
-					markerLineActive = true;
-					break;
-				} else if( markerLineActive === true ){
-					that.tooltipEnd();
-					markerLineActive = false;
-				}
-			}
 			
 			// check if mouse is over label
 			let objNum;
