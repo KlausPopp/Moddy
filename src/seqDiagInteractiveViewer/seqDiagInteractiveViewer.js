@@ -14,7 +14,7 @@
  * 
  */
 const g_viewerName = "moddy sd interactive viewer";
-const g_version = "0.7";
+const g_version = "0.8";
 
 //-----------------------------------------------------------------------------------
 // Shape classes. Must appear in source code before their usage
@@ -183,7 +183,15 @@ class LabelShape extends Shape {
 
 		// just for debugging 
 		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), "pink"); 
-		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentRefLinePolygon(), "pink"); 
+		//drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentRefLinePolygon(), "pink");
+		
+		let searchHit = d.getSearchHit();
+		if( searchHit.hit ){
+			let color = "yellow";
+			if( searchHit.selected ) color = "orange";
+			this.drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), color);
+		}
+		
 		this.drawLabel( g_lay.canvas.mh.main.ctx, 
 				d.getText(),
 				d.getCurrentCenter(),
@@ -266,14 +274,16 @@ let drawObjs = distributeTraceData(g_moddyTracedEvents);
 let _shapes = drawObjs.shapes;
 let _labels = drawObjs.labels;
 
-var g_labelMgr = new LabelMgr(g_lay, _labels, 40 /*ms*/);
+let g_labelMgr = new LabelMgr(g_lay, _labels, 40 /*ms*/);
 
-var g_markerLineManager = new MarkerLineManager(g_lay, g_labelMgr);
+let g_markerLineManager = new MarkerLineManager(g_lay, g_labelMgr);
 _shapes = _shapes.concat(g_markerLineManager.createShapes());
 
-var g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ );
-var g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
-var g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_drawingUpdateMgr);
+let g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ );
+let g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
+let g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_drawingUpdateMgr);
+let g_seachEngine = SearchEngine(g_lay, g_labelMgr, g_drawingUpdateMgr);
+
 g_drawingUpdateMgr.requestParam({
 	timeScale: g_lay.scaling.timeScale, 
 	timeOffset: g_lay.scaling.timeOffset, 
@@ -685,7 +695,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		this.scaling.timeOffset = offset;
 	}
 	
-	/// TITLE and version
+	/// TITLE bar
 	this.initTitle = function(){
 		let titleDiv = d3.select("body").select("#title");
 		
@@ -695,6 +705,41 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 			.append("p")
 			.html(g_diagramArgs.title == "" ? "(Untitled)" : g_diagramArgs.title);
 
+		
+		// search input 
+		let searchDiv = titleDiv.append("div")
+		.style("float", "left")
+		.style("margin-left", "20px")
+	    .attr("id","SearchContainer")
+		
+		searchDiv.append("p")
+		 .html("Search: ")
+		 .attr("class","SearchLabel")
+		 .style("float", "left")
+		searchDiv.append("input")
+		 .attr("id","SearchInput")
+		 .attr("type","text")
+		searchDiv.append("p")
+		 .attr("id","SearchResults")
+		 .attr("class","SearchLabel")
+		 .style("width","100px")
+		 .html("")
+		searchDiv.append("button")
+		 .attr("class", "searchbutton")
+		 .attr("id","SearchClear")
+		 .html("\u2715")
+		searchDiv.append("button")
+		 .attr("class", "searchbutton")
+		 .attr("id","SearchNext")
+		 .html("\u21E9")
+		searchDiv.append("button")
+		 .attr("class", "searchbutton")
+		 .attr("id","SearchPrev")
+		 .html("\u21E7")
+
+		
+		
+		// markerLine time delta display 
 		titleDiv.append("div")
 			.style("float", "left")
 			.style("margin-left", "20px")
@@ -902,6 +947,7 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 	this.currentTextPolygonCache = undefined;
 	this.currentRefLinePolygonCache = undefined;
 	
+	this.searchHit = {};
 	
 	this.getText = function() { return this.curText; }
 
@@ -1260,7 +1306,37 @@ function SdLabel( refLine, anchor, text, color, lay, targetPoint, allowBelowLine
 		this.setText(this.fullText);
 		this.resetPolygonCache();
 	}
-		
+	
+	
+	/// Search function
+	
+	// Check if sdl fullText contains searchText
+	// if so, 
+	this.searchMatch = function( searchText ){
+		let hitStart = this.fullText.indexOf( searchText );
+		if( hitStart !== -1 ){
+			this.searchHit = { hit: true, selected: false, hitStart: hitStart, hitLength: searchText.length};
+		}
+		return hitStart !== -1;
+	}
+	
+	this.searchSelect = function(){
+		this.searchHit.selected = true;
+	}
+	
+	this.searchSelectClear = function(){
+		this.searchHit.selected = false;
+	}
+
+	this.searchClear = function(){
+		this.searchHit = { hit: false, selected: false, hitStart: -1, hitLength: -1};
+	} 
+	
+	this.getSearchHit = function(){
+		return this.searchHit;
+	}
+	
+	this.searchClear();
 }
 
 
@@ -1307,6 +1383,10 @@ function LabelMgr( lay, labels, maxPlacementTime ) {
 	
 	this.positioningQ = new Queue();
 	this.visibleLabels = [];
+	
+	this.getLabels = function(){
+		return labels;
+	}
 	
 	this.addLabel = function(sdl){
 		labels.push(sdl);
@@ -1942,6 +2022,122 @@ function TooltipControl(lay) {
 	
 	window.addEventListener("mousemove", this.mouseMove);
 }
+
+
+//--------------------------------------------------------------------------
+// Text Search Engine
+
+function SearchEngine(lay, labelMgr, drawingUpdateMgr) {
+	let that = this;
+	let foundLabels = [];
+	let foundSelectedIdx = 0;
+	
+	function nextSearchResult(){
+		console.log("nextSearchResult clicked");
+		if( foundLabels.length > 0){
+			
+			if( foundSelectedIdx < foundLabels.length-1){
+				changeSelectedIdx(foundSelectedIdx+1);
+			}
+			else {
+				changeSelectedIdx(0);				
+			}
+		}
+	}
+	
+	function prevSearchResult(){
+		console.log("prevSearchResult clicked");
+		if( foundLabels.length > 0){
+			
+			if( foundSelectedIdx > 0){
+				changeSelectedIdx(foundSelectedIdx-1);
+			}
+			else {
+				changeSelectedIdx(foundLabels.length-1);				
+			}
+		}
+	}
+	function clearSearch(){
+		console.log("clearSearchResult clicked");
+		searchTextInput.node().value = "";
+		clearLabels();
+		changeSelectedIdx(-1);
+	}
+	function searchInputChanged(){
+		let searchText = searchTextInput.node().value;
+		console.log("searchInputChanged %s", searchText);
+		
+		if( searchText != ""){
+			clearLabels();
+			doSearch( searchText );
+			changeSelectedIdx(foundLabels.length > 0 ? 0: -1);
+		}
+		else {
+			clearSearch();
+		}
+	}
+	
+	function clearLabels(){
+		for( let sdl of foundLabels){
+			sdl.searchClear();
+		}
+		foundLabels = [];
+	}
+	
+	function doSearch( searchText ){
+		clearLabels();
+		for( let sdl of labelMgr.getLabels()){
+			if( sdl.searchMatch( searchText ) == true ){
+				foundLabels.push(sdl);
+				console.debug("searchhit: %s", sdl.fullText);
+			}
+		}
+	}
+	
+	function changeSelectedIdx( newIdx ){
+		let gotoTime = undefined;
+		if( foundSelectedIdx >= 0 && foundSelectedIdx < foundLabels.length){
+			foundLabels[foundSelectedIdx].searchSelectClear();
+		}
+		if( newIdx >= 0 && newIdx < foundLabels.length){
+			let sdl = foundLabels[newIdx]; 
+			sdl.searchSelect();
+			
+			// check if label is currently visible. If not, scroll so it will be visible
+			if (isShapeVisible( lay.getVisibleTimeRange(), sdl.refLine.y1, sdl.refLine.y2 ) == false){
+				gotoTime = sdl.refLine.y1 + (sdl.refLine.y2 - sdl.refLine.y1) * sdl.hpos; //TODO: Add some offset!
+				console.debug("gotoTime: %f", gotoTime);
+			}
+		}
+		foundSelectedIdx = newIdx;
+		redraw( gotoTime );
+	}
+	
+	function updateSearchResult(){
+		let text = "";
+		if (foundSelectedIdx >= 0){
+			text = (foundSelectedIdx+1).toString() + "/" + foundLabels.length.toString();
+		}
+		else if( searchTextInput.node().value != ""){
+			text = "No Match";
+		}
+		searchResults.html( text );
+	}
+	function redraw( gotoTime ){
+		updateSearchResult();
+		let request = {doRedraw:true};
+		if( gotoTime !== undefined ) request.timeOffset = gotoTime; 
+		drawingUpdateMgr.requestParam( request );		
+	}
+	let searchTextInput = d3.select("#SearchInput");
+	searchTextInput.on("keyup", searchInputChanged);
+	let searchResults = d3.select("#SearchResults");
+	d3.select("#SearchNext").on("click", nextSearchResult);
+	d3.select("#SearchPrev").on("click", prevSearchResult);
+	d3.select("#SearchClear").on("click", clearSearch);
+	
+}
+
 
 //--------------------------------------------------------------------------
 //Helpers

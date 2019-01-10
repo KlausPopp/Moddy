@@ -77,7 +77,35 @@ div.tooltip {
 	/*background-color: lightblue;*/
 }
 
+#searchContainer {
+	margin-top: 3px;
+    border-style: solid;
+	border-color: grey;
+    border-width: 1px;
+    padding-left: 0px;	
+    padding-right: 3px;	
+}
 
+#searchInput {
+	float: left;
+	margin-top: 0.5em;
+	margin-left: 0.5em;
+}
+
+.searchLabel {
+	float: left;
+	margin: unset;
+	margin-top: 0.8em;
+	margin-left: 0.5em;
+}
+
+.searchButton {
+	float: left;
+	margin-top: 0.5em;
+	background-color: black;
+	color: white;
+	border: none;	
+}
 
 .active {
   stroke-width: 3px;
