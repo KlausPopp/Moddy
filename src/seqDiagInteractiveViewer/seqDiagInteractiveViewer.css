@@ -1,5 +1,6 @@
 @CHARSET "ISO-8859-1";
 body {
+
 	font: 9pt Verdana, Helvetica, Arial, sans-serif;
 	margin-left: 8px;
 	margin-top: 0px;
@@ -84,29 +85,38 @@ div.tooltip {
     border-width: 1px;
     padding-left: 0px;	
     padding-right: 3px;	
+    padding-bottom: 2px;
 }
 
 #searchInput {
 	float: left;
-	margin-top: 0.5em;
+	margin-top: 2px;
 	margin-left: 0.5em;
+	font-family: Verdana, Helvetica, Arial, sans-serif;
 }
 
 .searchLabel {
 	float: left;
 	margin: unset;
-	margin-top: 0.8em;
+	margin-top: 0.6em;
 	margin-left: 0.5em;
 }
 
 .searchButton {
 	float: left;
-	margin-top: 0.5em;
+	margin-top: 2px;
 	background-color: black;
 	color: white;
-	border: none;	
+	/*border: none;*/
+	height: 22px;
+		
 }
 
 .active {
   stroke-width: 3px;
+}
+
+/* Remove the blue outline border on active elements */
+:focus {
+	outline: 0;
 }

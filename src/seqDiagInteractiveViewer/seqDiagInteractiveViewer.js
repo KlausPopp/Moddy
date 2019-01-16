@@ -187,8 +187,8 @@ class LabelShape extends Shape {
 		
 		let searchHit = d.getSearchHit();
 		if( searchHit.hit ){
-			let color = "yellow";
-			if( searchHit.selected ) color = "orange";
+			let color = d.color=="yellow" ? "black" : "yellow";
+			if( searchHit.selected ) color = d.color=="orange" ? "black" : "orange";
 			this.drawLabelPolygon( g_lay.canvas.mh.main.ctx, d.getCurrentTextPolygon(), color);
 		}
 		
@@ -282,7 +282,7 @@ _shapes = _shapes.concat(g_markerLineManager.createShapes());
 let g_drawingUpdateMgr = new DrawingUpdateMgr( g_lay, _shapes, g_labelMgr, 30 /*ms*/ );
 let g_timeScaleControl = new TimeScaleControl(g_lay, g_drawingUpdateMgr);
 let g_windowChangeControl = new WindowChangeControl(g_lay, g_timeScaleControl, g_drawingUpdateMgr);
-let g_seachEngine = SearchEngine(g_lay, g_labelMgr, g_drawingUpdateMgr);
+let g_seachEngine = SearchEngine(g_lay, g_labelMgr, g_drawingUpdateMgr, 30 /*ms*/);
 
 g_drawingUpdateMgr.requestParam({
 	timeScale: g_lay.scaling.timeScale, 
@@ -711,6 +711,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		.style("float", "left")
 		.style("margin-left", "20px")
 	    .attr("id","SearchContainer")
+	    .attr("spellcheck","false")
 		
 		searchDiv.append("p")
 		 .html("Search: ")
@@ -727,7 +728,7 @@ function DrawingLayout( partArray, moddyTracedEvents ) {
 		searchDiv.append("button")
 		 .attr("class", "searchbutton")
 		 .attr("id","SearchClear")
-		 .html("\u2715")
+		 .html("x"/*\u2715"*/)
 		searchDiv.append("button")
 		 .attr("class", "searchbutton")
 		 .attr("id","SearchNext")
@@ -1389,6 +1390,7 @@ function LabelMgr( lay, labels, maxPlacementTime ) {
 	}
 	
 	this.addLabel = function(sdl){
+		console.debug("addLabel %s", sdl.fullText);
 		labels.push(sdl);
 	}
 	
@@ -1692,12 +1694,12 @@ function MarkerLineManager(lay, labelMgr) {
 	function updateDelta(){
 		let text;
 		if(markerLine.t1.isActive && markerLine.t2.isActive){  
-			text = "\u0394T: " + markerFormatTime(markerLine.t1.time - markerLine.t2.time);
+			text = "\u0394T: " + markerFormatTime(markerLine.t2.time - markerLine.t1.time);
 		}
 		else {
 			text = "";
 		}
-		console.debug("updateDelta %s", text)
+		//console.debug("updateDelta %s", text)
 		d3.select("#TimeMarkerDelta").node().textContent = text;
 	}
 	
@@ -1711,6 +1713,7 @@ function MarkerLineManager(lay, labelMgr) {
 		else if( absTime >= 1E-3) rv = d3.format(fmt)(time*1E3) + " ms";	
 		else if( absTime >= 1E-6) rv = d3.format(fmt)(time*1E6) + " us";	
 		else if( absTime >= 1E-9) rv = d3.format(fmt)(time*1E9) + " ns";
+		else if( absTime == 0) rv = "0";
 		else /*if( absTime >= 1E-12)*/ rv = d3.format(fmt)(time*1E12) + " ps";
 		return rv;
 	}
@@ -1720,7 +1723,7 @@ function MarkerLineManager(lay, labelMgr) {
 		let line = {};
 		let timerange = g_lay.getVisibleTimeRange();
 		
-		if( (e.clientX < g_lay.canvas.fullWidth) && (e.which == 1 /* left mouse button*/) ) {
+		if( (e.clientX < g_lay.canvas.fullWidth) && (e.clientY > g_lay.canvas.top) && (e.which == 1 /* left mouse button*/) ) {
 			var timeAtY = g_lay.screenY2Time(e.clientY);
 			
 			if( timeAtY <= timerange.end && timeAtY >= 0.0) {
@@ -1802,6 +1805,13 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 		}
 		
 		if( shown.timeOffset != requested.timeOffset ){
+			if( requested.setScrollY == true ){
+				let scrollY = lay.scaling.yScale(requested.timeOffset);
+				console.debug("draw: scrollToY %d", scrollY);
+				window.scroll( window.scrollX, scrollY);
+				requested.setScrollY = false;
+			}
+			
 			console.debug("draw: timeOffset changed %f %f", shown.timeOffset, requested.timeOffset );
 			if( lay.scaling.sceneHeight <= lay.canvas.height ){
 				// The total scene fits into the visible area, it makes no sense to hide parts before timeoffset
@@ -1836,7 +1846,7 @@ function DrawingUpdateMgr(lay, shapes, labelMgr, maxShapeDrawTime){
 		else {
 			beginPartialDraw();
 		}
-		console.debug("draw: labels in q %d", labelMgr.positioningQ.length());
+		//console.debug("draw: labels in q %d", labelMgr.positioningQ.length());
 
 		//console.time('labelMgrPlace');
 		labelMgr.placeLabels();
@@ -2027,10 +2037,14 @@ function TooltipControl(lay) {
 //--------------------------------------------------------------------------
 // Text Search Engine
 
-function SearchEngine(lay, labelMgr, drawingUpdateMgr) {
+function SearchEngine(lay, labelMgr, drawingUpdateMgr, maxSearchTime) {
 	let that = this;
 	let foundLabels = [];
 	let foundSelectedIdx = 0;
+	let currentSearchText = "";
+	let searchIdx;
+	let animFrameRequested = false;
+	let allLabelsCount;	// num labels when search started 
 	
 	function nextSearchResult(){
 		console.log("nextSearchResult clicked");
@@ -2059,22 +2073,55 @@ function SearchEngine(lay, labelMgr, drawingUpdateMgr) {
 	}
 	function clearSearch(){
 		console.log("clearSearchResult clicked");
-		searchTextInput.node().value = "";
+		searchTextInput.node().value = currentSearchText = "";
 		clearLabels();
 		changeSelectedIdx(-1);
 	}
 	function searchInputChanged(){
 		let searchText = searchTextInput.node().value;
-		console.log("searchInputChanged %s", searchText);
 		
-		if( searchText != ""){
+		if( searchText != currentSearchText && searchText != ""){
+			currentSearchText = searchText;
+			searchIdx = 0;
 			clearLabels();
-			doSearch( searchText );
-			changeSelectedIdx(foundLabels.length > 0 ? 0: -1);
+			changeSelectedIdx(-1);
+			allLabelsCount = labelMgr.getLabels().length;
+			
+			console.debug("search start new search %s", searchText);
+			if( !animFrameRequested ){
+				requestAnimationFrame(deferredSearch);
+				animFrameRequested = true;
+				
+			}
 		}
-		else {
+		else if( searchText == "" ){
+			currentSearchText = searchText;
 			clearSearch();
 		}
+	}
+	
+	function deferredSearch(){
+		animFrameRequested = false;
+		
+		if( currentSearchText != ""){
+			let searchHitsBefore = foundLabels.length;
+			searchIdx = doSearch( currentSearchText, searchIdx );
+			let searchHitsAfter = foundLabels.length;
+			
+			if( searchHitsBefore != searchHitsAfter){
+				changeSelectedIdx(foundLabels.length > 0 ? 0: -1);
+			}
+			
+			if( searchIdx < allLabelsCount){
+				console.debug("search deferred idx=%d %s", searchIdx, currentSearchText);
+				requestAnimationFrame(deferredSearch);
+				animFrameRequested = true;	
+			}
+			else {
+				console.debug("search done idx=%d found %d", searchIdx, foundLabels.length);
+			}
+		}
+		updateSearchResult();
 	}
 	
 	function clearLabels(){
@@ -2084,14 +2131,24 @@ function SearchEngine(lay, labelMgr, drawingUpdateMgr) {
 		foundLabels = [];
 	}
 	
-	function doSearch( searchText ){
-		clearLabels();
-		for( let sdl of labelMgr.getLabels()){
+	function doSearch( searchText, startIdx ){
+		let labelIdx = startIdx;
+		let startTime = performance.now(); 
+		let labels = labelMgr.getLabels();
+
+		for( ; labelIdx < allLabelsCount; labelIdx++){
+			let sdl = labels[labelIdx];
+		
 			if( sdl.searchMatch( searchText ) == true ){
 				foundLabels.push(sdl);
 				console.debug("searchhit: %s", sdl.fullText);
 			}
+			if( performance.now() - startTime > maxSearchTime ){
+				labelIdx++;
+				break;
+			}
 		}
+		return labelIdx;
 	}
 	
 	function changeSelectedIdx( newIdx ){
@@ -2105,7 +2162,7 @@ function SearchEngine(lay, labelMgr, drawingUpdateMgr) {
 			
 			// check if label is currently visible. If not, scroll so it will be visible
 			if (isShapeVisible( lay.getVisibleTimeRange(), sdl.refLine.y1, sdl.refLine.y2 ) == false){
-				gotoTime = sdl.refLine.y1 + (sdl.refLine.y2 - sdl.refLine.y1) * sdl.hpos; //TODO: Add some offset!
+				gotoTime = (sdl.refLine.y1 + (sdl.refLine.y2 - sdl.refLine.y1) * sdl.hpos) - lay.y2Time( lay.canvas.height * 0.3);
 				console.debug("gotoTime: %f", gotoTime);
 			}
 		}
@@ -2115,22 +2172,27 @@ function SearchEngine(lay, labelMgr, drawingUpdateMgr) {
 	
 	function updateSearchResult(){
 		let text = "";
+		let searchInProgress = (searchIdx < allLabelsCount);
+		console.debug("searchIdx %d labels %d", searchIdx, allLabelsCount);
 		if (foundSelectedIdx >= 0){
 			text = (foundSelectedIdx+1).toString() + "/" + foundLabels.length.toString();
+			if( searchInProgress) text += "?";
 		}
-		else if( searchTextInput.node().value != ""){
-			text = "No Match";
+		else if( currentSearchText != ""){
+			text = searchInProgress ? "Searching" : "No Match";
 		}
 		searchResults.html( text );
 	}
 	function redraw( gotoTime ){
 		updateSearchResult();
 		let request = {doRedraw:true};
-		if( gotoTime !== undefined ) request.timeOffset = gotoTime; 
+		if( gotoTime !== undefined ) request = {doRedraw:true, timeOffset:gotoTime, setScrollY:true};  
 		drawingUpdateMgr.requestParam( request );		
 	}
 	let searchTextInput = d3.select("#SearchInput");
 	searchTextInput.on("keyup", searchInputChanged);
+	searchTextInput.on("change", searchInputChanged);
+	searchTextInput.on("submit", searchInputChanged);
 	let searchResults = d3.select("#SearchResults");
 	d3.select("#SearchNext").on("click", nextSearchResult);
 	d3.select("#SearchPrev").on("click", prevSearchResult);
