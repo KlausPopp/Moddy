@@ -1,11 +1,12 @@
 '''
-Created on 15.10.2018
+:mod:`seqDiagInteractiveGen` -- Interactive Sequence Diagram Generator
+=======================================================================
 
-@author: klauspopp@gmx.de
+.. module:: seqDiagInteractiveGen
+   :platform: Unix, Windows
+   :synopsis: Moddy Interactive Sequence Diagram Generator
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
-TODO 
-- timeRange support warning
-- support old svg output
 '''
 
 import seqDiagInteractiveViewer
@@ -23,43 +24,48 @@ def moddyGenerateSequenceDiagram( sim,
                                   timeRange=(0,None),
                                   **kwargs):
     '''
-    Moddy high level function to create dynamic sequence diagrams.
-    Dynamic sequence diagrams are generated as HTML files containing javascript code
-    to dynamically zoom and arrange sequence diagram
+    Moddy function to create sequence diagrams.
+    The function is supposed to be called after the simulator has stopped. It takes the recorded
+    events from the simulator instance.
     
-    sim - the simulator object
-    fileName - output filename (including .html)
-    fmt -         iaViewer         - moddy interactive viewer: HTML with javascript/css embedded
-                  iaViewerRef      - moddy interactive viewer: HTML with javascript/css referenced
-                  svg              - static SVG (using code in svgSeqD)
-                  svgInHtml        - static SVG embedded in HTML (using code in svgSeqD)
+    Depending on the `fmt` parameter, either dynamic or static diagrams are generated.
+        
+    :param sim sim: Simulator instance
+    :param str fileName: output filename (including filename extension e.g. ``.html``)
+    :param str fmt: Output format. One of 
+    
+        * iaViewer - moddy interactive viewer: HTML with javascript/css embedded
+        * iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced
+        * svg - static SVG (using code in svgSeqD)
+        * svgInHtml - static SVG embedded in HTML (using code in svgSeqD)
                 
 
-    showPartsList - if given, show only the listed parts in that order in sequence diagram.
+    :param list showPartsList: if given, show only the listed parts in that order in sequence diagram.
                     Each element can be either a reference to the part or a string with the
-                    hierarchy name of the part 
+                    hierarchy name of the part.  
                     if omitted, show all parts known by simulator, in the order of their creation
     
-    showVarList -   List of watched variables: Strings with the variable hierarchy name
+    :param list showVarList: List of watched variables: Strings with the variable hierarchy name
                     
-    excludedElementList - 
-                    parts or timers that should be excluded from drawing
+    :param list excludedElementList: parts or timers that should be excluded from drawing
                     Each list element can be the object to exclude or one of the following:
                     - 'allTimers' - exclude all timers
+                    
                     NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported
 
-    timeRange - tuple with start and end time. Everything before start and after end is not drawn
+    :param tuple timeRange: tuple with start and end time. Everything before start and after end is not drawn
                 - currently supported only for svg/svgInHtml
     
-    **kwargs - further arguments
-     title = Sequence Diagram title
-     timePerDiv - time per time grid division
-     pixPerDiv=25 - pixels per time grid division (start value)
-     partSpacing=300 - pixels between parts (start value)
-     partBoxSize = (100,60) - x,y pixel size of part box
-     statusBoxWidth=20 - pixel width of status box on life line
-     variableBoxWidth=150 - pixel width of watched variable value box on life line
-     varSpacing = 180 - pixels between variables
+    :param \\**kwargs: further arguments
+     
+         * title - Sequence Diagram title
+         * timePerDiv - time per time grid division
+         * pixPerDiv=25 - pixels per time grid division (start value)
+         * partSpacing=300 - pixels between parts (start value)
+         * partBoxSize = (100,60) - x,y pixel size of part box
+         * statusBoxWidth=20 - pixel width of status box on life line
+         * variableBoxWidth=150 - pixel width of watched variable value box on life line
+         * varSpacing = 180 - pixels between variables
     '''
     
     # call old generator if output shall be svg

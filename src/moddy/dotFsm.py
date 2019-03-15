@@ -1,7 +1,11 @@
 '''
-Created on 12.02.2017
+:mod:`dotFsm` -- Generate a graph of a moddy finite state machine
+=======================================================================
 
-@author: Klaus Popp
+.. module:: dotFsm
+   :synopsis: Generate a graph of a moddy finite state machine
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
+
 '''
 from moddy.fsm import isSubFsmSpecification
 from moddy.utils import moddyCreateDirsAndOpenOutputFile
@@ -13,8 +17,10 @@ import os
 def moddyGenerateFsmGraph( fsm, fileName, keepGvFile=False ):
     ''' 
     Generate a Fsm Graph of an fsm using the GraphViz dot tool
-    <fileName> should be the relative filename including '.svg'  
-    <keepGvFile> if True, don't delete graphviz input file
+    
+    :param fsm: an instance of the fsm
+    :param fileName: the relative filename including '.svg'  
+    :param keepGvFile: if True, don't delete graphviz input file
     '''
     df = DotFsm(fsm)
     df.dotGen(fileName, keepGvFile)

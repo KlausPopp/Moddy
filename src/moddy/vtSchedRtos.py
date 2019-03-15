@@ -1,7 +1,11 @@
 '''
-Created on 04.01.2017
+:mod:`vtSchedRtos` -- Moddy RTOS scheduler simulation 
+=======================================================================
 
-@author: klaus popp
+.. module:: vtSchedRtos
+   :platform: Unix, Windows
+   :synopsis: Moddy RTOS scheduler simulation
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 '''
 import threading
 from moddy.simulator import simPart
@@ -9,18 +13,25 @@ from moddy.vthread import vThread
 
 class vtSchedRtos(simPart):
     '''
-    RTOS scheduler for vThreads
-    Behaves as a typical, simple RTOS
+    RTOS scheduler for vThreads, an instance of a :class:`~.simulator.simPart`
     
-    16 thread priorities - 0 is highest priority
-    priority based scheduling. Low prio threads run only if no higher thread ready.
-    Threads with same priority will be scheduled round robin (when one of the same prio threads
+    Behaves as a typical, simple RTOS.
+    
+    * 16 thread priorities - 0 is highest priority.
+    * priority based scheduling. Low prio threads run only if no higher thread ready.
+    * Threads with same priority will be scheduled round robin (when one of the same prio threads \
     releases the processor, the next same prio thread which is ready is selected)
     
-    The scheduler tracks the currently ready tasks in the <_readyVThreads> list of lists.
-    A list of all vThreads is maintained in <_listVThreads>
+    
+    :param sim: Simulator instance
+    :param objName: scheduler name
+    :param parentObj: parent part. None if scheduler has no parent. 
     
     '''
+
+    # The scheduler tracks the currently ready tasks in the :attr:`_readyVThreads` list of lists.
+    # A list of all vThreads is maintained in :attr:`_listVThreads`
+
     numPrio = 16
     schedVThreadComTimeout = 20.0 # seconds
 
@@ -40,12 +51,12 @@ class vtSchedRtos(simPart):
     
     def addVThread(self, vThread, prio):
         '''
-        @param vThread: thread to be added
-        @param prio: priority of the thread 0..15 (0=highest)
+        :param vThread: thread to be added
+        :param prio: priority of the thread 0..15 (0=highest)
         
-        Checks vThread.remoteControl: if True, allow thread state to be controlled through a moddy port "threadControlPort".
-            Those threads are not started automatically, but only via explicit "start" message to the "threadControlPort".
-            Those threads can be killed via "kill" and restarted via "start". 
+        Checks :attr:`.vThread.remoteControl`: if True, allow thread state to be controlled through a moddy port `threadControlPort`.
+        Those threads are not started automatically, but only via explicit "start" message to the `threadControlPort`.
+        Those threads can be killed via "kill" and restarted via "start" message. 
         '''
         if vThread in self._listVThreads:
             raise ValueError('vThread already added')
@@ -432,7 +443,13 @@ class vtSchedRtos(simPart):
         return vThread._scCallReturnVal
         
 class vSimpleProg(vThread):
-    ''' A special version of a vThread that has its own scheduler and no concurrency '''
+    ''' 
+    A special version of a vThread that has its own scheduler and no concurrency 
+
+    :param sim: Simulator instance
+    :param vThreadArgs: see :class:`.vThread` for parameters
+
+    '''
     
     def __init__(self, sim, **vThreadArgs):
         ''' See vThread.__init__ for arguments '''

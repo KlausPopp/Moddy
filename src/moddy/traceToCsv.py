@@ -1,9 +1,11 @@
 '''
-Export simulator trace to csv
+:mod:`traceToCsv` -- Export simulator trace to csv 
+=======================================================================
 
-Created on 26.12.2016
+.. module:: traceToCsv
+   :synopsis: Export simulator trace to csv
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
-@author: Klaus Popp
 '''
 
 import csv
@@ -14,12 +16,14 @@ from moddy.utils import moddyCreateDirsAndOpenOutputFile
 def moddyGenerateTraceTable( sim, fileName, **kwargs):
     '''
     Moddy high level function to create trace tables as .csv.
-    sim - the simulator object
-    fileName - output filename (including .csv)
     
-    **kwargs - further arguments
-     timeUnit="s" - time unit for all time stamps in table ('s', 'ms', 'us', 'ns')
-     floatComma=',' - Comma character for float numbers
+    :param sim sim: Simulator instance
+    :param fileName: output filename (including .csv)
+    
+    :param \**kwargs: further arguments
+     
+     * timeUnit="s" - time unit for all time stamps in table ('s', 'ms', 'us', 'ns')
+     * floatComma=',' - Comma character for float numbers
     '''
     trc = TraceToCsv(sim.tracedEvents(),**kwargs)
     trc.save(fileName)

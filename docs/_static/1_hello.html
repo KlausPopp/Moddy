@@ -1,0 +1,49 @@
+<html>
+<head>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<link rel="stylesheet" type="text/css" href="..\..\seqDiagInteractiveViewer\seqDiagInteractiveViewer.css">
+</head>
+            <body>
+            <div id="controls">
+                <div class="slider-wrapper">
+                  <input id="ScaleSlider" type="range" min="-2" max="2" value="0" step="any">
+                </div>
+                <div>
+                 <output id="T-Scale">1.00</output>
+                </div>
+            </div>
+            <div id="scrollDummy"></div>
+            <div id="title"></div>
+            <div id="parts"></div>
+            <div id='diagram'></div>
+<script>
+g_moddyDiagramArgs = {timePerDiv: 1.0, pixPerDiv: 30, title: "Hello Demo", };
+g_moddyDiagramParts = [
+{ name: "Bob", tp: "Part" },
+{ name: "Joe", tp: "Part" },
+];
+g_moddyTracedEvents = [
+{ tp: "<MSG", t: 1, p: 0, s: 1, b: 0, txt: "Hi Joe", l:"f"}, 
+{ tp: "ANN", t: 1, p: 1, txt: "got message Hi Joe"}, 
+{ tp: "T-EXP", t: 3, p: 1, txt: "thinkTmr"}, 
+{ tp: "STA", t: 3, p: 1, b: 1, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+{ tp: "<MSG", t: 4.5, p: 1, s: 0, b: 3, txt: "Hi, How are you?", l:"f"}, 
+{ tp: "T-EXP", t: 5.9, p: 0, txt: "thinkTmr"}, 
+{ tp: "STA", t: 5.9, p: 0, b: 4.5, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+{ tp: "<MSG", t: 6.9, p: 0, s: 1, b: 5.9, txt: "How are you?", l:"f"}, 
+{ tp: "ANN", t: 6.9, p: 1, txt: "got message How are you?"}, 
+{ tp: "T-EXP", t: 8.9, p: 1, txt: "thinkTmr"}, 
+{ tp: "STA", t: 8.9, p: 1, b: 6.9, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+{ tp: "<MSG", t: 10.4, p: 1, s: 0, b: 8.9, txt: "Fine", l:"f"}, 
+{ tp: "T-EXP", t: 11.8, p: 0, txt: "thinkTmr"}, 
+{ tp: "STA", t: 11.8, p: 0, b: 10.4, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+// close STA/VC
+];
+</script>
+<script src="..\..\seqDiagInteractiveViewer\seqDiagInteractiveViewer.js"></script>
+<script>
+                if (typeof getDiagramArgs !== "function") {
+                    alert("Sorry, your browser does not support ecmascript 6. Please use Chrome, Firefox, Edge...");
+                }
+                </script>
+</body></html>

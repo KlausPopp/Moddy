@@ -1,5 +1,11 @@
 '''
-Moddy - Python system simulator
+:mod:`simulator` -- Moddy Simulator core
+========================================
+
+.. module:: simulator
+   :platform: Unix, Windows
+   :synopsis: Moddy Simulator Core Routines
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
  
 '''
 from copy import deepcopy
@@ -50,7 +56,12 @@ class simBaseElement:
 
 
 class simPart(simBaseElement):
-    """Simulator block"""
+    """an instance of simPart forms a moddy object
+    
+    :param sim: Simulator instance
+    :param objName: part's name
+    :param parentObj: parent part. None if part has no parent. Defaults to None
+    """
     def __init__(self, sim, objName, parentObj = None ):
         super().__init__(sim, parentObj, objName, "Part")
         self._listPorts = []
@@ -76,31 +87,62 @@ class simPart(simBaseElement):
         Increment simulator global assertion failure counter
         Stop simulator if configured so
         
-        :param assertionStr error message to display
-        :param frame traceback frame index (1 if caller's frame, 2 if caller-caller's frame...)
+        :param assertionStr: error message to display
+        :param frameIdx: traceback frame index (1 if caller's frame, 2 if caller-caller's frame...)
         '''
         self._sim.assertionFailed(self, assertionStr, frameIdx+1 )
         
     def setStateIndicator(self,text,appearance={}):
-        """set part's state from model at simulation time"""
+        """set part's state from model at simulation time
+        
+        :param text: text to show in life line
+        :param dict appearance: appearance of state indicator. Dictionary with color values, e.g. ``{'boxStrokeColor':'black', 'boxFillColor':'green', 'textColor':'white'}``
+        """
         self._sim.setStateIndicator(self, text, appearance)
     
     def newInputPort(self, name, msgReceivedFunc):
+        """ 
+        Add a new input port to the part 
+        
+        :param name: name of port
+        :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``
+          
+        """
         port = simInputPort(self._sim, self, name, msgReceivedFunc)
         self.addInputPort(port)
         return port
     
     def newOutputPort(self, name):
+        """ 
+        Add a new output port to the part 
+        
+        :param name: name of port
+          
+        """
         port = simOutputPort(self._sim, self, name)
         self.addOutputPort(port)
         return port
     
     def newIOPort(self, name, msgReceivedFunc):
+        """ 
+        Add a new "I/O" port to the part 
+        
+        :param name: name of port
+        :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``
+          
+        """
         port = simIOPort(self._sim, self, name, msgReceivedFunc)
         self.addIOPort(port)
         return port
 
     def newTimer(self, name, elapsedFunc):
+        """ 
+        Add a new timer to the part 
+        
+        :param name: name of timer
+        :param elapsedFunc: callback function to call for timer expiry. Signature ``func(timer)``
+          
+        """
         timer = simTimer(self._sim, self, name, elapsedFunc)
         self.addTimer(timer)
         return timer
@@ -142,9 +184,13 @@ class simPart(simBaseElement):
     def createPorts(self, ptype, listPortNames):
         '''
         Convinience functions to create multiple ports at once.
-        <type> must be one of 'in', 'out' or 'io
+        
+        :param ptype: Type of ports, must be one of 'in', 'out' or 'io'
+        :param list listPortNames: list of port names to create
+        
         The function creates for each port a member variable with this name in the part.
-        For "in" and "io" ports, a receive function <portName>Recv must be provided by caller 
+        For "in" and "io" ports, a receive function *<portName>Recv* must be provided by caller
+         
         '''
         if ptype == 'in':
             for portName in listPortNames:
@@ -161,6 +207,9 @@ class simPart(simBaseElement):
     def createTimers(self, listTimerNames):
         '''
         Convinience functions to create multiple timers at once.
+        
+        :param list listTimerNames: list of timer names to create
+        
         The function creates for each port a member variable with this name in the part.
         A timer callback function <tmrName>Expired must be provided by caller 
         '''
@@ -188,7 +237,15 @@ class simEvent(object):
         return self.execTime < other.execTime
         
 class simInputPort(simBaseElement):
-    """Simulator input port"""
+    """Simulator input port
+    
+    :param sim sim: Simulator instance
+    :param simPart part: simPart that contains this port
+    :param name: port name
+    :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``
+    :param ioPort: reference to the IOPort which contains this inPort (None if not part of IOPort).  
+    
+    """
     def __init__(self, sim, part, name, msgReceivedFunc, ioPort=None):
         super().__init__(sim, part, name, "InPort")
         self._outPort = None        # connected output port
@@ -204,7 +261,15 @@ class simInputPort(simBaseElement):
         return self._outPort is not None 
     
 class simOutputPort(simBaseElement):
-    """Simulator output port"""
+    """Simulator output port
+
+    :param sim sim: Simulator instance
+    :param simPart part: simPart that contains this port
+    :param name: port name
+    :param color: message color to use in sequence diagram. Use default color if *None* 
+    :param ioPort: reference to the IOPort which contains this outPort (None if not part of IOPort).  
+    
+    """
    
     class fireEvent(simEvent):
         """ Event that is passed to scheduler to send a message """
@@ -281,7 +346,12 @@ class simOutputPort(simBaseElement):
         self._lostSeqHeap = []      # heap with message sequence numbers that will be lost 
         
     def bind(self, inputPort):
-        """bind an output port to an input port"""
+        """bind an output port to an input port
+        
+        :param inputPort: input port to which this output port shall be bound
+        :raise AssertionError: if input port is already bound
+        
+        """
         assert(inputPort._outPort is None),"input port already bound"
         inputPort._outPort = self
         self._listInPorts.append(inputPort)
@@ -309,7 +379,12 @@ class simOutputPort(simBaseElement):
         
     
     def send(self, msg, flightTime):
-        """User interface to send a message"""
+        """User interface to send a message
+        
+        :param msg: message to send
+        :param flightTime: flight time of message 
+        
+        """
         self._learnMsgTypes(msg)
         event = self.fireEvent(self._sim, self, msg, flightTime)
         if not self._listPendingMsg:
@@ -349,7 +424,15 @@ class simOutputPort(simBaseElement):
             return False    
         
 class simIOPort(simBaseElement):
-    ''' An element that contains one input and one output port '''
+    ''' An element that contains one input and one output port 
+    
+    :param sim sim: Simulator instance
+    :param simPart part: simPart that contains this port
+    :param name: port name
+    :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``
+    :param specialInPort: if None, create a standard :class:`simInputPort`, otherwise use the supplied specialInPort  
+    
+    '''
     def __init__(self, sim, part, name, msgReceivedFunc, specialInPort=None):
         super().__init__(sim, part, name, "IOPort")
         self._outPort = simOutputPort( sim, part, name + "Out", ioPort=self)
@@ -371,11 +454,16 @@ class simIOPort(simBaseElement):
     
     # delegation methods to output port     
     def send(self, msg, flightTime):
-        ''' send message to IoPorts output port '''
+        ''' send message to IoPorts output port
+        
+        Refer to :func:`simOutputPort.send` for parameters.
+         '''
         self._outPort.send(msg, flightTime)
     
     def injectLostMessageErrorBySequence(self, nextSeq):
-        ''' inject error on IoPorts output port '''
+        ''' inject error on IoPorts output port 
+        Refer to :func:`simOutputPort.injectLostMessageErrorBySequence` for details.
+        '''
         self._outPort.injectLostMessageErrorBySequence(self, nextSeq)
         
     def setColor(self, color):
@@ -400,7 +488,14 @@ class simIOPort(simBaseElement):
 class simTimer(simBaseElement):
     """Simulator Timer
     timer is either running or stopped
-    timer can be canceled, and restarted"""
+    timer can be canceled, and restarted
+    
+    :param sim sim: Simulator instance
+    :param simPart part: simPart that contains this port
+    :param name: port name
+    :param elapsedFunc: callback function to call for timer expiry. Signature ``func(timer)``
+
+    """
     
     class timerEvent(simEvent):
         """ Event that is passed to scheduler for timer """
@@ -440,7 +535,11 @@ class simTimer(simBaseElement):
         self._pendingEvent = event
     
     def start(self, timeout):
-        """Start the timer. Timer will fire after <timeout>"""
+        """Start the timer. 
+        
+        :param timeout: Timer will fire after *timeout*
+        :raise AssertionError: if timer already started
+        """
         self._start(timeout)
         self._sim.addTraceEvent( simTraceEvent(self._parentObj, self, self.timeoutFmt(self._sim,timeout), 'T-START') )
     
@@ -455,7 +554,11 @@ class simTimer(simBaseElement):
         self._stop()
         
     def restart(self,timeout):
-        """Restart timer. Timer will fire after <timeout>"""
+        """Restart timer, works whether timer is running or not.
+        
+        :param timeout: Timer will fire after *timeout*
+
+        """
         self._sim.addTraceEvent( simTraceEvent(self._parentObj, self, self.timeoutFmt(self._sim,timeout), 'T-RESTA') )
         self._stop()
         self._start(timeout)
@@ -471,10 +574,12 @@ class simVariableWatcher(simBaseElement):
     """
     def __init__(self, sim, part, varName, formatString):
         """
-        :param sim: simulator object
+        Init
+        
+        :param sim sim: simulator object
         :param simPart part: part which contains the variable 
-        :param string varName: Variable name as seen part scope
-        :param string formatString: print format like string to format value 
+        :param str varName: Variable name as seen part scope
+        :param str formatString: print format like string to format value 
         """
         super().__init__(sim, part, varName, "WatchedVar")
         self._varName = varName
@@ -661,13 +766,13 @@ class sim:
     #
     def assertionFailed(self, part, assertionStr, frameIdx=1):
         '''
-        Add an assertion failure trace event
-        Increment global assertion failure counter
-        Stop simulator if configured so
+        Add an assertion failure trace event.
+        Increment global assertion failure counter.
+        Stop simulator if configured so.
         
-        :param part the related simPart. None if global assertion
-        :param assertionStr error message to display
-        :param frame traceback frame index (1 if caller's frame, 2 if caller-caller's frame...)
+        :param simPart part: the related simPart. None if global assertion
+        :param string assertionStr: error message to display
+        :param int frameIdx: traceback frame index (1 if caller's frame, 2 if caller-caller's frame...)
         '''
         _,fileName,lineNumber,functionName,_,_ = inspect.stack()[frameIdx]
 
@@ -712,18 +817,21 @@ class sim:
             enableTracePrinting=True, 
             stopOnAssertionFailure=True):
         '''
-        run the simulator until 
+        
+        run the simulator until
+         
             - stopTime reached
             - no more events to execute
             - maxEvents reached 
             - model called assertionFailed() and stopOnAssertionFailure==True
             - a model exception (including exceptions from vThreads) has been caught
-        @param stopTime - simulation time at which the simulator shall stop latest
-        @param maxEvents - (default: 100000) maximum number of simulator events to process. Can be set to None for infinite events 
-        @param enableTracePrinting - (default: True) if set to False, simulator will not display events as they are executing
-        @param stopOnAssertionFailure - (default: True) if set to False, don't stop when model calls assertionFailed(). 
+            
+        :param float stopTime: simulation time at which the simulator shall stop latest
+        :param int maxEvents: (default: 100000) maximum number of simulator events to process. Can be set to None for infinite events 
+        :param bool enableTracePrinting: (default: True) if set to False, simulator will not display events as they are executing
+        :param bool stopOnAssertionFailure: (default: True) if set to False, don't stop when model calls assertionFailed(). 
                                         Just print info at end of simulation
-        @raise exceptions coming from model or simulator
+        :raise: exceptions coming from model or simulator
         
         '''
         self._enableTracePrints = enableTracePrinting
@@ -835,19 +943,26 @@ class sim:
         UML execution specification to a life line 
         at the current simulation time. 
         An empty text flags 'no state' which removes the indication from the life line
+        
+        :param simPart part: affected part
+        :param str text: text to display (Empty string to clear indicator)
+        :param dict appearance: (default: {}) colors for indicator  
         '''
         te = simTraceEvent( part, part, self.StateIndTransVal(text,appearance), 'STA')
         self.addTraceEvent(te)
 
     def setDisplayTimeUnit(self,unit):
-        """Define how the simulator prints/displays time units
-        Unit can be "s", "ms", "us", "ns"
+        """
+        Define how the simulator prints/displays time units
+        
+        :param str unit: can be "s", "ms", "us", "ns"
+        
         """
         self._disTimeScaleStr = unit
         self._disTimeScale = timeUnit2Factor(unit)
         
     def timeStr(self,time):
-        """return a formatted time string of <time> based on the display scale"""
+        """return a formatted time string of *time* based on the display scale"""
         tmfmt = "%.1f" % (time / self._disTimeScale)
         return tmfmt + self._disTimeScaleStr
 

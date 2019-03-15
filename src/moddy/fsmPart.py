@@ -1,7 +1,11 @@
 '''
-Created on 11.02.2017
+:mod:`fsmPart` -- A moddy part with a state machine 
+=======================================================================
 
-@author: Klaus Popp
+.. module:: fsmPart
+   :synopsis: A moddy part with a state machine
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
+
 '''
 from moddy import simPart
 
@@ -9,17 +13,20 @@ from moddy import simPart
 class simFsmPart(simPart):
     '''
     A moddy part with a state machine
-    All simulator events are directed to the fsm
+    All simulator events are directed to the fsm.
+    
+    :param sim: Simulator instance
+    :param objName: part name
+    :param Fsm fsm: the state machine (Fsm class) object created by caller
+    :param parentObj: parent part. None if part has no parent. Defaults to None
+    :param dict statusBoxReprMap: defines how each state is shown in sequence diagrams' status boxes \
+            Must be a dictionary with the state names as keys. The values must be a tuple of
+            
+            * text to display (None if org. state name shall be used)
+            * appearance: The colors of the status box, see setStatIndication()   
+
     '''
     def __init__(self, sim, objName, fsm, parentObj=None, statusBoxReprMap=None ):
-        '''
-        Initialize the part.
-        <fsm> must be the state machine (Fsm class) object created by caller
-        <statusBoxReprMap> defines how each state is shown in sequence diagrams' status boxes
-            Must be a dictionary with the state names as keys. The values must be a tuple of
-                - text to display (None if org. state name shall be used)
-                - appearance: The colors of the status box, see setStatIndication()
-        '''
         super().__init__(sim=sim, objName=objName, parentObj=parentObj )
         
         # reference the fsm
@@ -39,8 +46,12 @@ class simFsmPart(simPart):
         # Override simPart method to route all events to central handlers
         '''
         Convinience functions to create multiple ports at once.
-        <type> must be one of 'in', 'out' or 'io
+        
+        :param ptype: Type of ports, must be one of 'in', 'out' or 'io'
+        :param list listPortNames: list of port names to create
+        
         The function creates for each port a member variable with this name in the part.
+        
         '''
         if ptype == 'in':
             for portName in listPortNames:
@@ -55,6 +66,9 @@ class simFsmPart(simPart):
         # Override simPart method to route all events to central handlers
         '''
         Convinience functions to create multiple timers at once.
+        
+        :param list listTimerNames: list of timer names to create
+        
         The function creates for each port a member variable with this name in the part.
         '''
         for tmrName in listTimerNames:

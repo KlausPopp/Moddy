@@ -1,9 +1,11 @@
 '''
-Created on 11.02.2017
+:mod:`fsm` -- Moddy Finite State Machine 
+=======================================================================
 
-@author: Klaus Popp
+.. module:: fsm
+   :synopsis: A general finite state machine with hierarchical state support
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
-A general finite state machine with hierarchical state support
 '''
 def isSubFsmSpecification(nameClsTuple):
     ''' Test if the tuple from a transition list (name, classType) is a subFsm specification '''
@@ -18,37 +20,38 @@ class Fsm(object):
     A finite state machine.
     Subclass your FSM from this class.
     
-    Example: 
-    class Computer(Fsm):
+    Example::
     
-        def __init__(self):
-            
-            transitions = { 
-                '':
-                    [('INITIAL', 'Off')],
-                'Off': 
-                    [('PowerApplied', 'Standby')],
-                'Standby':
-                    [('PowerButtonPressed', 'NormalOp')],
-                'NormalOp':
-                    [('PowerButtonPressed', 'Standby'),
-                     ('OsShutdown', 'Standby')],
-                'ANY':
-                    [('PowerRemoved', 'Off')]
-            }
-            
-            super().__init__( dictTransitions=transitions )
+        class Computer(Fsm):
+        
+            def __init__(self):
+                
+                transitions = { 
+                    '':
+                        [('INITIAL', 'Off')],
+                    'Off': 
+                        [('PowerApplied', 'Standby')],
+                    'Standby':
+                        [('PowerButtonPressed', 'NormalOp')],
+                    'NormalOp':
+                        [('PowerButtonPressed', 'Standby'),
+                         ('OsShutdown', 'Standby')],
+                    'ANY':
+                        [('PowerRemoved', 'Off')]
+                }
+                
+                super().__init__( dictTransitions=transitions )
 
-        The special 'ANY' state means that the transitions can be initiated from ANY state.
-        The special 'INITIAL' must be in the '' (uninitialized) state and specifies the INITIAL transistion
-        which is triggered by startFsm()
+    The special *ANY* state means that the transitions can be initiated from ANY state.
+    The special *INITIAL* event must be in the '' (uninitialized) state and specifies the INITIAL transistion
+    which is triggered by :meth:`.startFsm`.
 
                 
     You can define entry and exit method that are executed when a state is entered or left.
-    These methods must follow the naming convention "STATE_<statename>_<Entry/Exit>".
+    These methods must follow the naming convention ``STATE_<statename>_<Entry/Exit>``
     They don't need to exist. They are called only if they are defined.
     
-    Note that entry and exit actions are NOT called at self transitions (transitions to the current state)
+    Note that entry and exit actions are NOT called at self transitions (transitions to the current state)::
     
         # Off actions    
         def State_Off_Entry(self):
@@ -58,17 +61,19 @@ class Fsm(object):
             print("State_Off_Exit")
     
     You can also define a "do" Method that is invoked
-    - after the "Entry" methode
-    - at self transistions to the state
-    These methods must follow the naming convention "STATE_<statename>_Do".
+    
+    * after the "Entry" methode
+    * at self transistions to the state
+    
+    These methods must follow the naming convention ``STATE_<statename>_Do`` 
     
     
-    Such routines can be also defined for the special 'ANY' state. If they exist they are called at
+    Such routines can be also defined for the special *ANY* state. If they exist they are called at
     the entry or exit or self transitions to/from any state.
 
-    Note: You cannot define actions for transitions!
+    .. note: You cannot define actions for transitions!
             
-    Use the fsm as follows:
+    Use the fsm as follows::
     
         comp = Computer()
         comp.startFsm()    # sets the state machine to its initial state 
@@ -83,62 +88,62 @@ class Fsm(object):
         print("State %s" % comp.state)
     
     
-    You can call execStateDependentMethod to execute a state specific method of the fsm.
-    e.g. execStateDependentMethod('Msg', 123) calls State_<currentStateName>_Msg( 123 )
+    You can call :meth:`.execStateDependentMethod` to execute a state specific method of the fsm.
+    e.g. ``execStateDependentMethod('Msg', 123)`` calls ``State_<currentStateName>_Msg( 123 )``
+    
     (e.g. the simFsmPart uses it to execute the _Msg and _Expiration functions)
     
     
-    Hierarchically Nested State Support
+    **Hierarchically Nested State Support**
+    
     https://en.wikipedia.org/wiki/UML_state_machine#Hierarchically_nested_states
     
     Rules:
-    Nested states are defined by the user in the transition list: 
+    Nested states are defined by the user in the transition list:
      
     
-    Main FSM:
-                transitions = { 
-                '':
-                    [('INITIAL', 'Off')],
-                'Off': 
-                    [('PowerApplied', 'Standby')],
-                'Standby':
-                    [('PowerButtonPressed', 'NormalOp')],
-                'NormalOp':
-                    [ 
-                    ####### NESTED FSM ('fsm-Name', Class-Name)
-                     ('fsm-name' , subfsm),
-                     ('PowerButtonPressed', 'Standby'),
-                     ('OsShutdown', 'Standby')],
-                'ANY':
-                    [('PowerRemoved', 'Off')]
-            }
+    Main FSM::
+    
+        transitions = { 
+            '':
+                [('INITIAL', 'Off')],
+            'Off': 
+                [('PowerApplied', 'Standby')],
+            'Standby':
+                [('PowerButtonPressed', 'NormalOp')],
+            'NormalOp':
+                [ 
+                ####### NESTED FSM ('fsm-Name', Class-Name)
+                 ('fsm-name' , subfsm),
+                 ('PowerButtonPressed', 'Standby'),
+                 ('OsShutdown', 'Standby')],
+            'ANY':
+                [('PowerRemoved', 'Off')]
+        }
 
-    A nested FSM is instantiated when the upper level state is entered
-    A nested FSM cannot exit
-    A nested FSM receives all events from the upper level FSM. If the event is not known in the nested FSM,
+    * A nested FSM is instantiated when the upper level state is entered
+    * A nested FSM cannot exit
+    * A nested FSM receives all events from the upper level FSM. If the event is not known in the nested FSM, \
     it is directed to the upper FSM. Events that are known in the nested FSM are NOT directed to upper FSM 
 
-    If the upper state exits, the exit action of the current states (first, the state in the nested fsm, then the upper fsm) 
-    are called. Then the nested fsm is terminated.
+    * If the upper state exits, the exit action of the current states (first, the state in the nested fsm, \
+    then the upper fsm) are called. Then the nested fsm is terminated.
     
-    Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel. Just
+    * Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel. Just \
     enter multiple subFsms in the transition list of a state.
     
-    For nested statemachines, the following methods are usefull:
-    self.topFsm() gives you the reference to the top level Fsm. E.g. to fire an event to the top Fsm.
-    self.moddyPart() gives you the moddy part where the state machine is contained, regardless of the fsm nesting level
+    * For nested statemachines, the following methods are usefull:
     
+        - :meth:`.topFsm` gives you the reference to the top level Fsm. E.g. to fire an event to the top Fsm.
+        - :meth:`moddyPart` gives you the moddy part where the state machine is contained, regardless of the fsm nesting level
+    
+    
+    :param dict dictTransitions: a dictionary, with the transitions: The dict key is the state, and the values are a list of transition from
+        that state. Each transition consists of a tuple (event, targetState).
+    :param Fsm parentFsm: The parent Finite State Machine. None if no parent.  
     '''
     
     def __init__(self, dictTransitions, parentFsm=None):
-        '''
-        dictTransitions must be a dictionary, with the transitions (see example in class doc)
-
-        The dict key is the state, and the values are a list of transition from
-        that state. Each transition consists of a tuple (event, targetState).
-        
-        
-        '''
         self.state = None
         self._parentFsm = parentFsm
         
@@ -181,10 +186,14 @@ class Fsm(object):
     def execStateDependentMethod(self, methodName, deep, *args, **kwargs):
         ''' 
         Execute the state specific methods:
-         if 'deep' is true, then for each currently active subFsm, the execStateMethod called
-         The method self.State_ANY_<methodName>(*args,**kwargs) is called if it exists.
-         The method self.State_<stateName>_<methodName>(*args,**kwargs) is called if it exists.
-         Returns True if at least one method exists
+        
+        The method ``self.State_ANY_<methodName>(*args,**kwargs)`` is called if it exists.
+        
+        The method ``self.State_<stateName>_<methodName>(*args,**kwargs)`` is called if it exists.
+
+        :param methodName: method name to call
+        :param deep: if True, then for each currently active subFsm, the execStateMethod called
+        :return: True if at least one method exists
         '''
         handled = 0
 
@@ -200,11 +209,19 @@ class Fsm(object):
         return handled > 0
 
     def setStateChangeCallback(self, callback):
-        ''' Register a method that is called whenever the state of the fsm changes '''
+        ''' 
+        Register a method that is called whenever the state of the fsm changes 
+        
+        :param callback: function to be called on state changes
+        '''
         self._stateChangeCallback = callback
 
     def hasEvent(self,evName):
-        ''' check if the event is known by the fsm or a currently active statemachine '''
+        ''' 
+        check if the event is known by the fsm or a currently active statemachine
+        
+        :return: True if event is known by the fsm or a currently active statemachine
+        '''
         rv = False
         if evName in self._listEvents:
             rv = True
@@ -217,14 +234,17 @@ class Fsm(object):
         
     
     def startFsm(self):
+        ''' start the FSM. Fire event ``INITIAL`` '''
         assert(self.state is None)
         self._event('INITIAL')     
 
     def event(self, evName):
         '''
-        Execute an Event in the "ANY" and current state.
-        Raises AssertError if the current state is None.
-        Returns True if the event causes a state change, False if not.
+        Execute an Event in the *ANY* and current state.
+        
+        :param evName: event to execute
+        :raise AssertionError: if the current state is None.
+        :return: True if the event causes a state change, False if not.
         '''
         assert(self.state is not None),"Did you call startFsm?"
         return self._event(evName)

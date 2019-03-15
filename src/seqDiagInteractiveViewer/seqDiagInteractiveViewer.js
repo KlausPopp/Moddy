@@ -1536,7 +1536,7 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 			}
 			
 			let newscale = startScale * Math.pow(1.02, (e.clientY - mouseStartY));
-			newscale = Math.max(0.1, newscale);
+			newscale = Math.max(0.01, newscale);
 			newscale = Math.min(100, newscale);
 			
 			//console.log( "mm newscale %f", newscale)
@@ -1572,7 +1572,7 @@ function TimeScaleControl(lay, drawingUpdateMgr) {
 	// @param screenZoomY zoom around this y screen position 
 	this.setTimeScale = function( scaleFactor, screenZoomY){
 
-		scaleFactor = Math.max(0.1, scaleFactor);
+		scaleFactor = Math.max(0.01, scaleFactor);
 		scaleFactor = Math.min(100, scaleFactor);
 		
 		// determine which time is at screenZoomY

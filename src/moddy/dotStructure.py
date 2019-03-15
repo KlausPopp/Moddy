@@ -1,7 +1,11 @@
 '''
-Created on 24.01.2017
+:mod:`dotStructure` -- Generate a graph of the model structure
+=======================================================================
 
-@author: Klaus Popp
+.. module:: dotStructure
+   :synopsis: Generate a graph of the model structure
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
+
 '''
 from moddy.simulator import sim, simPart
 from moddy.utils import moddyCreateDirsAndOpenOutputFile
@@ -12,9 +16,11 @@ import os
 
 def moddyGenerateStructureGraph( sim, fileName, keepGvFile=False ):
     ''' 
-    Generate a graph of the model' structure using the GraphViz dot tool
-    <fileName> should be the relative filename including '.svg'  
-    <keepGvFile> if True, don't delete graphviz input file
+    Generate a graph of the model structure using the GraphViz dot tool
+    
+    :param sim sim: Simulator instance
+    :param fileName: the relative filename including '.svg'
+    :param keepGvFile: if True, don't delete graphviz input file
     '''
     ds = DotStructure(sim.topLevelParts(), sim.outputPorts())
     ds.dotGen(fileName, keepGvFile)
