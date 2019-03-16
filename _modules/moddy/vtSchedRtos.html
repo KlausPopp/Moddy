@@ -1,0 +1,649 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.vtSchedRtos &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.vtSchedRtos</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.vtSchedRtos</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:mod:`vtSchedRtos` -- Moddy RTOS scheduler simulation </span>
+<span class="sd">=======================================================================</span>
+
+<span class="sd">.. module:: vtSchedRtos</span>
+<span class="sd">   :platform: Unix, Windows</span>
+<span class="sd">   :synopsis: Moddy RTOS scheduler simulation</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">moddy.simulator</span> <span class="k">import</span> <span class="n">simPart</span>
+<span class="kn">from</span> <span class="nn">moddy.vthread</span> <span class="k">import</span> <span class="n">vThread</span>
+
+<div class="viewcode-block" id="vtSchedRtos"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vtSchedRtos.vtSchedRtos">[docs]</a><span class="k">class</span> <span class="nc">vtSchedRtos</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    RTOS scheduler for vThreads, an instance of a :class:`~.simulator.simPart`</span>
+<span class="sd">    </span>
+<span class="sd">    Behaves as a typical, simple RTOS.</span>
+<span class="sd">    </span>
+<span class="sd">    * 16 thread priorities - 0 is highest priority.</span>
+<span class="sd">    * priority based scheduling. Low prio threads run only if no higher thread ready.</span>
+<span class="sd">    * Threads with same priority will be scheduled round robin (when one of the same prio threads \</span>
+<span class="sd">    releases the processor, the next same prio thread which is ready is selected)</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    :param sim: Simulator instance</span>
+<span class="sd">    :param objName: scheduler name</span>
+<span class="sd">    :param parentObj: parent part. None if scheduler has no parent. </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># The scheduler tracks the currently ready tasks in the :attr:`_readyVThreads` list of lists.</span>
+    <span class="c1"># A list of all vThreads is maintained in :attr:`_listVThreads`</span>
+
+    <span class="n">numPrio</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">schedVThreadComTimeout</span> <span class="o">=</span> <span class="mf">20.0</span> <span class="c1"># seconds</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># Methods to be called from the Simulator thread</span>
+    <span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span><span class="p">):</span>
+                
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="n">parentObj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_typeStr</span> <span class="o">=</span> <span class="s2">&quot;scheduler&quot;</span>     <span class="c1"># overwrite &quot;part&quot; (ugly)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listVThreads</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readyVThreads</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numPrio</span><span class="p">)]</span>   <span class="c1"># create list of lists, one list for each prio </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scCallEvent</span>   <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span> <span class="o">=</span> <span class="kc">None</span>                                 <span class="c1"># currently running vThread</span>
+    
+<div class="viewcode-block" id="vtSchedRtos.addVThread"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vtSchedRtos.vtSchedRtos.addVThread">[docs]</a>    <span class="k">def</span> <span class="nf">addVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">prio</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param vThread: thread to be added</span>
+<span class="sd">        :param prio: priority of the thread 0..15 (0=highest)</span>
+<span class="sd">        </span>
+<span class="sd">        Checks :attr:`.vThread.remoteControl`: if True, allow thread state to be controlled through a moddy port `threadControlPort`.</span>
+<span class="sd">        Those threads are not started automatically, but only via explicit &quot;start&quot; message to the `threadControlPort`.</span>
+<span class="sd">        Those threads can be killed via &quot;kill&quot; and restarted via &quot;start&quot; message. </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">vThread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listVThreads</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;vThread already added&#39;</span><span class="p">)</span>
+        
+                   
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listVThreads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vThread</span><span class="p">)</span>
+        
+        <span class="c1"># add scheduler members to vThread</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scheduler</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scPrio</span> <span class="o">=</span> <span class="n">prio</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scState</span> <span class="o">=</span> <span class="s1">&#39;INIT&#39;</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scBusyStartTime</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,{})</span>              <span class="c1"># for status indicator   </span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scLastAppStatus</span> <span class="o">=</span> <span class="kc">None</span>           
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        
+        <span class="c1"># create a timer for sysCalls </span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scSysCallTimer</span> <span class="o">=</span> <span class="n">vThread</span><span class="o">.</span><span class="n">newTimer</span><span class="p">(</span><span class="n">vThread</span><span class="o">.</span><span class="n">objName</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;ScTmr&quot;</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sysCallTmrExpired</span><span class="p">)</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scSysCallTimer</span><span class="o">.</span><span class="n">_scVThread</span><span class="o">=</span> <span class="n">vThread</span>
+    
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">vThread</span><span class="o">.</span><span class="n">remoteControlled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">()</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateAllStateIndicators</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">runVThreadTilSysCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vThread</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Run the vThread&#39;s routine until it executes a syscall</span>
+<span class="sd">        Then execute the syscall and possible reschedule</span>
+<span class="sd">        &#39;&#39;&#39;</span> 
+        <span class="c1">#print(&quot;  runVThreadTilSysCall %s %d&quot; % (vThread.objName(), vThread._scIsPythonThreadStarted))</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scSysCallTimer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">vThread</span><span class="o">.</span><span class="n">pythonThreadRunning</span><span class="p">:</span>
+            <span class="c1"># first time, start python thread</span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">startThread</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># wake python thread up from syscall</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span><span class="o">.</span><span class="n">isSet</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span>    
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+
+        <span class="c1">#</span>
+        <span class="c1"># wait until vThread executes syscall</span>
+        <span class="c1">#</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scCallEvent</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schedVThreadComTimeout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rv</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scCallEvent</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            
+            <span class="c1"># </span>
+            <span class="c1"># Execute the sysCall</span>
+            <span class="c1"># </span>
+            <span class="n">sysCallName</span> <span class="o">=</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sysCallArg</span>  <span class="o">=</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="c1">#print(&quot;  runVThreadTilSysCall %s Exec sysCall %s&quot; % (vThread.objName(), sysCallName))</span>
+            
+            <span class="n">timer</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="k">if</span> <span class="n">sysCallName</span> <span class="o">==</span> <span class="s1">&#39;busy&#39;</span><span class="p">:</span>
+                <span class="n">timer</span> <span class="o">=</span> <span class="n">sysCallArg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scAppStatus</span>  <span class="o">=</span> <span class="n">sysCallArg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="o">=</span> <span class="n">timer</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scBusyStartTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="s1">&#39;ok&#39;</span>
+                
+            <span class="k">elif</span> <span class="n">sysCallName</span> <span class="o">==</span> <span class="s1">&#39;wait&#39;</span><span class="p">:</span>
+                <span class="n">timer</span> <span class="o">=</span> <span class="n">sysCallArg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span> <span class="o">=</span> <span class="n">sysCallArg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;wait&#39;</span><span class="p">)</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
+                
+            <span class="k">elif</span> <span class="n">sysCallName</span> <span class="o">==</span> <span class="s1">&#39;term&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;term&#39;</span><span class="p">)</span>
+                <span class="c1"># if thread terminated due to an exception, raise also an exception in simulator</span>
+                <span class="k">if</span> <span class="n">sysCallArg</span> <span class="o">==</span> <span class="s1">&#39;exception&#39;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;vThread </span><span class="si">%s</span><span class="s2"> terminated due to an exception&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vThread</span><span class="o">.</span><span class="n">objName</span><span class="p">()))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Illegal syscall </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sysCallName</span><span class="p">)</span>
+    
+            <span class="k">if</span> <span class="n">timer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scSysCallTimer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Timeout waiting for thread to issue sysCall</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Timeout waiting for vThread </span><span class="si">%s</span><span class="s2"> to issue sysCall&quot;</span> <span class="o">%</span> <span class="n">vThread</span><span class="o">.</span><span class="n">objName</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">vThread</span><span class="o">.</span><span class="n">pythonThreadRunning</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Timeout waiting for vThread </span><span class="si">%s</span><span class="s2"> to issue sysCall&quot;</span> <span class="o">%</span> <span class="n">vThread</span><span class="o">.</span><span class="n">objName</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># VThread stopped</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;term&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">updateAllStateIndicators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">readyStatusAppearance</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="s1">&#39;textColor&#39;</span><span class="p">:</span><span class="s1">&#39;grey&#39;</span><span class="p">}</span>
+        <span class="n">newAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;STATE&#39;</span><span class="p">,</span><span class="s1">&#39;TEXT&#39;</span><span class="p">,</span><span class="s1">&#39;APPEARANCE&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listVThreads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scState</span> <span class="o">==</span> <span class="s1">&#39;RUNNING&#39;</span><span class="p">:</span>
+                <span class="n">newAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;running&#39;</span><span class="p">,</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scAppStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scAppStatus</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scState</span> <span class="o">==</span> <span class="s1">&#39;WAITING&#39;</span><span class="p">:</span>
+                <span class="n">newAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;waiting&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">elif</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scState</span> <span class="o">==</span> <span class="s1">&#39;READY&#39;</span><span class="p">:</span>
+                <span class="n">newAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;ready&#39;</span><span class="p">,</span> <span class="s1">&#39;PE&#39;</span><span class="p">,</span> <span class="n">readyStatusAppearance</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scState</span> <span class="o">==</span> <span class="s1">&#39;INIT&#39;</span><span class="p">:</span>
+                <span class="n">newAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span>  <span class="s1">&#39;&#39;</span><span class="p">,</span>  <span class="p">{})</span>
+
+            <span class="k">if</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scLastAppStatus</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">vt</span><span class="o">.</span><span class="n">_scLastAppStatus</span> <span class="o">!=</span> <span class="n">newAppStatus</span><span class="p">:</span>
+                <span class="n">vt</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="n">newAppStatus</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">newAppStatus</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">vt</span><span class="o">.</span><span class="n">_scLastAppStatus</span> <span class="o">=</span> <span class="n">newAppStatus</span>
+
+
+    <span class="k">def</span> <span class="nf">sysCallTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="c1"># Called when the sysCall timer of a vThread expired</span>
+        <span class="c1"># this routine is used for all threads</span>
+        <span class="n">vThread</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">_scVThread</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="o">=</span> <span class="mi">0</span>  
+        <span class="k">if</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scState</span> <span class="o">==</span> <span class="s1">&#39;WAITING&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wake</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scState</span> <span class="o">==</span> <span class="s1">&#39;RUNNING&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">runVThreadTilSysCall</span><span class="p">(</span><span class="n">vThread</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;sysCallTmrExpired in bad state </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scState</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateAllStateIndicators</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">wake</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wake</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateAllStateIndicators</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">_wake</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Called in context of simulator to wakeup a vThread</span>
+<span class="sd">        event is the event that caused the wakeup</span>
+<span class="sd">        If event is None, it signals that the wake is caused by timeout</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ioPortEvent</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># allow user to specify an ioPort to wait for</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="s2">&quot;_ioPort&quot;</span><span class="p">):</span>
+                    <span class="n">ioPortEvent</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">_ioPort</span>
+            
+            <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="n">ioPortEvent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ioPortEvent</span> <span class="ow">in</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span><span class="p">):</span>
+                
+                <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="s1">&#39;timeout&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="s1">&#39;ok&#39;</span>
+                    
+                <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;wake&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">_highestReadyVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">highest</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">for</span> <span class="n">prio</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numPrio</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_readyVThreads</span><span class="p">[</span><span class="n">prio</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1">#print(&quot;_highestReadyVThread &quot;, prio, self._readyVThreads[prio])</span>
+                <span class="n">highest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readyVThreads</span><span class="p">[</span><span class="n">prio</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">break</span>
+        
+        <span class="k">return</span> <span class="n">highest</span>
+                 
+    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Evaluate which ready vThread has highest priority.</span>
+<span class="sd">        If this is another vThread than the currently running vThread:</span>
+<span class="sd">            preempt the running vThread, i.e. determine remaining busy time.</span>
+<span class="sd">            put running vThread back to _listVThreads</span>
+<span class="sd">            make the new vThread the current one</span>
+<span class="sd">            run new vThread until sysCall, and execute the sysCall</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">highestReadyVt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_highestReadyVThread</span><span class="p">()</span>
+        <span class="n">newVt</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">highestReadyVt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">newVt</span> <span class="o">=</span> <span class="n">highestReadyVt</span>
+                <span class="c1">#print(&quot; schedule1: highest=%s&quot; % (newVt.objName() ))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#print(&quot; schedule2&quot;)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># there is a running vThread</span>
+            <span class="k">if</span> <span class="n">highestReadyVt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">newVt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span>
+                <span class="c1">#print(&quot; schedule3: old=%s&quot; % (newVt.objName() ))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">highestReadyVt</span><span class="o">.</span><span class="n">_scPrio</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span><span class="o">.</span><span class="n">_scPrio</span><span class="p">:</span>
+                    <span class="n">newVt</span> <span class="o">=</span> <span class="n">highestReadyVt</span>
+                    <span class="c1">#print(&quot; schedule4: highest=%s&quot; % (newVt.objName() ))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">newVt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span>
+                    <span class="c1">#print(&quot; schedule5:&quot;)</span>
+        
+        <span class="k">if</span> <span class="n">newVt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">oldVt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">oldVt</span><span class="p">,</span> <span class="s1">&#39;preempt&#39;</span><span class="p">)</span>
+
+                
+            <span class="k">if</span> <span class="n">newVt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1">#print(&quot; newVt is %s busytime=%f&quot; % (newVt.objName(), newVt._scRemainBusyTime))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">newVt</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">newVt</span><span class="o">.</span><span class="n">_scRemainBusyTime</span>  <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">runVThreadTilSysCall</span><span class="p">(</span><span class="n">newVt</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># finish busy time</span>
+                    <span class="n">newVt</span><span class="o">.</span><span class="n">_scSysCallTimer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">newVt</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="p">)</span>
+        
+    
+    <span class="k">def</span> <span class="nf">vtStateMachine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">vThread</span><span class="p">,</span><span class="n">event</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Change state of vThread based on &lt;event&gt;</span>
+<span class="sd">        &lt;event&gt; is one of</span>
+<span class="sd">            &quot;start&quot;</span>
+<span class="sd">            &quot;run&quot;</span>
+<span class="sd">            &quot;wait&quot;</span>
+<span class="sd">            &quot;preempt&quot;</span>
+<span class="sd">            &quot;wake&quot;</span>
+<span class="sd">            &quot;term&quot;</span>
+<span class="sd">            </span>
+<span class="sd">        Return True if state changed</span>
+
+<span class="sd">        vThread State Machine</span>
+
+<span class="sd">            +--------&gt;INIT</span>
+<span class="sd">            |          | &lt;start&gt;</span>
+<span class="sd">            |          v  </span>
+<span class="sd">            |&lt;-&lt;term&gt;-READY &lt;--------------------------+&lt;--------------------+</span>
+<span class="sd">            |          | &lt;run&gt;                         |                     |</span>
+<span class="sd">            |          v                               |&lt;preempt&gt;            | &lt;wake&gt;</span>
+<span class="sd">            |&lt;-&lt;term&gt;-RUNNING--------------------------+                     |</span>
+<span class="sd">            |          | &lt;wait&gt;                                              |</span>
+<span class="sd">            |          v                                                     |</span>
+<span class="sd">            |&lt;-&lt;term&gt;-WAITING -----------------------------------------------+</span>
+<span class="sd">                                  </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#print(&quot;  vtSmac %s %s %s&quot; % (vThread.objName(), vThread._scState, event))</span>
+        <span class="n">oldState</span> <span class="o">=</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scState</span>
+        <span class="n">newState</span> <span class="o">=</span> <span class="n">oldState</span>
+        
+        <span class="k">if</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;INIT&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+                <span class="n">newState</span> <span class="o">=</span> <span class="s1">&#39;READY&#39;</span>
+        
+        <span class="k">if</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;READY&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span>
+                <span class="n">newState</span> <span class="o">=</span> <span class="s1">&#39;RUNNING&#39;</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scBusyStartTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;RUNNING&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;wait&#39;</span><span class="p">:</span>
+                <span class="n">newState</span> <span class="o">=</span> <span class="s1">&#39;WAITING&#39;</span>
+            <span class="k">elif</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;preempt&#39;</span><span class="p">:</span>
+                <span class="n">elapsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scBusyStartTime</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="o">-=</span> <span class="n">elapsed</span>
+                <span class="c1">#print( &quot;     preempt remain=%f %f&quot; % (vThread._scRemainBusyTime, vThread._scBusyStartTime))</span>
+                <span class="k">assert</span><span class="p">(</span><span class="n">vThread</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scSysCallTimer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                <span class="n">newState</span> <span class="o">=</span> <span class="s1">&#39;READY&#39;</span>
+        
+        <span class="k">elif</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;WAITING&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;wake&#39;</span><span class="p">:</span>
+                <span class="n">newState</span> <span class="o">=</span> <span class="s1">&#39;READY&#39;</span>
+
+        <span class="k">if</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;READY&#39;</span> <span class="ow">or</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;RUNNING&#39;</span> <span class="ow">or</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;WAITING&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;term&#39;</span><span class="p">:</span>
+                <span class="n">newState</span><span class="o">=</span> <span class="s1">&#39;INIT&#39;</span>
+        
+        
+        <span class="c1">#</span>
+        <span class="c1"># Perform State entry/exit actions</span>
+        <span class="c1">#</span>
+        <span class="k">if</span> <span class="n">oldState</span> <span class="o">!=</span> <span class="n">newState</span><span class="p">:</span>
+
+            <span class="c1"># INIT entry</span>
+            <span class="k">if</span> <span class="n">newState</span> <span class="o">==</span> <span class="s1">&#39;INIT&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminateVThread</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;kill&#39;</span><span class="p">)</span>
+
+            <span class="c1"># RUNNING entry</span>
+            <span class="k">if</span> <span class="n">newState</span> <span class="o">==</span> <span class="s1">&#39;RUNNING&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span> <span class="o">=</span> <span class="n">vThread</span>
+
+            
+            <span class="c1"># RUNNING exit</span>
+            <span class="k">if</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;RUNNING&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="c1"># READY entry</span>
+            <span class="k">if</span> <span class="n">newState</span> <span class="o">==</span> <span class="s1">&#39;READY&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">vThread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readyVThreads</span><span class="p">[</span><span class="n">vThread</span><span class="o">.</span><span class="n">_scPrio</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;vThread already in READY list&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_readyVThreads</span><span class="p">[</span><span class="n">vThread</span><span class="o">.</span><span class="n">_scPrio</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vThread</span><span class="p">)</span>
+                
+            <span class="c1"># READY exit</span>
+            <span class="k">if</span> <span class="n">oldState</span> <span class="o">==</span> <span class="s1">&#39;READY&#39;</span><span class="p">:</span>
+                <span class="c1"># remove from ready lists</span>
+                <span class="c1">#print(&quot;removing vThread %s from ready list&quot; % vThread)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_readyVThreads</span><span class="p">[</span><span class="n">vThread</span><span class="o">.</span><span class="n">_scPrio</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">vThread</span><span class="p">)</span>
+                
+            <span class="c1"># WAITING entry</span>
+            <span class="k">if</span> <span class="n">newState</span> <span class="o">==</span> <span class="s1">&#39;WAITING&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scState</span> <span class="o">=</span> <span class="n">newState</span>
+        <span class="k">return</span> <span class="n">newState</span> <span class="o">!=</span> <span class="n">oldState</span>
+        
+    
+    <span class="k">def</span> <span class="nf">terminateSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; terminate simulation. stop all python processes executing vThreads &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listVThreads</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminateVThread</span><span class="p">(</span><span class="n">vt</span><span class="p">)</span>
+            
+
+    <span class="k">def</span> <span class="nf">terminateVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">returnCode</span><span class="o">=</span><span class="s1">&#39;exit&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Terminate a vthread</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">vThread</span><span class="o">.</span><span class="n">pythonThreadRunning</span><span class="p">:</span>
+            <span class="c1">#print(&quot;Terminate %s&quot; % vThread.objName())</span>
+            <span class="c1"># tell vThreads to exit. Causes a TerminateException() or KillException in user code</span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="n">returnCode</span>    
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">waitUntilThreadTerminated</span><span class="p">()</span>
+        
+    
+    <span class="k">def</span> <span class="nf">vtRemoteControl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;kill&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vtStateMachine</span><span class="p">(</span><span class="n">vThread</span><span class="p">,</span> <span class="s1">&#39;term&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;vTRemoteControl </span><span class="si">%s</span><span class="s2"> bad action </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vThread</span><span class="o">.</span><span class="n">objName</span><span class="p">(),</span> <span class="n">action</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateAllStateIndicators</span><span class="p">()</span>
+    
+    <span class="c1">#</span>
+    <span class="c1"># Methods to be called from a vThread thread context</span>
+    <span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">sysCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">call</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Called in vThread context to execute a system call, which may cause re-scheduling</span>
+<span class="sd">        call -- string with system call &#39;busy&#39;, &#39;wait&#39;, &#39;term&#39;</span>
+<span class="sd">        args -- list of arguments to system call</span>
+<span class="sd">        returns when scheduler schedules vThread again</span>
+<span class="sd">        returns the list of return values from scheduler</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># invoke system call</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span> <span class="o">=</span> <span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#print(&quot;  VT:sysCall exec&quot;,vThread.objName(), call,args)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scCallEvent</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        
+        <span class="c1"># wait until scheduler completed syscall</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schedVThreadComTimeout</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">rv</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">isRunning</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="c1"># Simulator stop, tell thread to exit</span>
+                <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="s1">&#39;exit&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Timeout waiting for scheduler to return from sysCall&quot;</span><span class="p">)</span>
+        
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="c1">#print(&quot;  VT:sysCall ret&quot;,vThread.objName(), call,vThread._scCallReturnVal)</span>
+        <span class="n">pendCall</span> <span class="o">=</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span> <span class="o">=</span> <span class="kc">None</span>        
+        
+        <span class="k">if</span> <span class="n">pendCall</span> <span class="o">!=</span> <span class="s1">&#39;term&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">==</span> <span class="s1">&#39;exit&#39;</span><span class="p">:</span>
+                <span class="c1">#print(&quot;  VT:sysCall raising TerminateException %s %s&quot; % (vThread.objName(),vThread._scPendingCall))</span>
+                <span class="k">raise</span> <span class="n">vThread</span><span class="o">.</span><span class="n">TerminateException</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">==</span> <span class="s1">&#39;kill&#39;</span><span class="p">:</span>
+                <span class="c1">#print(&quot;  VT:sysCall raising KillException %s %s&quot; % (vThread.objName(),vThread._scPendingCall))</span>
+                <span class="k">raise</span> <span class="n">vThread</span><span class="o">.</span><span class="n">KillException</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span></div>
+        
+<div class="viewcode-block" id="vSimpleProg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vtSchedRtos.vSimpleProg">[docs]</a><span class="k">class</span> <span class="nc">vSimpleProg</span><span class="p">(</span><span class="n">vThread</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    A special version of a vThread that has its own scheduler and no concurrency </span>
+
+<span class="sd">    :param sim: Simulator instance</span>
+<span class="sd">    :param vThreadArgs: see :class:`.vThread` for parameters</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="o">**</span><span class="n">vThreadArgs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; See vThread.__init__ for arguments &#39;&#39;&#39;</span>
+        <span class="n">vThread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="o">**</span><span class="n">vThreadArgs</span> <span class="p">)</span>
+        <span class="n">sched</span><span class="o">=</span> <span class="n">vtSchedRtos</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;sched&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">sched</span><span class="o">.</span><span class="n">addVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+        
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

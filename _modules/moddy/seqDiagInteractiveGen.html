@@ -1,0 +1,573 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.seqDiagInteractiveGen &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.seqDiagInteractiveGen</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.seqDiagInteractiveGen</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:mod:`seqDiagInteractiveGen` -- Interactive Sequence Diagram Generator</span>
+<span class="sd">=======================================================================</span>
+
+<span class="sd">.. module:: seqDiagInteractiveGen</span>
+<span class="sd">   :platform: Unix, Windows</span>
+<span class="sd">   :synopsis: Moddy Interactive Sequence Diagram Generator</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">seqDiagInteractiveViewer</span>
+<span class="kn">from</span> <span class="nn">moddy.svgSeqD</span> <span class="k">import</span> <span class="n">moddyGenerateSvgSequenceDiagram</span>
+<span class="kn">from</span> <span class="nn">moddy.utils</span> <span class="k">import</span> <span class="n">moddyCreateDirsAndOpenOutputFile</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="moddyGenerateSequenceDiagram"><a class="viewcode-back" href="../../reference_results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram">[docs]</a><span class="k">def</span> <span class="nf">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="p">,</span> 
+                                  <span class="n">fileName</span><span class="p">,</span> 
+                                  <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;iaViewer&#39;</span><span class="p">,</span> 
+                                  <span class="n">showPartsList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                  <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[],</span>
+                                  <span class="n">showVarList</span><span class="o">=</span><span class="p">[],</span>
+                                  <span class="n">timeRange</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">),</span>
+                                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Moddy function to create sequence diagrams.</span>
+<span class="sd">    The function is supposed to be called after the simulator has stopped. It takes the recorded</span>
+<span class="sd">    events from the simulator instance.</span>
+<span class="sd">    </span>
+<span class="sd">    Depending on the `fmt` parameter, either dynamic or static diagrams are generated.</span>
+<span class="sd">        </span>
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param str fileName: output filename (including filename extension e.g. ``.html``)</span>
+<span class="sd">    :param str fmt: Output format. One of </span>
+<span class="sd">    </span>
+<span class="sd">        * iaViewer - moddy interactive viewer: HTML with javascript/css embedded</span>
+<span class="sd">        * iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced</span>
+<span class="sd">        * svg - static SVG (using code in svgSeqD)</span>
+<span class="sd">        * svgInHtml - static SVG embedded in HTML (using code in svgSeqD)</span>
+<span class="sd">                </span>
+
+<span class="sd">    :param list showPartsList: if given, show only the listed parts in that order in sequence diagram.</span>
+<span class="sd">                    Each element can be either a reference to the part or a string with the</span>
+<span class="sd">                    hierarchy name of the part.  </span>
+<span class="sd">                    if omitted, show all parts known by simulator, in the order of their creation</span>
+<span class="sd">    </span>
+<span class="sd">    :param list showVarList: List of watched variables: Strings with the variable hierarchy name</span>
+<span class="sd">                    </span>
+<span class="sd">    :param list excludedElementList: parts or timers that should be excluded from drawing</span>
+<span class="sd">                    Each list element can be the object to exclude or one of the following:</span>
+<span class="sd">                    - &#39;allTimers&#39; - exclude all timers</span>
+<span class="sd">                    </span>
+<span class="sd">                    NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported</span>
+
+<span class="sd">    :param tuple timeRange: tuple with start and end time. Everything before start and after end is not drawn</span>
+<span class="sd">                - currently supported only for svg/svgInHtml</span>
+<span class="sd">    </span>
+<span class="sd">    :param \\**kwargs: further arguments</span>
+<span class="sd">     </span>
+<span class="sd">         * title - Sequence Diagram title</span>
+<span class="sd">         * timePerDiv - time per time grid division</span>
+<span class="sd">         * pixPerDiv=25 - pixels per time grid division (start value)</span>
+<span class="sd">         * partSpacing=300 - pixels between parts (start value)</span>
+<span class="sd">         * partBoxSize = (100,60) - x,y pixel size of part box</span>
+<span class="sd">         * statusBoxWidth=20 - pixel width of status box on life line</span>
+<span class="sd">         * variableBoxWidth=150 - pixel width of watched variable value box on life line</span>
+<span class="sd">         * varSpacing = 180 - pixels between variables</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c1"># call old generator if output shall be svg</span>
+    <span class="k">if</span> <span class="n">fmt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span> <span class="s2">&quot;svg&quot;</span><span class="p">):</span>
+        <span class="n">moddyGenerateSvgSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">showPartsList</span><span class="p">,</span> <span class="n">excludedElementList</span><span class="p">,</span> <span class="n">showVarList</span><span class="p">,</span> <span class="n">timeRange</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> 
+        <span class="k">return</span>
+    
+    <span class="c1"># Make list of parts to show</span>
+    <span class="k">if</span> <span class="n">showPartsList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">allParts</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">_listParts</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">allParts</span> <span class="o">=</span> <span class="n">showPartsList</span> 
+    
+    <span class="n">partsList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">allParts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">findPartByName</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">part</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludedElementList</span><span class="p">:</span>
+            <span class="n">partsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+
+    <span class="c1"># Make list of variables to show</span>
+    <span class="n">varList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">showVarList</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">findWatchedVariableByName</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="n">varList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="n">timeRange</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Interactive Viewer does not yet support parameter timeRange&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
+    <span class="n">outDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">fileName</span> <span class="p">)</span>
+    <span class="n">dv</span> <span class="o">=</span> <span class="n">TraceGenDynamicViewer</span><span class="p">(</span> <span class="n">outDir</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">partsList</span><span class="p">,</span> <span class="n">varList</span><span class="p">,</span> <span class="n">excludedElementList</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">dv</span><span class="o">.</span><span class="n">genHtmlHead</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dv</span><span class="o">.</span><span class="n">getHtmlStyle</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dv</span><span class="o">.</span><span class="n">getHtmlMid1</span><span class="p">()</span>
+    
+    <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&lt;script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dv</span><span class="o">.</span><span class="n">genHeader</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dv</span><span class="o">.</span><span class="n">genTraceOutput</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">tracedEvents</span><span class="p">())</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dv</span><span class="o">.</span><span class="n">genScript</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">dv</span><span class="o">.</span><span class="n">genHtmlTail</span><span class="p">()</span>
+    
+    <span class="c1"># write file</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">moddyCreateDirsAndOpenOutputFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;saved sequence diagram in </span><span class="si">%s</span><span class="s2"> as </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">fmt</span><span class="p">))</span></div>
+
+
+    
+<span class="k">class</span> <span class="nc">TraceGenDynamicViewer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outDir</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">partsList</span><span class="p">,</span> <span class="n">varList</span><span class="p">,</span> <span class="n">excludedElementList</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listParts</span> <span class="o">=</span> <span class="n">partsList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listVars</span> <span class="o">=</span> <span class="n">varList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listExcludedElements</span> <span class="o">=</span> <span class="n">excludedElementList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listAllParts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listParts</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listVars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_partShadow</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">fmt</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Ref&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">referFiles</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_outDir</span> <span class="o">=</span> <span class="n">outDir</span>       <span class="c1"># files are embedded in HTML. reference from HTML output    </span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">referFiles</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_outDir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>           <span class="c1"># files are embedded in HTML. reference from current dir           </span>
+
+        <span class="c1"># create object for each part to record current STA/VC values</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listAllParts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_partShadow</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">{</span><span class="s1">&#39;current&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;lastChange&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> 
+                                      <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s2">&quot;VC&quot;</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listVars</span> <span class="k">else</span> <span class="s2">&quot;STA&quot;</span><span class="p">})</span>
+            
+        
+        
+        
+    <span class="k">def</span> <span class="nf">hasPart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Test if simPart is in Drawing &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listAllParts</span>
+    
+    <span class="k">def</span> <span class="nf">partNo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Raises ValueError if the part is not present.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listAllParts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span> <span class="n">part</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">shallEventBeShown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">te</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;&gt;MSG&quot;</span> <span class="ow">or</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;T-START&quot;</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">part</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="kc">True</span>     <span class="c1"># global event</span>
+        <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;VC&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasPart</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">subObj</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>    
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasPart</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">part</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;&lt;MSG&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasPart</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">_parentObj</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>     
+    
+    <span class="k">def</span> <span class="nf">genHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;g_moddyDiagramArgs = {&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &quot;</span><span class="si">%s</span><span class="s1">&quot;, &#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">, &#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+                
+        <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;};</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;g_moddyDiagramParts = [</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listAllParts</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;{ name: &quot;</span><span class="si">%s</span><span class="s1">&quot;, tp: &quot;</span><span class="si">%s</span><span class="s1">&quot; },</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">(),</span> 
+                                              <span class="s2">&quot;Part&quot;</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listParts</span> <span class="k">else</span> <span class="s2">&quot;Var&quot;</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;];</span><span class="se">\n</span><span class="s1">&#39;</span>
+        
+        
+        <span class="k">return</span> <span class="n">out</span>
+        
+    <span class="k">def</span> <span class="nf">genTraceOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evList</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        generate js array with traced events </span>
+<span class="sd">        events belonging to parts which are not shown are omitted</span>
+<span class="sd">        </span>
+<span class="sd">        General format</span>
+<span class="sd">        { tp: &lt;typeofentry&gt;, t: &lt;time&gt;, p: &lt;part&gt; } </span>
+
+<span class="sd">        Types:</span>
+<span class="sd">        { tp: &quot;&lt;MSG&quot;,    t:&lt;end-time&gt;, p: &lt;srcPart#&gt;, s: &lt;dstPart#&gt;, b: &lt;begin-time&gt;, txt: &lt;text&gt;, l:t/f c:&lt;color&gt;}</span>
+<span class="sd">        { tp: &quot;T-EXP&quot;,   t:&lt;time&gt;, p: &lt;part#&gt;, txt: &lt;timername&gt; }</span>
+<span class="sd">        { tp: &quot;ANN&quot;,     t:&lt;time&gt;, p: &lt;part#&gt;, txt: &lt;text&gt; }</span>
+<span class="sd">        { tp: &quot;ASSFAIL&quot;, t:&lt;time&gt;, p: &lt;part#&gt;, txt: &lt;text&gt; }</span>
+<span class="sd">        { tp: &quot;STA&quot;,     t:&lt;time&gt;, p: &lt;part#&gt;, b: &lt;begin-time&gt;, txt: &lt;sta&gt;, c:&lt;color&gt;, sc:&lt;color&gt;, fc:&lt;color&gt;  }</span>
+<span class="sd">        { tp: &quot;VC&quot;,      t:&lt;time&gt;, p: &lt;part#&gt;, b: &lt;begin-time&gt;, txt: &lt;val&gt;, c:&lt;color&gt;, sc:&lt;color&gt;, fc:&lt;color&gt; }</span>
+<span class="sd">        </span>
+<span class="sd">        partNo: 0..n-&gt;index of parts from left to right, -1: global</span>
+<span class="sd">        c: text color (for messages also message color)</span>
+<span class="sd">        sc: box stroke color</span>
+<span class="sd">        fc: box fill color </span>
+<span class="sd">         </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">vcAppearance</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="s1">&#39;textColor&#39;</span><span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">}</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;g_moddyTracedEvents = [</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">lastEventTs</span> <span class="o">=</span>  <span class="kc">None</span>
+        
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">evList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shallEventBeShown</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;VC&quot;</span><span class="p">:</span> 
+                    <span class="n">partNo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partNo</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">partNo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partNo</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">part</span><span class="p">)</span>
+
+                <span class="n">hdr</span> <span class="o">=</span> <span class="s1">&#39;{ tp: &quot;</span><span class="si">%s</span><span class="s1">&quot;, t: </span><span class="si">%g</span><span class="s1">, p: </span><span class="si">%d</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">e</span><span class="o">.</span><span class="n">action</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">traceTime</span><span class="p">,</span> <span class="n">partNo</span><span class="p">)</span>
+                
+                <span class="n">lastEventTs</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">traceTime</span>
+                
+                <span class="n">doOutput</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            
+                <span class="c1"># Messages</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;&lt;MSG&quot;</span><span class="p">:</span>
+                    <span class="n">fireEvent</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">transVal</span>
+                    <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;s: </span><span class="si">%d</span><span class="s1">, b: </span><span class="si">%g</span><span class="s1">, txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;, l:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">partNo</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">_parentObj</span><span class="p">),</span>
+                        <span class="n">fireEvent</span><span class="o">.</span><span class="n">execTime</span> <span class="o">-</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_flightTime</span><span class="p">,</span>
+                        <span class="n">fireEvent</span><span class="o">.</span><span class="n">msgText</span><span class="p">(),</span>
+                        <span class="s1">&#39;&quot;t&quot;&#39;</span> <span class="k">if</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_isLost</span> <span class="k">else</span> <span class="s1">&#39;&quot;f&quot;&#39;</span><span class="p">)</span>
+                    
+                    <span class="c1"># generate colored messages</span>
+                    <span class="n">msgColor</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">msgColor</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_color</span>
+                    <span class="k">if</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_msgColor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">msgColor</span> <span class="o">=</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_msgColor</span>
+                    <span class="k">if</span> <span class="n">msgColor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">mid</span> <span class="o">+=</span> <span class="s1">&#39;, c:&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">msgColor</span> 
+                    
+                    <span class="n">doOutput</span> <span class="o">=</span> <span class="kc">True</span>
+                        
+                <span class="c1"># Timer event</span>
+                <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;T-EXP&quot;</span><span class="p">:</span>
+                    <span class="n">tmr</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">subObj</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">tmr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listExcludedElements</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s1">&#39;allTimers&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listExcludedElements</span><span class="p">:</span>
+                        <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">objName</span><span class="p">())</span>
+                        <span class="n">doOutput</span> <span class="o">=</span> <span class="kc">True</span>
+         
+                <span class="c1"># Annotations</span>
+                <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;ANN&quot;</span> <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;ASSFAIL&quot;</span><span class="p">:</span>
+                    <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+                    <span class="n">doOutput</span> <span class="o">=</span> <span class="kc">True</span>
+                    
+                <span class="c1"># Status</span>
+                <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;VC&quot;</span> <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;STA&quot;</span><span class="p">:</span>
+
+                    <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partShadow</span><span class="p">[</span><span class="n">partNo</span><span class="p">]</span>
+                    <span class="n">currentVal</span> <span class="o">=</span> <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;current&#39;</span><span class="p">]</span>
+                     
+                    
+                    <span class="n">tv</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">transVal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+                    <span class="k">if</span> <span class="n">currentVal</span> <span class="o">!=</span> <span class="n">tv</span><span class="p">:</span>
+                        <span class="c1"># generate box for just ended period</span>
+                        <span class="k">if</span> <span class="n">currentVal</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="p">:</span>
+                            <span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">staVcOutput</span><span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="s1">&#39;lastChange&#39;</span><span class="p">],</span> <span class="n">currentVal</span><span class="p">,</span> <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;currentApp&#39;</span><span class="p">])</span>
+                            <span class="n">doOutput</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="c1">#print(&quot;%f: p=%d tv=%s currentVal=%s doOutput %s&quot; %(e.traceTime, partNo, tv, currentVal, doOutput))</span>
+                        <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;current&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tv</span>
+                        <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;currentApp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="n">appearance</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;STA&quot;</span> <span class="k">else</span> <span class="n">vcAppearance</span>
+                        <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;lastChange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">traceTime</span>
+                        
+                <span class="k">if</span> <span class="n">doOutput</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">+=</span> <span class="n">hdr</span> <span class="o">+</span> <span class="n">mid</span> <span class="o">+</span> <span class="s1">&#39;}, </span><span class="se">\n</span><span class="s1">&#39;</span>    
+                    
+        <span class="c1"># generate a final status event for all parts</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;// close STA/VC</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partShadow</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;current&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;lastChange&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lastEventTs</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;{ tp: &quot;</span><span class="si">%s</span><span class="s1">&quot;, t: </span><span class="si">%g</span><span class="s1">, p: </span><span class="si">%d</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">ps</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">],</span> <span class="n">lastEventTs</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">staVcOutput</span><span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="s1">&#39;lastChange&#39;</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;current&#39;</span><span class="p">],</span> <span class="n">ps</span><span class="p">[</span><span class="s1">&#39;currentApp&#39;</span><span class="p">])</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;}, </span><span class="se">\n</span><span class="s1">&#39;</span>    
+            <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                    
+        <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;];</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">out</span>
+    
+    <span class="k">def</span> <span class="nf">staVcOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">appearance</span> <span class="p">):</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;b: </span><span class="si">%g</span><span class="s1">, txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+        <span class="n">sc</span><span class="p">,</span><span class="n">fc</span><span class="p">,</span><span class="n">tc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxAppearance</span><span class="p">(</span><span class="n">appearance</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">+=</span> <span class="s1">&#39;, c:&quot;</span><span class="si">%s</span><span class="s1">&quot;, fc:&quot;</span><span class="si">%s</span><span class="s1">&quot;, sc:&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">mid</span>
+    
+    <span class="k">def</span> <span class="nf">seqDiagInteractiveViewerPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; get path relative to output directory to the seqDiagInteractiveViewer directory &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">seqDiagInteractiveViewer</span><span class="o">.</span><span class="vm">__file__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outDir</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">readseqDiagInteractiveViewerFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; read fileName from seqDiagInteractiveViewer directory and return its content &#39;&#39;&#39;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqDiagInteractiveViewerPath</span><span class="p">(),</span> <span class="n">fileName</span><span class="p">)</span> 
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span> <span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span> <span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span>
+        <span class="k">return</span> <span class="n">text</span>
+    
+    <span class="k">def</span> <span class="nf">genHtmlHead</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;html&gt;</span><span class="se">\n</span><span class="s1">&lt;head&gt;</span><span class="se">\n</span><span class="s1">&lt;script src=&quot;https://d3js.org/d3.v5.min.js&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">;</span>
+
+    <span class="k">def</span> <span class="nf">getHtmlStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cssFile</span> <span class="o">=</span> <span class="s2">&quot;seqDiagInteractiveViewer.css&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">referFiles</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqDiagInteractiveViewerPath</span><span class="p">(),</span> <span class="n">cssFile</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;style&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readseqDiagInteractiveViewerFile</span><span class="p">(</span><span class="n">cssFile</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/style&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">getHtmlMid1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;&#39;&lt;/head&gt;</span>
+<span class="s1">            &lt;body&gt;</span>
+<span class="s1">            &lt;div id=&quot;controls&quot;&gt;</span>
+<span class="s1">                &lt;div class=&quot;slider-wrapper&quot;&gt;</span>
+<span class="s1">                  &lt;input id=&quot;ScaleSlider&quot; type=&quot;range&quot; min=&quot;-2&quot; max=&quot;2&quot; value=&quot;0&quot; step=&quot;any&quot;&gt;</span>
+<span class="s1">                &lt;/div&gt;</span>
+<span class="s1">                &lt;div&gt;</span>
+<span class="s1">                 &lt;output id=&quot;T-Scale&quot;&gt;1.00&lt;/output&gt;</span>
+<span class="s1">                &lt;/div&gt;</span>
+<span class="s1">            &lt;/div&gt;</span>
+<span class="s1">            &lt;div id=&quot;scrollDummy&quot;&gt;&lt;/div&gt;</span>
+<span class="s1">            &lt;div id=&quot;title&quot;&gt;&lt;/div&gt;</span>
+<span class="s1">            &lt;div id=&quot;parts&quot;&gt;&lt;/div&gt;</span>
+<span class="s1">            &lt;div id=&#39;diagram&#39;&gt;&lt;/div&gt;</span><span class="se">\n</span><span class="s1">&#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">genScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">scriptFile</span> <span class="o">=</span> <span class="s2">&quot;seqDiagInteractiveViewer.js&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">referFiles</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&lt;script src=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqDiagInteractiveViewerPath</span><span class="p">(),</span> <span class="n">scriptFile</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readseqDiagInteractiveViewerFile</span><span class="p">(</span><span class="n">scriptFile</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            
+        <span class="c1"># generate code to check alert if browser is not compatible with ECMA6</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&#39;&#39;&lt;script&gt;</span>
+<span class="s1">                if (typeof getDiagramArgs !== &quot;function&quot;) {</span>
+<span class="s1">                    alert(&quot;Sorry, your browser does not support ecmascript 6. Please use Chrome, Firefox, Edge...&quot;);</span>
+<span class="s1">                }</span>
+<span class="s1">                &lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">out</span>
+        
+    
+    <span class="k">def</span> <span class="nf">genHtmlTail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;/body&gt;&lt;/html&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">;</span>
+    
+    <span class="k">def</span> <span class="nf">boxAppearance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appearance</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>                <span class="n">boxStrokeColor</span>  <span class="o">=</span> <span class="n">appearance</span><span class="p">[</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">]</span>  
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>    <span class="n">boxStrokeColor</span>  <span class="o">=</span> <span class="s1">&#39;orange&#39;</span>
+        <span class="k">try</span><span class="p">:</span>                <span class="n">boxFillColor</span>    <span class="o">=</span> <span class="n">appearance</span><span class="p">[</span><span class="s1">&#39;boxFillColor&#39;</span><span class="p">]</span>    
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>    <span class="n">boxFillColor</span>    <span class="o">=</span> <span class="s1">&#39;white&#39;</span>
+        <span class="k">try</span><span class="p">:</span>                <span class="n">textColor</span>       <span class="o">=</span> <span class="n">appearance</span><span class="p">[</span><span class="s1">&#39;textColor&#39;</span><span class="p">]</span>       
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>    <span class="n">textColor</span>       <span class="o">=</span> <span class="s1">&#39;orange&#39;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">boxStrokeColor</span><span class="p">,</span> <span class="n">boxFillColor</span><span class="p">,</span> <span class="n">textColor</span><span class="p">)</span>
+
+    
+        
+        
+        
+    
+    
+    
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

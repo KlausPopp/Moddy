@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Moddy Result Generator APIs &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Moddy Finite State Machines" href="reference_fsm.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detailed.html">Detailed User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="reference_core.html">Simulator Core API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference_vthread.html">Virtual Thread Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference_fsm.html">Moddy Finite State Machines</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Moddy Result Generator APIs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sequence-diagrams">Sequence Diagrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trace-tables">Trace Tables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#structure-graph">Structure Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fsm-graph">FSM Graph</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="reference.html">API Reference</a> &raquo;</li>
+        
+      <li>Moddy Result Generator APIs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/reference_results.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="moddy-result-generator-apis">
+<h1>Moddy Result Generator APIs<a class="headerlink" href="#moddy-result-generator-apis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="sequence-diagrams">
+<span id="seqdiagreference"></span><h2>Sequence Diagrams<a class="headerlink" href="#sequence-diagrams" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram">
+<code class="descclassname">moddy.seqDiagInteractiveGen.</code><code class="descname">moddyGenerateSequenceDiagram</code><span class="sig-paren">(</span><em>sim</em>, <em>fileName</em>, <em>fmt='iaViewer'</em>, <em>showPartsList=None</em>, <em>excludedElementList=[]</em>, <em>showVarList=[]</em>, <em>timeRange=(0</em>, <em>None)</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/moddy/seqDiagInteractiveGen.html#moddyGenerateSequenceDiagram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moddy function to create sequence diagrams.
+The function is supposed to be called after the simulator has stopped. It takes the recorded
+events from the simulator instance.</p>
+<p>Depending on the <cite>fmt</cite> parameter, either dynamic or static diagrams are generated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sim</strong> (<a class="reference internal" href="reference_core.html#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
+<li><strong>fileName</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – output filename (including filename extension e.g. <code class="docutils literal notranslate"><span class="pre">.html</span></code>)</li>
+<li><strong>fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – <p>Output format. One of</p>
+<ul>
+<li>iaViewer - moddy interactive viewer: HTML with javascript/css embedded</li>
+<li>iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced</li>
+<li>svg - static SVG (using code in svgSeqD)</li>
+<li>svgInHtml - static SVG embedded in HTML (using code in svgSeqD)</li>
+</ul>
+</li>
+<li><strong>showPartsList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – if given, show only the listed parts in that order in sequence diagram.
+Each element can be either a reference to the part or a string with the
+hierarchy name of the part.  
+if omitted, show all parts known by simulator, in the order of their creation</li>
+<li><strong>showVarList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – List of watched variables: Strings with the variable hierarchy name</li>
+<li><strong>excludedElementList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – <p>parts or timers that should be excluded from drawing
+Each list element can be the object to exclude or one of the following:
+- ‘allTimers’ - exclude all timers</p>
+<p>NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported</p>
+</li>
+<li><strong>timeRange</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – tuple with start and end time. Everything before start and after end is not drawn
+- currently supported only for svg/svgInHtml</li>
+<li><strong>**kwargs</strong> – <p>further arguments</p>
+<ul>
+<li>title - Sequence Diagram title</li>
+<li>timePerDiv - time per time grid division</li>
+<li>pixPerDiv=25 - pixels per time grid division (start value)</li>
+<li>partSpacing=300 - pixels between parts (start value)</li>
+<li>partBoxSize = (100,60) - x,y pixel size of part box</li>
+<li>statusBoxWidth=20 - pixel width of status box on life line</li>
+<li>variableBoxWidth=150 - pixel width of watched variable value box on life line</li>
+<li>varSpacing = 180 - pixels between variables</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="trace-tables">
+<span id="tracetocsvreference"></span><h2>Trace Tables<a class="headerlink" href="#trace-tables" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="moddy.traceToCsv.moddyGenerateTraceTable">
+<code class="descclassname">moddy.traceToCsv.</code><code class="descname">moddyGenerateTraceTable</code><span class="sig-paren">(</span><em>sim</em>, <em>fileName</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/moddy/traceToCsv.html#moddyGenerateTraceTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.traceToCsv.moddyGenerateTraceTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moddy high level function to create trace tables as .csv.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sim</strong> (<a class="reference internal" href="reference_core.html#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
+<li><strong>fileName</strong> – output filename (including .csv)</li>
+<li><strong>**kwargs</strong> – <p>further arguments</p>
+<ul>
+<li>timeUnit=”s” - time unit for all time stamps in table (‘s’, ‘ms’, ‘us’, ‘ns’)</li>
+<li>floatComma=’,’ - Comma character for float numbers</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="structure-graph">
+<span id="dotstructurereference"></span><h2>Structure Graph<a class="headerlink" href="#structure-graph" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="moddy.dotStructure.moddyGenerateStructureGraph">
+<code class="descclassname">moddy.dotStructure.</code><code class="descname">moddyGenerateStructureGraph</code><span class="sig-paren">(</span><em>sim</em>, <em>fileName</em>, <em>keepGvFile=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/moddy/dotStructure.html#moddyGenerateStructureGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.dotStructure.moddyGenerateStructureGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a graph of the model structure using the GraphViz dot tool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sim</strong> (<a class="reference internal" href="reference_core.html#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
+<li><strong>fileName</strong> – the relative filename including ‘.svg’</li>
+<li><strong>keepGvFile</strong> – if True, don’t delete graphviz input file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="fsm-graph">
+<span id="dotfsmreference"></span><h2>FSM Graph<a class="headerlink" href="#fsm-graph" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="moddy.dotFsm.moddyGenerateFsmGraph">
+<code class="descclassname">moddy.dotFsm.</code><code class="descname">moddyGenerateFsmGraph</code><span class="sig-paren">(</span><em>fsm</em>, <em>fileName</em>, <em>keepGvFile=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/moddy/dotFsm.html#moddyGenerateFsmGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.dotFsm.moddyGenerateFsmGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a Fsm Graph of an fsm using the GraphViz dot tool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fsm</strong> – an instance of the fsm</li>
+<li><strong>fileName</strong> – the relative filename including ‘.svg’</li>
+<li><strong>keepGvFile</strong> – if True, don’t delete graphviz input file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="reference_fsm.html" class="btn btn-neutral float-left" title="Moddy Finite State Machines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

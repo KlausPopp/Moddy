@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.traceToCsv &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.traceToCsv</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.traceToCsv</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:mod:`traceToCsv` -- Export simulator trace to csv </span>
+<span class="sd">=======================================================================</span>
+
+<span class="sd">.. module:: traceToCsv</span>
+<span class="sd">   :synopsis: Export simulator trace to csv</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">moddy.simulator</span> <span class="k">import</span> <span class="n">timeUnit2Factor</span>
+<span class="kn">from</span> <span class="nn">moddy.utils</span> <span class="k">import</span> <span class="n">moddyCreateDirsAndOpenOutputFile</span>
+
+
+<div class="viewcode-block" id="moddyGenerateTraceTable"><a class="viewcode-back" href="../../reference_results.html#moddy.traceToCsv.moddyGenerateTraceTable">[docs]</a><span class="k">def</span> <span class="nf">moddyGenerateTraceTable</span><span class="p">(</span> <span class="n">sim</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Moddy high level function to create trace tables as .csv.</span>
+<span class="sd">    </span>
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param fileName: output filename (including .csv)</span>
+<span class="sd">    </span>
+<span class="sd">    :param \**kwargs: further arguments</span>
+<span class="sd">     </span>
+<span class="sd">     * timeUnit=&quot;s&quot; - time unit for all time stamps in table (&#39;s&#39;, &#39;ms&#39;, &#39;us&#39;, &#39;ns&#39;)</span>
+<span class="sd">     * floatComma=&#39;,&#39; - Comma character for float numbers</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">trc</span> <span class="o">=</span> <span class="n">TraceToCsv</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">tracedEvents</span><span class="p">(),</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">trc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">TraceToCsv</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evList</span><span class="p">,</span> <span class="n">timeUnit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">floatComma</span><span class="o">=</span><span class="s2">&quot;,&quot;</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evList</span> <span class="o">=</span> <span class="n">evList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timeUnit</span> <span class="o">=</span> <span class="n">timeUnit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timeUnitFactor</span> <span class="o">=</span> <span class="n">timeUnit2Factor</span><span class="p">(</span><span class="n">timeUnit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_floatComma</span> <span class="o">=</span> <span class="n">floatComma</span>
+         
+    <span class="k">def</span> <span class="nf">timeFmt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%.6f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeUnitFactor</span> <span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_floatComma</span><span class="p">)</span>
+                 
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">moddyCreateDirsAndOpenOutputFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+        
+        <span class="n">csv</span><span class="o">.</span><span class="n">register_dialect</span><span class="p">(</span>
+            <span class="s1">&#39;mydialect&#39;</span><span class="p">,</span>
+            <span class="n">delimiter</span> <span class="o">=</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span>
+            <span class="n">quotechar</span> <span class="o">=</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">,</span>
+            <span class="n">doublequote</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">skipinitialspace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">lineterminator</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">quoting</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_MINIMAL</span><span class="p">)</span>
+        
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;mydialect&#39;</span><span class="p">)</span>
+        
+        
+        <span class="c1"># Write Comment row</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;#time&#39;</span><span class="p">,</span><span class="s1">&#39;Action&#39;</span><span class="p">,</span><span class="s1">&#39;Object&#39;</span><span class="p">,</span><span class="s1">&#39;Port/Tmr&#39;</span><span class="p">,</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span><span class="s1">&#39;requestTime&#39;</span><span class="p">,</span><span class="s1">&#39;startTime&#39;</span><span class="p">,</span><span class="s1">&#39;endTime&#39;</span><span class="p">,</span><span class="s1">&#39;flightTime&#39;</span><span class="p">]</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">te</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evList</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">timeFmt</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">traceTime</span><span class="p">),</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">part</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="s1">&#39;Global&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">te</span><span class="o">.</span><span class="n">part</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">()</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">subObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">hierarchyNameWithType</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">action</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;MSG&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="c1"># print request, begin, end, flightTime and msg in separate columns</span>
+                    <span class="n">fireEvent</span> <span class="o">=</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;(***LOST***)&quot;</span> <span class="k">if</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_isLost</span> <span class="k">else</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">msgText</span><span class="p">())</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeFmt</span><span class="p">(</span><span class="n">fireEvent</span><span class="o">.</span><span class="n">_requestTime</span><span class="p">))</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeFmt</span><span class="p">(</span><span class="n">fireEvent</span><span class="o">.</span><span class="n">execTime</span> <span class="o">-</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_flightTime</span><span class="p">))</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeFmt</span><span class="p">(</span><span class="n">fireEvent</span><span class="o">.</span><span class="n">execTime</span><span class="p">))</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeFmt</span><span class="p">(</span><span class="n">fireEvent</span><span class="o">.</span><span class="n">_flightTime</span><span class="p">))</span>
+                <span class="k">elif</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">action</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;T-&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">timeoutFmt</span> <span class="o">=</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeFmt</span><span class="p">(</span><span class="n">timeoutFmt</span><span class="o">.</span><span class="n">_timeout</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            
+            <span class="c1">#print(&quot;ROW=&quot;, row)</span>
+            
+            
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>    
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;saved </span><span class="si">%s</span><span class="s2"> as CSV&quot;</span> <span class="o">%</span> <span class="n">fileName</span><span class="p">)</span>        
+        
+        
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
