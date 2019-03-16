@@ -9,6 +9,7 @@ Moddy generates sequence diagram, model structure graphs, finite state machine g
 
 
 Typical applications are
+
 	* Modelling communication protocols
 	* Modelling highly distributed computer systems
 
@@ -21,6 +22,6 @@ Screenshot of Moddy Interactive Viewer Screenshot
 
 .. figure:: docs/ModdyIaViewerScreenShot.jpg
 
-
+`Online Viewer Demo <https://klauspopp.github.io/Moddy/_static/2_sergw.html>`.
 
 Moddy requires: Python >=3.5, svgwrite, Graphviz
