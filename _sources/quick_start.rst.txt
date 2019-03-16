@@ -216,7 +216,7 @@ This is the result:
 
 .. figure:: _static/0020_1_hello.png 
 
-View as HTML: `1_hello <../../../src/tutorial/output/1_hello.html>`_
+View as HTML: `1_hello <_static/1_hello.html>`_
 
 Notes:
 
