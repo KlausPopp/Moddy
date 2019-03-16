@@ -83,7 +83,7 @@ if __name__ == '__main__':
     # Output sequence diagram
     moddyGenerateSequenceDiagram( sim=simu, 
                                   fileName="output/1_hello.html", 
-                                  fmt="iaViewerRef", 
+                                  fmt="iaViewer", 
                                   excludedElementList=[], 
                                   timePerDiv = 1.0, 
                                   pixPerDiv = 30,

@@ -156,7 +156,7 @@ if __name__ == '__main__':
         # create SVG drawing
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/2_sergw.html", 
-                                      fmt="iaViewerRef", 
+                                      fmt="iaViewer", 
                                       showPartsList=[client, gateway.rxThread, gateway.txThread, serDev],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 50*us, 
