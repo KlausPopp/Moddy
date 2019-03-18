@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
     <link rel="prev" title="Moddy Finite State Machines" href="reference_fsm.html" /> 
 </head>
 
@@ -96,6 +97,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 </ul>
 
             
@@ -182,31 +184,48 @@ events from the simulator instance.</p>
 <li><strong>fileName</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – output filename (including filename extension e.g. <code class="docutils literal notranslate"><span class="pre">.html</span></code>)</li>
 <li><strong>fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – <p>Output format. One of</p>
 <ul>
+<li>dynamic diagram<blockquote>
+<div><ul>
 <li>iaViewer - moddy interactive viewer: HTML with javascript/css embedded</li>
 <li>iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced</li>
+</ul>
+</div></blockquote>
+</li>
+<li>static diagram<blockquote>
+<div><ul>
 <li>svg - static SVG (using code in svgSeqD)</li>
 <li>svgInHtml - static SVG embedded in HTML (using code in svgSeqD)</li>
+</ul>
+</div></blockquote>
+</li>
 </ul>
 </li>
 <li><strong>showPartsList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – if given, show only the listed parts in that order in sequence diagram.
 Each element can be either a reference to the part or a string with the
 hierarchy name of the part.  
 if omitted, show all parts known by simulator, in the order of their creation</li>
-<li><strong>showVarList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – List of watched variables: Strings with the variable hierarchy name</li>
+<li><strong>showVarList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – List of watched variables to include in the sequence diagram. 
+Each element must be a string with the variable hierarchy name. e.g. “VC.var1”. 
+If omitted, no variables are included.</li>
 <li><strong>excludedElementList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – <p>parts or timers that should be excluded from drawing
 Each list element can be the object to exclude or one of the following:
 - ‘allTimers’ - exclude all timers</p>
 <p>NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported</p>
 </li>
 <li><strong>timeRange</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – tuple with start and end time. Everything before start and after end is not drawn
-- currently supported only for svg/svgInHtml</li>
+You can specify None for end time, in this case end time is the end of the simulation. 
+This parameter is currently supported only for static diagrams and ignored in the interactive viewer.</li>
 <li><strong>**kwargs</strong> – <p>further arguments</p>
 <ul>
-<li>title - Sequence Diagram title</li>
-<li>timePerDiv - time per time grid division</li>
-<li>pixPerDiv=25 - pixels per time grid division (start value)</li>
-<li>partSpacing=300 - pixels between parts (start value)</li>
-<li>partBoxSize = (100,60) - x,y pixel size of part box</li>
+<li>title - Title text to be displayed above the sequence diagram</li>
+<li>timePerDiv - time per “Time Div”.</li>
+<li>pixPerDiv=25 - pixels per time grid division. Optional, default:25. 
+Note: The interactive viewer dynamically adjust the time scale depending on the current time 
+scale factor and uses <em>timePerDiv</em> and <em>pixPerDiv</em> only as an hint for the initial scale factor.</li>
+<li>partSpacing=300 - horizontal spacing in pixels between parts. (start value)</li>
+<li>partBoxSize = (100,60) - Tupel with x,y pixel size of part box. 
+Note: The interactive viewer dynamically adjust the part box size according 
+to the length of the part names.</li>
 <li>statusBoxWidth=20 - pixel width of status box on life line</li>
 <li>variableBoxWidth=150 - pixel width of watched variable value box on life line</li>
 <li>varSpacing = 180 - pixels between variables</li>
@@ -300,6 +319,8 @@ Each list element can be the object to exclude or one of the following:
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="reference_fsm.html" class="btn btn-neutral float-left" title="Moddy Finite State Machines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

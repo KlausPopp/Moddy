@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Modelling with Finite State Machines &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sequential Program Simulation" href="detailed_seqprog.html" />
+    <link rel="prev" title="Core Simulator" href="detailed_coresim.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="detailed.html">Detailed User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="detailed_coresim.html">Core Simulator</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Modelling with Finite State Machines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-the-fsm">Specifying the FSM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generating-fsm-events">Generating FSM Events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#action-callbacks">Action Callbacks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-do-action">The Do Action</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#executing-application-specific-state-dependent-callbacks">Executing Application Specific, State-Dependent Callbacks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nested-fsms">Nested FSMs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sub-state-machine-instantiation">Sub-State Machine Instantiation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sub-state-machine-termination">Sub-State Machine Termination</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sub-state-machine-event-reception">Sub-State Machine Event Reception</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accessing-super-fsms-from-sub-state-machines">Accessing Super-FSMs from Sub-State Machines</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#modelling-a-moddy-part-with-a-finite-state-machine">Modelling a Moddy Part with a Finite State Machine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#creating-a-simfsmpart">Creating a simFsmPart</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#representation-of-the-fsm-state-on-the-life-line">Representation of the FSM State on the Life Line</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#message-handling">Message Handling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timer-handling">Timer Handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="detailed_seqprog.html">Sequential Program Simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detailed_modelchecking.html">Model Checking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detailed_visualization.html">Visualisation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="detailed.html">Detailed User Guide</a> &raquo;</li>
+        
+      <li>Modelling with Finite State Machines</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/detailed_fsm.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="modelling-with-finite-state-machines">
+<span id="detailed-fsm"></span><h1>Modelling with Finite State Machines<a class="headerlink" href="#modelling-with-finite-state-machines" title="Permalink to this headline">¶</a></h1>
+<p>Instead of using the event-callback based mechanism described in the previous chapter,
+it is sometimes easier to describe your model with finite state machines (FSMs).
+In moddy, FSMs are defined using the python language directly in your model code by creating a
+class derived from the Moddy <a class="reference internal" href="reference_fsm.html#moddy.fsm.Fsm" title="moddy.fsm.Fsm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fsm</span></code></a> class.</p>
+<p>Moddy FSMs features:</p>
+<ul class="simple">
+<li>Simple FSM specification using a python dictionary</li>
+<li>Simple interface to simulator events (Message reception and timer events)</li>
+<li>Generation of graphical representation of the state machine</li>
+<li>FSM-events trigger transitions between states</li>
+<li>Action-callbacks for state-entry, state-exit, state-do</li>
+<li>Support for nested state machines, including orthogonal (parallel) nested state machines</li>
+</ul>
+<p>Intentionally NOT supported are actions on transitions, because they make FSMs more difficult to read.</p>
+<div class="section" id="specifying-the-fsm">
+<h2>Specifying the FSM<a class="headerlink" href="#specifying-the-fsm" title="Permalink to this headline">¶</a></h2>
+<p>Let’s begin with a simple FSM, describing the states of a (simplified) computer:</p>
+<div class="figure">
+<img alt="_images/0100_computerfsm.png" src="_images/0100_computerfsm.png" />
+</div>
+<p>Note that this figure is generated by Moddy using <a class="reference internal" href="reference_results.html#moddy.dotFsm.moddyGenerateFsmGraph" title="moddy.dotFsm.moddyGenerateFsmGraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateFsmGraph()</span></code></a>.</p>
+<p>In moddy, this state machine can be expressed as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Computer</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+
+   <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentFsm</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+       <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+           <span class="s1">&#39;&#39;</span><span class="p">:</span>
+               <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)],</span>
+           <span class="s1">&#39;Off&#39;</span><span class="p">:</span>
+               <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
+           <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>
+               <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span>
+           <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span>
+               <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s1">&#39;OsShutdown&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
+           <span class="s1">&#39;ANY&#39;</span><span class="p">:</span>
+               <span class="p">[(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)]</span>
+       <span class="p">}</span>
+
+       <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">,</span> <span class="n">parentFsm</span><span class="o">=</span><span class="n">parentFsm</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The state and the transitions are specified as a python dictionary:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="n">state1</span><span class="p">:</span> <span class="p">[</span><span class="n">transition1</span><span class="p">,</span> <span class="n">transition2</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">state2</span><span class="p">:</span> <span class="p">[</span><span class="n">transition1</span><span class="p">,</span> <span class="n">transition2</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>The dictionary keys are the states. In the example above, the state machines regular states
+are ‘Off’, ‘Standby’ and ‘NormalOp’ (the two special states ‘’ and ‘ANY’ are described below).</p>
+<p>Each dictionary element’s value is a list of transitions valid in the specified state.
+Each transition is specified as a tuple:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">target</span><span class="o">-</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the example above, the <code class="docutils literal notranslate"><span class="pre">('PowerApplied',</span> <span class="pre">'Standby')</span></code> transition is valid in the ‘Off’ state.
+It defines that the ‘PowerApplied’ event leads to state ‘Standby’.</p>
+<p>There are two special states:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The start state is specified with an empty string. When the state machine is started,
+it automatically executes the ‘INITIAL’ event, which transits to the initial state (‘Off’ in our example).</li>
+<li>Transitions defined in the pseudo state ‘ANY’ are valid in any state.
+In our example, the ‘PowerRemoved’ event leads to ‘Off’ state, regardless of the current FSM state.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="generating-fsm-events">
+<h2>Generating FSM Events<a class="headerlink" href="#generating-fsm-events" title="Permalink to this headline">¶</a></h2>
+<p>Before you can work with an FSM, you must instantiate and start it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">comp</span> <span class="o">=</span> <span class="n">Computer</span><span class="p">()</span>
+<span class="n">comp</span><span class="o">.</span><span class="n">startFsm</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="reference_fsm.html#moddy.fsm.Fsm.startFsm" title="moddy.fsm.Fsm.startFsm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startFsm()</span></code></a> method issues automatically the ‘INITIAL’ event and transits to the initial state.</p>
+<p>To force transitions of the FSM, your model generates FSM events using the <a class="reference internal" href="reference_fsm.html#moddy.fsm.Fsm.event" title="moddy.fsm.Fsm.event"><code class="xref py py-meth docutils literal notranslate"><span class="pre">event()</span></code></a> method.</p>
+<p>The current FSM state can be read from the state member:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">comp</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">comp</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="n">comp</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">comp</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="n">comp</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">comp</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This produces the following output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">State Standby</span>
+<span class="go">State NormalOp</span>
+<span class="go">State Off</span>
+</pre></div>
+</div>
+<p>Note that the <a class="reference internal" href="reference_fsm.html#moddy.fsm.Fsm.event" title="moddy.fsm.Fsm.event"><code class="xref py py-meth docutils literal notranslate"><span class="pre">event()</span></code></a> method return value tells you if the event caused a state change
+(True) or not (False).</p>
+</div>
+<div class="section" id="action-callbacks">
+<h2>Action Callbacks<a class="headerlink" href="#action-callbacks" title="Permalink to this headline">¶</a></h2>
+<p>You can define callbacks that are executed when</p>
+<blockquote>
+<div><ul class="simple">
+<li>A state is entered (Entry Action)</li>
+<li>A state is left (Exit Action)</li>
+<li>A state is entered or a self-transition is execute (Do Action)</li>
+</ul>
+</div></blockquote>
+<p>These callbacks are optional. They are only executed when the corresponding methods are defined in the FSM class.
+The callbacks must be named according to the following convention:</p>
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">State_&lt;state&gt;_&lt;action&gt;</span></code></div></blockquote>
+<p>These callbacks have no parameters.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Computer</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+            <span class="o">...</span>
+        <span class="k">def</span> <span class="nf">State_Off_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;State_Off_Entry&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">State_Off_Exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;State_Off_Exit&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also define callbacks that are executed in any state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">State_ANY_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Any State Entry&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="the-do-action">
+<h3>The Do Action<a class="headerlink" href="#the-do-action" title="Permalink to this headline">¶</a></h3>
+<p>The Do Action is executed when</p>
+<blockquote>
+<div><ul class="simple">
+<li>A state is entered, directly after the Entry Action</li>
+<li>On a state self-transition</li>
+</ul>
+</div></blockquote>
+<p>A state self-transition is a transition whose source and target state are identical.
+In this case, the Exit and Entry Actions are NOT executed, but the Do Action is executed.</p>
+</div>
+<div class="section" id="executing-application-specific-state-dependent-callbacks">
+<h3>Executing Application Specific, State-Dependent Callbacks<a class="headerlink" href="#executing-application-specific-state-dependent-callbacks" title="Permalink to this headline">¶</a></h3>
+<p>The mechanisms to execute the Entry/Exit/Do Actions can be used also directly for application specific purposes.
+Consider the following situation: The object implementing the FSM should receive data from another object,
+but how the data is processed, depends on the FSMs state.</p>
+<p>For this purpose, the FSM class provides <a class="reference internal" href="reference_fsm.html#moddy.fsm.Fsm.execStateDependentMethod" title="moddy.fsm.Fsm.execStateDependentMethod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execStateDependentMethod()</span></code></a>.</p>
+<p>Example: The “Computer” shall receive data only when it is in “NormalOp” State:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Computer</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+            <span class="o">...</span>
+        <span class="k">def</span> <span class="nf">State_NormalOp_ReceiveData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;NormalOp_ReceiveData&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">State_Standby_ReceiveData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Standby_ReceiveData&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, when you execute</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">comp</span><span class="o">.</span><span class="n">execStateDependentMethod</span><span class="p">(</span> <span class="s1">&#39;ReceiveData&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s1">&#39;123&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>the <code class="docutils literal notranslate"><span class="pre">State_&lt;state&gt;_ReceiveData</span></code> function with the argument <code class="docutils literal notranslate"><span class="pre">data='123'</span></code> of the corresponding state is
+executed (or none if no such method exists for the current state).</p>
+<p>The detailed signature is</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">methodWasCalled</span> <span class="o">=</span> <span class="n">execStateDependentMethod</span><span class="p">(</span><span class="n">methodName</span><span class="p">,</span> <span class="n">deep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>where</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><em>methodName</em> is the method name to call.</p>
+<blockquote>
+<div><ul class="simple">
+<li>First <code class="docutils literal notranslate"><span class="pre">State_ANY_&lt;methodName&gt;</span></code> is called (if it exists), then</li>
+<li><code class="docutils literal notranslate"><span class="pre">State_&lt;state&gt;_&lt;methodName&gt;</span></code> is called (if it exists) where state is the current FSM state.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If <em>deep</em> is True, the call is also propagated to all currently active sub-state machines,
+before the calls to the top level state machine</p>
+</li>
+<li><p class="first">*args and **kwargs are the positional and named arguments to pass to the method</p>
+</li>
+<li><p class="first">The return value is True if at least one method could be called</p>
+</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="nested-fsms">
+<h2>Nested FSMs<a class="headerlink" href="#nested-fsms" title="Permalink to this headline">¶</a></h2>
+<p>Nested FSMs are needed if one or more of the FSMs states contains sub-states.</p>
+<p>The following example shows a state machine with two sub-state machines.
+This example can be found in the moddy tutorial <code class="docutils literal notranslate"><span class="pre">3_carinfo.py</span></code>.
+It simulates the behaviour of a simplified car infotainment system.
+The main state machine models the devices global state. The “NormalOp” states has two substates:
+The first is “Apps” which switches between the Radio Application and the Navigation Application.
+The second is “Vol” which controls the audio volume based on button events.
+The two sub state machines are both active at the same time (as long as the main state machine is in the “NormalOp” state.</p>
+<p>Note that the graphical representation of sub-states in Moddy is a little unconventional,
+mainly due to the limitations of the GraphViz tool. The sub-states are drawn in separated container boxes,
+whereas they are normally drawn inside the containing super-state.</p>
+<div class="figure">
+<img alt="_images/0110_nestedfsm.png" src="_images/0110_nestedfsm.png" />
+</div>
+<p>To specify sub-states in a FSM, specify the sub-states name and the sub-state class as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CarInfoSystem</span><span class="p">(</span><span class="n">simFsmPart</span><span class="p">):</span>
+
+
+    <span class="o">...</span>
+    <span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+            <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)],</span>
+                <span class="s1">&#39;Off&#39;</span><span class="p">:</span>
+                    <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
+                <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>
+                    <span class="p">[(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Booting&#39;</span><span class="p">),</span>
+                     <span class="p">(</span><span class="s1">&#39;IgnitionOn&#39;</span><span class="p">,</span> <span class="s1">&#39;Booting&#39;</span><span class="p">)],</span>
+                <span class="s1">&#39;Booting&#39;</span><span class="p">:</span>
+                    <span class="p">[(</span><span class="s1">&#39;bootTmr_Expired&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span>
+                <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span>
+                     <span class="c1"># The following two lines specify nested state machines,</span>
+                     <span class="c1"># executing in parallel</span>
+                    <span class="p">[(</span><span class="s1">&#39;Apps&#39;</span> <span class="p">,</span> <span class="n">CarInfoSystem</span><span class="o">.</span><span class="n">FSM</span><span class="o">.</span><span class="n">ApplicationsFsm</span> <span class="p">),</span>
+                     <span class="p">(</span><span class="s1">&#39;Vol&#39;</span> <span class="p">,</span> <span class="n">CarInfoSystem</span><span class="o">.</span><span class="n">FSM</span><span class="o">.</span><span class="n">VolumeFsm</span> <span class="p">),</span>
+                     <span class="c1"># Normal tranisitions</span>
+                     <span class="p">(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Shutdown&#39;</span><span class="p">),</span>
+                     <span class="c1"># ...</span>
+            <span class="p">}</span>
+
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span> <span class="p">)</span>
+
+        <span class="c1"># Nested state machine CarInfo System Applications</span>
+        <span class="k">class</span> <span class="nc">ApplicationsFsm</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+
+            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentFsm</span><span class="p">):</span>
+
+                <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Radio&#39;</span><span class="p">)],</span>
+                    <span class="s1">&#39;Radio&#39;</span><span class="p">:</span>
+                        <span class="p">[(</span><span class="s1">&#39;NaviButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Navi&#39;</span><span class="p">)],</span>
+                    <span class="s1">&#39;Navi&#39;</span><span class="p">:</span>
+                        <span class="p">[(</span><span class="s1">&#39;RadioButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Radio&#39;</span><span class="p">)]</span>
+                <span class="p">}</span>
+
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">,</span> <span class="n">parentFsm</span><span class="o">=</span><span class="n">parentFsm</span> <span class="p">)</span>
+
+                <span class="o">...</span>
+</pre></div>
+</div>
+<p>This means sub-states are defined in the list of transitions.
+If the Fsm class code detects that a class reference is given instead a string with a target state,
+it treats this as a sub-state machine specification.</p>
+<div class="section" id="sub-state-machine-instantiation">
+<h3>Sub-State Machine Instantiation<a class="headerlink" href="#sub-state-machine-instantiation" title="Permalink to this headline">¶</a></h3>
+<p>A sub-state machine object is created when the super-state is entered.
+(In our example above, the ApplicationFsm and VolumeFsm objects are created when the super-state ‘NormalOp’ is entered).
+The sub-state machine then automatically execute the ‘INITIAL’ event to transit to their initial state.</p>
+</div>
+<div class="section" id="sub-state-machine-termination">
+<h3>Sub-State Machine Termination<a class="headerlink" href="#sub-state-machine-termination" title="Permalink to this headline">¶</a></h3>
+<p>A sub-state machine object is terminated when the super-state exits.
+When the super-state exits, the Exit action of the current states are called:
+First, the Exit Action of the current state in the sub state machines, and then the Exit Action of the
+current state of the super-state machine. Then the sub-state machine objects are deleted.</p>
+</div>
+<div class="section" id="sub-state-machine-event-reception">
+<h3>Sub-State Machine Event Reception<a class="headerlink" href="#sub-state-machine-event-reception" title="Permalink to this headline">¶</a></h3>
+<p>All currently active sub-state machines receive the events that are generated at the super-FSM.
+The super-FSM first forwards any event to all its sub-state machines.
+Only if none of the sub-state machines “knows” the event, the event is processed at the super-FSM itself.
+A sub-state machine is said to “know” an event if the event is listed in the transitions list passed
+to the constructor (it doesn’t matter in which state).</p>
+<p>In the “carinfo” example, if the Main-FSM is in the ‘NormalOp’ state and receives the ‘NaviButton’ event,
+the event is processed only in the ApplicationFsm sub-state machine,
+because only this FSM knows the ‘NaviButton’ event.
+However, if the Main-FSM is in the ‘NormalOp’ state and receives the ‘PowerButton’ event,
+the event is processed in the Main-FSM, because no sub-state machine knows this event.</p>
+</div>
+<div class="section" id="accessing-super-fsms-from-sub-state-machines">
+<h3>Accessing Super-FSMs from Sub-State Machines<a class="headerlink" href="#accessing-super-fsms-from-sub-state-machines" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes sub-state machine want to send events to higher level state machines,
+to force a ransition at the higher level state machine.</p>
+<p>A sub-state machine can get a reference to the next higher level FSM using the _parentFsm member:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">_parentFsm</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;MyEvent&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to send an event to the highest level FSM, use the <a class="reference internal" href="reference_fsm.html#moddy.fsm.Fsm.topFsm" title="moddy.fsm.Fsm.topFsm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">topFsm()</span></code></a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">topFsm</span><span class="p">()</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;MyEvent&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="modelling-a-moddy-part-with-a-finite-state-machine">
+<span id="detailed-fsmpart"></span><h2>Modelling a Moddy Part with a Finite State Machine<a class="headerlink" href="#modelling-a-moddy-part-with-a-finite-state-machine" title="Permalink to this headline">¶</a></h2>
+<p>Moddy provides a convenience class <a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a> to specify a Moddy Part with a FSM.</p>
+<dl class="docutils">
+<dt>The simFsmPart class provides the following features:</dt>
+<dd><ul class="first last simple">
+<li>The FSMs state is represented on the sequence diagram’s life line via the status box</li>
+<li>Messages received on input ports and timer expiration events can generate FSM events</li>
+</ul>
+</dd>
+</dl>
+<div class="section" id="creating-a-simfsmpart">
+<h3>Creating a simFsmPart<a class="headerlink" href="#creating-a-simfsmpart" title="Permalink to this headline">¶</a></h3>
+<p>To create a part that is controlled by a FSM, create a sub-class of <a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a>.
+You see in the example below that you need to create a nested class containing the FSM (here called class “FSM”)
+and pass an instance of this class to the simFsmPart’s constructor:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">moddy</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">CarInfoSystem</span><span class="p">(</span><span class="n">simFsmPart</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+        <span class="n">statusBoxReprMap</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="o">...</span>
+        <span class="p">}</span>
+
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> <span class="n">fsm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">FSM</span><span class="p">(),</span>
+                <span class="n">statusBoxReprMap</span><span class="o">=</span><span class="n">statusBoxReprMap</span><span class="p">)</span>
+
+        <span class="c1"># Ports &amp; Timers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;buttonPort&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;visualPort&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;bootTmr&#39;</span><span class="p">,</span> <span class="s1">&#39;shutdownTmr&#39;</span><span class="p">,</span> <span class="s1">&#39;clockTmr&#39;</span><span class="p">])</span>
+
+
+    <span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+            <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="c1"># FSM uninitialized</span>
+                    <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)],</span>
+                <span class="s1">&#39;Off&#39;</span><span class="p">:</span>
+                        <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="representation-of-the-fsm-state-on-the-life-line">
+<h3>Representation of the FSM State on the Life Line<a class="headerlink" href="#representation-of-the-fsm-state-on-the-life-line" title="Permalink to this headline">¶</a></h3>
+<p>An instance of <a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a> automatically shows its FSM state on the part’s life line.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The life line cannot show states of nested FSMs, only the state of the highest level FSM can be shown.</p>
+</div>
+<p>To define how the FSM state are represented on the part’s life line, you define for each state the text and the colours:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">whiteOnGreen</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;textColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">}</span>
+<span class="n">whiteOnRed</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;textColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">}</span>
+<span class="n">whiteOnBlue</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;textColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">}</span>
+<span class="n">blackOnWhite</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;textColor&#39;</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can use also one of the predefined appearance constants, see <a class="reference internal" href="reference_core.html#predef-bc-colors"><span class="std std-ref">Predefined color names for status boxes</span></a></p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CarInfoSystem</span><span class="p">(</span><span class="n">simFsmPart</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+
+        <span class="n">statusBoxReprMap</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Off&#39;</span><span class="p">:</span>      <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">blackOnWhite</span><span class="p">),</span>
+            <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;SBY&#39;</span><span class="p">,</span> <span class="n">whiteOnRed</span><span class="p">),</span>
+            <span class="s1">&#39;Booting&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;BOOT&#39;</span><span class="p">,</span> <span class="n">whiteOnBlue</span><span class="p">),</span>
+            <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;NORM&#39;</span><span class="p">,</span> <span class="n">whiteOnGreen</span><span class="p">),</span>
+            <span class="s1">&#39;Shutdown&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;SD&#39;</span><span class="p">,</span> <span class="n">whiteOnRed</span><span class="p">)</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>For each FSM state, a tuple <code class="docutils literal notranslate"><span class="pre">(text,</span> <span class="pre">appearance)</span></code> has to be defined.</p>
+<p>If you specify the map to be None or if you don’t specify a mapping for a specific state,
+then the text shown at the life line will be the state name and the status box colours will be the default colours.
+Using the map shown above, will result in the following sequence diagram:</p>
+<div class="figure">
+<img alt="_images/0120_fsmcolor.png" src="_images/0120_fsmcolor.png" />
+</div>
+</div>
+<div class="section" id="message-handling">
+<h3>Message Handling<a class="headerlink" href="#message-handling" title="Permalink to this headline">¶</a></h3>
+<p>Now, how to connect moddy messages to FSMs?</p>
+<p>If a Moddy message is received on an input port owned by a simFsmPart, it either</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>generates directly an FSM event or</li>
+<li>executes a callback function, which can analyse the message and then generate an FSM event</li>
+</ol>
+</div></blockquote>
+<p>Usually, you want use option 2), i.e. analyse the message first.</p>
+<p>In this case, create a callback function for the port that will receive the message.
+E.g. if your port is called <em>ingitionPort</em> and you want to receive the messages in any state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">State_ANY_ignitionPort_Msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;on&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;IgnitionOn&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;off&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;IgnitionOff&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So the callback function must be named always <code class="docutils literal notranslate"><span class="pre">State_&lt;state&gt;_&lt;portName&gt;_Msg</span></code>.
+It is passed the message <em>msg</em> which was received on the port.</p>
+<p>However, if you don’t need to analyse the message content, you can also let moddy generate directly an FSM event.
+For this, specify in your transitions list an event called <code class="docutils literal notranslate"><span class="pre">&lt;portName&gt;_Msg</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">...</span>
+            <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>
+                <span class="p">[(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Booting&#39;</span><span class="p">),</span>
+                 <span class="p">(</span><span class="s1">&#39;ignitionPort_Msg&#39;</span><span class="p">,</span> <span class="s1">&#39;Booting&#39;</span><span class="p">)],</span>
+</pre></div>
+</div>
+<p>If the <a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a> logic recognizes that your FSM knows an event <code class="docutils literal notranslate"><span class="pre">&lt;portName&gt;_Msg</span></code>,
+it generates this event whenever a message is received on the port and it does NOT call the callback
+function <code class="docutils literal notranslate"><span class="pre">State_&lt;state&gt;_&lt;portName&gt;_Msg</span></code>.</p>
+</div>
+<div class="section" id="timer-handling">
+<h3>Timer Handling<a class="headerlink" href="#timer-handling" title="Permalink to this headline">¶</a></h3>
+<p>Timer handling in <a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a> is very similar to message receiption.
+Also here, you can chose to let moddy directly generate an event when a timer expires,
+or to execute a callback function. But for timers, you normally let moddy directly generate events:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+      <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+          <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+              <span class="o">...</span>
+              <span class="s1">&#39;Booting&#39;</span><span class="p">:</span>
+                  <span class="p">[(</span><span class="s1">&#39;bootTmr_Expired&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span>
+          <span class="p">}</span>
+</pre></div>
+</div>
+<p>Here, the <a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a> generates the <code class="docutils literal notranslate"><span class="pre">bootTmr_Expired</span></code> event, when the timer named <em>bootTmr</em> expires.</p>
+<p>If you don’t have the <code class="docutils literal notranslate"><span class="pre">bootTmr_Expired</span></code> event in your transitions list,
+<a class="reference internal" href="reference_fsm.html#moddy.fsmPart.simFsmPart" title="moddy.fsmPart.simFsmPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simFsmPart</span></code></a> will attempt to execute a callback function <code class="docutils literal notranslate"><span class="pre">State_&lt;state&gt;_&lt;timerName&gt;_Expired</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="detailed_seqprog.html" class="btn btn-neutral float-right" title="Sequential Program Simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="detailed_coresim.html" class="btn btn-neutral float-left" title="Core Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

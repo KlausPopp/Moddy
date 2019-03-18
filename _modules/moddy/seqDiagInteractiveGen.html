@@ -83,6 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 </ul>
 
             
@@ -182,10 +183,15 @@
 <span class="sd">    :param str fileName: output filename (including filename extension e.g. ``.html``)</span>
 <span class="sd">    :param str fmt: Output format. One of </span>
 <span class="sd">    </span>
-<span class="sd">        * iaViewer - moddy interactive viewer: HTML with javascript/css embedded</span>
-<span class="sd">        * iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced</span>
-<span class="sd">        * svg - static SVG (using code in svgSeqD)</span>
-<span class="sd">        * svgInHtml - static SVG embedded in HTML (using code in svgSeqD)</span>
+<span class="sd">        * dynamic diagram</span>
+
+<span class="sd">            * iaViewer - moddy interactive viewer: HTML with javascript/css embedded</span>
+<span class="sd">            * iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced</span>
+
+<span class="sd">        * static diagram</span>
+<span class="sd">    </span>
+<span class="sd">            * svg - static SVG (using code in svgSeqD)</span>
+<span class="sd">            * svgInHtml - static SVG embedded in HTML (using code in svgSeqD)</span>
 <span class="sd">                </span>
 
 <span class="sd">    :param list showPartsList: if given, show only the listed parts in that order in sequence diagram.</span>
@@ -193,7 +199,9 @@
 <span class="sd">                    hierarchy name of the part.  </span>
 <span class="sd">                    if omitted, show all parts known by simulator, in the order of their creation</span>
 <span class="sd">    </span>
-<span class="sd">    :param list showVarList: List of watched variables: Strings with the variable hierarchy name</span>
+<span class="sd">    :param list showVarList: List of watched variables to include in the sequence diagram. </span>
+<span class="sd">                    Each element must be a string with the variable hierarchy name. e.g. &quot;VC.var1&quot;. </span>
+<span class="sd">                    If omitted, no variables are included.</span>
 <span class="sd">                    </span>
 <span class="sd">    :param list excludedElementList: parts or timers that should be excluded from drawing</span>
 <span class="sd">                    Each list element can be the object to exclude or one of the following:</span>
@@ -202,18 +210,28 @@
 <span class="sd">                    NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported</span>
 
 <span class="sd">    :param tuple timeRange: tuple with start and end time. Everything before start and after end is not drawn</span>
-<span class="sd">                - currently supported only for svg/svgInHtml</span>
+<span class="sd">                    You can specify None for end time, in this case end time is the end of the simulation. </span>
+<span class="sd">                    This parameter is currently supported only for static diagrams and ignored in the interactive viewer.</span>
 <span class="sd">    </span>
 <span class="sd">    :param \\**kwargs: further arguments</span>
 <span class="sd">     </span>
-<span class="sd">         * title - Sequence Diagram title</span>
-<span class="sd">         * timePerDiv - time per time grid division</span>
-<span class="sd">         * pixPerDiv=25 - pixels per time grid division (start value)</span>
-<span class="sd">         * partSpacing=300 - pixels between parts (start value)</span>
-<span class="sd">         * partBoxSize = (100,60) - x,y pixel size of part box</span>
+<span class="sd">         * title - Title text to be displayed above the sequence diagram</span>
+<span class="sd">         * timePerDiv - time per &quot;Time Div&quot;.</span>
+<span class="sd">         </span>
+<span class="sd">         * pixPerDiv=25 - pixels per time grid division. Optional, default:25. </span>
+<span class="sd">           Note: The interactive viewer dynamically adjust the time scale depending on the current time </span>
+<span class="sd">           scale factor and uses *timePerDiv* and *pixPerDiv* only as an hint for the initial scale factor.</span>
+
+<span class="sd">         * partSpacing=300 - horizontal spacing in pixels between parts. (start value)</span>
+<span class="sd">         </span>
+<span class="sd">         * partBoxSize = (100,60) - Tupel with x,y pixel size of part box. </span>
+<span class="sd">           Note: The interactive viewer dynamically adjust the part box size according </span>
+<span class="sd">           to the length of the part names.</span>
+
 <span class="sd">         * statusBoxWidth=20 - pixel width of status box on life line</span>
 <span class="sd">         * variableBoxWidth=150 - pixel width of watched variable value box on life line</span>
 <span class="sd">         * varSpacing = 180 - pixels between variables</span>
+<span class="sd">         </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     
     <span class="c1"># call old generator if output shall be svg</span>

@@ -96,6 +96,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="detailed.html">Detailed User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 </ul>
 
             
@@ -342,7 +343,8 @@ On the python console, the simulator outputs the simulation trace:</p>
 <h3>Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permalink to this headline">¶</a></h3>
 <p>Moddy can generate a sequence diagram from the simulation results.
 The sequence diagram is generated as a as HTML.
-After simulation run, the following code generates the sequence diagram:</p>
+After simulation run, the following code generates the sequence diagram.
+For details, see <a class="reference internal" href="reference_results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
                               <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;1_hello.html&quot;</span><span class="p">,</span>
                               <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span>

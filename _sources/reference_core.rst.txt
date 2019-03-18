@@ -38,3 +38,20 @@ Timer
 .. autoclass:: moddy.simulator.simTimer
    :members: start, stop, restart
 
+Global Constants 
+----------------
+
+.. _predef-bc-colors:
+
+Predefined color names for status boxes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autodata:: moddy.__init__.bcWhiteOnGreen
+.. autodata:: moddy.__init__.bcWhiteOnRed
+.. autodata:: moddy.__init__.bcWhiteOnBlue
+.. autodata:: moddy.__init__.bcWhiteOnBrown
+.. autodata:: moddy.__init__.bcWhiteOnBlack
+.. autodata:: moddy.__init__.bcBlackOnPink
+.. autodata:: moddy.__init__.bcBlackOnGrey
+.. autodata:: moddy.__init__.bcWhiteOnGrey
+.. autodata:: moddy.__init__.bcBlackOnWhite 

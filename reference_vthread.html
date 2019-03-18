@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="reference_results.html">Moddy Result Generator APIs</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 </ul>
 
             
@@ -376,12 +377,12 @@ See svgSeqD.statusBox</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timeout</strong> – time to wait for events. If None, wait forever</li>
-<li><strong>evList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of events to wait for. Events can be <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>,          <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a>, <a class="reference internal" href="#moddy.vthread.vtIOPort" title="moddy.vthread.vtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtIOPort</span></code></a>, or <a class="reference internal" href="#moddy.vthread.vtTimer" title="moddy.vthread.vtTimer"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtTimer</span></code></a> object</li>
+<li><strong>timeout</strong> – time to wait for events. If None, wait forever. A timeout value of 0 is invalid.</li>
+<li><strong>evList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of events to wait for. Events can be <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>,          <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a>, <a class="reference internal" href="#moddy.vthread.vtIOPort" title="moddy.vthread.vtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtIOPort</span></code></a>, or <a class="reference internal" href="#moddy.vthread.vtTimer" title="moddy.vthread.vtTimer"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtTimer</span></code></a> object.          If evList is empty (or omitted), wait for timeout unconditionally.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ if one of the events has been triggered, ‘timeout’ if timeout</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ if one of the events has been triggered (it does not tell you which one), ‘timeout’ if timeout</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>

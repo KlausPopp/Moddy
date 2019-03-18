@@ -201,7 +201,8 @@ Sequence Diagram
 
 Moddy can generate a sequence diagram from the simulation results. 
 The sequence diagram is generated as a as HTML.
-After simulation run, the following code generates the sequence diagram:
+After simulation run, the following code generates the sequence diagram. 
+For details, see :func:`~.seqDiagInteractiveGen.moddyGenerateSequenceDiagram`:
 
 .. code-block:: python
 

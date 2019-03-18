@@ -83,6 +83,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 </ul>
 
             
@@ -463,11 +464,12 @@
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Suspend vThread until one of the events in `evList` occurs or timeout</span>
 <span class="sd">        </span>
-<span class="sd">        :param timeout: time to wait for events. If None, wait forever</span>
+<span class="sd">        :param timeout: time to wait for events. If None, wait forever. A timeout value of 0 is invalid.</span>
 <span class="sd">        :param list evList: list of events to wait for. Events can be :class:`vtSamplingInPort`, \</span>
-<span class="sd">         :class:`vtQueuingInPort`, :class:`vtIOPort`, or :class:`vtTimer` object</span>
+<span class="sd">         :class:`vtQueuingInPort`, :class:`vtIOPort`, or :class:`vtTimer` object. \</span>
+<span class="sd">         If evList is empty (or omitted), wait for timeout unconditionally.</span>
 <span class="sd">            </span>
-<span class="sd">        :return: &#39;ok&#39; if one of the events has been triggered, &#39;timeout&#39; if timeout</span>
+<span class="sd">        :return: &#39;ok&#39; if one of the events has been triggered (it does not tell you which one), &#39;timeout&#39; if timeout</span>
 
 <span class="sd">        :raise TerminateException: if simulator stopped </span>
 <span class="sd">        &#39;&#39;&#39;</span>
