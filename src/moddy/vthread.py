@@ -315,11 +315,12 @@ class vThread(simPart):
         '''
         Suspend vThread until one of the events in `evList` occurs or timeout
         
-        :param timeout: time to wait for events. If None, wait forever
+        :param timeout: time to wait for events. If None, wait forever. A timeout value of 0 is invalid.
         :param list evList: list of events to wait for. Events can be :class:`vtSamplingInPort`, \
-         :class:`vtQueuingInPort`, :class:`vtIOPort`, or :class:`vtTimer` object
+         :class:`vtQueuingInPort`, :class:`vtIOPort`, or :class:`vtTimer` object. \
+         If evList is empty (or omitted), wait for timeout unconditionally.
             
-        :return: 'ok' if one of the events has been triggered, 'timeout' if timeout
+        :return: 'ok' if one of the events has been triggered (it does not tell you which one), 'timeout' if timeout
 
         :raise TerminateException: if simulator stopped 
         '''

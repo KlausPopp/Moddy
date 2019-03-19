@@ -19,8 +19,8 @@ For detailed information, refer to `Moddy Online <Documentation https://klauspop
 
 Moddy comes with an interactive viewer for sequence diagrams where you can dynamically adjust the time scale:
 
-Screenshot of Moddy Interactive Viewer Screenshot, 
-or see `Online Viewer Demo <https://klauspopp.github.io/Moddy/_static/2_sergw.html>`.
+Here is a screenshot of Moddy Interactive Viewer,  
+better see `Online Viewer Demo <https://klauspopp.github.io/Moddy/_static/2_sergw.html>`.
 
 .. figure:: docs/ModdyIaViewerScreenShot.jpg
 

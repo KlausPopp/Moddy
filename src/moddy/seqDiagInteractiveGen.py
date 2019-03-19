@@ -34,10 +34,15 @@ def moddyGenerateSequenceDiagram( sim,
     :param str fileName: output filename (including filename extension e.g. ``.html``)
     :param str fmt: Output format. One of 
     
-        * iaViewer - moddy interactive viewer: HTML with javascript/css embedded
-        * iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced
-        * svg - static SVG (using code in svgSeqD)
-        * svgInHtml - static SVG embedded in HTML (using code in svgSeqD)
+        * dynamic diagram
+
+            * iaViewer - moddy interactive viewer: HTML with javascript/css embedded
+            * iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced
+
+        * static diagram
+    
+            * svg - static SVG (using code in svgSeqD)
+            * svgInHtml - static SVG embedded in HTML (using code in svgSeqD)
                 
 
     :param list showPartsList: if given, show only the listed parts in that order in sequence diagram.
@@ -45,7 +50,9 @@ def moddyGenerateSequenceDiagram( sim,
                     hierarchy name of the part.  
                     if omitted, show all parts known by simulator, in the order of their creation
     
-    :param list showVarList: List of watched variables: Strings with the variable hierarchy name
+    :param list showVarList: List of watched variables to include in the sequence diagram. 
+                    Each element must be a string with the variable hierarchy name. e.g. "VC.var1". 
+                    If omitted, no variables are included.
                     
     :param list excludedElementList: parts or timers that should be excluded from drawing
                     Each list element can be the object to exclude or one of the following:
@@ -54,18 +61,28 @@ def moddyGenerateSequenceDiagram( sim,
                     NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported
 
     :param tuple timeRange: tuple with start and end time. Everything before start and after end is not drawn
-                - currently supported only for svg/svgInHtml
+                    You can specify None for end time, in this case end time is the end of the simulation. 
+                    This parameter is currently supported only for static diagrams and ignored in the interactive viewer.
     
     :param \\**kwargs: further arguments
      
-         * title - Sequence Diagram title
-         * timePerDiv - time per time grid division
-         * pixPerDiv=25 - pixels per time grid division (start value)
-         * partSpacing=300 - pixels between parts (start value)
-         * partBoxSize = (100,60) - x,y pixel size of part box
+         * title - Title text to be displayed above the sequence diagram
+         * timePerDiv - time per "Time Div".
+         
+         * pixPerDiv=25 - pixels per time grid division. Optional, default:25. 
+           Note: The interactive viewer dynamically adjust the time scale depending on the current time 
+           scale factor and uses *timePerDiv* and *pixPerDiv* only as an hint for the initial scale factor.
+
+         * partSpacing=300 - horizontal spacing in pixels between parts. (start value)
+         
+         * partBoxSize = (100,60) - Tupel with x,y pixel size of part box. 
+           Note: The interactive viewer dynamically adjust the part box size according 
+           to the length of the part names.
+
          * statusBoxWidth=20 - pixel width of status box on life line
          * variableBoxWidth=150 - pixel width of watched variable value box on life line
          * varSpacing = 180 - pixels between variables
+         
     '''
     
     # call old generator if output shall be svg

@@ -30,14 +30,24 @@ us = 1E-6
 ms = 1E-3
 
 # Commonly used status box appearance colors
+
+#: constant for white on green status box
 bcWhiteOnGreen = {'boxStrokeColor':'black', 'boxFillColor':'green', 'textColor':'white'}
+#: constant for white on red status box
 bcWhiteOnRed = {'boxStrokeColor':'black', 'boxFillColor':'red', 'textColor':'white'}
+#: constant for white on blue status box
 bcWhiteOnBlue = {'boxStrokeColor':'blue', 'boxFillColor':'blue', 'textColor':'white'}
+#: constant for white on brown status box
 bcWhiteOnBrown = {'boxStrokeColor':'brown', 'boxFillColor':'brown', 'textColor':'white'}
+#: constant for white on black status box
 bcWhiteOnBlack = {'boxStrokeColor':'black', 'boxFillColor':'black', 'textColor':'white'}
+#: constant for black on pink status box
 bcBlackOnPink = {'boxStrokeColor':'pink', 'boxFillColor':'pink', 'textColor':'black'}
+#: constant for black on grey status box
 bcBlackOnGrey = {'boxStrokeColor':'grey', 'boxFillColor':'grey', 'textColor':'black'}
+#: constant for white on grey status box
 bcWhiteOnGrey = {'boxStrokeColor':'grey', 'boxFillColor':'grey', 'textColor':'white'}
+#: constant for black on white status box
 bcBlackOnWhite = {'boxStrokeColor':'black', 'boxFillColor':'white', 'textColor':'black'}
 
 

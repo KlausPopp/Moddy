@@ -1,3 +1,5 @@
+.. include:: globals.rst
+
 .. Moddy Discrete Event Simulator documentation master file, created by
    sphinx-quickstart on Sat Mar  9 20:24:34 2019.
    You can adapt this file completely to your liking, but it should at least
@@ -6,6 +8,10 @@
 Welcome to Moddy Discrete Event Simulator's documentation!
 ==========================================================
 
+.. note:: Please find installation instructions under :ref:`install`!
+
+* :ref:`genindex`
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -13,6 +19,7 @@ Welcome to Moddy Discrete Event Simulator's documentation!
    quick_start.rst
    detailed.rst
    reference.rst
+   install.rst
 
 
 What is Moddy?
@@ -56,9 +63,3 @@ I was looking for a simulator that
 * Is open source or at least affordable
 * I could not find commercial or open source tools that provided those features.
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
