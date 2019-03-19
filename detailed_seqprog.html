@@ -180,9 +180,9 @@ it can be quite cumbersome to do this with the event based mechanism.
 For example if you want to model the execution of a software program like this</p>
 <blockquote>
 <div><ul class="simple">
-<li>Get inputs (from Moddy messages), takes 100|micro|s</li>
+<li>Get inputs (from Moddy messages), takes 100 µs</li>
 <li>Calculate, takes 1ms</li>
-<li>Set outputs, takes 200|micro|s</li>
+<li>Set outputs, takes 200 µs</li>
 </ul>
 </div></blockquote>
 <p>With the event based mechanism, you would need a state machine in the timer’s callback routine,
@@ -214,8 +214,8 @@ or <a class="reference internal" href="reference_vthread.html#moddy.vtSchedRtos.
 <blockquote>
 <div><ul class="simple">
 <li>Idle (waiting) for 1.2ms</li>
-<li>Performing a send “TX1” operation, which takes 100|micro|s</li>
-<li>Performing a send “TX2” operation, which takes 100|micro|s</li>
+<li>Performing a send “TX1” operation, which takes 100 µs</li>
+<li>Performing a send “TX2” operation, which takes 100 µs</li>
 </ul>
 </div></blockquote>
 <p>Moddy parts derived from <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread" title="moddy.vthread.vThread"><code class="xref py py-class docutils literal notranslate"><span class="pre">vThread</span></code></a> or <a class="reference internal" href="reference_vthread.html#moddy.vtSchedRtos.vSimpleProg" title="moddy.vtSchedRtos.vSimpleProg"><code class="xref py py-class docutils literal notranslate"><span class="pre">vSimpleProg</span></code></a>
@@ -227,10 +227,10 @@ for more information)</p>
 <p>The <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> method can control the timing of the program via “system calls”:</p>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> delays the program execution for a specified time or
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> delays the program execution for a specified time or
 until an event occurred, indicating that the program is idle. No status box is shown on
 the sequence diagram life line while a program is waiting</li>
-<li><a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.busy" title="moddy.vthread.vThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a> delays the program execution for the specified time.
+<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code> delays the program execution for the specified time.
 A user defined status box (e.g. ‘TX1’ in the example above occurs) is shown on the life line
 while the program is busy.</li>
 </ul>
@@ -282,7 +282,7 @@ There are two types of buffering ports</p>
 </div>
 <p>A program reads a message from a buffering ports via the <a class="reference internal" href="reference_vthread.html#moddy.vthread.vtInPort.readMsg" title="moddy.vthread.vtInPort.readMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readMsg()</span></code></a> method.</p>
 <p>It can check the number of messages in the buffer through the <a class="reference internal" href="reference_vthread.html#moddy.vthread.vtInPort.nMsg" title="moddy.vthread.vtInPort.nMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nMsg()</span></code></a> method.</p>
-<p>A program can wait for new message using the <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> method.
+<p>A program can wait for new message using the <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> method.
 The exact behavior depends on the type of buffer port (Sampling or Queuing) and will be explained in the following.</p>
 <div class="section" id="sampling-input-ports">
 <h3>Sampling Input Ports<a class="headerlink" href="#sampling-input-ports" title="Permalink to this headline">¶</a></h3>
@@ -306,7 +306,7 @@ last <a class="reference internal" href="reference_vthread.html#moddy.vthread.vt
 </pre></div>
 </div>
 <p>The <a class="reference internal" href="reference_vthread.html#moddy.vthread.vtInPort.nMsg" title="moddy.vthread.vtInPort.nMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nMsg()</span></code></a> method returns 0 if no message was received at 0, or 1 otherwise.
-A program can call <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> so that is woken up if a message arrives on the port:</p>
+A program can call <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> so that is woken up if a message arrives on the port:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inP1</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -368,13 +368,13 @@ method, usually from the program’s constructor:</p>
 <p>The <a class="reference internal" href="reference_vthread.html#moddy.vthread.vtInPort.readMsg" title="moddy.vthread.vtInPort.readMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readMsg()</span></code></a> method on a queuing input port returns the first message of the queue.
 If no message is in the queue, it raises a BufferError exception.</p>
 <p>The <a class="reference internal" href="reference_vthread.html#moddy.vthread.vtInPort.nMsg" title="moddy.vthread.vtInPort.nMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nMsg()</span></code></a> method returns the number of messages in the queue (0 if none).</p>
-<p>A program can call <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> so that is woken up when a the first message an empty queue arrives on the port:</p>
+<p>A program can call <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> so that is woken up when a the first message an empty queue arrives on the port:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inP1</span><span class="p">])</span>
 </pre></div>
 </div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Call <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> only on empty queuing ports,
+<p class="last">Call <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> only on empty queuing ports,
 otherwise the program will not be woken up (because the wakeup happens only at empty-&gt;non-empty transitions)!</p>
 </div>
 <p>The following snippet demonstrates the use of a queuing port.
@@ -426,10 +426,10 @@ otherwise the program will not be woken up (because the wakeup happens only at e
 </div>
 <div class="section" id="system-calls-for-sequential-programs">
 <h2>System Calls for Sequential Programs<a class="headerlink" href="#system-calls-for-sequential-programs" title="Permalink to this headline">¶</a></h2>
-<p>In the previous chapters, the system calls <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> and <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.busy" title="moddy.vthread.vThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a>
+<p>In the previous chapters, the system calls <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code>
 were already briefly introduced. Now in more detail:</p>
-<p><a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> delays the program execution for a specified time or until an event occurred.
-The model is indicating with <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> that the program is idle.
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> delays the program execution for a specified time or until an event occurred.
+The model is indicating with <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> that the program is idle.
 Therefore no status box is shown on the sequence diagram life line while a program is waiting.</p>
 <dl class="function">
 <dt id="moddy.vthread.vThread.wait">
@@ -455,8 +455,8 @@ Therefore no status box is shown on the sequence diagram life line while a progr
 </table>
 </dd></dl>
 
-<p><a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.busy" title="moddy.vthread.vThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a> delays the program execution for the specified time.
-The model is indicating with <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.busy" title="moddy.vthread.vThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a> that the program is performing some operation.
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code> delays the program execution for the specified time.
+The model is indicating with <code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code> that the program is performing some operation.
 Therefore, a user defined status box appears on the life line while the program is busy.</p>
 <dl class="function">
 <dt id="moddy.vthread.vThread.busy">
@@ -498,7 +498,7 @@ The scheduler has the following features:</p>
 (when one of the same priority threads releases the processor,
 the next same priority thread which is ready is selected).
 Note that the round robin occurs not periodically.
-It happens only when one task executes <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a>.</li>
+It happens only when one task executes <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code>.</li>
 </ul>
 </div></blockquote>
 <p>First, you create the scheduler object:</p>
@@ -652,7 +652,7 @@ In another moddy part, create an output port and bind it to <code class="docutil
 <li><strong>start</strong> - Start or restart the vThread’s <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> method.
 If the <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> is already active, the start message is ignored.</li>
 <li><strong>kill</strong> - Force the <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> to abort the
-current <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.busy" title="moddy.vthread.vThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a> or <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a>
+current <code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code> or <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code>
 call by raising a vThread.KillException.
 When the <a class="reference internal" href="reference_vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> has terminated, all pending timers are stopped,
 all receive queues in the input ports are cleared and no messages can be received while terminated.

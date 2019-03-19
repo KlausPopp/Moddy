@@ -1,8 +1,6 @@
-.. include globals.rst
+.. include:: globals.rst
 
 
-.. |genSeqDiag| replace:: :func:`~.seqDiagInteractiveGen.moddyGenerateSequenceDiagram`
-.. |genStruct| replace:: :func:`~.dotStructure.moddyGenerateStructureGraph`
 
 .. _detailed_visualization:
 

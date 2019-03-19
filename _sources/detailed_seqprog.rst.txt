@@ -1,7 +1,6 @@
-.. include globals.rst
+.. include:: globals.rst
 
 .. _detailed_seqprog:
-
 
 *********************************************
 Sequential Program Simulation
@@ -15,9 +14,9 @@ However, when you want to model a sequential execution,
 it can be quite cumbersome to do this with the event based mechanism. 
 For example if you want to model the execution of a software program like this
 
-	* Get inputs (from Moddy messages), takes 100|micro|s
+	* Get inputs (from Moddy messages), takes 100 |microseconds|
 	* Calculate, takes 1ms
-	* Set outputs, takes 200|micro|s
+	* Set outputs, takes 200 |microseconds|
 	
 With the event based mechanism, you would need a state machine in the timer's callback routine, 
 which is not easy to understand.
@@ -53,8 +52,8 @@ Program Model
 In the above example, you see a very simple sequential program, that is
 
 	* Idle (waiting) for 1.2ms
-	* Performing a send "TX1" operation, which takes 100|micro|s
-	* Performing a send "TX2" operation, which takes 100|micro|s
+	* Performing a send "TX1" operation, which takes 100 |microseconds|
+	* Performing a send "TX2" operation, which takes 100 |microseconds|
 
 Moddy parts derived from :class:`~.vthread.vThread` or :class:`~.vtSchedRtos.vSimpleProg` 
 must implement a method :meth:`~.vthread.vThread.runVThread`. This method contains your sequential program model. 
