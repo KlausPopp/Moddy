@@ -14,11 +14,10 @@ Typical applications are:
 * Modelling communication protocols
 * Modelling highly distributed computer systems
 
-For detailed information, refer to `Moddy Online <Documentation https://klauspopp.github.io/Moddy>`.
+For detailed information, refer to `Moddy Online Documentation <https://klauspopp.github.io/Moddy>`.
 
 
-Moddy comes with an interactive viewer for sequence diagrams where you can dynamically adjust the time scale:
-
+Moddy comes with an interactive viewer for sequence diagrams where you can dynamically adjust the time scale.
 Here is a screenshot of Moddy Interactive Viewer,  
 better see `Online Viewer Demo <https://klauspopp.github.io/Moddy/_static/2_sergw.html>`.
 
