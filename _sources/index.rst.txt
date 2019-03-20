@@ -20,6 +20,7 @@ Welcome to Moddy Discrete Event Simulator's documentation!
    detailed.rst
    reference.rst
    install.rst
+   developer.rst
 
 
 What is Moddy?
