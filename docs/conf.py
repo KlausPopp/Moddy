@@ -15,7 +15,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../src'))
-
+from moddy.version import VERSION
 
 # -- Project information -----------------------------------------------------
 
@@ -24,9 +24,9 @@ copyright = '2019, Klaus Popp'
 author = 'Klaus Popp'
 
 # The short X.Y version
-version = ''
+version = '.'.join(VERSION.split('.')[0:2])
 # The full version, including alpha/beta/rc tags
-release = '1.6'
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
@@ -102,6 +102,7 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+
 
 
 # -- Options for HTMLHelp output ---------------------------------------------

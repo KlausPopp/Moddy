@@ -1,4 +1,4 @@
-.. include globals.rst
+.. include ../globals.rst
 
 .. _detailed_coresim:
 
@@ -377,7 +377,7 @@ Here, multiple send() calls are issued at the same simulation time.
 
 This results in the following sequence diagram. You see that the next character is fired when the previous character transmission ends:
  
-.. figure:: _static/0030_serial_transfer.png 
+.. figure:: ../_static/0030_serial_transfer.png 
  
  
 Receiving Messages
@@ -565,7 +565,7 @@ will force the 3rd, 6th and 7th message on the netPort to be lost.
  
 In the sequence diagrams, lost messages are indicated by an cross in front of the message arrow:
  
-.. figure:: _static/0040_lost_messages.png 
+.. figure:: ../_static/0040_lost_messages.png 
 
 In the simulator trace output, a lost message is shown as a normal message reception event, 
 but with the additional "(LOST)" string:
@@ -700,7 +700,7 @@ You add an annotation by calling the simPart's :meth:`~.simPart.addAnnotation` m
 	
 In a sequence diagram, an annotation is displayed on the part's life line at the current simulation time:
 
-.. figure:: _static/0050_annotation.png 
+.. figure:: ../_static/0050_annotation.png 
  
 The :meth:`~.simPart.addAnnotation` method expects a string as its argument. 
 It must be a single-line string. No special characters such as newline are allowed.
@@ -811,7 +811,7 @@ You define with the parameter *showVarList* which variable traces are shown in t
                                   pixPerDiv = 30)    
 
 
-.. figure:: _static/0060_showvars.png 
+.. figure:: ../_static/0060_showvars.png 
  
  
 

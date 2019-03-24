@@ -107,7 +107,7 @@ if __name__ == '__main__':
         # create SVG drawing
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/6_vthreadRemoteControlled.html", 
-                                      fmt="iaViewerRef", 
+                                      fmt="iaViewer", 
                                       showPartsList=[ "utilThread", "rcThread", "Stim"],
                                       excludedElementList=['allTimers'], 
                                       title="remote controlled vThreads Demo",

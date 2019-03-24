@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     moddyGenerateSequenceDiagram( sim=simu, 
                                   fileName="output/4_varwatch.html", 
-                                  fmt="iaViewerRef", 
+                                  fmt="iaViewer", 
                                   showPartsList=['VC'],
                                   showVarList=['VC.var1', 'VC.var2'],
                                   excludedElementList=['allTimers'], 

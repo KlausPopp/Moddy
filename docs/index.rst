@@ -17,9 +17,11 @@ Welcome to Moddy Discrete Event Simulator's documentation!
    :caption: Contents:
 
    quick_start.rst
-   detailed.rst
-   reference.rst
+   detailed/index
+   tutorials/index
+   reference/index
    install.rst
+   developer.rst
 
 
 What is Moddy?

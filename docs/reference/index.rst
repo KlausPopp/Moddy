@@ -1,4 +1,4 @@
-.. include:: globals.rst
+.. include:: ../globals.rst
 
 .. _reference:
 
@@ -11,8 +11,8 @@ API Reference
    :maxdepth: 2
    :caption: Contents:
 
-   reference_core.rst
-   reference_vthread.rst
-   reference_fsm.rst
-   reference_results.rst
+   core.rst
+   vthread.rst
+   fsm.rst
+   results.rst
    

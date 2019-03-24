@@ -1,4 +1,4 @@
-.. include:: globals.rst
+.. include:: ../globals.rst
 
 .. _detailed_fsm:
 
@@ -28,7 +28,7 @@ Specifying the FSM
 
 Let's begin with a simple FSM, describing the states of a (simplified) computer:
 
-.. figure:: _static/0100_computerfsm.png 
+.. figure:: ../_static/0100_computerfsm.png 
  
 
  
@@ -233,7 +233,7 @@ Note that the graphical representation of sub-states in Moddy is a little unconv
 mainly due to the limitations of the GraphViz tool. The sub-states are drawn in separated container boxes, 
 whereas they are normally drawn inside the containing super-state. 
 
-.. figure:: _static/0110_nestedfsm.png 
+.. figure:: ../_static/0110_nestedfsm.png 
  
  
 To specify sub-states in a FSM, specify the sub-states name and the sub-state class as follows:
@@ -436,7 +436,7 @@ then the text shown at the life line will be the state name and the status box c
 Using the map shown above, will result in the following sequence diagram:
 
 
-.. figure:: _static/0120_fsmcolor.png 
+.. figure:: ../_static/0120_fsmcolor.png 
  
 
  

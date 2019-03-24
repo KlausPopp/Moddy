@@ -54,7 +54,7 @@ if __name__ == '__main__':
         # create SVG drawing
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/5_lostMsg.html", 
-                                      fmt="iaViewerRef", 
+                                      fmt="iaViewer", 
                                       showPartsList=["Producer","Consumer"],
                                       excludedElementList=['allTimers'], 
                                       title="Lost Message Demo",

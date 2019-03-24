@@ -1,0 +1,46 @@
+digraph G {
+   rankdir=TB;
+   graph [fontname = "helvetica" fontsize=10 fontnodesep=0.1];
+   node [fontname = "helvetica" fontsize=10 shape=ellipse color=black height=.1];
+   edge [fontname = "helvetica" color=black fontsize=8 fontcolor=black];
+   INIT [style=invisible];
+   Off [label=Off];
+   Standby [label=Standby];
+   Booting [label=Booting];
+   NormalOp [label=NormalOp];
+   Shutdown [label=Shutdown];
+   ANY [label="from any state" shape=none];
+   INIT -> Off [label="INITIAL"];
+   Off -> Standby [label="PowerApplied"];
+   Standby -> Booting [label="PowerButton"];
+   Standby -> Booting [label="IgnitionOn"];
+   Booting -> NormalOp [label="bootTmr_Expired"];
+   subgraph cluster_Apps {  
+      label="Apps";
+      Apps_Radio [label=Radio];
+      Apps_Navi [label=Navi];
+      Apps_Radio -> Apps_Navi [label="NaviButton"];
+      Apps_Navi -> Apps_Radio [label="RadioButton"];
+   }
+   NormalOp -> Apps_Radio [color=lightgrey];
+   subgraph cluster_Vol {  
+      label="Vol";
+      Vol_On [label=On];
+      Vol_IncVol [label=IncVol];
+      Vol_DecVol [label=DecVol];
+      Vol_Mute [label=Mute];
+      Vol_On -> Vol_Mute [label="MuteButton"];
+      Vol_On -> Vol_IncVol [label="VolKnobRight"];
+      Vol_On -> Vol_DecVol [label="VolKnobLeft"];
+      Vol_IncVol -> Vol_On [label="VolChangeDone"];
+      Vol_DecVol -> Vol_On [label="VolChangeDone"];
+      Vol_Mute -> Vol_On [label="MuteButton"];
+      Vol_Mute -> Vol_On [label="VolKnobRight"];
+   }
+   NormalOp -> Vol_On [color=lightgrey];
+   NormalOp -> Shutdown [label="PowerButton"];
+   NormalOp -> Shutdown [label="IgnitionOff"];
+   NormalOp -> NormalOp [label="clockTmr_Expired"];
+   Shutdown -> Standby [label="shutdownTmr_Expired"];
+   ANY -> Off [label="PowerRemoved"];
+}

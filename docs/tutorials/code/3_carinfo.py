@@ -219,7 +219,7 @@ if __name__ == '__main__':
     
     moddyGenerateSequenceDiagram( sim=simu, 
                               fileName="output/3_carinfo.html", 
-                              fmt="iaViewerRef", 
+                              fmt="iaViewer", 
                               showPartsList=[stim, cis], 
                               timePerDiv = 0.3, 
                               pixPerDiv = 30,

@@ -229,7 +229,7 @@ This is the result:
 
 .. figure:: _static/0020_1_hello.png 
 
-View as HTML: `1_hello <_static/1_hello.html>`_
+View as HTML: :download:`1_hello <tutorials/code/output/1_hello.html>`
 
 Notes:
 

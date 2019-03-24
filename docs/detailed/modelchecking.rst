@@ -1,4 +1,4 @@
-.. include:: globals.rst
+.. include:: ../globals.rst
 
 .. _detailed_modelchecking:
 
@@ -33,5 +33,5 @@ and prints a summary at the end of the simulation:
 Assertion failures are also displayed in the sequence diagram in purple color: 
  
  
-.. figure:: _static/0300_checking.png 
+.. figure:: ../_static/0300_checking.png 
  

@@ -9,7 +9,7 @@
 
 '''
 
-import seqDiagInteractiveViewer
+import moddy.seqDiagInteractiveViewer
 from moddy.svgSeqD import moddyGenerateSvgSequenceDiagram
 from moddy.utils import moddyCreateDirsAndOpenOutputFile
 import os
@@ -316,7 +316,7 @@ class TraceGenDynamicViewer(object):
     
     def seqDiagInteractiveViewerPath(self):
         ''' get path relative to output directory to the seqDiagInteractiveViewer directory '''
-        return os.path.dirname(os.path.relpath(seqDiagInteractiveViewer.__file__, self._outDir))
+        return os.path.dirname(os.path.relpath(moddy.seqDiagInteractiveViewer.__file__, self._outDir))
     
     def readseqDiagInteractiveViewerFile(self, fileName):
         ''' read fileName from seqDiagInteractiveViewer directory and return its content '''

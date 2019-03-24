@@ -1,4 +1,4 @@
-.. include:: globals.rst
+.. include:: ../globals.rst
 
 .. _detailed_seqprog:
 
@@ -46,7 +46,7 @@ Program Model
 	            self.netPort.send('test1', 100*us)
 	            self.busy(100*us, 'TX2', whiteOnRed)
    
-.. figure:: _static/0200_vthread.png 
+.. figure:: ../_static/0200_vthread.png 
  
 
 In the above example, you see a very simple sequential program, that is
@@ -195,7 +195,7 @@ The following snippet demonstrates the use of a sampling port.
 
 This would result in the following sequence diagram:
    
-.. figure:: _static/0210_samplinginport.png 
+.. figure:: ../_static/0210_samplinginport.png 
  
  
 Queuing Input Ports
@@ -277,7 +277,7 @@ The following snippet demonstrates the use of a queuing port.
 
 
    
-.. figure:: _static/0220_queuingport.png 
+.. figure:: ../_static/0220_queuingport.png 
  
  
 
@@ -292,12 +292,14 @@ The model is indicating with :meth:`~.vthread.vThread.wait()` that the program i
 Therefore no status box is shown on the sequence diagram life line while a program is waiting.
 
 .. autofunction:: moddy.vthread.vThread.wait
-
+	:noindex:
+	
 :meth:`~.vthread.vThread.busy()` delays the program execution for the specified time. 
 The model is indicating with :meth:`~.vthread.vThread.busy()` that the program is performing some operation. 
 Therefore, a user defined status box appears on the life line while the program is busy.
 
 .. autofunction:: moddy.vthread.vThread.busy
+	:noindex:
 
 Concurrent Program Execution/RTOS Simulation
 ============================================
@@ -397,7 +399,7 @@ Example snippet:
 Resulting in the following sequence diagram:
  
    
-.. figure:: _static/0230_rtos.png 
+.. figure:: ../_static/0230_rtos.png 
  
 Note: The "PE" status indicator tells you that the thread is "preempted", i.e. 
 it would be ready to run, but it has to wait for the CPU resource, because a higher priority thread is busy.

@@ -1,4 +1,4 @@
-.. include:: globals.rst
+.. include:: ../globals.rst
 
 
 
@@ -40,7 +40,7 @@ Elements of a sequence diagram
 ------------------------------
 
  
-.. figure:: _static/0400_sd_elements.PNG 
+.. figure:: ../_static/0400_sd_elements.PNG 
  
 
 Interactive Sequence Diagrams
@@ -91,7 +91,7 @@ time division occupies 30 pixels.
 Using the Interactive Viewer
 ----------------------------
  
-Please try the following demo: `2_sergw <_static/2_sergw.html>`_ 
+Please try the following demo: :download:`2_sergw <../tutorials/code/output/2_sergw.html>` 
 
 The major interactive functions of the viewer are:
 
@@ -171,7 +171,7 @@ Very useful to document the model and to explain the model to others.
 
 An example structure graph:
  
-.. figure:: _static/0410_structuregraph.png 
+.. figure:: ../_static/0410_structuregraph.png 
  
 * The parts hierarchy is shown: For example, EcDev1 contains two sub-parts: "uC" and "FPGA".
 * The ports of a part are shown: For example, EcDev1 has a "ucPort" and an "ecPort".
@@ -188,7 +188,7 @@ An example structure graph:
   including the thread priorities. (WARNING: This feature does not work under all circumstances)
 
  
-.. figure:: _static/0420_structuregraph2.png 
+.. figure:: ../_static/0420_structuregraph2.png 
  
  
 Moddy uses the *GraphViz* command line tool ``dot`` to generate the structure graphs, so *GraphViz* has to be installed. 
@@ -214,7 +214,7 @@ This file can be viewed with a table calculation program such as MS Excel.
 Example: 
 
  
-.. figure:: _static/0430_trace.png 
+.. figure:: ../_static/0430_trace.png 
  
 
 To generate a trace table, call :func:`~.traceToCsv.moddyGenerateTraceTable()` after running the simulation:
@@ -246,7 +246,7 @@ State Machine Graph Generation
 Moddy can also generate graphs to show the finite state machines of the model. 
 An example state machine graph (from tutorial ``3_carinfo.py``):
  
-.. figure:: _static/0440_fsm.png 
+.. figure:: ../_static/0440_fsm.png 
  
 
 The "Apps" and "Vol" boxes are sub-states of the "NormalOp" state.
