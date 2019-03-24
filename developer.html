@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Developer Guide &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
+  <title>Developer Guide &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
   
 
   
@@ -88,6 +88,7 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detailed/index.html">Detailed User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
@@ -95,7 +96,10 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#running-test-suite">Running Test Suite</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#updating-the-docs">Updating the docs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-the-docs">Updating the docs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-pdf">Creating PDF</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -200,6 +204,19 @@ where you checked out moddy master branch.</p>
 </div>
 <p>This updates the <code class="docutils literal notranslate"><span class="pre">moddy-docs/html</span></code> content.</p>
 <p>When you commit and push <code class="docutils literal notranslate"><span class="pre">moddy-docs/html</span></code> back, you’ll should see the update on <a class="reference external" href="https://klauspopp.github.io/Moddy">https://klauspopp.github.io/Moddy</a></p>
+<div class="section" id="creating-pdf">
+<h3>Creating PDF<a class="headerlink" href="#creating-pdf" title="Permalink to this headline">¶</a></h3>
+<p>Requires a latex installation. For windows, I used <a class="reference external" href="https://miktex.org/download">https://miktex.org/download</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd ../moddy/docs</span>
+<span class="go">make latex</span>
+
+<span class="go">cd ../../moddy-docs/latex</span>
+<span class="go">pdflatex ModdyDiscreteEventSimulator.tex</span>
+</pre></div>
+</div>
+<p>I had to run pdflatex twice to resolve references.</p>
+<p>This creates <code class="docutils literal notranslate"><span class="pre">ModdyDiscreteEventSimulator.pdf</span></code>.</p>
+</div>
 </div>
 </div>
 

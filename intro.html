@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Introduction &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
   
 
   
@@ -25,7 +25,6 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
-        <script type="text/javascript" src="_static/searchtools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +34,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quick Start" href="quick_start.html" />
+    <link rel="prev" title="Welcome to Moddy Discrete Event Simulator’s documentation!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -69,7 +70,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -87,8 +88,12 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-moddy">What is Moddy?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-another-simulator">Why another Simulator?</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="detailed/index.html">Detailed User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
@@ -140,12 +145,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Search</li>
+      <li>Introduction</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -157,24 +164,65 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search
-      functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-moddy">
+<h2>What is Moddy?<a class="headerlink" href="#what-is-moddy" title="Permalink to this headline">¶</a></h2>
+<p>Moddy is a simulator to model and analyze the timing behavior of systems consisting
+of objects that communicate via messages. The objects are called “parts” in Moddy,
+to be consistent with the term SysML uses in internal block diagrams.</p>
+<p>Moddy was written to analyze complex systems in the concept phase to validate the
+suitability of the concept. Typical applications are</p>
+<ul class="simple">
+<li>Modelling communication protocols</li>
+<li>Modelling highly distributed computer systems</li>
+</ul>
+<p>You describe the structure and the behavior of your model via a program written in “python” language.
+After the simulation run, Moddy can produce a number of result files that you will analyze to
+evaluate whether the model behaves as expected. These result files are</p>
+<ul class="simple">
+<li>A sequence diagram</li>
+<li>An event trace</li>
+<li>A static structure graph of your model (block diagram)</li>
+<li>A static graph of your finite state machines in the model</li>
+</ul>
+<p>Further result files, such as wave forms may be added in the future.
+Moddy’s Simulator is a classic Discrete Event simulator.</p>
+<dl class="docutils">
+<dt>From Wikipedia <a class="reference external" href="https://en.wikipedia.org/wiki/Discrete_event_simulation">https://en.wikipedia.org/wiki/Discrete_event_simulation</a>:</dt>
+<dd><em>A discrete-event simulation (DES) models the operation of a system as a discrete sequence of events
+in time. Each event occurs at a particular instant in time and marks a change of state in the system.
+Between consecutive events, no change in the system is assumed to occur;
+thus the simulation can directly jump in time from one event to the next.</em></dd>
+</dl>
+</div>
+<div class="section" id="why-another-simulator">
+<h2>Why another Simulator?<a class="headerlink" href="#why-another-simulator" title="Permalink to this headline">¶</a></h2>
+<p>I was looking for a simulator that</p>
+<ul class="simple">
+<li>Supports Quick Model generation: Meaning: Modelling shall be doable by non-programmers in an intuitive and easy-to-remember way</li>
+<li>Is suitable to model communication between objects</li>
+<li>Can visualize those communication at least in form of sequence diagrams</li>
+<li>Is open source or at least affordable</li>
+<li>I could not find commercial or open source tools that provided those features.</li>
+</ul>
+</div>
+</div>
 
-  
-  <div id="search-results">
-  
-  </div>
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="quick_start.html" class="btn btn-neutral float-right" title="Quick Start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Moddy Discrete Event Simulator’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -207,14 +255,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

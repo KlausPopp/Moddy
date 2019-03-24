@@ -58,3 +58,27 @@ Then, go to ``moddy/docs`` and run:
 This updates the ``moddy-docs/html`` content.
 
 When you commit and push ``moddy-docs/html`` back, you'll should see the update on https://klauspopp.github.io/Moddy
+
+Creating PDF
+------------
+
+Requires a latex installation. For windows, I used https://miktex.org/download
+
+
+.. code-block:: console
+
+	cd ../moddy/docs
+	make latex
+	
+	cd ../../moddy-docs/latex
+	pdflatex ModdyDiscreteEventSimulator.tex
+	
+I had to run pdflatex twice to resolve references.
+
+This creates ``ModdyDiscreteEventSimulator.pdf``.
+
+
+	
+
+
+

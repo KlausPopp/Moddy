@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
+  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
   
 
   
@@ -89,6 +89,7 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Detailed User Guide</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Core Simulator</a><ul>
@@ -506,7 +507,7 @@ how long it takes until the message arrives at the input port.
 (meaning: the flight time of one or more previous messages has not elapsed)?</p>
 <p>In this case, the output port queues the pending messages one after each other.
 When a messages flight time has elapsed, the next message from the queue is sent.
-This simulates the behavior of a serial transmission. See the following snapshot from the tutorial “2_sergw”???.
+This simulates the behavior of a serial transmission. See the following snapshot from the tutorial <a class="reference internal" href="../tutorials/2_sergw.html#sergw"><span class="std std-ref">Serial Gateway</span></a>.
 Here, multiple send() calls are issued at the same simulation time.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TXFIFO&#39;</span><span class="p">,</span> <span class="n">whiteOnRed</span><span class="p">)</span>
 
