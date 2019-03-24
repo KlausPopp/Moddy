@@ -140,6 +140,8 @@ latex_documents = [
 ]
 
 
+latex_show_urls = "inline"
+
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples

@@ -364,7 +364,7 @@ What happens if you call the send method on a port which is already sending a me
 
 In this case, the output port queues the pending messages one after each other. 
 When a messages flight time has elapsed, the next message from the queue is sent. 
-This simulates the behavior of a serial transmission. See the following snapshot from the tutorial "2_sergw"???. 
+This simulates the behavior of a serial transmission. See the following snapshot from the tutorial :ref:`2_sergw`. 
 Here, multiple send() calls are issued at the same simulation time.
 
 .. code-block:: python
