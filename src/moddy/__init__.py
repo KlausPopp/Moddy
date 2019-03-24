@@ -17,8 +17,7 @@ Moddy was written to analyze complex systems in the concept phase to validate th
 
 
 
-version = (1, 6, 1)  
-VERSION = '%d.%d.%d' % version
+from moddy.version import version, VERSION
 
 AUTHOR_NAME = 'Klaus Popp'
 AUTHOR_EMAIL = 'klauspopp@gmx.de'
