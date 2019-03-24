@@ -7,9 +7,10 @@
 from setuptools import setup, find_packages
 import sys
 import os
+import re
 
 sys.path.append("src")
-from moddy.version import VERSION
+#from moddy.version import VERSION
 
 def read(fname):
     try:
@@ -17,9 +18,15 @@ def read(fname):
     except IOError:
         return "File '%s' not found.\n" % fname
 
+def readVersion():
+    txt = read('src/moddy/version.py')
+    ver = re.findall(r'([0-9]+)', txt)
+    print("ver=%s" % ver)
+    return ver[0] + "." + ver[1] + "." + ver[2]
+
 setup(name='moddy',
     install_requires=['svgwrite'],
-    version=VERSION,
+    version=readVersion(),
     
     description='A discrete event simulator generating sequence diagrams',
     
