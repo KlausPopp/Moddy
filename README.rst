@@ -23,15 +23,22 @@ better see `Online Viewer Demo <https://klauspopp.github.io/Moddy/_static/2_serg
 
 .. figure:: docs/ModdyIaViewerScreenShot.jpg
 
+        
 Installation
 ============
 
-Until now, moddy is not yet prepared for installation via *pip*.
-
-Please follow `<https://klauspopp.github.io/Moddy/install.html>`
+Moddy requires: Python >=3.5, and Graphviz.
 
 
-Requirements
-============
+.. code-bloc:: console
+	
+	$ pip install -U moddy
 
-Moddy requires: Python >=3.5, svgwrite, Graphviz
+Getting Started
+===============
+
+
+Run `the basic demo <https://klauspopp.github.io/Moddy/install.html#test-moddy>`
+
+
+

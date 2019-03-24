@@ -4,6 +4,15 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2019-03-21
+
+### Added
+- Installation via pip 
+
+### Changed
+- Documentation changed from .docx/pdf to Sphinx
+- Internal directory structure: seqDiagInteractiveViewer now below moddy/
+
 ## [1.6.1] - 2019-01-16
 
 ### Added
