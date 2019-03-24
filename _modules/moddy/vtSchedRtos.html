@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.vtSchedRtos &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>moddy.vtSchedRtos &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -57,6 +57,10 @@
           
             
             
+              <div class="version">
+                1.7
+              </div>
+            
           
 
           
@@ -81,8 +85,9 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
 </ul>
@@ -161,7 +166,7 @@
 <span class="kn">from</span> <span class="nn">moddy.simulator</span> <span class="k">import</span> <span class="n">simPart</span>
 <span class="kn">from</span> <span class="nn">moddy.vthread</span> <span class="k">import</span> <span class="n">vThread</span>
 
-<div class="viewcode-block" id="vtSchedRtos"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vtSchedRtos.vtSchedRtos">[docs]</a><span class="k">class</span> <span class="nc">vtSchedRtos</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+<div class="viewcode-block" id="vtSchedRtos"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vtSchedRtos.vtSchedRtos">[docs]</a><span class="k">class</span> <span class="nc">vtSchedRtos</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    RTOS scheduler for vThreads, an instance of a :class:`~.simulator.simPart`</span>
 <span class="sd">    </span>
@@ -199,7 +204,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_scCallEvent</span>   <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_runningVThread</span> <span class="o">=</span> <span class="kc">None</span>                                 <span class="c1"># currently running vThread</span>
     
-<div class="viewcode-block" id="vtSchedRtos.addVThread"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vtSchedRtos.vtSchedRtos.addVThread">[docs]</a>    <span class="k">def</span> <span class="nf">addVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">prio</span><span class="p">):</span>
+<div class="viewcode-block" id="vtSchedRtos.addVThread"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vtSchedRtos.vtSchedRtos.addVThread">[docs]</a>    <span class="k">def</span> <span class="nf">addVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">prio</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param vThread: thread to be added</span>
 <span class="sd">        :param prio: priority of the thread 0..15 (0=highest)</span>
@@ -592,7 +597,7 @@
         
         <span class="k">return</span> <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span></div>
         
-<div class="viewcode-block" id="vSimpleProg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vtSchedRtos.vSimpleProg">[docs]</a><span class="k">class</span> <span class="nc">vSimpleProg</span><span class="p">(</span><span class="n">vThread</span><span class="p">):</span>
+<div class="viewcode-block" id="vSimpleProg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vtSchedRtos.vSimpleProg">[docs]</a><span class="k">class</span> <span class="nc">vSimpleProg</span><span class="p">(</span><span class="n">vThread</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">    A special version of a vThread that has its own scheduler and no concurrency </span>
 

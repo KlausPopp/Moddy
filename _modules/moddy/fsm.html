@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.fsm &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>moddy.fsm &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -57,6 +57,10 @@
           
             
             
+              <div class="version">
+                1.7
+              </div>
+            
           
 
           
@@ -81,8 +85,9 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
 </ul>
@@ -165,7 +170,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="Fsm"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm">[docs]</a><span class="k">class</span> <span class="nc">Fsm</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm">[docs]</a><span class="k">class</span> <span class="nc">Fsm</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A finite state machine.</span>
 <span class="sd">    Subclass your FSM from this class.</span>
@@ -333,7 +338,7 @@
     <span class="k">def</span> <span class="nf">getDictTransitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span>        
                 
-<div class="viewcode-block" id="Fsm.execStateDependentMethod"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.execStateDependentMethod">[docs]</a>    <span class="k">def</span> <span class="nf">execStateDependentMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methodName</span><span class="p">,</span> <span class="n">deep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.execStateDependentMethod"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.execStateDependentMethod">[docs]</a>    <span class="k">def</span> <span class="nf">execStateDependentMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methodName</span><span class="p">,</span> <span class="n">deep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        Execute the state specific methods:</span>
 <span class="sd">        </span>
@@ -358,7 +363,7 @@
             <span class="n">handled</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">handled</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="Fsm.setStateChangeCallback"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.setStateChangeCallback">[docs]</a>    <span class="k">def</span> <span class="nf">setStateChangeCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.setStateChangeCallback"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.setStateChangeCallback">[docs]</a>    <span class="k">def</span> <span class="nf">setStateChangeCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        Register a method that is called whenever the state of the fsm changes </span>
 <span class="sd">        </span>
@@ -366,7 +371,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stateChangeCallback</span> <span class="o">=</span> <span class="n">callback</span></div>
 
-<div class="viewcode-block" id="Fsm.hasEvent"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.hasEvent">[docs]</a>    <span class="k">def</span> <span class="nf">hasEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">evName</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.hasEvent"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.hasEvent">[docs]</a>    <span class="k">def</span> <span class="nf">hasEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">evName</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        check if the event is known by the fsm or a currently active statemachine</span>
 <span class="sd">        </span>
@@ -383,12 +388,12 @@
         <span class="k">return</span> <span class="n">rv</span></div>
         
     
-<div class="viewcode-block" id="Fsm.startFsm"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.startFsm">[docs]</a>    <span class="k">def</span> <span class="nf">startFsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.startFsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.startFsm">[docs]</a>    <span class="k">def</span> <span class="nf">startFsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; start the FSM. Fire event ``INITIAL`` &#39;&#39;&#39;</span>
         <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="p">(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">)</span>     </div>
 
-<div class="viewcode-block" id="Fsm.event"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.event">[docs]</a>    <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evName</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.event"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.event">[docs]</a>    <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evName</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Execute an Event in the *ANY* and current state.</span>
 <span class="sd">        </span>
@@ -399,11 +404,11 @@
         <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span><span class="s2">&quot;Did you call startFsm?&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="p">(</span><span class="n">evName</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="Fsm.topFsm"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.topFsm">[docs]</a>    <span class="k">def</span> <span class="nf">topFsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.topFsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.topFsm">[docs]</a>    <span class="k">def</span> <span class="nf">topFsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; get a reference to the topmost Fsm in the hierarchy &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topFsm</span></div>
     
-<div class="viewcode-block" id="Fsm.moddyPart"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsm.Fsm.moddyPart">[docs]</a>    <span class="k">def</span> <span class="nf">moddyPart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Fsm.moddyPart"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.moddyPart">[docs]</a>    <span class="k">def</span> <span class="nf">moddyPart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        return a reference of the moddy part this fsm is contained in (regardless of the fsm nesting level).</span>
 <span class="sd">        return None if it is not included in a moddy part</span>

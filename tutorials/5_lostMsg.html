@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Lost Messages &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Remote Controlled Threads" href="6_vthreadRemoteControlled.html" />
+    <link rel="prev" title="Variable Watching" href="4_varwatch.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_hello.html">Hello</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_sergw.html">Serial Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_carinfo.html">Car Infotainment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+        
+      <li>Lost Messages</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/5_lostMsg.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="lost-messages">
+<h1>Lost Messages<a class="headerlink" href="#lost-messages" title="Permalink to this headline">¶</a></h1>
+<p>Covers:</p>
+<ul class="simple">
+<li>How to inject lost message errors.</li>
+</ul>
+<p>This demo shows how you can force some messages to get lost, to see how the receiver reacts to those events.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on 30.08.2017</span>
+
+<span class="sd">@author: Klaus Popp</span>
+
+<span class="sd">test lost messages</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">Producer</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Producer&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span> 
+
+    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX1&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnBlue</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX2&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX3&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Consumer&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span> 
+
+    <span class="k">def</span> <span class="nf">netPortRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+ 
+            
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+    <span class="n">simu</span><span class="o">.</span><span class="n">setDisplayTimeUnit</span><span class="p">(</span><span class="s1">&#39;us&#39;</span><span class="p">)</span>
+    
+    <span class="n">prod</span> <span class="o">=</span> <span class="n">Producer</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    <span class="n">cons</span> <span class="o">=</span> <span class="n">Consumer</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+
+    <span class="n">prod</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">cons</span><span class="o">.</span><span class="n">netPort</span><span class="p">)</span>
+    
+    <span class="c1"># let simulator run</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+        
+    <span class="k">except</span><span class="p">:</span> <span class="k">raise</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># create SVG drawing</span>
+        <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> 
+                                      <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;output/5_lostMsg.html&quot;</span><span class="p">,</span> 
+                                      <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span> 
+                                      <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Producer&quot;</span><span class="p">,</span><span class="s2">&quot;Consumer&quot;</span><span class="p">],</span>
+                                      <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span> 
+                                      <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lost Message Demo&quot;</span><span class="p">,</span>
+                                      <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> 
+                                      <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>    
+
+        <span class="c1"># Output trace table</span>
+        <span class="n">moddyGenerateTraceTable</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/5_lostMsg.csv&#39;</span><span class="p">,</span> <span class="n">timeUnit</span><span class="o">=</span><span class="s2">&quot;us&quot;</span> <span class="p">)</span>
+        
+</pre></div>
+</div>
+<p>The simulation outputs:</p>
+<blockquote>
+<div><a class="reference download internal" download="" href="../_downloads/47fe7ba4d602d92471ada67dff5652d7/5_lostMsg.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></div></blockquote>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="6_vthreadRemoteControlled.html" class="btn btn-neutral float-right" title="Remote Controlled Threads" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="4_varwatch.html" class="btn btn-neutral float-left" title="Variable Watching" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

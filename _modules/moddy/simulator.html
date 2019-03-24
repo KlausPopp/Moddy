@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.simulator &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>moddy.simulator &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -57,6 +57,10 @@
           
             
             
+              <div class="version">
+                1.7
+              </div>
+            
           
 
           
@@ -81,8 +85,9 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
 </ul>
@@ -205,7 +210,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objName</span>
 
 
-<div class="viewcode-block" id="simPart"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart">[docs]</a><span class="k">class</span> <span class="nc">simPart</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart">[docs]</a><span class="k">class</span> <span class="nc">simPart</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;an instance of simPart forms a moddy object</span>
 <span class="sd">    </span>
 <span class="sd">    :param sim: Simulator instance</span>
@@ -227,11 +232,11 @@
         <span class="k">assert</span><span class="p">(</span> <span class="n">subPart</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listSubParts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listSubParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subPart</span><span class="p">)</span>
         
-<div class="viewcode-block" id="simPart.addAnnotation"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.addAnnotation">[docs]</a>    <span class="k">def</span> <span class="nf">addAnnotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">text</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.addAnnotation"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.addAnnotation">[docs]</a>    <span class="k">def</span> <span class="nf">addAnnotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">text</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add annotation from model at current simulation time&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="simPart.assertionFailed"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.assertionFailed">[docs]</a>    <span class="k">def</span> <span class="nf">assertionFailed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assertionStr</span><span class="p">,</span> <span class="n">frameIdx</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.assertionFailed"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.assertionFailed">[docs]</a>    <span class="k">def</span> <span class="nf">assertionFailed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assertionStr</span><span class="p">,</span> <span class="n">frameIdx</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Add an assertion failure trace event</span>
 <span class="sd">        Increment simulator global assertion failure counter</span>
@@ -242,7 +247,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">assertionFailed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assertionStr</span><span class="p">,</span> <span class="n">frameIdx</span><span class="o">+</span><span class="mi">1</span> <span class="p">)</span></div>
         
-<div class="viewcode-block" id="simPart.setStateIndicator"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.setStateIndicator">[docs]</a>    <span class="k">def</span> <span class="nf">setStateIndicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">text</span><span class="p">,</span><span class="n">appearance</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="simPart.setStateIndicator"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.setStateIndicator">[docs]</a>    <span class="k">def</span> <span class="nf">setStateIndicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">text</span><span class="p">,</span><span class="n">appearance</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot;set part&#39;s state from model at simulation time</span>
 <span class="sd">        </span>
 <span class="sd">        :param text: text to show in life line</span>
@@ -250,7 +255,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="simPart.newInputPort"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.newInputPort">[docs]</a>    <span class="k">def</span> <span class="nf">newInputPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgReceivedFunc</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.newInputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.newInputPort">[docs]</a>    <span class="k">def</span> <span class="nf">newInputPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgReceivedFunc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new input port to the part </span>
 <span class="sd">        </span>
@@ -262,7 +267,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addInputPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port</span></div>
     
-<div class="viewcode-block" id="simPart.newOutputPort"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.newOutputPort">[docs]</a>    <span class="k">def</span> <span class="nf">newOutputPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.newOutputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.newOutputPort">[docs]</a>    <span class="k">def</span> <span class="nf">newOutputPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new output port to the part </span>
 <span class="sd">        </span>
@@ -273,7 +278,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addOutputPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port</span></div>
     
-<div class="viewcode-block" id="simPart.newIOPort"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.newIOPort">[docs]</a>    <span class="k">def</span> <span class="nf">newIOPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgReceivedFunc</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.newIOPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.newIOPort">[docs]</a>    <span class="k">def</span> <span class="nf">newIOPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgReceivedFunc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new &quot;I/O&quot; port to the part </span>
 <span class="sd">        </span>
@@ -285,7 +290,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addIOPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port</span></div>
 
-<div class="viewcode-block" id="simPart.newTimer"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.newTimer">[docs]</a>    <span class="k">def</span> <span class="nf">newTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">elapsedFunc</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.newTimer"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.newTimer">[docs]</a>    <span class="k">def</span> <span class="nf">newTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">elapsedFunc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new timer to the part </span>
 <span class="sd">        </span>
@@ -297,7 +302,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addTimer</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">timer</span></div>
     
-<div class="viewcode-block" id="simPart.newVarWatcher"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.newVarWatcher">[docs]</a>    <span class="k">def</span> <span class="nf">newVarWatcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varName</span><span class="p">,</span> <span class="n">formatString</span> <span class="p">):</span>
+<div class="viewcode-block" id="simPart.newVarWatcher"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.newVarWatcher">[docs]</a>    <span class="k">def</span> <span class="nf">newVarWatcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varName</span><span class="p">,</span> <span class="n">formatString</span> <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a variable to the watched variables.</span>
 <span class="sd">        A watched variables value will be checked for changes during simulation.</span>
@@ -331,7 +336,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_listVarWatchers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varWatcher</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">addVarWatcher</span><span class="p">(</span><span class="n">varWatcher</span><span class="p">)</span>
     
-<div class="viewcode-block" id="simPart.createPorts"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.createPorts">[docs]</a>    <span class="k">def</span> <span class="nf">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.createPorts"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.createPorts">[docs]</a>    <span class="k">def</span> <span class="nf">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Convinience functions to create multiple ports at once.</span>
 <span class="sd">        </span>
@@ -354,7 +359,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown port type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ptype</span><span class="p">))</span></div>
             
-<div class="viewcode-block" id="simPart.createTimers"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.createTimers">[docs]</a>    <span class="k">def</span> <span class="nf">createTimers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listTimerNames</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.createTimers"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.createTimers">[docs]</a>    <span class="k">def</span> <span class="nf">createTimers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listTimerNames</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Convinience functions to create multiple timers at once.</span>
 <span class="sd">        </span>
@@ -366,15 +371,15 @@
         <span class="k">for</span> <span class="n">tmrName</span> <span class="ow">in</span> <span class="n">listTimerNames</span><span class="p">:</span>
             <span class="n">exec</span><span class="p">(</span><span class="s1">&#39;self.</span><span class="si">%s</span><span class="s1"> = self.newTimer(&quot;</span><span class="si">%s</span><span class="s1">&quot;, self.</span><span class="si">%s</span><span class="s1">Expired)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tmrName</span><span class="p">,</span><span class="n">tmrName</span><span class="p">,</span><span class="n">tmrName</span><span class="p">))</span> </div>
     
-<div class="viewcode-block" id="simPart.startSim"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.startSim">[docs]</a>    <span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.startSim"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.startSim">[docs]</a>    <span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Called from simulator when simulation begins&#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
             
-<div class="viewcode-block" id="simPart.terminateSim"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.terminateSim">[docs]</a>    <span class="k">def</span> <span class="nf">terminateSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.terminateSim"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.terminateSim">[docs]</a>    <span class="k">def</span> <span class="nf">terminateSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Called from simulator when simulation stops. Terminate block (e.g. stop threads)&#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
     
-<div class="viewcode-block" id="simPart.time"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simPart.time">[docs]</a>    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="simPart.time"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.time">[docs]</a>    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Get current simulation time&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div></div>
 
@@ -386,7 +391,7 @@
     <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">execTime</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">execTime</span>
         
-<div class="viewcode-block" id="simInputPort"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simInputPort">[docs]</a><span class="k">class</span> <span class="nc">simInputPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
+<div class="viewcode-block" id="simInputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simInputPort">[docs]</a><span class="k">class</span> <span class="nc">simInputPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator input port</span>
 <span class="sd">    </span>
 <span class="sd">    :param sim sim: Simulator instance</span>
@@ -410,7 +415,7 @@
         <span class="sd">&quot;&quot;&quot;Report True if port is bound to an output port&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> </div>
     
-<div class="viewcode-block" id="simOutputPort"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simOutputPort">[docs]</a><span class="k">class</span> <span class="nc">simOutputPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
+<div class="viewcode-block" id="simOutputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort">[docs]</a><span class="k">class</span> <span class="nc">simOutputPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator output port</span>
 
 <span class="sd">    :param sim sim: Simulator instance</span>
@@ -495,7 +500,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_seqNo</span> <span class="o">=</span> <span class="mi">0</span>             <span class="c1"># next message sequence number (for lost messages)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lostSeqHeap</span> <span class="o">=</span> <span class="p">[]</span>      <span class="c1"># heap with message sequence numbers that will be lost </span>
         
-<div class="viewcode-block" id="simOutputPort.bind"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simOutputPort.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputPort</span><span class="p">):</span>
+<div class="viewcode-block" id="simOutputPort.bind"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputPort</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;bind an output port to an input port</span>
 <span class="sd">        </span>
 <span class="sd">        :param inputPort: input port to which this output port shall be bound</span>
@@ -528,7 +533,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">scheduleEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         
     
-<div class="viewcode-block" id="simOutputPort.send"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simOutputPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
+<div class="viewcode-block" id="simOutputPort.send"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;User interface to send a message</span>
 <span class="sd">        </span>
 <span class="sd">        :param msg: message to send</span>
@@ -545,11 +550,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_listPendingMsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
         <span class="c1">#print(self, &quot;sendlp&quot;, len(self._listPendingMsg))</span>
         
-<div class="viewcode-block" id="simOutputPort.setColor"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simOutputPort.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+<div class="viewcode-block" id="simOutputPort.setColor"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Set color for messages leaving that port &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">color</span></div>
 
-<div class="viewcode-block" id="simOutputPort.injectLostMessageErrorBySequence"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simOutputPort.injectLostMessageErrorBySequence">[docs]</a>    <span class="k">def</span> <span class="nf">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nextSeq</span><span class="p">):</span>
+<div class="viewcode-block" id="simOutputPort.injectLostMessageErrorBySequence"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort.injectLostMessageErrorBySequence">[docs]</a>    <span class="k">def</span> <span class="nf">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nextSeq</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Inject error. Force one of the next messages sent via this port to be lost</span>
 <span class="sd">        If nextSeq is 0, the next message sent via this port will be lost, if it is 1 the next but one</span>
 <span class="sd">        message is lost etc.</span>
@@ -573,7 +578,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>    </div>
         
-<div class="viewcode-block" id="simIOPort"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simIOPort">[docs]</a><span class="k">class</span> <span class="nc">simIOPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
+<div class="viewcode-block" id="simIOPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort">[docs]</a><span class="k">class</span> <span class="nc">simIOPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; An element that contains one input and one output port </span>
 <span class="sd">    </span>
 <span class="sd">    :param sim sim: Simulator instance</span>
@@ -592,31 +597,31 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span> <span class="o">=</span> <span class="n">specialInPort</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">_ioPort</span> <span class="o">=</span> <span class="bp">self</span>
         
-<div class="viewcode-block" id="simIOPort.bind"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simIOPort.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherIoPort</span><span class="p">):</span>
+<div class="viewcode-block" id="simIOPort.bind"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherIoPort</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Bind IOPort to another IOPort, in/out will be crossed &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">otherIoPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
         <span class="n">otherIoPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="simIOPort.loopBind"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simIOPort.loopBind">[docs]</a>    <span class="k">def</span> <span class="nf">loopBind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="simIOPort.loopBind"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.loopBind">[docs]</a>    <span class="k">def</span> <span class="nf">loopBind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Loop in/out ports of an IO port together &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span></div>
     
     
     <span class="c1"># delegation methods to output port     </span>
-<div class="viewcode-block" id="simIOPort.send"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simIOPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
+<div class="viewcode-block" id="simIOPort.send"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; send message to IoPorts output port</span>
 <span class="sd">        </span>
 <span class="sd">        Refer to :func:`simOutputPort.send` for parameters.</span>
 <span class="sd">         &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="simIOPort.injectLostMessageErrorBySequence"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simIOPort.injectLostMessageErrorBySequence">[docs]</a>    <span class="k">def</span> <span class="nf">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nextSeq</span><span class="p">):</span>
+<div class="viewcode-block" id="simIOPort.injectLostMessageErrorBySequence"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.injectLostMessageErrorBySequence">[docs]</a>    <span class="k">def</span> <span class="nf">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nextSeq</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; inject error on IoPorts output port </span>
 <span class="sd">        Refer to :func:`simOutputPort.injectLostMessageErrorBySequence` for details.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nextSeq</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="simIOPort.setColor"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simIOPort.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+<div class="viewcode-block" id="simIOPort.setColor"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Set color for messages leaving that IOport &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">color</span></div>
 
@@ -635,7 +640,7 @@
         <span class="k">return</span> <span class="n">peer</span>         </div>
          
         
-<div class="viewcode-block" id="simTimer"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simTimer">[docs]</a><span class="k">class</span> <span class="nc">simTimer</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
+<div class="viewcode-block" id="simTimer"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simTimer">[docs]</a><span class="k">class</span> <span class="nc">simTimer</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator Timer</span>
 <span class="sd">    timer is either running or stopped</span>
 <span class="sd">    timer can be canceled, and restarted</span>
@@ -684,7 +689,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">scheduleEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pendingEvent</span> <span class="o">=</span> <span class="n">event</span>
     
-<div class="viewcode-block" id="simTimer.start"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simTimer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+<div class="viewcode-block" id="simTimer.start"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simTimer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Start the timer. </span>
 <span class="sd">        </span>
 <span class="sd">        :param timeout: Timer will fire after *timeout*</span>
@@ -698,12 +703,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">cancelEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pendingEvent</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pendingEvent</span> <span class="o">=</span> <span class="kc">None</span>
     
-<div class="viewcode-block" id="simTimer.stop"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simTimer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="simTimer.stop"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simTimer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Stop timer. Does nothing if timer not running&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">addTraceEvent</span><span class="p">(</span> <span class="n">simTraceEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parentObj</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;T-STOP&#39;</span><span class="p">)</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">()</span></div>
         
-<div class="viewcode-block" id="simTimer.restart"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.simTimer.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">timeout</span><span class="p">):</span>
+<div class="viewcode-block" id="simTimer.restart"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simTimer.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">timeout</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Restart timer, works whether timer is running or not.</span>
 <span class="sd">        </span>
 <span class="sd">        :param timeout: Timer will fire after *timeout*</span>
@@ -795,7 +800,7 @@
             <span class="n">traceStr</span> <span class="o">+=</span> <span class="s2">&quot; // </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">traceStr</span>
 
-<div class="viewcode-block" id="sim"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.sim">[docs]</a><span class="k">class</span> <span class="nc">sim</span><span class="p">:</span>
+<div class="viewcode-block" id="sim"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim">[docs]</a><span class="k">class</span> <span class="nc">sim</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Simulator main class&quot;&quot;&quot;</span>
            
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -961,7 +966,7 @@
               <span class="s2">&quot;. Executed </span><span class="si">%d</span><span class="s2"> events in </span><span class="si">%.3f</span><span class="s2"> seconds&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_numEvents</span><span class="p">,</span> <span class="n">elapsedTime</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span> <span class="p">)</span> <span class="c1">#TODO</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">printAssertionFailures</span><span class="p">()</span>
         
-<div class="viewcode-block" id="sim.run"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.sim.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<div class="viewcode-block" id="sim.run"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
             <span class="n">stopTime</span><span class="p">,</span> 
             <span class="n">maxEvents</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> 
             <span class="n">enableTracePrinting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
@@ -1101,7 +1106,7 @@
         <span class="n">te</span> <span class="o">=</span> <span class="n">simTraceEvent</span><span class="p">(</span> <span class="n">part</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">StateIndTransVal</span><span class="p">(</span><span class="n">text</span><span class="p">,</span><span class="n">appearance</span><span class="p">),</span> <span class="s1">&#39;STA&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addTraceEvent</span><span class="p">(</span><span class="n">te</span><span class="p">)</span>
 
-<div class="viewcode-block" id="sim.setDisplayTimeUnit"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.sim.setDisplayTimeUnit">[docs]</a>    <span class="k">def</span> <span class="nf">setDisplayTimeUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">unit</span><span class="p">):</span>
+<div class="viewcode-block" id="sim.setDisplayTimeUnit"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.setDisplayTimeUnit">[docs]</a>    <span class="k">def</span> <span class="nf">setDisplayTimeUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">unit</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define how the simulator prints/displays time units</span>
 <span class="sd">        </span>
@@ -1111,7 +1116,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_disTimeScaleStr</span> <span class="o">=</span> <span class="n">unit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_disTimeScale</span> <span class="o">=</span> <span class="n">timeUnit2Factor</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="sim.timeStr"><a class="viewcode-back" href="../../reference_core.html#moddy.simulator.sim.timeStr">[docs]</a>    <span class="k">def</span> <span class="nf">timeStr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
+<div class="viewcode-block" id="sim.timeStr"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.timeStr">[docs]</a>    <span class="k">def</span> <span class="nf">timeStr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;return a formatted time string of *time* based on the display scale&quot;&quot;&quot;</span>
         <span class="n">tmfmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disTimeScale</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tmfmt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disTimeScaleStr</span></div>

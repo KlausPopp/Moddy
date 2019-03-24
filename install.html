@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>Installation &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -35,7 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Moddy Result Generator APIs" href="reference_results.html" /> 
+    <link rel="next" title="Developer Guide" href="developer.html" />
+    <link rel="prev" title="Moddy Result Generator APIs" href="reference/results.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -57,6 +58,10 @@
 
           
             
+            
+              <div class="version">
+                1.7
+              </div>
             
           
 
@@ -82,17 +87,26 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installing-eclipse">Installing Eclipse</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#install-python">Install Python</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-pydev">Installing PyDev</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-svgwrite">Installing svgwrite</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installing-graphviz">Installing GraphViz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-moddy">Installing moddy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-moddy">Install Moddy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-moddy">Test Moddy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#demo-output">Demo output</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#using-moddy-with-eclipse">Using Moddy with Eclipse</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-eclipse">Installing Eclipse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-pydev">Installing PyDev</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-moddy-project">Create a Moddy Project</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
 </ul>
 
             
@@ -159,24 +173,6 @@
             
   <div class="section" id="installation">
 <span id="install"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>Tested with python 3.5.2 and 3.6 under Windows 10, Eclipse Neon/pyDev.</p>
-<p>Required libraries:</p>
-<blockquote>
-<div><ul class="simple">
-<li>svgwrite <a class="reference external" href="https://pypi.python.org/pypi/svgwrite">https://pypi.python.org/pypi/svgwrite</a> , tested with svgwrite 1.1.9</li>
-</ul>
-</div></blockquote>
-<dl class="docutils">
-<dt>Required tools:</dt>
-<dd><ul class="first last simple">
-<li>GraphViz, tested with Version 2.38</li>
-</ul>
-</dd>
-</dl>
-<div class="section" id="installing-eclipse">
-<h2>Installing Eclipse<a class="headerlink" href="#installing-eclipse" title="Permalink to this headline">¶</a></h2>
-<p>Download &amp; Install Eclipse from <a class="reference external" href="https://eclipse.org/downloads/">https://eclipse.org/downloads/</a></p>
-</div>
 <div class="section" id="install-python">
 <h2>Install Python<a class="headerlink" href="#install-python" title="Permalink to this headline">¶</a></h2>
 <p>Download &amp; Install Python from <a class="reference external" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></p>
@@ -186,61 +182,86 @@
 <p class="last">Moddy does not support Python 2.x.</p>
 </div>
 <p>During install, click checkbox <code class="docutils literal notranslate"><span class="pre">add</span> <span class="pre">python</span> <span class="pre">to</span> <span class="pre">PATH</span></code></p>
-</div>
-<div class="section" id="installing-pydev">
-<h2>Installing PyDev<a class="headerlink" href="#installing-pydev" title="Permalink to this headline">¶</a></h2>
-<p>In Eclipse, select <code class="docutils literal notranslate"><span class="pre">Help-&gt;Install</span> <span class="pre">new</span> <span class="pre">Software</span></code> and enter <a class="reference external" href="http://www.pydev.org/updates">http://www.pydev.org/updates</a> for both Name and location</p>
-<div class="figure">
-<img alt="_images/0500_pydev.png" src="_images/0500_pydev.png" />
-</div>
-<p>Select <code class="docutils literal notranslate"><span class="pre">pyDev</span></code> and follow the installation instructions.</p>
-</div>
-<div class="section" id="installing-svgwrite">
-<h2>Installing svgwrite<a class="headerlink" href="#installing-svgwrite" title="Permalink to this headline">¶</a></h2>
-<p>Open Windows command line.
-From the command line, call</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install svgwrite</span>
-</pre></div>
-</div>
+<p>Tested with python 3.5, 3.6 and 3.7 under Windows 10.</p>
 </div>
 <div class="section" id="installing-graphviz">
 <h2>Installing GraphViz<a class="headerlink" href="#installing-graphviz" title="Permalink to this headline">¶</a></h2>
 <p>Install GraphViz from <a class="reference external" href="http://www.graphviz.org/Download.php">http://www.graphviz.org/Download.php</a></p>
 <p>Then ensure that the <code class="docutils literal notranslate"><span class="pre">bin/</span></code> subdirectory of the GraphViz installation is in your <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
 </div>
-<div class="section" id="installing-moddy">
-<h2>Installing moddy<a class="headerlink" href="#installing-moddy" title="Permalink to this headline">¶</a></h2>
-<p>Clone moddy from GitHub.</p>
-<p>Let’s assume you want to clone into an eclipse project called <code class="docutils literal notranslate"><span class="pre">mymoddy</span></code>.</p>
-<p>Change into the eclipse workspace path:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> D:
-<span class="gp">#</span> <span class="nb">cd</span> D:<span class="se">\o</span>wncloud<span class="se">\d</span>ocuments<span class="se">\K</span>laus<span class="se">\e</span>clipse
+<div class="section" id="install-moddy">
+<h2>Install Moddy<a class="headerlink" href="#install-moddy" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> pip install -U moddy
 </pre></div>
 </div>
-<p>Clone moddy into <code class="docutils literal notranslate"><span class="pre">mymoddy</span></code> subdirectory</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> git clone https://github.com/KlausPopp/Moddy.git mymoddy
+</div>
+<div class="section" id="test-moddy">
+<h2>Test Moddy<a class="headerlink" href="#test-moddy" title="Permalink to this headline">¶</a></h2>
+<p>Copy the text from <a class="reference download internal" download="" href="_downloads/544aaf052c2e4cb54cc66e872c5adf06/1_hello.py"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">Basic</span> <span class="pre">Demo</span></code></a> and save it to <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>
+into an arbitrary directory on your machine.</p>
+<p>Then try to run the demo:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python 1_hello.py
 </pre></div>
 </div>
-<p>From eclipse, select <code class="docutils literal notranslate"><span class="pre">File-&gt;New-&gt;PyDev</span> <span class="pre">Project</span></code>.</p>
-<p>Choose a the project name according to the directory where you cloned moddy to (here:<code class="docutils literal notranslate"><span class="pre">mymoddy</span></code>).</p>
-<p>Select PyDev - Interpreter = 3.x (according to your phyton version)</p>
-<p>Select “Create <code class="docutils literal notranslate"><span class="pre">src</span></code> folder and add it to the <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>:</p>
-<div class="figure">
-<img alt="_images/0510_eclipsemoddy.png" src="_images/0510_eclipsemoddy.png" />
-</div>
-<p>In eclipse, try to run the tutorial:</p>
-<p>Right click in Package Explorer to <code class="docutils literal notranslate"><span class="pre">moddy/src/tutorial/1_hello.py</span></code>.</p>
-<p>Select “Run As”-&gt;”Python Run”</p>
+<div class="section" id="demo-output">
+<span id="hello-output"></span><h3>Demo output<a class="headerlink" href="#demo-output" title="Permalink to this headline">¶</a></h3>
 <p>The console log should end with</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Drawing ANN events</span>
-<span class="go">saved 1_hello.html as svgInHtml</span>
-<span class="go">Saved structure graph to 1_hello_structure.svg</span>
-<span class="go">saved 1_hello.csv as CSV</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">TRC:      11.8s STA     Bob(Part) //</span>
+<span class="go">TRC:      11.8s &gt;MSG    Bob.mouth(OutPort) //  req=11.8s beg=11.8s end=12.8s dur=1.0s msg=[Hm?]</span>
+<span class="go">SIM: Stops because stopTime reached</span>
+<span class="go">SIM: Simulator stopped at 12.0s. Executed 9 events in 0.000 seconds</span>
+<span class="go">saved sequence diagram in output/1_hello.html as iaViewer</span>
+<span class="go">Saved structure graph to output/1_hello_structure.svg</span>
+<span class="go">saved output/1_hello.csv as CSV</span>
 </pre></div>
 </div>
-<p>If you want to update Moddy, go into the directory where you have Moddy cloned to and execute:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> git pull
+<p>You should also find a folder <code class="docutils literal notranslate"><span class="pre">output</span></code> in your directory that contains the result files:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">|   1_hello.py</span>
+<span class="go">|</span>
+<span class="go">+---output</span>
+<span class="go">        1_hello.csv</span>
+<span class="go">        1_hello.html</span>
+<span class="go">        1_hello_structure.svg</span>
 </pre></div>
+</div>
+<p>Open <code class="docutils literal notranslate"><span class="pre">1_hello.html</span></code> into a web browser and it should look like this
+<a class="reference download internal" download="" href="_downloads/9d005f7f9aebdfe3faaa1692a7c60b9e/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+</div>
+</div>
+<div class="section" id="using-moddy-with-eclipse">
+<h2>Using Moddy with Eclipse<a class="headerlink" href="#using-moddy-with-eclipse" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This step is optional, you can use Moddy also without Eclipse. I just put it here because
+I personally use Eclipse.</p>
+</div>
+<div class="section" id="installing-eclipse">
+<h3>Installing Eclipse<a class="headerlink" href="#installing-eclipse" title="Permalink to this headline">¶</a></h3>
+<p>Download &amp; Install Eclipse from <a class="reference external" href="https://eclipse.org/downloads/">https://eclipse.org/downloads/</a></p>
+</div>
+<div class="section" id="installing-pydev">
+<h3>Installing PyDev<a class="headerlink" href="#installing-pydev" title="Permalink to this headline">¶</a></h3>
+<p>In Eclipse, select <code class="docutils literal notranslate"><span class="pre">Help-&gt;Install</span> <span class="pre">new</span> <span class="pre">Software</span></code> and enter <a class="reference external" href="http://www.pydev.org/updates">http://www.pydev.org/updates</a> for both Name and location</p>
+<div class="figure">
+<img alt="_images/0500_pydev.png" src="_images/0500_pydev.png" />
+</div>
+</div>
+<div class="section" id="create-a-moddy-project">
+<h3>Create a Moddy Project<a class="headerlink" href="#create-a-moddy-project" title="Permalink to this headline">¶</a></h3>
+<p>In Eclipse Select <code class="docutils literal notranslate"><span class="pre">New</span> <span class="pre">--&gt;</span> <span class="pre">Project</span> <span class="pre">--&gt;</span> <span class="pre">PyDev</span> <span class="pre">Project</span></code>:</p>
+<div class="figure">
+<img alt="_images/0510_eclipse_new.png" src="_images/0510_eclipse_new.png" />
+</div>
+<p>Name the project <code class="docutils literal notranslate"><span class="pre">myFirstModdyProject</span></code>:</p>
+<div class="figure">
+<img alt="_images/0520_pydev.png" src="_images/0520_pydev.png" />
+</div>
+<p>Create a module named <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>:</p>
+<div class="figure">
+<img alt="_images/0530_createmod.png" src="_images/0530_createmod.png" />
+</div>
+<p>Copy the text from <a class="reference download internal" download="" href="_downloads/544aaf052c2e4cb54cc66e872c5adf06/1_hello.py"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">Basic</span> <span class="pre">Demo</span></code></a> and paste it into <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>.</p>
+<p>Now you can <code class="docutils literal notranslate"><span class="pre">Run</span></code> the <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>. You should get an output as described in <a class="reference internal" href="#hello-output"><span class="std std-ref">Demo output</span></a>.</p>
 </div>
 </div>
 </div>
@@ -253,8 +274,10 @@ From the command line, call</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="developer.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="reference_results.html" class="btn btn-neutral float-left" title="Moddy Result Generator APIs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="reference/results.html" class="btn btn-neutral float-left" title="Moddy Result Generator APIs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

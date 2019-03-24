@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Hello &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Serial Gateway" href="2_sergw.html" />
+    <link rel="prev" title="Tutorials" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Hello</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_sergw.html">Serial Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_carinfo.html">Car Infotainment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+        
+      <li>Hello</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/1_hello.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="hello">
+<h1>Hello<a class="headerlink" href="#hello" title="Permalink to this headline">¶</a></h1>
+<p>Covers:</p>
+<ul class="simple">
+<li>Event driven modelling</li>
+<li>Ports &amp; Timers</li>
+</ul>
+<p>This demo models how two persons, Bob and Joe, talk to eachother.</p>
+<p>The words they are talking are the mesages.</p>
+<p>The persons send the words at their mouth and receive it through their ears.
+A timer is used to model their “think” time.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on 23.12.2016</span>
+
+<span class="sd">@author: klaus</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+
+        <span class="c1"># Ports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mouth&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Timers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+        
+
+    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Joe</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+
+        <span class="c1"># Ports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mouth&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Timers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi Joe&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hi, How are you?&quot;</span>
+        <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;How are you?&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Fine&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+        
+
+    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+    
+    <span class="n">bob</span>    <span class="o">=</span> <span class="n">Bob</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span> <span class="p">)</span>
+    <span class="n">joe</span>    <span class="o">=</span> <span class="n">Joe</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span> <span class="p">)</span>
+    
+    <span class="c1"># bind ports</span>
+    <span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">joe</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
+    <span class="n">joe</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">bob</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
+
+    <span class="c1"># Let Bob start talking</span>
+    <span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1"># let simulator run</span>
+    <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
+    
+    <span class="c1"># Output sequence diagram</span>
+    <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> 
+                                  <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;output/1_hello.html&quot;</span><span class="p">,</span> 
+                                  <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span> 
+                                  <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[],</span> 
+                                  <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> 
+                                  <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+                                  <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Hello Demo&quot;</span><span class="p">)</span>    
+
+    <span class="c1"># Output model structure graph</span>
+    <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/1_hello_structure.svg&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Output trace table</span>
+    <span class="n">moddyGenerateTraceTable</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/1_hello.csv&#39;</span> <span class="p">)</span>
+
+</pre></div>
+</div>
+<p>The simulation outputs:</p>
+<blockquote>
+<div><p><a class="reference download internal" download="" href="../_downloads/9d005f7f9aebdfe3faaa1692a7c60b9e/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/153432d138cbc9f7a4b22cdb0998e72b/1_hello.csv"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">trace</span> <span class="pre">table</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/efc5e88b86cc549ec26a3db4c372bdb8/1_hello_structure.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">structure</span> <span class="pre">graph</span></code></a></p>
+</div></blockquote>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="2_sergw.html" class="btn btn-neutral float-right" title="Serial Gateway" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

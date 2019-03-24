@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Quick Start &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>Quick Start &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Detailed User Guide" href="detailed.html" />
+    <link rel="next" title="Detailed User Guide" href="detailed/index.html" />
     <link rel="prev" title="Welcome to Moddy Discrete Event Simulator’s documentation!" href="index.html" /> 
 </head>
 
@@ -58,6 +58,10 @@
 
           
             
+            
+              <div class="version">
+                1.7
+              </div>
             
           
 
@@ -91,9 +95,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#generating-the-sequence-diagram">Generating the Sequence Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
 </ul>
 
             
@@ -170,7 +176,7 @@ therefore “Bob” and “Joe” are the two parts used in the model.</p>
 <p>This example uses only only of two modelling flavours, the “event based” method.
 Using this method, the model reacts to events using callback routines.</p>
 <p class="last">Another modelling technique is the “program based” method. For more information,
-refer to <a class="reference internal" href="detailed_seqprog.html#detailed-seqprog"><span class="std std-ref">Sequential Program Simulation</span></a></p>
+refer to <a class="reference internal" href="detailed/seqprog.html#detailed-seqprog"><span class="std std-ref">Sequential Program Simulation</span></a></p>
 </div>
 <div class="section" id="model-structure">
 <h2>Model Structure<a class="headerlink" href="#model-structure" title="Permalink to this headline">¶</a></h2>
@@ -210,7 +216,7 @@ function and specify the input port that shall be bound.</p>
 <span class="n">joe</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">bob</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Moddy can also output the structure of the model. After you created the structure, call <a class="reference internal" href="reference_results.html#moddy.dotStructure.moddyGenerateStructureGraph" title="moddy.dotStructure.moddyGenerateStructureGraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateStructureGraph()</span></code></a>:</p>
+<p>Moddy can also output the structure of the model. After you created the structure, call <a class="reference internal" href="reference/results.html#moddy.dotStructure.moddyGenerateStructureGraph" title="moddy.dotStructure.moddyGenerateStructureGraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateStructureGraph()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Output model structure graph</span>
 <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;1_hello_structure.svg&#39;</span><span class="p">)</span>
 </pre></div>
@@ -258,7 +264,7 @@ A message is send via the sending port’s send() method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>See <a class="reference internal" href="reference_core.html#moddy.simulator.simOutputPort.send" title="moddy.simulator.simOutputPort.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> for details.</p>
+<p>See <a class="reference internal" href="reference/core.html#moddy.simulator.simOutputPort.send" title="moddy.simulator.simOutputPort.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> for details.</p>
 <p>In this example, self.reply is the message; here it is a string.
 The second parameter defines the flight time, i.e. how long it takes until the message
 arrives at the input port.
@@ -302,7 +308,7 @@ A timer is stopped by default.</p>
 </div>
 <div class="section" id="running-simulator">
 <h2>Running Simulator<a class="headerlink" href="#running-simulator" title="Permalink to this headline">¶</a></h2>
-<p>After the parts and bindings were created, the simulator can <a class="reference internal" href="reference_core.html#moddy.simulator.sim.run" title="moddy.simulator.sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+<p>After the parts and bindings were created, the simulator can <a class="reference internal" href="reference/core.html#moddy.simulator.sim.run" title="moddy.simulator.sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># let simulator run</span>
 <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
 </pre></div>
@@ -351,7 +357,7 @@ On the python console, the simulator outputs the simulation trace:</p>
 <p>Moddy can generate a sequence diagram from the simulation results.
 The sequence diagram is generated as a as HTML.
 After simulation run, the following code generates the sequence diagram.
-For details, see <a class="reference internal" href="reference_results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a>:</p>
+For details, see <a class="reference internal" href="reference/results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
                               <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;1_hello.html&quot;</span><span class="p">,</span>
                               <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span>
@@ -364,7 +370,7 @@ For details, see <a class="reference internal" href="reference_results.html#modd
 <div class="figure">
 <img alt="_images/0020_1_hello.png" src="_images/0020_1_hello.png" />
 </div>
-<p>View as HTML: <a class="reference external" href="_static/1_hello.html">1_hello</a></p>
+<p>View as HTML: <a class="reference download internal" download="" href="_downloads/9d005f7f9aebdfe3faaa1692a7c60b9e/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">1_hello</span></code></a></p>
 <p>Notes:</p>
 <blockquote>
 <div><ul class="simple">
@@ -385,7 +391,7 @@ For details, see <a class="reference internal" href="reference_results.html#modd
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="detailed.html" class="btn btn-neutral float-right" title="Detailed User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="detailed/index.html" class="btn btn-neutral float-right" title="Detailed User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Moddy Discrete Event Simulator’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

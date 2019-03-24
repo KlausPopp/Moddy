@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.seqDiagInteractiveGen &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>moddy.seqDiagInteractiveGen &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -57,6 +57,10 @@
           
             
             
+              <div class="version">
+                1.7
+              </div>
+            
           
 
           
@@ -81,8 +85,9 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
 </ul>
@@ -159,13 +164,13 @@
 
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="kn">import</span> <span class="nn">seqDiagInteractiveViewer</span>
+<span class="kn">import</span> <span class="nn">moddy.seqDiagInteractiveViewer</span>
 <span class="kn">from</span> <span class="nn">moddy.svgSeqD</span> <span class="k">import</span> <span class="n">moddyGenerateSvgSequenceDiagram</span>
 <span class="kn">from</span> <span class="nn">moddy.utils</span> <span class="k">import</span> <span class="n">moddyCreateDirsAndOpenOutputFile</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<div class="viewcode-block" id="moddyGenerateSequenceDiagram"><a class="viewcode-back" href="../../reference_results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram">[docs]</a><span class="k">def</span> <span class="nf">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="p">,</span> 
+<div class="viewcode-block" id="moddyGenerateSequenceDiagram"><a class="viewcode-back" href="../../reference/results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram">[docs]</a><span class="k">def</span> <span class="nf">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="p">,</span> 
                                   <span class="n">fileName</span><span class="p">,</span> 
                                   <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;iaViewer&#39;</span><span class="p">,</span> 
                                   <span class="n">showPartsList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
@@ -466,7 +471,7 @@
     
     <span class="k">def</span> <span class="nf">seqDiagInteractiveViewerPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; get path relative to output directory to the seqDiagInteractiveViewer directory &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">seqDiagInteractiveViewer</span><span class="o">.</span><span class="vm">__file__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outDir</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">seqDiagInteractiveViewer</span><span class="o">.</span><span class="vm">__file__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outDir</span><span class="p">))</span>
     
     <span class="k">def</span> <span class="nf">readseqDiagInteractiveViewerFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; read fileName from seqDiagInteractiveViewer directory and return its content &#39;&#39;&#39;</span>

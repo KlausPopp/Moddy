@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.fsmPart &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>moddy.fsmPart &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -57,6 +57,10 @@
           
             
             
+              <div class="version">
+                1.7
+              </div>
+            
           
 
           
@@ -81,8 +85,9 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
 </ul>
@@ -160,7 +165,7 @@
 <span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="n">simPart</span>
 
 
-<div class="viewcode-block" id="simFsmPart"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsmPart.simFsmPart">[docs]</a><span class="k">class</span> <span class="nc">simFsmPart</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+<div class="viewcode-block" id="simFsmPart"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsmPart.simFsmPart">[docs]</a><span class="k">class</span> <span class="nc">simFsmPart</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A moddy part with a state machine</span>
 <span class="sd">    All simulator events are directed to the fsm.</span>
@@ -192,7 +197,7 @@
         <span class="c1"># Bring state machine into initial state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">startFsm</span><span class="p">()</span>
         
-<div class="viewcode-block" id="simFsmPart.createPorts"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsmPart.simFsmPart.createPorts">[docs]</a>    <span class="k">def</span> <span class="nf">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">):</span>
+<div class="viewcode-block" id="simFsmPart.createPorts"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsmPart.simFsmPart.createPorts">[docs]</a>    <span class="k">def</span> <span class="nf">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">):</span>
         <span class="c1"># Override simPart method to route all events to central handlers</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Convinience functions to create multiple ports at once.</span>
@@ -212,7 +217,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="simFsmPart.createTimers"><a class="viewcode-back" href="../../reference_fsm.html#moddy.fsmPart.simFsmPart.createTimers">[docs]</a>    <span class="k">def</span> <span class="nf">createTimers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listTimerNames</span><span class="p">):</span>
+<div class="viewcode-block" id="simFsmPart.createTimers"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsmPart.simFsmPart.createTimers">[docs]</a>    <span class="k">def</span> <span class="nf">createTimers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listTimerNames</span><span class="p">):</span>
         <span class="c1"># Override simPart method to route all events to central handlers</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Convinience functions to create multiple timers at once.</span>

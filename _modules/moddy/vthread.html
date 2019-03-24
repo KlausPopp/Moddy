@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.vthread &mdash; Moddy Discrete Event Simulator 1.6 documentation</title>
+  <title>moddy.vthread &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
   
 
   
@@ -57,6 +57,10 @@
           
             
             
+              <div class="version">
+                1.7
+              </div>
+            
           
 
           
@@ -81,8 +85,9 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../detailed.html">Detailed User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
 </ul>
@@ -164,7 +169,7 @@
 <span class="kn">import</span> <span class="nn">threading</span>
 
 
-<div class="viewcode-block" id="vtInPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtInPort">[docs]</a><span class="k">class</span> <span class="nc">vtInPort</span><span class="p">(</span><span class="n">simInputPort</span><span class="p">):</span>
+<div class="viewcode-block" id="vtInPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtInPort">[docs]</a><span class="k">class</span> <span class="nc">vtInPort</span><span class="p">(</span><span class="n">simInputPort</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Base class for input ports of vThreads which extends the standard input port:</span>
 <span class="sd">    </span>
@@ -188,11 +193,11 @@
     <span class="k">def</span> <span class="nf">wake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vThread</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">wake</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vThread</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
     
-<div class="viewcode-block" id="vtInPort.readMsg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtInPort.readMsg">[docs]</a>    <span class="k">def</span> <span class="nf">readMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="vtInPort.readMsg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtInPort.readMsg">[docs]</a>    <span class="k">def</span> <span class="nf">readMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Read a message from the port&#39;s buffer. Overwritten by subclass&#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="vtInPort.nMsg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtInPort.nMsg">[docs]</a>    <span class="k">def</span> <span class="nf">nMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vtInPort.nMsg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtInPort.nMsg">[docs]</a>    <span class="k">def</span> <span class="nf">nMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Check how many messages are in the port&#39;s buffer. Overwritten by subclass&#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
 
@@ -200,7 +205,7 @@
         <span class="sd">&#39;&#39;&#39;clear input port&#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampledMsg</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="vtSamplingInPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtSamplingInPort">[docs]</a><span class="k">class</span> <span class="nc">vtSamplingInPort</span><span class="p">(</span><span class="n">vtInPort</span><span class="p">):</span>
+<div class="viewcode-block" id="vtSamplingInPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtSamplingInPort">[docs]</a><span class="k">class</span> <span class="nc">vtSamplingInPort</span><span class="p">(</span><span class="n">vtInPort</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Sampling input port for vThreads</span>
 <span class="sd">    A sampling port buffers only the last received message</span>
@@ -220,7 +225,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_sampledMsg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wake</span><span class="p">()</span>
         
-<div class="viewcode-block" id="vtSamplingInPort.readMsg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtSamplingInPort.readMsg">[docs]</a>    <span class="k">def</span> <span class="nf">readMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="vtSamplingInPort.readMsg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtSamplingInPort.readMsg">[docs]</a>    <span class="k">def</span> <span class="nf">readMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        Get current message from sampling buffer.</span>
 <span class="sd">        The message is not consumed, i.e. if `readMsg` is called again before a new message comes in, the </span>
@@ -238,13 +243,13 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">default</span></div>
 
-<div class="viewcode-block" id="vtSamplingInPort.nMsg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtSamplingInPort.nMsg">[docs]</a>    <span class="k">def</span> <span class="nf">nMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vtSamplingInPort.nMsg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtSamplingInPort.nMsg">[docs]</a>    <span class="k">def</span> <span class="nf">nMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        :return: 1 if message is available, or 0 if not</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampledMsg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span></div></div>
 
-<div class="viewcode-block" id="vtQueuingInPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtQueuingInPort">[docs]</a><span class="k">class</span> <span class="nc">vtQueuingInPort</span><span class="p">(</span><span class="n">vtInPort</span><span class="p">):</span>
+<div class="viewcode-block" id="vtQueuingInPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtQueuingInPort">[docs]</a><span class="k">class</span> <span class="nc">vtQueuingInPort</span><span class="p">(</span><span class="n">vtInPort</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Queuing input port for vThreads.</span>
 <span class="sd">    A queuing port buffers all messages in a fifo queue. The queue depth is infinite.</span>
@@ -266,7 +271,7 @@
                 <span class="c1"># wakeup waiting thread if queue changes from empty to one entry</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">wake</span><span class="p">()</span>
         
-<div class="viewcode-block" id="vtQueuingInPort.readMsg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtQueuingInPort.readMsg">[docs]</a>    <span class="k">def</span> <span class="nf">readMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="vtQueuingInPort.readMsg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtQueuingInPort.readMsg">[docs]</a>    <span class="k">def</span> <span class="nf">readMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        Get first message from queue.</span>
 <span class="sd">        The message is consumed.</span>
@@ -280,7 +285,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">BufferError</span><span class="p">(</span><span class="s2">&quot;No msg in queue&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="vtQueuingInPort.nMsg"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtQueuingInPort.nMsg">[docs]</a>    <span class="k">def</span> <span class="nf">nMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vtQueuingInPort.nMsg"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtQueuingInPort.nMsg">[docs]</a>    <span class="k">def</span> <span class="nf">nMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        :return: number of messages in queue</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -288,7 +293,7 @@
     
 
 
-<div class="viewcode-block" id="vtIOPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtIOPort">[docs]</a><span class="k">class</span> <span class="nc">vtIOPort</span><span class="p">(</span><span class="n">simIOPort</span><span class="p">):</span>
+<div class="viewcode-block" id="vtIOPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtIOPort">[docs]</a><span class="k">class</span> <span class="nc">vtIOPort</span><span class="p">(</span><span class="n">simIOPort</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    An IOPort that combines a Sampling/Queuing input port and a standard output port</span>
 
@@ -308,7 +313,7 @@
     <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="vtTimer"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtTimer">[docs]</a><span class="k">class</span> <span class="nc">vtTimer</span><span class="p">(</span><span class="n">simTimer</span><span class="p">):</span>
+<div class="viewcode-block" id="vtTimer"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtTimer">[docs]</a><span class="k">class</span> <span class="nc">vtTimer</span><span class="p">(</span><span class="n">simTimer</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A timer for vThreads which extends the standard simulation timer</span>
 
@@ -331,24 +336,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_tmrFired</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vThread</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">wake</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vThread</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
     
-<div class="viewcode-block" id="vtTimer.hasFired"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtTimer.hasFired">[docs]</a>    <span class="k">def</span> <span class="nf">hasFired</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vtTimer.hasFired"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtTimer.hasFired">[docs]</a>    <span class="k">def</span> <span class="nf">hasFired</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :return: True if timer expired</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmrFired</span></div>
 
-<div class="viewcode-block" id="vtTimer.start"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtTimer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+<div class="viewcode-block" id="vtTimer.start"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtTimer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
         <span class="c1"># Override method from simTimer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tmrFired</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="vtTimer.restart"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vtTimer.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+<div class="viewcode-block" id="vtTimer.restart"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vtTimer.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
         <span class="c1"># Override method from simTimer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tmrFired</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restart</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span></div></div>
 
     
-<div class="viewcode-block" id="vThread"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread">[docs]</a><span class="k">class</span> <span class="nc">vThread</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread">[docs]</a><span class="k">class</span> <span class="nc">vThread</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A virtual thread simulating a software running on an operating system.</span>
 <span class="sd">    The scheduler of the operating system schedules the vthreads.</span>
@@ -412,7 +417,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;waitUntilThreadTerminated: Thread </span><span class="si">%s</span><span class="s2"> did not terminate&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">objName</span><span class="p">())</span>
 
-<div class="viewcode-block" id="vThread.TerminateException"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.TerminateException">[docs]</a>    <span class="k">class</span> <span class="nc">TerminateException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.TerminateException"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.TerminateException">[docs]</a>    <span class="k">class</span> <span class="nc">TerminateException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Exception that is raised to tell the thread that it shall be terminated&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -448,7 +453,7 @@
             <span class="k">if</span> <span class="n">termReason</span> <span class="o">!=</span> <span class="s2">&quot;Terminated&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;vThread </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">termReason</span><span class="p">)</span>
     
-<div class="viewcode-block" id="vThread.runVThread"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.runVThread">[docs]</a>    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.runVThread"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.runVThread">[docs]</a>    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Model code of the VThread. must be overridden by subclass&#39;&#39;&#39;</span>
         <span class="k">pass</span> </div>
     
@@ -461,7 +466,7 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="s1">&#39;clear&#39;</span><span class="p">):</span>
                 <span class="n">port</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
-<div class="viewcode-block" id="vThread.wait"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">evList</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="vThread.wait"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">evList</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Suspend vThread until one of the events in `evList` occurs or timeout</span>
 <span class="sd">        </span>
@@ -476,7 +481,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">sysCall</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;wait&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">evList</span><span class="p">))</span></div>
     
-<div class="viewcode-block" id="vThread.waitUntil"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.waitUntil">[docs]</a>    <span class="k">def</span> <span class="nf">waitUntil</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">evList</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="vThread.waitUntil"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.waitUntil">[docs]</a>    <span class="k">def</span> <span class="nf">waitUntil</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">evList</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Suspend vThread until one of the events in `evList` occurs or until specified time </span>
 <span class="sd">        </span>
@@ -493,7 +498,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;waitUntil: target time already gone&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span> <span class="n">time</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="n">evList</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="vThread.busy"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.busy">[docs]</a>    <span class="k">def</span> <span class="nf">busy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">statusAppearance</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="vThread.busy"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.busy">[docs]</a>    <span class="k">def</span> <span class="nf">busy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">statusAppearance</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        tell the scheduler how much time the current operation takes</span>
 <span class="sd">        </span>
@@ -513,7 +518,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">sysCall</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;term&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">termReason</span><span class="p">)</span> <span class="p">)</span>
     
-<div class="viewcode-block" id="vThread.newVtSamplingInPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.newVtSamplingInPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtSamplingInPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.newVtSamplingInPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.newVtSamplingInPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtSamplingInPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new sampling input port (:class:`vtSamplingInPort`) to the part </span>
 <span class="sd">        </span>
@@ -524,7 +529,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addInputPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port</span></div>
         
-<div class="viewcode-block" id="vThread.newVtQueuingInPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.newVtQueuingInPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtQueuingInPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.newVtQueuingInPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.newVtQueuingInPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtQueuingInPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new queueing input port (:class:`vtQueuingInPort`) to the part </span>
 <span class="sd">        </span>
@@ -534,7 +539,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addInputPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> 
         <span class="k">return</span> <span class="n">port</span></div>
     
-<div class="viewcode-block" id="vThread.newVtSamplingIOPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.newVtSamplingIOPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtSamplingIOPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.newVtSamplingIOPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.newVtSamplingIOPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtSamplingIOPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new sampling I/O port (via :class:`vtIOPort`) to the part </span>
 <span class="sd">        </span>
@@ -544,7 +549,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addIOPort</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">port</span></div>
 
-<div class="viewcode-block" id="vThread.newVtQueuingIOPort"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.newVtQueuingIOPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtQueuingIOPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.newVtQueuingIOPort"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.newVtQueuingIOPort">[docs]</a>    <span class="k">def</span> <span class="nf">newVtQueuingIOPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new queueing I/O port(via :class:`vtIOPort`)  to the part </span>
 <span class="sd">        </span>
@@ -555,7 +560,7 @@
         <span class="k">return</span> <span class="n">port</span></div>
         
 
-<div class="viewcode-block" id="vThread.newVtTimer"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.newVtTimer">[docs]</a>    <span class="k">def</span> <span class="nf">newVtTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.newVtTimer"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.newVtTimer">[docs]</a>    <span class="k">def</span> <span class="nf">newVtTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Add a new virtual timer to the part </span>
 <span class="sd">        </span>
@@ -565,7 +570,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addTimer</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">timer</span></div>
     
-<div class="viewcode-block" id="vThread.createPorts"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.createPorts">[docs]</a>    <span class="k">def</span> <span class="nf">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.createPorts"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.createPorts">[docs]</a>    <span class="k">def</span> <span class="nf">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Convinience functions to create multiple vtPorts at once.</span>
 <span class="sd">        </span>
@@ -597,7 +602,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">simPart</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">listPortNames</span><span class="p">)</span></div>
             
-<div class="viewcode-block" id="vThread.createVtTimers"><a class="viewcode-back" href="../../reference_vthread.html#moddy.vthread.vThread.createVtTimers">[docs]</a>    <span class="k">def</span> <span class="nf">createVtTimers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listTimerNames</span><span class="p">):</span>
+<div class="viewcode-block" id="vThread.createVtTimers"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.createVtTimers">[docs]</a>    <span class="k">def</span> <span class="nf">createVtTimers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listTimerNames</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Convinience functions to create multiple vtTimers at once.</span>
 <span class="sd">        </span>

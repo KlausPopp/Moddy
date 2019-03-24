@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Serial Gateway &mdash; Moddy Discrete Event Simulator 1.7.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Car Infotainment" href="3_carinfo.html" />
+    <link rel="prev" title="Hello" href="1_hello.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_hello.html">Hello</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Serial Gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_carinfo.html">Car Infotainment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+        
+      <li>Serial Gateway</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/2_sergw.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="serial-gateway">
+<h1>Serial Gateway<a class="headerlink" href="#serial-gateway" title="Permalink to this headline">¶</a></h1>
+<p>Covers:</p>
+<ul class="simple">
+<li>Sequential Program Simulation</li>
+<li>Multitasking</li>
+<li>Moddy output port send queuing behavior</li>
+</ul>
+<p>This demo models a serial gateway between a network port and a serial port. The gateway has a CPU which runs
+two threads a RxThread and a TxThread, which are scheduled by Moddy’s built-in RTOS scheduler simulation.</p>
+<p>The RxThread waits for data from the serial device and forwards it to the network port, which is connected to the
+Client program.</p>
+<p>The TxThread waits for data from the Client and forwards it to the serial port.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">2_sergw: A tutorial that models a serial gateway to show the use of moddy vThreads</span>
+
+<span class="sd">Created on 04.02.2017</span>
+
+<span class="sd">@author: Klaus Popp</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<span class="k">class</span> <span class="nc">Gateway</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;GW&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Create a scheduler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sched</span> <span class="o">=</span> <span class="n">vtSchedRtos</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;sched&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        
+        <span class="c1"># Create a Rx and a Tx thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rxThread</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RxThread</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">gateway</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txThread</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TxThread</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">gateway</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sched</span><span class="o">.</span><span class="n">addVThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rxThread</span><span class="p">,</span> <span class="n">prio</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sched</span><span class="o">.</span><span class="n">addVThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">txThread</span><span class="p">,</span> <span class="n">prio</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+
+         
+    <span class="k">class</span> <span class="nc">RxThread</span><span class="p">(</span><span class="n">vThread</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">gateway</span> <span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;RxThr&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="n">gateway</span><span class="p">)</span>
+            <span class="c1"># Create serial port for serial input (with Queuing) </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;QueuingIn&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;serPort&#39;</span><span class="p">])</span> 
+            <span class="c1"># Create a network output port (interface to network client)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span> 
+            
+        
+        <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># Wait until serial data available</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">nMsg</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">evList</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="p">])</span>
+                
+                <span class="c1"># Read serial data. Simulate read from HW Fifo (each message is only one char)</span>
+                <span class="c1"># Simulate fifo depth of 8 (if more than 8 messages received, Fifo overflow)</span>
+                <span class="n">nChars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">nMsg</span><span class="p">()</span>
+                
+                <span class="n">msgStr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nChars</span><span class="p">):</span>
+                    <span class="n">msgStr</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">readMsg</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">nChars</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;FIFO overflow!&#39;</span><span class="p">)</span>
+                    <span class="n">nChars</span> <span class="o">=</span> <span class="mi">8</span>
+                    <span class="n">msgStr</span> <span class="o">=</span> <span class="n">msgStr</span><span class="p">[:</span><span class="n">nChars</span><span class="p">]</span>
+                    
+                <span class="c1"># Simulate reading from HW Fifo takes time (20us per char, really slow CPU...)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="n">nChars</span> <span class="o">*</span> <span class="mi">20</span> <span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;RFIFO&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
+                
+                <span class="c1"># push data to network</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="mi">150</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TXNET&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">)</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="n">msgStr</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+
+            
+    <span class="k">class</span> <span class="nc">TxThread</span><span class="p">(</span><span class="n">vThread</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">gateway</span> <span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;TxThr&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="n">gateway</span><span class="p">)</span>
+            <span class="c1"># Create serial port for serial output (with Queuing) </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;serPort&#39;</span><span class="p">])</span> 
+            <span class="c1"># Create a network output input (interface to network client)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;QueuingIn&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span> 
+            
+        
+        <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">nMsg</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">evList</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="p">])</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;RXNET&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">)</span>
+                
+                <span class="c1"># read one message</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">readMsg</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TXFIFO&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
+            
+                <span class="c1"># push to serial port</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="n">c</span><span class="p">,</span> <span class="n">serFlightTime</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            
+<span class="k">class</span> <span class="nc">Client</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Client&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;QueuingIO&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span> 
+
+    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mf">1.2</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX1&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnBlue</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX2&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mf">2.3</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX3&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">SerialDevice</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;SerDev&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;QueuingIO&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;serPort&#39;</span><span class="p">])</span> 
+        
+    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Generate some serial output</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+            
+            <span class="n">msgStr</span> <span class="o">=</span> <span class="s1">&#39;abc&#39;</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">msgStr</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">serFlightTime</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+            
+            <span class="n">msgStr</span> <span class="o">=</span> <span class="s1">&#39;Hello-World&#39;</span> 
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">msgStr</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">serFlightTime</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+            
+
+
+<span class="k">def</span> <span class="nf">serFlightTime</span><span class="p">(</span><span class="n">txString</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Compute flight time for txString (baudrate=115200) &#39;&#39;&#39;</span>
+    <span class="n">timePerChar</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mi">115200</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> 
+    <span class="k">return</span> <span class="n">timePerChar</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">txString</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+    <span class="n">simu</span><span class="o">.</span><span class="n">setDisplayTimeUnit</span><span class="p">(</span><span class="s1">&#39;us&#39;</span><span class="p">)</span>
+    
+    <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    <span class="n">gateway</span> <span class="o">=</span> <span class="n">Gateway</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    <span class="n">serDev</span> <span class="o">=</span> <span class="n">SerialDevice</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    
+    <span class="n">serDev</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">gateway</span><span class="o">.</span><span class="n">rxThread</span><span class="o">.</span><span class="n">serPort</span> <span class="p">)</span>
+    <span class="n">gateway</span><span class="o">.</span><span class="n">txThread</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">serDev</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
+    
+    <span class="n">client</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">gateway</span><span class="o">.</span><span class="n">txThread</span><span class="o">.</span><span class="n">netPort</span> <span class="p">)</span>
+    <span class="n">gateway</span><span class="o">.</span><span class="n">rxThread</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">client</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
+    
+    <span class="n">serDev</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># let simulator run</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mi">12</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+        
+    <span class="k">except</span><span class="p">:</span> <span class="k">raise</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># create SVG drawing</span>
+        <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> 
+                                      <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;output/2_sergw.html&quot;</span><span class="p">,</span> 
+                                      <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span> 
+                                      <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="n">client</span><span class="p">,</span> <span class="n">gateway</span><span class="o">.</span><span class="n">rxThread</span><span class="p">,</span> <span class="n">gateway</span><span class="o">.</span><span class="n">txThread</span><span class="p">,</span> <span class="n">serDev</span><span class="p">],</span>
+                                      <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span> 
+                                      <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> 
+                                      <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+                                      <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Serial Gateway Demo&quot;</span><span class="p">)</span>    
+    
+    <span class="c1"># Output model structure graph</span>
+    <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/2_sergw_structure.svg&#39;</span><span class="p">)</span>
+        
+</pre></div>
+</div>
+<p>The simulation outputs:</p>
+<blockquote>
+<div><p><a class="reference download internal" download="" href="../_downloads/69f8abc04404fb0aa5b81d1252921bca/2_sergw.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/78e1807f6472006e7a4f71eb2e3835fd/2_sergw_structure.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">structure</span> <span class="pre">graph</span></code></a></p>
+</div></blockquote>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="3_carinfo.html" class="btn btn-neutral float-right" title="Car Infotainment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="1_hello.html" class="btn btn-neutral float-left" title="Hello" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
