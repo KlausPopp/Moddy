@@ -30,7 +30,7 @@ Installation
 Moddy requires: Python >=3.5, and Graphviz.
 
 
-.. code-bloc:: console
+.. code-block:: console
 	
 	$ pip install -U moddy
 

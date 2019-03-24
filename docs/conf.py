@@ -103,7 +103,7 @@ html_static_path = ['_static']
 #
 # html_sidebars = {}
 
-
+html_logo = 'moddy-logo-200px.png'
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

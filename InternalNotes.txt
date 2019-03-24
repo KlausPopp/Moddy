@@ -1,0 +1,30 @@
+
+
+Dist Packaging
+==============
+
+Create source distro:
+
+> cd d:\owncloud\documents\Klaus\eclipse\moddy
+> python setup.py sdist
+
+test installation first
+
+
+Create virtual env
+
+> python -m venv d:\owncloud\documents\Klaus\venv-A\ (ONLY ONCE)
+
+Activate environment
+> d:\owncloud\documents\Klaus\venv-A\Scripts\activate.bat
+
+Test installation from just created 
+> pip uninstall moddy svgwrite
+> pip install d:\owncloud\documents\Klaus\eclipse\moddy\dist\moddy-1.7.0.tar.gz
+
+
+Updload to Pypi
+
+> cd d:\owncloud\documents\Klaus\eclipse\moddy
+> twine upload dist/*
+
