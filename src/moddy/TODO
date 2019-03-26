@@ -1,8 +1,2 @@
-MODDY.doc
-Bug: vThreads that are initially preempted lose incoming messages on ports
-    def msgEvent(self,msg):
-        # overwritten from base simInputPort class!
-        #print("vtSamplingInPort inRecv %s %s" % (self,msg))
-        if self._vThread.pythonThreadRunning:  <-- here is the problem
-            self._sampledMsg.append(msg)
-            self.wake()
+Remove thread timeouts, otherwise debugging impossible
+Allow to bind multi output ports to one input port

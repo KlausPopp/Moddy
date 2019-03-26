@@ -101,7 +101,18 @@ class TestSchedRtos(unittest.TestCase):
 
     def testQueingPort(self):
         busyAppearance = bcWhiteOnBlue
-        class myThread1(vSimpleProg):
+        
+        # Block myThread1 22s from running. Test to see if messages arrive when thread initially preempted
+        # Was a bug in moddy <= 1.7.1
+        class myBlockThread(vThread):
+            def __init__(self, sim ):
+                super().__init__(sim=sim, objName='Block', parentObj=None)
+
+            def runVThread(self):
+                self.busy(22, "Block")
+                self.wait(None)
+        
+        class myThread1(vThread):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
                 self.createPorts('QueuingIn', ['inP1'])
@@ -144,7 +155,11 @@ class TestSchedRtos(unittest.TestCase):
         simu = sim()
                         
         t1 = myThread1(simu)
+        t2 = myBlockThread(simu)
         
+        sched = vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+        sched.addVThread(t1, 2)
+        sched.addVThread(t2, 1)
         stim = stimThread(simu)
         stim.toT1Port.bind(t1.inP1)
         
@@ -153,18 +168,18 @@ class TestSchedRtos(unittest.TestCase):
         moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
-                                      showPartsList=[stim,t1],
+                                      showPartsList=[stim,t1,t2],
                                       excludedElementList=['allTimers'], 
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
         trc = simu.tracedEvents()
         
-        self.assertEqual(searchAnn(trc, 33.0, t1), "['hello1']" )
-        self.assertEqual(searchAnn(trc, 35.0, t1), "['hello2']" )
-        self.assertEqual(searchAnn(trc, 68.0, t1), "['hello3', 'hello4']" )
-        self.assertEqual(searchAnn(trc, 80.0, t1), "['hello5']" )
-        self.assertEqual(searchAnn(trc, 113.0, t1), "['hello6', 'hello7']" )
+        self.assertEqual(searchAnn(trc, 55.0, t1), "['hello1', 'hello2', 'hello3']" )
+        self.assertEqual(searchAnn(trc, 65.0, t1), "['hello4']" )
+        self.assertEqual(searchAnn(trc, 98.0, t1), "['hello5', 'hello6']" )
+        self.assertEqual(searchAnn(trc, 110.0, t1), "['hello7']")
+        self.assertEqual(searchAnn(trc, 143.0, t1), "['hello8', 'hello9']" )
 
     def testQueingIOPort(self):
         busyAppearance = bcWhiteOnBlue

@@ -66,7 +66,7 @@ class vtSamplingInPort(vtInPort):
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
         #print("vtSamplingInPort inRecv %s %s" % (self,msg))
-        if self._vThread.pythonThreadRunning:
+        if self._vThread._scState != 'INIT':
             self._sampledMsg.append(msg)
             self.wake()
         
@@ -110,7 +110,7 @@ class vtQueuingInPort(vtInPort):
     def msgEvent(self,msg):
         # overwritten from base simInputPort class!
         #print("vtQueuingInPort inRecv %s %s" % (self,msg))
-        if self._vThread.pythonThreadRunning:
+        if self._vThread._scState != 'INIT':
             self._sampledMsg.append(msg)
             if len(self._sampledMsg) == 1:
                 # wakeup waiting thread if queue changes from empty to one entry
