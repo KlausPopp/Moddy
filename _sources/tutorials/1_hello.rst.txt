@@ -1,3 +1,5 @@
+.. _1_hello:
+ 
 ===========
 Hello
 ===========
@@ -13,6 +15,8 @@ The words they are talking are the mesages.
 
 The persons send the words at their mouth and receive it through their ears.
 A timer is used to model their "think" time.
+
+.. note:: See also :ref:`8_hello_program`, which models the same behavior with sequential programs.
 
 .. literalinclude:: code/1_hello.py
 

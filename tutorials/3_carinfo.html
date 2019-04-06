@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Car Infotainment &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Car Infotainment &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
@@ -186,10 +187,6 @@
 </ul>
 <p>The Stim part simulates user events.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Created on 12.02.2017</span>
-
-<span class="sd">@author: Klaus Popp</span>
-
 <span class="sd">Simulate the behavior of a (extremely simplified) car infotainment system.</span>
 
 <span class="sd">The main state is simulated with a Moddy Finite state machine. (Off, Booting, NormalOp etc).</span>
@@ -198,6 +195,8 @@
 <span class="sd"> &#39;Volume&#39; - manages the audio volume</span>
 
 <span class="sd">The Stim part simulates user events.</span>
+
+<span class="sd">@author: klauspopp@gmx.de</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -355,49 +354,47 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">-=</span> <span class="mi">1</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">topFsm</span><span class="p">()</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;VolChangeDone&#39;</span><span class="p">)</span>
  
-<span class="k">class</span> <span class="nc">Stim</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>   
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Stim&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;buttonPort&#39;</span><span class="p">])</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;SamplingIn&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;visualPort&#39;</span><span class="p">])</span> 
-        <span class="bp">self</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
-        
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;on&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;NaviButton&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobLeft&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;MuteButton&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stimProg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;on&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;NaviButton&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobLeft&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;MuteButton&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
     
          
         
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>         
     <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
     <span class="n">cis</span> <span class="o">=</span> <span class="n">CarInfoSystem</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys&quot;</span><span class="p">)</span>
-    <span class="n">stim</span> <span class="o">=</span> <span class="n">Stim</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
-    
+    <span class="n">stim</span> <span class="o">=</span> <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Stim&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">stimProg</span><span class="p">,</span> 
+                        <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;buttonPort&#39;</span><span class="p">],</span>
+                                <span class="s1">&#39;SamplingIn&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;visualPort&#39;</span><span class="p">]}</span> <span class="p">)</span>
+
     <span class="c1"># bind ports</span>
-    <span class="n">stim</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">cis</span><span class="o">.</span><span class="n">powerPort</span><span class="p">)</span>
-    <span class="n">stim</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">cis</span><span class="o">.</span><span class="n">ignitionPort</span><span class="p">)</span>
-    <span class="n">stim</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">cis</span><span class="o">.</span><span class="n">buttonPort</span><span class="p">)</span>
-    <span class="n">cis</span><span class="o">.</span><span class="n">visualPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">stim</span><span class="o">.</span><span class="n">visualPort</span><span class="p">)</span>
-    <span class="n">cis</span><span class="o">.</span><span class="n">audioPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">stim</span><span class="o">.</span><span class="n">audioPort</span><span class="p">)</span>
+    <span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">(</span> <span class="p">[</span> 
+        <span class="p">[</span><span class="s1">&#39;Stim.powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.powerPort&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;Stim.ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.ignitionPort&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;Stim.buttonPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.buttonPort&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;Stim.visualPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.visualPort&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;Stim.audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.audioPort&#39;</span><span class="p">],</span>
+    <span class="p">])</span>
         
     <span class="n">moddyGenerateFsmGraph</span><span class="p">(</span> <span class="n">fsm</span><span class="o">=</span><span class="n">cis</span><span class="o">.</span><span class="n">fsm</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;output/3_carinfo_fsm.svg&#39;</span><span class="p">,</span> <span class="n">keepGvFile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
     

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Simulator Core API Reference &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Simulator Core API Reference &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -237,6 +237,26 @@ Just print info at end of simulation</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="moddy.simulator.sim.smartBind">
+<code class="descname">smartBind</code><span class="sig-paren">(</span><em>bindings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.smartBind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.smartBind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create many port bindings at once using simple lists.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">(</span> <span class="p">[</span> 
+    <span class="p">[</span><span class="s1">&#39;App.outPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev1.inPort&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev2.inPort&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;App.ioPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Server.netPort&#39;</span> <span class="p">]</span>  <span class="p">])</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bindings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Each list element must be a list of strings, which specifies ports that shall be         connected to each other. The strings must specify the hierarchy names of the ports.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="moddy.simulator.sim.timeStr">
 <code class="descname">timeStr</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.timeStr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.timeStr" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a formatted time string of <em>time</em> based on the display scale</p>
@@ -250,7 +270,7 @@ Just print info at end of simulation</li>
 <p>These are the user relevant methods of the simPart class:</p>
 <dl class="class">
 <dt id="moddy.simulator.simPart">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simPart</code><span class="sig-paren">(</span><em>sim</em>, <em>objName</em>, <em>parentObj=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simPart</code><span class="sig-paren">(</span><em>sim</em>, <em>objName</em>, <em>parentObj=None</em>, <em>elems=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart" title="Permalink to this definition">¶</a></dt>
 <dd><p>an instance of simPart forms a moddy object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -260,6 +280,7 @@ Just print info at end of simulation</li>
 <li><strong>sim</strong> – Simulator instance</li>
 <li><strong>objName</strong> – part’s name</li>
 <li><strong>parentObj</strong> – parent part. None if part has no parent. Defaults to None</li>
+<li><strong>elems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dictionary with elements (ports and timers) to create,     e.g. <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">'in':</span> <span class="pre">'inPort1',</span> <span class="pre">'out':</span> <span class="pre">['outPort1',</span> <span class="pre">'outPort2'],</span> <span class="pre">'tmr'</span> <span class="pre">:</span> <span class="pre">'timer1'</span> <span class="pre">}</span></code></li>
 </ul>
 </td>
 </tr>
@@ -509,7 +530,7 @@ If a value change is detected, a simulator trace event is generated</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputPort</strong> – input port to which this output port shall be bound</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if input port is already bound</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if input port is already bound to that output port</td>
 </tr>
 </tbody>
 </table>

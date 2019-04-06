@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.seqDiagInteractiveGen &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>moddy.seqDiagInteractiveGen &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -413,7 +413,7 @@
                     
                     <span class="c1"># generate colored messages</span>
                     <span class="n">msgColor</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">msgColor</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">subObj</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_color</span>
+                    <span class="k">if</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">msgColor</span> <span class="o">=</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_color</span>
                     <span class="k">if</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_msgColor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">msgColor</span> <span class="o">=</span> <span class="n">fireEvent</span><span class="o">.</span><span class="n">_msgColor</span>
                     <span class="k">if</span> <span class="n">msgColor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">mid</span> <span class="o">+=</span> <span class="s1">&#39;, c:&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">msgColor</span> 

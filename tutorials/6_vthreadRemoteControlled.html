@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Remote Controlled Threads &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Remote Controlled Threads &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="API Reference" href="../reference/index.html" />
+    <link rel="next" title="Multiple Output Ports bound to one Input Port" href="7_multiPortBinding.html" />
     <link rel="prev" title="Lost Messages" href="5_lostMsg.html" /> 
 </head>
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
@@ -242,61 +243,52 @@ attribute, which means it will have a <em>threadControlPort</em>, through which 
         
         <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="s1">&#39;2&#39;</span><span class="p">,</span><span class="n">bcWhiteOnBlue</span><span class="p">)</span>
 
-<span class="k">class</span> <span class="nc">myUtilThread</span><span class="p">(</span><span class="n">vThread</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span> <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s1">&#39;utilThread&#39;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;toRcPort&quot;</span><span class="p">])</span>
         
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="n">bcWhiteOnRed</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">toRcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="k">def</span> <span class="nf">utilThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="n">bcWhiteOnRed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toRcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
-<span class="k">class</span> <span class="nc">Stim</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span> <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s1">&#39;Stim&#39;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;rcPort&quot;</span><span class="p">])</span>
-        
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stimProg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="c1"># @2s: initial start of rcTread </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
-        
-        <span class="c1"># @130s: restart rcThread, it has terminated, because it finished its main loop</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
-        
-        <span class="c1"># @180s: kill rcThread</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;kill&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-        
-        <span class="c1"># @200s: restart rcThread, it has terminated because it has been killed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+    <span class="c1"># @2s: initial start of rcTread </span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># @130s: restart rcThread, it has terminated, because it finished its main loop</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">130</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># @180s: kill rcThread</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;kill&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># @200s: restart rcThread, it has terminated because it has been killed</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
-        <span class="c1"># @290s: restart rcThread, it has terminated because it finished its main loop</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
+    <span class="c1"># @290s: restart rcThread, it has terminated because it finished its main loop</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">290</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
     <span class="n">simu</span><span class="o">.</span><span class="n">setDisplayTimeUnit</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
     
-    <span class="n">sched</span><span class="o">=</span> <span class="n">vtSchedRtos</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;sched&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">sched</span> <span class="o">=</span> <span class="n">vtSchedRtos</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;sched&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="n">rcThread</span> <span class="o">=</span> <span class="n">myRcThread</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
-    <span class="n">utilThread</span> <span class="o">=</span> <span class="n">myUtilThread</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    <span class="n">utilThread</span> <span class="o">=</span> <span class="n">vThread</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;utilThread&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">utilThread</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;toRcPort&#39;</span> <span class="p">}</span> <span class="p">)</span>
     <span class="n">sched</span><span class="o">.</span><span class="n">addVThread</span><span class="p">(</span><span class="n">rcThread</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">sched</span><span class="o">.</span><span class="n">addVThread</span><span class="p">(</span><span class="n">utilThread</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">stim</span> <span class="o">=</span> <span class="n">Stim</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
-    <span class="n">stim</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">rcThread</span><span class="o">.</span><span class="n">threadControlPort</span><span class="p">)</span>
+    <span class="n">stim</span> <span class="o">=</span> <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Stim&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">stimProg</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;rcPort&#39;</span> <span class="p">}</span> <span class="p">)</span>
 
-    <span class="n">utilThread</span><span class="o">.</span><span class="n">toRcPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">rcThread</span><span class="o">.</span><span class="n">fromUtilPort</span><span class="p">)</span>
+    <span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">([[</span><span class="s1">&#39;rcThread.threadControlPort&#39;</span><span class="p">,</span> <span class="s1">&#39;Stim.rcPort&#39;</span><span class="p">],</span> 
+                    <span class="p">[</span><span class="s1">&#39;utilThread.toRcPort&#39;</span><span class="p">,</span> <span class="s1">&#39;rcThread.fromUtilPort&#39;</span><span class="p">]</span> <span class="p">])</span>
 
     <span class="c1"># let simulator run</span>
     <span class="k">try</span><span class="p">:</span>
@@ -328,7 +320,7 @@ attribute, which means it will have a <em>threadControlPort</em>, through which 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../reference/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="7_multiPortBinding.html" class="btn btn-neutral float-right" title="Multiple Output Ports bound to one Input Port" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="5_lostMsg.html" class="btn btn-neutral float-left" title="Lost Messages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

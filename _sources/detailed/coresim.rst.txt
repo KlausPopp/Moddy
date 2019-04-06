@@ -27,7 +27,8 @@ Simulation Time
 The simulator time is the virtual time seen by the model while the simulation is running. 
 It has nothing to do with the real time of the computer running the simulation. 
 It is important to understand that the simulation time does NOT advance while the model is 
-executing a callback function (like a message receive or timer expiration callback). This means all python statements in a callback routine are executed at the same simulation time. 
+executing a callback function (like a message receive or timer expiration callback). 
+This means all python statements in a callback routine are executed at the same simulation time. 
 
 Time Unit
 ---------
@@ -87,7 +88,8 @@ This derived class contains the model code implementing the behavior of the part
 	* The parts initialization code
 	* The port receive methods
 	* The timer expired methods
-	* Optionally: Methods that are executed at the beginning and the end of the simulation .(:meth:`~.simPart.startSim()` and :meth:`~.simPart.terminateSim()`)
+	* Optionally: Methods that are executed at the beginning and the end of the 
+	  simulation. (:meth:`~.simPart.startSim()` and :meth:`~.simPart.terminateSim()`)
 
 Here is a simple example of a part class derived from :class:`.simPart`.
 
@@ -101,14 +103,11 @@ For Python beginners: The *self* variable that is used in ever method is the ref
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 	        # Initialize the parent class
-	        super().__init__(sim=sim, objName=objName)
+	        super().__init__(sim=sim, objName=objName, 
+	                         elems = {'in': 'ears', 
+	                                  'out': 'mouth',
+	                                  'tmr': 'thinkTmr'})
 	
-	        # Ports
-	        self.createPorts('in', ['ears'])
-	        self.createPorts('out', ['mouth'])
-	
-	        # Timers
-	        self.createTimers(['thinkTmr'])
 	        self.reply = ""
 	
 	    def earsRecv(self, port, msg):
@@ -124,6 +123,7 @@ For Python beginners: The *self* variable that is used in ever method is the ref
 	    def thinkTmrExpired(self, timer):
 	        self.setStateIndicator("")
 	        self.mouth.send(self.reply, 1)
+   
 
 simPart Constructor Parameters
 ------------------------------
@@ -134,12 +134,15 @@ Each part must call the simPart's constructor in it's *__init__* method.
 
 	class simPart(simBaseElement):
 	    """Simulator block"""
-	    def __init__(self, sim, objName, parentObj = None ):
+	    def __init__(self, sim, objName, parentObj = None, elems=None ):
 			'''	
 			The parameters are:
 			:param sim: The simulator instance
 			:param objName: The name of the part (for example "engine")
-			:param parentObj: The parent part (for example the "car" if the current part is "engine"). If this parameter is omitted, "no parent", i.e. top level part is assumed.
+			:param parentObj: The parent part (for example the "car" if the current part is "engine"). 
+			 If this parameter is omitted, "no parent", i.e. top level part is assumed.
+			:param dict elems: A dictionary with elements (ports and timers) to create, 
+			 e.g. ``{ 'in': 'inPort1', 'out': ['outPort1', 'outPort2'], 'tmr' : 'timer1' } 
 			'''
 			
 Example:
@@ -149,7 +152,7 @@ Example:
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 	        # Initialize the base class
-	        super().__init__(sim=sim, objName=objName)
+	        super().__init__(sim=sim, objName=objName, elems = {'in': 'ears'} )
 
 simPart Methods Called on Start and End of Simulation
 ------------------------------------------------------
@@ -174,8 +177,8 @@ in the order the parts have been created. The typical actions in the :meth:`~.si
 If present, the `~.simPart.terminateSim()` method is called by the simulator when the simulation is terminated, 
 in the order the parts have been created. Typical actions of `~.simPart.terminateSim()` are
 
-*	stopping threads
-*	closing files
+	*	stopping threads
+	*	closing files
 
 Nested Parts
 ------------
@@ -195,7 +198,10 @@ To model this, you use the simPart constructors *parentObj* argument.
 	        super().__init__(sim=sim, objName=objName)
 	        self.engine = Engine(sim, 'engine', self) 
 
-.. note:: The part hierarchy has no relevance for the simulator. The part hierarchy however is displayed in the structure graph, trace output and in the sequence diagrams.
+.. note:: 
+
+	The part hierarchy has no relevance for the simulator. The part hierarchy however is 
+	displayed in the structure graph, trace output and in the sequence diagrams.
 
 Message Communication
 =====================
@@ -219,7 +225,7 @@ All ports of a part must be explicitly created by a part.
 This is usually done in the constructor (*__init__* method) of the part owning the port. 
 Note that a port is always owned by exactly one part.
 
-There are two ways to create ports:
+There are three ways to create ports:
 
 Using the low level methods:
 
@@ -278,8 +284,24 @@ Output ports and IO ports can be created with the same method:
     self.createPorts('out', ['outPort1', 'outPort2', 'outPort3'])
     self.createPorts('io', ['ioPort1', 'ioPort2', 'ioPort3'])
 
-Usually, you will always use the high level method, unless you need to create several input ports that 
+Usually, you will always use the high level methods, unless you need to create several input ports that 
 have the same receive method.
+
+Since Moddy 1.8, ports can be created even more simpler through the `elems` parameter to the 
+:class:`~.simPart` constructor. This is essentially the same as using the :meth:`~.simPart.createPorts`
+method, but requires less typing:
+ 
+.. code-block:: python
+
+	class Bob(simPart):
+	    def __init__(self, sim, objName):
+	        # Initialize the parent class
+	        super().__init__(sim=sim, objName=objName, 
+	                         elems = {'in': 'ears', 
+	                                  'out': 'mouth',
+	                                  'tmr': 'thinkTmr'})
+
+
 
 Binding Ports
 -------------
@@ -287,15 +309,9 @@ Binding Ports
 Before a message can be sent between parts, someone must bind the output port of one object to the 
 input port of another object.
 
-.. note:: 
-
-	If an input and output port that shall be bound belongs to the same part, then messages sent over 
-	this binding are called "messages to self". 
-	The interactive viewer displays these messages, while the static svg diagrams do not display them. 
-
 This binding is done normally by the main program. If you have parts that are composed of other parts, 
 then the internal bindings within the top level part are done in the top level parts constructor.
-To bind an input port to an output port, you call the output ports bind method:
+To bind an input port to an output port, you call the output ports :meth:`~.simOutputPort.bind` method:
 
 .. code-block:: python
 
@@ -309,7 +325,13 @@ You can bind several input ports to one output board to simulate multicast trans
     bob.mouth.bind(john.ears)
     bob.mouth.bind(paul.ears)
 
-.. note:: You cannot bind several output ports to one input port!
+Since Moddy 1.8, you can bind several output ports to one input port:
+
+.. code-block:: python
+
+    bob.mouth.bind(joe.ears)
+    paul.mouth.bind(joe.ears)
+
 
 You can also bind IO ports to each other. In this case the output port of the first IO port is 
 bound to the input port of the second port and vice versa. It doesn't matter on which IO port you call the bind method.
@@ -340,6 +362,28 @@ What you send to the output port will be received after the flight time at the i
 .. code-block:: python
 
 	ioPort.loopBind()
+	
+	
+Since Moddy 1.8, there is a new function :meth:`~.sim.smartBind` method. This method should
+be used at the top level to bind all ports with a single call. In contrast to the 
+classic :meth:`~.simOutputPort.bind` method, you specify the hierarchy name of the ports
+as a string, instead of using their python references.   
+
+Example:
+
+
+.. code-block:: python
+
+	simu.smartBind( [ 
+	    ['App.outPort1', 'Dev1.inPort', 'Dev2.inPort'],		# binds the 3 ports together
+	    ['App.ioPort1', 'Server.netPort' ]  ])				# binds the 2 ports together
+	    
+
+.. note:: 
+
+	If an input and output port that shall be bound belongs to the same part, then messages sent over 
+	this binding are called "messages to self". 
+	The interactive viewer displays these messages, while the static svg diagrams do not display them. 
 
 Sending Messages
 ----------------
@@ -629,6 +673,22 @@ You can also create multiple timers with one call:
 .. code-block:: python
 	
         self.createTimers(['tmr1', 'tmr2'])
+        
+Since Moddy 1.8, timers can be created even more simpler through the `elems` parameter to the 
+:class:`~.simPart` constructor. This is essentially the same as using the :meth:`~.simPart.createTimers`
+method, but requires less typing:
+ 
+.. code-block:: python
+
+	class Bob(simPart):
+	    def __init__(self, sim, objName):
+	        # Initialize the parent class
+	        super().__init__(sim=sim, objName=objName, 
+	                         elems = {'in': 'ears', 
+	                                  'out': 'mouth',
+	                                  'tmr': 'thinkTmr'})
+        
+
 
 Starting and Stopping Timers
 -----------------------------

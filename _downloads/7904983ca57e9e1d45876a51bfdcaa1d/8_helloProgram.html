@@ -139,21 +139,29 @@ div.tooltip {
             <div id="parts"></div>
             <div id='diagram'></div>
 <script>
-g_moddyDiagramArgs = {timePerDiv: 0.5, pixPerDiv: 30, title: "Variable Watcher Demo", };
+g_moddyDiagramArgs = {timePerDiv: 1.0, pixPerDiv: 30, title: "Hello Program Demo", };
 g_moddyDiagramParts = [
-{ name: "VC", tp: "Part" },
-{ name: "VC.var1", tp: "Var" },
-{ name: "VC.var2", tp: "Var" },
+{ name: "Bob", tp: "Part" },
+{ name: "Joe", tp: "Part" },
 ];
 g_moddyTracedEvents = [
-{ tp: "VC", t: 2, p: 1, b: 0, txt: "0x00000001", c:"white", fc:"black", sc:"white"}, 
-{ tp: "VC", t: 4, p: 2, b: 2, txt: "ABC", c:"white", fc:"black", sc:"white"}, 
-{ tp: "STA", t: 6, p: 0, b: 4, txt: "WAIT", c:"orange", fc:"white", sc:"orange"}, 
-{ tp: "VC", t: 6, p: 1, b: 2, txt: "0x00000002", c:"white", fc:"black", sc:"white"}, 
-{ tp: "VC", t: 9, p: 1, b: 6, txt: "0x00000003", c:"white", fc:"black", sc:"white"}, 
+{ tp: "<MSG", t: 1, p: 0, s: 1, b: 0, txt: "Hi Joe", l:"f"}, 
+{ tp: "ANN", t: 1, p: 1, txt: "got message Hi Joe"}, 
+{ tp: "T-EXP", t: 3, p: 1, txt: "JoeScTmr"}, 
+{ tp: "STA", t: 3, p: 1, b: 1, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+{ tp: "<MSG", t: 4.5, p: 1, s: 0, b: 3, txt: "Hi, How are you?", l:"f"}, 
+{ tp: "ANN", t: 4.5, p: 0, txt: "got message Hi, How are you?"}, 
+{ tp: "T-EXP", t: 5.9, p: 0, txt: "BobScTmr"}, 
+{ tp: "STA", t: 5.9, p: 0, b: 4.5, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+{ tp: "<MSG", t: 6.9, p: 0, s: 1, b: 5.9, txt: "How are you?", l:"f"}, 
+{ tp: "ANN", t: 6.9, p: 1, txt: "got message How are you?"}, 
+{ tp: "T-EXP", t: 8.9, p: 1, txt: "JoeScTmr"}, 
+{ tp: "STA", t: 8.9, p: 1, b: 6.9, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
+{ tp: "<MSG", t: 10.4, p: 1, s: 0, b: 8.9, txt: "Fine", l:"f"}, 
+{ tp: "ANN", t: 10.4, p: 0, txt: "got message Fine"}, 
+{ tp: "T-EXP", t: 11.8, p: 0, txt: "BobScTmr"}, 
+{ tp: "STA", t: 11.8, p: 0, b: 10.4, txt: "Think", c:"orange", fc:"white", sc:"orange"}, 
 // close STA/VC
-{ tp: "VC", t: 10, p: 1, b: 9, txt: "0x00000001", c:"white", fc:"black", sc:"white"}, 
-{ tp: "VC", t: 10, p: 2, b: 4, txt: "DEF", c:"white", fc:"black", sc:"white"}, 
 ];
 </script>
 <script>

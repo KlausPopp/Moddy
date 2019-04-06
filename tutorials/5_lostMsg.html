@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Lost Messages &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Lost Messages &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Lost Messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
@@ -187,24 +188,19 @@
 
 <span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
 
-<span class="k">class</span> <span class="nc">Producer</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Producer&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span> 
-
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX1&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnBlue</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX2&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX3&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">producerProg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX1&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnBlue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX2&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX3&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
@@ -219,8 +215,8 @@
     <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
     <span class="n">simu</span><span class="o">.</span><span class="n">setDisplayTimeUnit</span><span class="p">(</span><span class="s1">&#39;us&#39;</span><span class="p">)</span>
     
-    <span class="n">prod</span> <span class="o">=</span> <span class="n">Producer</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
-    <span class="n">cons</span> <span class="o">=</span> <span class="n">Consumer</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    <span class="n">prod</span> <span class="o">=</span> <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Producer&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">producerProg</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;netPort&#39;</span> <span class="p">}</span> <span class="p">)</span>
+    <span class="n">cons</span> <span class="o">=</span> <span class="n">Consumer</span><span class="p">(</span> <span class="n">simu</span> <span class="p">)</span>
 
     <span class="n">prod</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">cons</span><span class="o">.</span><span class="n">netPort</span><span class="p">)</span>
     

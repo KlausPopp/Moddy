@@ -14,5 +14,7 @@ These tutorials demonstrate how to uses Moddy's features:
    4_varwatch
    5_lostMsg
    6_vthreadRemoteControlled
+   7_multiPortBinding
+   8_helloProgram
 
 	

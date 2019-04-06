@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.simulator &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>moddy.simulator &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -167,7 +167,6 @@
 <span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
 <span class="sd"> </span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="n">ms</span><span class="p">,</span><span class="n">us</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">VERSION</span>
 <span class="kn">from</span> <span class="nn">heapq</span> <span class="k">import</span> <span class="n">heappush</span><span class="p">,</span> <span class="n">heappop</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>  
@@ -212,6 +211,9 @@
     
     <span class="k">def</span> <span class="nf">objName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objName</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hierarchyNameWithType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="simPart"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart">[docs]</a><span class="k">class</span> <span class="nc">simPart</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
@@ -220,16 +222,22 @@
 <span class="sd">    :param sim: Simulator instance</span>
 <span class="sd">    :param objName: part&#39;s name</span>
 <span class="sd">    :param parentObj: parent part. None if part has no parent. Defaults to None</span>
+<span class="sd">    :param dict elems: A dictionary with elements (ports and timers) to create, \</span>
+<span class="sd">    e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; : &#39;timer1&#39; }``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">parentObj</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="s2">&quot;Part&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listPorts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listTimers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listSubParts</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># child parts list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listVarWatchers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parentObj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">parentObj</span><span class="o">.</span><span class="n">addSubPart</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> 
+            <span class="n">parentObj</span><span class="o">.</span><span class="n">addSubPart</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            
         <span class="n">sim</span><span class="o">.</span><span class="n">addPart</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">elems</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createElements</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">addSubPart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subPart</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;add subPart to list of subParts &#39;&#39;&#39;</span>
@@ -375,6 +383,24 @@
         <span class="k">for</span> <span class="n">tmrName</span> <span class="ow">in</span> <span class="n">listTimerNames</span><span class="p">:</span>
             <span class="n">exec</span><span class="p">(</span><span class="s1">&#39;self.</span><span class="si">%s</span><span class="s1"> = self.newTimer(&quot;</span><span class="si">%s</span><span class="s1">&quot;, self.</span><span class="si">%s</span><span class="s1">Expired)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tmrName</span><span class="p">,</span><span class="n">tmrName</span><span class="p">,</span><span class="n">tmrName</span><span class="p">))</span> </div>
     
+    <span class="k">def</span> <span class="nf">createElements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elems</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create ports and timers based on a dictionary.</span>
+<span class="sd">        </span>
+<span class="sd">        :param dict elems: A dictionary with elements (ports and timers) to create, \</span>
+<span class="sd">        e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; : &#39;timer1&#39; }``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">for</span> <span class="n">elType</span><span class="p">,</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">elems</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>   <span class="c1"># make a list if only a string is given</span>
+            
+            <span class="k">if</span> <span class="n">elType</span> <span class="o">==</span> <span class="s1">&#39;tmr&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="n">elType</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+                
+    
+    
 <div class="viewcode-block" id="simPart.startSim"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.startSim">[docs]</a>    <span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Called from simulator when simulation begins&#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
@@ -407,7 +433,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgReceivedFunc</span><span class="p">,</span> <span class="n">ioPort</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;InPort&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span> <span class="o">=</span> <span class="kc">None</span>        <span class="c1"># connected output port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outPorts</span> <span class="o">=</span> <span class="p">[]</span>         <span class="c1"># connected output ports</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_msgReceivedFunc</span> <span class="o">=</span> <span class="n">msgReceivedFunc</span> <span class="c1"># function that gets called when message arrives</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ioPort</span> <span class="o">=</span> <span class="n">ioPort</span>       <span class="c1"># reference to the IOPort which contains this inPort (None if not part of IOPort)</span>
         
@@ -417,7 +443,7 @@
         
     <span class="k">def</span> <span class="nf">isBound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Report True if port is bound to an output port&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> </div>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outPorts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> </div>
     
 <div class="viewcode-block" id="simOutputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort">[docs]</a><span class="k">class</span> <span class="nc">simOutputPort</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator output port</span>
@@ -508,11 +534,11 @@
         <span class="sd">&quot;&quot;&quot;bind an output port to an input port</span>
 <span class="sd">        </span>
 <span class="sd">        :param inputPort: input port to which this output port shall be bound</span>
-<span class="sd">        :raise AssertionError: if input port is already bound</span>
+<span class="sd">        :raise AssertionError: if input port is already bound to that output port</span>
 <span class="sd">        </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">inputPort</span><span class="o">.</span><span class="n">_outPort</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span><span class="s2">&quot;input port already bound&quot;</span>
-        <span class="n">inputPort</span><span class="o">.</span><span class="n">_outPort</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inputPort</span><span class="o">.</span><span class="n">_outPorts</span><span class="p">),</span><span class="s2">&quot;input port </span><span class="si">%s</span><span class="s2"> already bound to output port </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">inputPort</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">inputPort</span><span class="o">.</span><span class="n">_outPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listInPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inputPort</span><span class="p">)</span></div>
     
     <span class="k">def</span> <span class="nf">isBound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -629,20 +655,20 @@
         <span class="sd">&#39;&#39;&#39; Set color for messages leaving that IOport &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_color</span> <span class="o">=</span> <span class="n">color</span></div>
 
-    <span class="k">def</span> <span class="nf">peerPort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        return the peer IOPort to which this port is bound to.</span>
-<span class="sd">        return None if there is none</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">peer</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">isBound</span><span class="p">():</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">_outPort</span>   <span class="c1"># get reference to the peer</span>
-            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">_inPort</span>
-                <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
-                    <span class="n">peer</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span>
-        <span class="k">return</span> <span class="n">peer</span>         </div>
          
+    <span class="k">def</span> <span class="nf">peerPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        return all peer IOPorts to which this port is bound to.</span>
+<span class="sd">        return list of peer ports (empty list if none)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">listPeers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">isBound</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">_outPorts</span><span class="p">:</span>   
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">_inPort</span>
+                    <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
+                        <span class="n">listPeers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">listPeers</span>         </div>
         
 <div class="viewcode-block" id="simTimer"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simTimer">[docs]</a><span class="k">class</span> <span class="nc">simTimer</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator Timer</span>
@@ -853,6 +879,27 @@
     <span class="k">def</span> <span class="nf">outputPorts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listOutPorts</span>
     
+    <span class="k">def</span> <span class="nf">findPortByName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">portHierarchyName</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Find a port (input or output or IO) by its hierarchy name</span>
+<span class="sd">        :param string portHierarchyName: e.g. &quot;part1.ioPort1&quot; or &quot;part1.ioPort1.inPort&quot;</span>
+<span class="sd">        :return port: the found port</span>
+<span class="sd">        :raises ValueError: if port not found</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listParts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">_listPorts</span><span class="p">:</span>
+                <span class="c1">#print(&quot;findPortByName %s %s&quot; % (port.hierarchyName(), port._typeStr ))</span>
+                <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">()</span> <span class="o">==</span> <span class="n">portHierarchyName</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">port</span>
+                
+                <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_typeStr</span> <span class="o">==</span> <span class="s2">&quot;IOPort&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">()</span> <span class="o">==</span> <span class="n">portHierarchyName</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">_inPort</span>
+                    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">()</span> <span class="o">==</span> <span class="n">portHierarchyName</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">_outPort</span>
+                    
+        <span class="k">raise</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Port not found </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">portHierarchyName</span><span class="p">))</span>
+
     <span class="c1">#</span>
     <span class="c1"># Part management</span>
     <span class="c1"># </span>
@@ -1131,13 +1178,51 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> Assertion failures during simulation&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numAssertionFailures</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">te</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listTracedEvents</span><span class="p">:</span> 
                 <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;ASSFAIL&quot;</span><span class="p">:</span>
-                    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%10s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeStr</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">traceTime</span><span class="p">),</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
+                    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%10s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeStr</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">traceTime</span><span class="p">),</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 
     
+<div class="viewcode-block" id="sim.smartBind"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.smartBind">[docs]</a>    <span class="k">def</span> <span class="nf">smartBind</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create many port bindings at once using simple lists.</span>
+<span class="sd">        </span>
+<span class="sd">        Example:</span>
+<span class="sd">        </span>
+<span class="sd">        .. code-block:: python</span>
+<span class="sd">        </span>
+<span class="sd">            simu.smartBind( [ </span>
+<span class="sd">                [&#39;App.outPort1&#39;, &#39;Dev1.inPort&#39;, &#39;Dev2.inPort&#39;],</span>
+<span class="sd">                [&#39;App.ioPort1&#39;, &#39;Server.netPort&#39; ]  ])</span>
+<span class="sd">                </span>
+<span class="sd">        :param list bindings: Each list element must be a list of strings, which specifies ports that shall be \</span>
+<span class="sd">        connected to each other. The strings must specify the hierarchy names of the ports.</span>
+<span class="sd">         </span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">for</span> <span class="n">binding</span> <span class="ow">in</span> <span class="n">bindings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_singleSmartBind</span><span class="p">(</span><span class="n">binding</span><span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">_singleSmartBind</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">binding</span> <span class="p">):</span>
+        <span class="c1"># determine output and input ports</span>
+        <span class="n">outPorts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">inPorts</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">portName</span> <span class="ow">in</span> <span class="n">binding</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findPortByName</span><span class="p">(</span><span class="n">portName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_typeStr</span> <span class="o">==</span> <span class="s2">&quot;OutPort&quot;</span><span class="p">:</span>
+                <span class="n">outPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">port</span><span class="o">.</span><span class="n">_typeStr</span> <span class="o">==</span> <span class="s2">&quot;IOPort&quot;</span><span class="p">:</span>
+                <span class="n">outPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_outPort</span><span class="p">)</span>
+                <span class="n">inPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">port</span><span class="o">.</span><span class="n">_typeStr</span> <span class="o">==</span> <span class="s2">&quot;InPort&quot;</span><span class="p">:</span>
+                <span class="n">inPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+                
+        <span class="c1"># bind all output ports to all input ports</span>
+        <span class="k">for</span> <span class="n">outPort</span> <span class="ow">in</span> <span class="n">outPorts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">inPort</span> <span class="ow">in</span> <span class="n">inPorts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">outPort</span><span class="o">.</span><span class="n">_ioPort</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">outPort</span><span class="o">.</span><span class="n">_ioPort</span> <span class="o">!=</span> <span class="n">inPort</span><span class="o">.</span><span class="n">_ioPort</span><span class="p">):</span>
+                    <span class="n">outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">inPort</span><span class="p">)</span></div>
 
-
+            
 </pre></div>
 
            </div>

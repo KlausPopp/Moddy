@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.dotStructure &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>moddy.dotStructure &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -243,33 +243,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_outputPorts</span> <span class="o">=</span> <span class="n">outputPorts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listSchedulers</span> <span class="o">=</span> <span class="p">[]</span>
         
-    <span class="k">def</span> <span class="nf">showStructure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topLevelParts</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">showPart</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== bindings ===&quot;</span><span class="p">)</span>
-        <span class="n">ignInPorts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ignOutPorts</span> <span class="o">=</span> <span class="p">[]</span>
-        
-        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputPorts</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">port</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignOutPorts</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># test if IOPort </span>
-                    <span class="n">peer</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">peerPort</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">peer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="c1"># Has a peer port, make bidirectional connection</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;C </span><span class="si">%s</span><span class="s2"> -- </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">(),</span> <span class="n">peer</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">()))</span>
-                        <span class="c1"># These ports are already connected, ignore them in the rest of the scan</span>
-                        <span class="n">ignOutPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
-                        <span class="n">ignOutPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">_outPort</span><span class="p">)</span>
-                        <span class="n">ignInPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
-                        <span class="n">ignInPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
-                    
-                <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">for</span> <span class="n">inPort</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">inPort</span> <span class="ow">in</span> <span class="n">ignInPorts</span><span class="p">:</span> 
-                        <span class="n">s</span> <span class="o">+=</span> <span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">inPort</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> 
-                <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A </span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">port</span><span class="p">),</span> <span class="n">s</span><span class="p">))</span>
                     
     <span class="k">def</span> <span class="nf">showPart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
         <span class="n">lstr</span> <span class="o">=</span> <span class="s2">&quot;%&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;s</span><span class="si">%s</span><span class="s2">&quot;</span>
@@ -312,37 +285,41 @@
             
     <span class="k">def</span> <span class="nf">bindingsGen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ignInPorts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ignOutPorts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">knownBindings</span> <span class="o">=</span> <span class="p">[]</span>
         
         <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputPorts</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">port</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignOutPorts</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># test if IOPort </span>
-                    <span class="n">peer</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">peerPort</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">peer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ioPort</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># test if IOPort </span>
+            <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ioPort</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span> 
+                <span class="n">peers</span> <span class="o">=</span> <span class="n">ioPort</span><span class="o">.</span><span class="n">peerPorts</span><span class="p">()</span>
+                
+                <span class="k">for</span> <span class="n">peer</span> <span class="ow">in</span> <span class="n">peers</span><span class="p">:</span>
+                    <span class="c1">#print( &quot;port %s peer %s&quot; % (ioPort, peer))</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span> <span class="n">ioPort</span><span class="o">.</span><span class="n">_outPort</span><span class="p">,</span> <span class="n">peer</span><span class="o">.</span><span class="n">_inPort</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">knownBindings</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span> <span class="n">peer</span><span class="o">.</span><span class="n">_outPort</span><span class="p">,</span> <span class="n">ioPort</span><span class="o">.</span><span class="n">_inPort</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">knownBindings</span><span class="p">:</span>
+                        
                         <span class="c1"># Has a peer port, make bidirectional connection</span>
                         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1">  [dir=none penwidth=3 label=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="p">(</span> <span class="c1">#[constraint=false]</span>
                               <span class="n">moddyNameToDotName</span><span class="p">(</span><span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">port</span><span class="p">)),</span>
                               <span class="n">moddyNameToDotName</span><span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">hierarchyName</span><span class="p">()),</span>
                               <span class="n">p2pPortMsgTypes</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">_outPort</span><span class="p">,</span> <span class="n">peer</span><span class="o">.</span><span class="n">_outPort</span><span class="p">)</span> 
                             <span class="p">)]</span> <span class="p">)</span>
-
+    
                         <span class="c1"># These ports are already connected, ignore them in the rest of the scan</span>
-                        <span class="n">ignOutPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
-                        <span class="n">ignOutPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">_outPort</span><span class="p">)</span>
-                        <span class="n">ignInPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
-                        <span class="n">ignInPorts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
+                        <span class="n">knownBindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">ioPort</span><span class="o">.</span><span class="n">_outPort</span><span class="p">,</span> <span class="n">peer</span><span class="o">.</span><span class="n">_inPort</span> <span class="p">))</span>
+                        <span class="n">knownBindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">peer</span><span class="o">.</span><span class="n">_outPort</span><span class="p">,</span> <span class="n">ioPort</span><span class="o">.</span><span class="n">_inPort</span> <span class="p">))</span>
+                        
                     
-                <span class="k">for</span> <span class="n">inPort</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">inPort</span> <span class="ow">in</span> <span class="n">ignInPorts</span><span class="p">:</span>
-                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1"> [label=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="p">(</span> <span class="c1">#[constraint=false]</span>
-                              <span class="n">moddyNameToDotName</span><span class="p">(</span><span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">port</span><span class="p">)),</span>
-                              <span class="n">moddyNameToDotName</span><span class="p">(</span><span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">inPort</span><span class="p">)),</span>
-                              <span class="n">portMsgTypesToLabel</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">learnedMsgTypes</span><span class="p">())</span> <span class="p">)</span> <span class="p">]</span> <span class="p">)</span>
+            <span class="k">for</span> <span class="n">inPort</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ioPort</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span> <span class="n">ioPort</span><span class="o">.</span><span class="n">_outPort</span><span class="p">,</span> <span class="n">inPort</span> <span class="p">)</span> <span class="ow">in</span> <span class="n">knownBindings</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1"> [label=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="p">(</span> <span class="c1">#[constraint=false]</span>
+                          <span class="n">moddyNameToDotName</span><span class="p">(</span><span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">port</span><span class="p">)),</span>
+                          <span class="n">moddyNameToDotName</span><span class="p">(</span><span class="n">portOrIoPortHierarchyName</span><span class="p">(</span><span class="n">inPort</span><span class="p">)),</span>
+                          <span class="n">portMsgTypesToLabel</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">learnedMsgTypes</span><span class="p">())</span> <span class="p">)</span> <span class="p">]</span> <span class="p">)</span>
                          
          
         <span class="k">return</span> <span class="n">lines</span>
+
     
     <span class="k">def</span> <span class="nf">schedulerRelationsGen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
@@ -509,7 +486,6 @@
     <span class="n">ecDev1</span> <span class="o">=</span> <span class="n">EcDevice</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span><span class="s2">&quot;DEV1&quot;</span><span class="p">)</span>
     <span class="n">ecDev2</span> <span class="o">=</span> <span class="n">EcDevice</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span><span class="s2">&quot;DEV2&quot;</span><span class="p">)</span>
     <span class="n">sensor</span> <span class="o">=</span> <span class="n">Sensor</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span><span class="s2">&quot;SENSOR&quot;</span><span class="p">)</span>
-    <span class="n">cpu</span><span class="o">.</span><span class="n">app1</span><span class="o">.</span><span class="n">ecmPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecm</span><span class="o">.</span><span class="n">appPort</span><span class="p">)</span>
     <span class="n">ecm</span><span class="o">.</span><span class="n">ecPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecDev1</span><span class="o">.</span><span class="n">ecPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
     <span class="n">ecDev1</span><span class="o">.</span><span class="n">ecPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecDev2</span><span class="o">.</span><span class="n">ecPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
     <span class="n">ecDev2</span><span class="o">.</span><span class="n">ecPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecm</span><span class="o">.</span><span class="n">ecPort</span><span class="o">.</span><span class="n">_inPort</span><span class="p">)</span>
@@ -517,10 +493,20 @@
     <span class="n">sensor</span><span class="o">.</span><span class="n">outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecDev2</span><span class="o">.</span><span class="n">uc</span><span class="o">.</span><span class="n">sensPort</span><span class="p">)</span>
     <span class="c1"># sensless, but test that a peer-to-peer port can be bound to an additional input port</span>
     <span class="n">ecDev1</span><span class="o">.</span><span class="n">uc</span><span class="o">.</span><span class="n">fpgaPort</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">pwrPort</span><span class="p">)</span>
+    
+    <span class="c1"># test 3 IO ports bound together (mesh)</span>
+    <span class="n">cpu</span><span class="o">.</span><span class="n">app1</span><span class="o">.</span><span class="n">ecmPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecm</span><span class="o">.</span><span class="n">appPort</span><span class="p">)</span>
+    <span class="n">cpu</span><span class="o">.</span><span class="n">app2</span><span class="o">.</span><span class="n">ecmPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">ecm</span><span class="o">.</span><span class="n">appPort</span><span class="p">)</span>
+    <span class="n">cpu</span><span class="o">.</span><span class="n">app1</span><span class="o">.</span><span class="n">ecmPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">cpu</span><span class="o">.</span><span class="n">app2</span><span class="o">.</span><span class="n">ecmPort</span><span class="p">)</span>
 
+    <span class="c1">#print(&quot;app1 in outports %s Peers %s&quot; %  (cpu.app1.ecmPort._inPort._outPorts, cpu.app1.ecmPort.peerPorts()))</span>
+    <span class="c1">#print(&quot;app2 in outports %s&quot; %  cpu.app2.ecmPort._inPort._outPorts)</span>
+    <span class="c1">#print(&quot;ecm in outports %s&quot; %  ecm.appPort._inPort._outPorts)</span>
     
+    <span class="k">for</span> <span class="n">pName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SENSOR.outPort&#39;</span><span class="p">,</span> <span class="s1">&#39;DEV2.FPGA.ucPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CPU.App1.ecmPort&#39;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;findPortByName </span><span class="si">%s</span><span class="s2"> = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pName</span><span class="p">,</span> <span class="n">simu</span><span class="o">.</span><span class="n">findPortByName</span><span class="p">(</span><span class="n">pName</span><span class="p">)))</span>
     
-    <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;struct&#39;</span><span class="p">,</span> <span class="n">keepGvFile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/structTest.svg&#39;</span><span class="p">,</span> <span class="n">keepGvFile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     
 </pre></div>
 

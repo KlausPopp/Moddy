@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -221,7 +221,8 @@
 <p>The simulator time is the virtual time seen by the model while the simulation is running.
 It has nothing to do with the real time of the computer running the simulation.
 It is important to understand that the simulation time does NOT advance while the model is
-executing a callback function (like a message receive or timer expiration callback). This means all python statements in a callback routine are executed at the same simulation time.</p>
+executing a callback function (like a message receive or timer expiration callback).
+This means all python statements in a callback routine are executed at the same simulation time.</p>
 <div class="section" id="time-unit">
 <h3>Time Unit<a class="headerlink" href="#time-unit" title="Permalink to this headline">¶</a></h3>
 <p>Moddy’s simulation time unit is seconds, i.e. the value 1.0 means one second.
@@ -267,7 +268,8 @@ This derived class contains the model code implementing the behavior of the part
 <li>The parts initialization code</li>
 <li>The port receive methods</li>
 <li>The timer expired methods</li>
-<li>Optionally: Methods that are executed at the beginning and the end of the simulation .(<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.startSim" title="moddy.simulator.simPart.startSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startSim()</span></code></a> and <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.terminateSim" title="moddy.simulator.simPart.terminateSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminateSim()</span></code></a>)</li>
+<li>Optionally: Methods that are executed at the beginning and the end of the
+simulation. (<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.startSim" title="moddy.simulator.simPart.startSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startSim()</span></code></a> and <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.terminateSim" title="moddy.simulator.simPart.terminateSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminateSim()</span></code></a>)</li>
 </ul>
 </div></blockquote>
 <p>Here is a simple example of a part class derived from <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a>.</p>
@@ -278,14 +280,11 @@ This derived class contains the model code implementing the behavior of the part
 <span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
+                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
 
-        <span class="c1"># Ports</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mouth&#39;</span><span class="p">])</span>
-
-        <span class="c1"># Timers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
@@ -308,12 +307,15 @@ This derived class contains the model code implementing the behavior of the part
 <p>Each part must call the simPart’s constructor in it’s <em>__init__</em> method.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">simPart</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator block&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span> <span class="o">=</span> <span class="bp">None</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
                 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">                The parameters are:</span>
 <span class="sd">                :param sim: The simulator instance</span>
 <span class="sd">                :param objName: The name of the part (for example &quot;engine&quot;)</span>
-<span class="sd">                :param parentObj: The parent part (for example the &quot;car&quot; if the current part is &quot;engine&quot;). If this parameter is omitted, &quot;no parent&quot;, i.e. top level part is assumed.</span>
+<span class="sd">                :param parentObj: The parent part (for example the &quot;car&quot; if the current part is &quot;engine&quot;).</span>
+<span class="sd">                 If this parameter is omitted, &quot;no parent&quot;, i.e. top level part is assumed.</span>
+<span class="sd">                :param dict elems: A dictionary with elements (ports and timers) to create,</span>
+<span class="sd">                 e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; : &#39;timer1&#39; }</span>
 <span class="sd">                &#39;&#39;&#39;</span>
 </pre></div>
 </div>
@@ -321,7 +323,7 @@ This derived class contains the model code implementing the behavior of the part
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
         <span class="c1"># Initialize the base class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">}</span> <span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -346,10 +348,12 @@ in the order the parts have been created. The typical actions in the <a class="r
 </div></blockquote>
 <p>If present, the <cite>~.simPart.terminateSim()</cite> method is called by the simulator when the simulation is terminated,
 in the order the parts have been created. Typical actions of <cite>~.simPart.terminateSim()</cite> are</p>
-<ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li>stopping threads</li>
 <li>closing files</li>
 </ul>
+</div></blockquote>
 </div>
 <div class="section" id="nested-parts">
 <h3>Nested Parts<a class="headerlink" href="#nested-parts" title="Permalink to this headline">¶</a></h3>
@@ -369,7 +373,8 @@ To model this, you use the simPart constructors <em>parentObj</em> argument.</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The part hierarchy has no relevance for the simulator. The part hierarchy however is displayed in the structure graph, trace output and in the sequence diagrams.</p>
+<p class="last">The part hierarchy has no relevance for the simulator. The part hierarchy however is
+displayed in the structure graph, trace output and in the sequence diagrams.</p>
 </div>
 </div>
 </div>
@@ -387,7 +392,7 @@ The flight time simulates the transmission time of the message.</p>
 <p>All ports of a part must be explicitly created by a part.
 This is usually done in the constructor (<em>__init__</em> method) of the part owning the port.
 Note that a port is always owned by exactly one part.</p>
-<p>There are two ways to create ports:</p>
+<p>There are three ways to create ports:</p>
 <p>Using the low level methods:</p>
 <blockquote>
 <div><ul class="simple">
@@ -432,22 +437,28 @@ This means that your callback function MUST always be named <code class="docutil
 <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;io&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ioPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;ioPort2&#39;</span><span class="p">,</span> <span class="s1">&#39;ioPort3&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>Usually, you will always use the high level method, unless you need to create several input ports that
+<p>Usually, you will always use the high level methods, unless you need to create several input ports that
 have the same receive method.</p>
+<p>Since Moddy 1.8, ports can be created even more simpler through the <cite>elems</cite> parameter to the
+<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a> constructor. This is essentially the same as using the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createPorts" title="moddy.simulator.simPart.createPorts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createPorts()</span></code></a>
+method, but requires less typing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
+                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="binding-ports">
 <h3>Binding Ports<a class="headerlink" href="#binding-ports" title="Permalink to this headline">¶</a></h3>
 <p>Before a message can be sent between parts, someone must bind the output port of one object to the
 input port of another object.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If an input and output port that shall be bound belongs to the same part, then messages sent over
-this binding are called “messages to self”.
-The interactive viewer displays these messages, while the static svg diagrams do not display them.</p>
-</div>
 <p>This binding is done normally by the main program. If you have parts that are composed of other parts,
 then the internal bindings within the top level part are done in the top level parts constructor.
-To bind an input port to an output port, you call the output ports bind method:</p>
+To bind an input port to an output port, you call the output ports <a class="reference internal" href="../reference/core.html#moddy.simulator.simOutputPort.bind" title="moddy.simulator.simOutputPort.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">joe</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -457,9 +468,10 @@ To bind an input port to an output port, you call the output ports bind method:<
 <span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">paul</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">You cannot bind several output ports to one input port!</p>
+<p>Since Moddy 1.8, you can bind several output ports to one input port:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">joe</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
+<span class="n">paul</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">joe</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
+</pre></div>
 </div>
 <p>You can also bind IO ports to each other. In this case the output port of the first IO port is
 bound to the input port of the second port and vice versa. It doesn’t matter on which IO port you call the bind method.</p>
@@ -483,6 +495,22 @@ bound to the input port of the second port and vice versa. It doesn’t matter o
 What you send to the output port will be received after the flight time at the input port:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ioPort</span><span class="o">.</span><span class="n">loopBind</span><span class="p">()</span>
 </pre></div>
+</div>
+<p>Since Moddy 1.8, there is a new function <a class="reference internal" href="../reference/core.html#moddy.simulator.sim.smartBind" title="moddy.simulator.sim.smartBind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">smartBind()</span></code></a> method. This method should
+be used at the top level to bind all ports with a single call. In contrast to the
+classic <a class="reference internal" href="../reference/core.html#moddy.simulator.simOutputPort.bind" title="moddy.simulator.simOutputPort.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a> method, you specify the hierarchy name of the ports
+as a string, instead of using their python references.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">(</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s1">&#39;App.outPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev1.inPort&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev2.inPort&#39;</span><span class="p">],</span>             <span class="c1"># binds the 3 ports together</span>
+    <span class="p">[</span><span class="s1">&#39;App.ioPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Server.netPort&#39;</span> <span class="p">]</span>  <span class="p">])</span>                              <span class="c1"># binds the 2 ports together</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If an input and output port that shall be bound belongs to the same part, then messages sent over
+this binding are called “messages to self”.
+The interactive viewer displays these messages, while the static svg diagrams do not display them.</p>
 </div>
 </div>
 <div class="section" id="sending-messages">
@@ -725,6 +753,18 @@ It creates a new timer object, creates a new part variable <em>self.thinkTmr</em
 <p>This means that your callback function MUST always be named <code class="docutils literal notranslate"><span class="pre">&lt;timerName&gt;Expired</span></code>.</p>
 <p>You can also create multiple timers with one call:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;tmr1&#39;</span><span class="p">,</span> <span class="s1">&#39;tmr2&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Since Moddy 1.8, timers can be created even more simpler through the <cite>elems</cite> parameter to the
+<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a> constructor. This is essentially the same as using the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createTimers" title="moddy.simulator.simPart.createTimers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createTimers()</span></code></a>
+method, but requires less typing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
+                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
 </pre></div>
 </div>
 </div>

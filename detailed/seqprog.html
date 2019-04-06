@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Sequential Program Simulation &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Sequential Program Simulation &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -234,7 +234,23 @@ must implement a method <a class="reference internal" href="../reference/vthread
 <p>The <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> method is not supposed to exit/return, that’s why it contains an endless loop.
 (However, for remote controlled vThreads it makes sense to exit/return, see <a class="reference internal" href="#remote-controlled-thread"><span class="std std-ref">Remote Controlled vThreads</span></a>
 for more information)</p>
-<p>The <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> method can control the timing of the program via “system calls”:</p>
+<p>Since Moddy 1.8, you don’t need a subclass of <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread" title="moddy.vthread.vThread"><code class="xref py py-class docutils literal notranslate"><span class="pre">vThread</span></code></a> or <a class="reference internal" href="../reference/vthread.html#moddy.vtSchedRtos.vSimpleProg" title="moddy.vtSchedRtos.vSimpleProg"><code class="xref py py-class docutils literal notranslate"><span class="pre">vSimpleProg</span></code></a> anymore.
+You can pass instead a function to the constructor of <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread" title="moddy.vthread.vThread"><code class="xref py py-class docutils literal notranslate"><span class="pre">vThread</span></code></a> or <a class="reference internal" href="../reference/vthread.html#moddy.vtSchedRtos.vSimpleProg" title="moddy.vtSchedRtos.vSimpleProg"><code class="xref py py-class docutils literal notranslate"><span class="pre">vSimpleProg</span></code></a> via
+the <cite>target</cite> parameter. This function (in the example below <code class="docutils literal notranslate"><span class="pre">bobProg</span></code> is then called from <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bobProg</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">vSimpleProg</span><span class="p">):</span>
+    <span class="c1"># bob starts talking</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForMsg</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+
+    <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">bobProg</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;QueuingIO&#39;</span><span class="p">:</span> <span class="s1">&#39;head&#39;</span> <span class="p">}</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The program model in <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.runVThread" title="moddy.vthread.vThread.runVThread"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runVThread()</span></code></a> can control the timing of the program via “system calls”:</p>
 <blockquote>
 <div><ul class="simple">
 <li><a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> delays the program execution for a specified time or
@@ -286,14 +302,11 @@ There are two types of buffering ports</p>
 </ul>
 </div></blockquote>
 <p>Buffering input ports are derived from <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vtInPort" title="moddy.vthread.vtInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtInPort</span></code></a>.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The term “Queuing” was misspelled (as ‘Queing’) in earlier Moddy Versions.</p>
-</div>
 <p>A program reads a message from a buffering ports via the <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vtInPort.readMsg" title="moddy.vthread.vtInPort.readMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readMsg()</span></code></a> method.</p>
 <p>It can check the number of messages in the buffer through the <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vtInPort.nMsg" title="moddy.vthread.vtInPort.nMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nMsg()</span></code></a> method.</p>
-<p>A program can wait for new message using the <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> method.
-The exact behavior depends on the type of buffer port (Sampling or Queuing) and will be explained in the following.</p>
+<p>A program can wait for new message using the <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> method, or alternatively
+wait for a message and read the first available message through <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.waitForMsg" title="moddy.vthread.vThread.waitForMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">waitForMsg()</span></code></a>.</p>
+<p>The exact behavior depends on the type of buffer port (Sampling or Queuing) and will be explained in the following.</p>
 <div class="section" id="sampling-input-ports">
 <h3>Sampling Input Ports<a class="headerlink" href="#sampling-input-ports" title="Permalink to this headline">¶</a></h3>
 <p>Recall from previous chapter:</p>
@@ -385,7 +398,8 @@ If no message is in the queue, it raises a BufferError exception.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Call <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> only on empty queuing ports,
-otherwise the program will not be woken up (because the wakeup happens only at empty-&gt;non-empty transitions)!</p>
+otherwise the program will not be woken up (because the wakeup happens only at empty-&gt;non-empty transitions)!
+Alternatively, use <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.waitForMsg" title="moddy.vthread.vThread.waitForMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">waitForMsg()</span></code></a></p>
 </div>
 <p>The following snippet demonstrates the use of a queuing port.
 <em>myThread1</em> is a program that has a queuing input port <em>inP1</em>, while <em>stimThread</em> is firing messages to that port.</p>
@@ -431,6 +445,19 @@ otherwise the program will not be woken up (because the wakeup happens only at e
 </div>
 <div class="figure">
 <img alt="../_images/0220_queuingport.png" src="../_images/0220_queuingport.png" />
+</div>
+<p>Since Moddy 1.8, <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.waitForMsg" title="moddy.vthread.vThread.waitForMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">waitForMsg()</span></code></a> is available. This method waits for a message on any of the
+specified ports and returns the first available message:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="c1"># Wait for a message on either inP1 or inP2.</span>
+        <span class="c1"># Because 2 ports have been specified, waitForMsg returns a tuple with (msg, port) or None</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForMsg</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inP1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inP2</span><span class="p">])</span>
+
+        <span class="c1"># Wait for a message on inP2.</span>
+        <span class="c1"># Because 1 port has been specified, waitForMsg returns a just the msg or None</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForMsg</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inP2</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 </div>

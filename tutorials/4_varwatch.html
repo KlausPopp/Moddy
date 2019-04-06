@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Variable Watching &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Variable Watching &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -99,6 +99,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Variable Watching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
@@ -179,38 +180,33 @@
 <p>This demo shows how you can include the values of variables in a sequence diagram.</p>
 <p>The <em>VarChanger</em> instance uses two variables <em>var1</em> and <em>var2</em>, while <em>var2</em> is created during runtime (after 2 seconds).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Created on 09.04.2017</span>
-
-<span class="sd">@author: Klaus Popp</span>
+<span class="sd">@author: klauspopp@gmx.de</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
 
-<span class="k">class</span> <span class="nc">VarChanger</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>   
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;VC&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="c1"># self.var2 is created during execution</span>
+<span class="k">def</span> <span class="nf">varChangerProg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># self.var2 is created during execution</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">=</span> <span class="s2">&quot;ABC&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">=</span> <span class="s2">&quot;ABC&quot;</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">=</span> <span class="s2">&quot;DEF&quot;</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;WAIT&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">3</span>
-            
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">=</span> <span class="s2">&quot;DEF&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;WAIT&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">3</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
-    <span class="n">vc</span> <span class="o">=</span> <span class="n">VarChanger</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+    <span class="n">vc</span> <span class="o">=</span> <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;VC&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">varChangerProg</span> <span class="p">)</span>
+
     <span class="n">var1watch</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">newVarWatcher</span><span class="p">(</span><span class="s1">&#39;var1&#39;</span><span class="p">,</span> <span class="s2">&quot;0x</span><span class="si">%08x</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">var2watch</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">newVarWatcher</span><span class="p">(</span><span class="s1">&#39;var2&#39;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
         

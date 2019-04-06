@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Hello &mdash; Moddy Discrete Event Simulator 1.7.1 documentation</title>
+  <title>Hello &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.7
+                1.8
               </div>
             
           
@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
@@ -171,7 +172,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="hello">
-<h1>Hello<a class="headerlink" href="#hello" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Hello<a class="headerlink" href="#hello" title="Permalink to this headline">¶</a></h1>
 <p>Covers:</p>
 <ul class="simple">
 <li>Event driven modelling</li>
@@ -181,10 +182,14 @@
 <p>The words they are talking are the mesages.</p>
 <p>The persons send the words at their mouth and receive it through their ears.
 A timer is used to model their “think” time.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See also <a class="reference internal" href="8_helloProgram.html#hello-program"><span class="std std-ref">Hello Demo as a Sequential Program</span></a>, which models the same behavior with sequential programs.</p>
+</div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Created on 23.12.2016</span>
+<span class="sd">Basic Moddy demo </span>
 
-<span class="sd">@author: klaus</span>
+<span class="sd">@author: klauspopp@gmx.de</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
@@ -192,14 +197,11 @@ A timer is used to model their “think” time.</p>
 <span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> 
+                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span> 
+                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
 
-        <span class="c1"># Ports</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mouth&#39;</span><span class="p">])</span>
-
-        <span class="c1"># Timers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
@@ -215,19 +217,20 @@ A timer is used to model their “think” time.</p>
     <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Let Bob start talking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Joe</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
+                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span> 
+                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
 
-        <span class="c1"># Ports</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;mouth&#39;</span><span class="p">])</span>
-
-        <span class="c1"># Timers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>    
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
@@ -254,12 +257,8 @@ A timer is used to model their “think” time.</p>
     <span class="n">joe</span>    <span class="o">=</span> <span class="n">Joe</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span> <span class="p">)</span>
     
     <span class="c1"># bind ports</span>
-    <span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">joe</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
-    <span class="n">joe</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">bob</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
+    <span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">([</span> <span class="p">[</span><span class="s1">&#39;Bob.mouth&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.ears&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;Bob.ears&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.mouth&#39;</span><span class="p">]</span> <span class="p">])</span>
 
-    <span class="c1"># Let Bob start talking</span>
-    <span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    
     <span class="c1"># let simulator run</span>
     <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
     

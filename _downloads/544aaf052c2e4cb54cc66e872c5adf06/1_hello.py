@@ -1,7 +1,7 @@
 '''
-Created on 23.12.2016
+Basic Moddy demo 
 
-@author: klaus
+@author: klauspopp@gmx.de
 '''
 
 from moddy import *
@@ -9,14 +9,11 @@ from moddy import *
 class Bob(simPart):
     def __init__(self, sim, objName):
         # Initialize the parent class
-        super().__init__(sim=sim, objName=objName)
+        super().__init__(sim=sim, objName=objName, 
+                         elems = {'in': 'ears', 
+                                  'out': 'mouth',
+                                  'tmr': 'thinkTmr'})
 
-        # Ports
-        self.createPorts('in', ['ears'])
-        self.createPorts('out', ['mouth'])
-
-        # Timers
-        self.createTimers(['thinkTmr'])
         self.reply = ""
 
     def earsRecv(self, port, msg):
@@ -32,19 +29,20 @@ class Bob(simPart):
     def thinkTmrExpired(self, timer):
         self.setStateIndicator("")
         self.mouth.send(self.reply, 1)
+        
+    def startSim(self):
+        # Let Bob start talking
+        self.mouth.send("Hi Joe", 1)
 
 
 class Joe(simPart):
     def __init__(self, sim, objName):
         # Initialize the parent class
-        super().__init__(sim=sim, objName=objName)
+        super().__init__(sim=sim, objName=objName,
+                         elems = {'in': 'ears', 
+                                  'out': 'mouth',
+                                  'tmr': 'thinkTmr'})
 
-        # Ports
-        self.createPorts('in', ['ears'])
-        self.createPorts('out', ['mouth'])
-
-        # Timers
-        self.createTimers(['thinkTmr'])    
         self.reply = ""
 
     def earsRecv(self, port, msg):
@@ -71,12 +69,8 @@ if __name__ == '__main__':
     joe    = Joe( simu, "Joe" )
     
     # bind ports
-    bob.mouth.bind(joe.ears)
-    joe.mouth.bind(bob.ears)
+    simu.smartBind([ ['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth'] ])
 
-    # Let Bob start talking
-    bob.mouth.send("Hi Joe", 1)
-    
     # let simulator run
     simu.run(stopTime=12.0)
     
