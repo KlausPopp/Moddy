@@ -1,36 +1,31 @@
 '''
-Created on 09.04.2017
-
-@author: Klaus Popp
+@author: klauspopp@gmx.de
 '''
 
 from moddy import *
 
-class VarChanger(vSimpleProg):   
-    def __init__(self, sim):
-        super().__init__(sim=sim, objName="VC", parentObj=None)
-        self.var1 = 0
-        # self.var2 is created during execution
+def varChangerProg(self):
+    self.var1 = 0
+    # self.var2 is created during execution
+    while True:
+        self.var1 = 1
+        self.wait(2)
         
-    def runVThread(self):
-        while True:
-            self.var1 = 1
-            self.wait(2)
-            
-            self.var1 = 2
-            self.var2 = "ABC"
+        self.var1 = 2
+        self.var2 = "ABC"
 
-            self.wait(2)
-            self.var2 = "DEF"
-            
-            self.busy(2,'WAIT')
-            self.var1 = 3
-            
-            self.wait(3)
+        self.wait(2)
+        self.var2 = "DEF"
+        
+        self.busy(2,'WAIT')
+        self.var1 = 3
+        
+        self.wait(3)
 
 if __name__ == '__main__':
     simu = sim()
-    vc = VarChanger(simu)
+    vc = vSimpleProg( sim=simu, objName="VC", target=varChangerProg )
+
     var1watch = vc.newVarWatcher('var1', "0x%08x")
     var2watch = vc.newVarWatcher('var2', "%s")
         

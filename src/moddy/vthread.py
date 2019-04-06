@@ -229,18 +229,25 @@ class vThread(simPart):
     :param bool remoteControl: if True, allow thread state to be controlled through a moddy port "threadControlPort".\
     Those threads are not started automatically, but only via explicit "start" message to the "threadControlPort".\
     Those threads can be killed via "kill" and restarted via "start". 
-            
+    :param target: Instead of sublcassing vThread and implementing the model code in the subclasses ``runVThread`` method, \
+    specify the method with your model code in `target`. I gets called without parameters.
+    :param dict elems: A dictionary with elements (ports and timers) to create, \
+    e.g. ``{ 'QueuingIn': 'inPort1', 'out': ['outPort1', 'outPort2'], 'vtTmr' : 'timer1' }``
+
+               
     '''
 
 
-    def __init__(self, sim, objName, parentObj, remoteControlled=False):
+    def __init__(self, sim, objName, parentObj=None, remoteControlled=False, 
+                 target=None, elems=None ):
         '''
         Constructor
         '''
-        simPart.__init__(self,sim=sim, objName=objName, parentObj=parentObj)
+        simPart.__init__(self,sim=sim, objName=objName, parentObj=parentObj, elems=elems)
         self.remoteControlled = remoteControlled
         self.pythonThreadRunning = False;
         self.thread = None
+        self.target = target
         
         if remoteControlled:
             self.createPorts('in', ['threadControlPort'])
@@ -299,8 +306,11 @@ class vThread(simPart):
                 self.addAnnotation('vThread %s' % termReason)
     
     def runVThread(self):
-        ''' Model code of the VThread. must be overridden by subclass'''
-        pass 
+        ''' Model code of the VThread. can be overridden by subclass'''
+        if self.target is not None:
+            self.target(self)
+        else:
+            raise RuntimeError("%s: No implementation for runVThread available\n" % self)
     
     def stopAllTimers(self):
         for tmr in self._listTimers:
@@ -325,6 +335,57 @@ class vThread(simPart):
         :raise TerminateException: if simulator stopped 
         '''
         return self._scheduler.sysCall( self, 'wait', (timeout, evList))
+    
+    def waitForMsg(self, timeout, ports ):
+        '''
+        Suspend vThread until a message is available on at least at one of the `ports`.
+        
+        In contrast to :meth:`wait()`, you don't need to check that all ports are empty before calling this
+        method. 
+        
+        .. note:: 
+        
+            It makes not a lot of sense to call this method on :class:`vtSamplingInPort`, because once such a port 
+            has received at least once a message, this method returns immediately. 
+            
+        :param timeout: time to wait for messsages. If None, wait forever. If `0` is specified, don't wait, just 
+            return what is available.
+        :param ports: a port or a list of ports to wait for. Each port can be :class:`vtQueuingInPort` or :class:`vtIOPort`. 
+            
+        :return: One of the following:
+        
+            * if multiple ports were specified: tuple `(msg, port)` for the first message that is available one of the ports, 
+            * if a single port was specified: `msg` for the first message that is available on the ports, 
+            * None if no message available
+
+        :raise TerminateException: if simulator stopped 
+        '''
+        lstPorts = ports if type(ports) is list else [ports]
+        
+        # check if already a message available
+        rv = self._checkMsg(lstPorts)
+
+        if rv is None and timeout != 0:
+            # wait for message
+            self.wait( timeout, lstPorts )
+            rv = self._checkMsg(lstPorts)
+
+        return rv
+             
+            
+        
+    def _checkMsg( self, lstPorts ):
+        rv = None
+        
+        for port in lstPorts:
+            if port.nMsg() > 0:
+                if len(lstPorts) > 1:
+                    rv = (port.readMsg(), port)
+                else:
+                    rv = port.readMsg()
+                break
+        
+        return rv        
     
     def waitUntil(self, time, evList=[]):
         '''
@@ -390,7 +451,7 @@ class vThread(simPart):
         
         :param name: name of port
         """
-        port = vtIOPort(self._sim, name, self, vtSamplingInPort(self._sim, name, self))
+        port = vtIOPort(self._sim, name, self, vtSamplingInPort(self._sim, name + 'In', self))
         self.addIOPort(port)
         return port
 
@@ -400,7 +461,7 @@ class vThread(simPart):
         
         :param name: name of port
         """
-        port = vtIOPort(self._sim, name, self, vtQueuingInPort(self._sim, name, self))
+        port = vtIOPort(self._sim, name, self, vtQueuingInPort(self._sim, name + 'In', self))
         self.addIOPort(port)
         return port
         
@@ -458,9 +519,25 @@ class vThread(simPart):
         for tmrName in listTimerNames:
             exec('self.%s = self.newVtTimer("%s")' % (tmrName,tmrName)) 
        
-    
+    def createElements(self, elems):
+        """
+        Create ports and timers based on a dictionary.
+        
+        :param dict elems: A dictionary with elements (ports and timers) to create, \
+        e.g. ``{ 'QueuingIn': 'inPort1', 'out': ['outPort1', 'outPort2'], 'vtTmr' : 'timer1' }``
+        """
+        
+        for elType, names in elems.items():
+            if type(names) is str: names = [names]   # make a list if only a string is given
+            
+            if elType == 'vtTmr':
+                self.createVtTimers(names)
+            else:
+                self.createPorts(elType, names)
+
     def threadControlPortRecv(self, port, msg):
         self._scheduler.vtRemoteControl(self,msg)
             
+
             
             

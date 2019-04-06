@@ -254,7 +254,7 @@ class TraceGenDynamicViewer(object):
                     
                     # generate colored messages
                     msgColor = None
-                    if e.subObj._outPort._color is not None: msgColor = e.subObj._outPort._color
+                    if fireEvent._port._color is not None: msgColor = fireEvent._port._color
                     if fireEvent._msgColor is not None:
                         msgColor = fireEvent._msgColor
                     if msgColor is not None: mid += ', c:"%s"' % msgColor 

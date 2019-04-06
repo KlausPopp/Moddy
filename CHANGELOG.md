@@ -4,6 +4,24 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2019-04-03
+
+### Added
+- Allow to specify a part's ports in the constructor
+- Sequential programs: Allow to pass the program's function to the vThread/vSimpleProg constructor (target parameter)
+- waitForMsg() method for Queuing ports
+- Allow to bind multi output ports to one input port
+- simulator smartBind() method to bind all ports in a single call
+
+### Changed
+- all tutorials to use new comfort functions (smartBind, waitForMsg, creation of ports via constructor)
+- Remove timeouts between simulator thread and vThreads, otherwise debugging impossible
+
+## [1.7.1] - 2019-03-24
+
+### Added
+- First installation via pip
+
 ## [1.7.2] - 2019-03-26
 
 ### Fixed

@@ -27,6 +27,7 @@ To create a "program", your Part must be a subclass of either :class:`~.vthread.
 or :class:`~.vtSchedRtos.vSimpleProg`. 
 (More about the difference between them in chapter :ref:`diff-simpleprog-and-vthread`).
 
+
 Program Model
 =============
 
@@ -64,8 +65,26 @@ The :meth:`~.vthread.vThread.runVThread` method is not supposed to exit/return, 
 (However, for remote controlled vThreads it makes sense to exit/return, see :ref:`remote-controlled-thread` 
 for more information)
 
+Since Moddy 1.8, you don't need a subclass of :class:`~.vthread.vThread` or :class:`~.vtSchedRtos.vSimpleProg` anymore. 
+You can pass instead a function to the constructor of :class:`~.vthread.vThread` or :class:`~.vtSchedRtos.vSimpleProg` via
+the `target` parameter. This function (in the example below ``bobProg`` is then called from :meth:`~.vthread.vThread.runVThread`:
 
-The :meth:`~.vthread.vThread.runVThread` method can control the timing of the program via "system calls":
+.. code-block:: python
+
+	def bobProg(self: vSimpleProg):
+	    # bob starts talking
+	    self.head.send("Hi Joe", 1)
+	    
+	    while True:
+	        msg = self.waitForMsg(None, self.head)
+
+	if __name__ == '__main__':
+	    simu = sim()
+    
+	    vSimpleProg( sim=simu, objName="Bob", target=bobProg, elems={ 'QueuingIO': 'head' } )
+
+
+The program model in :meth:`~.vthread.vThread.runVThread` can control the timing of the program via "system calls":
 
 	* :meth:`~.vthread.vThread.wait()` delays the program execution for a specified time or 
 	  until an event occurred, indicating that the program is idle. No status box is shown on 
@@ -108,14 +127,14 @@ There are two types of buffering ports
 		* A read from the buffer consumes the first message
 
 Buffering input ports are derived from :class:`~.vthread.vtInPort`.
-
-.. note:: The term "Queuing" was misspelled (as 'Queing') in earlier Moddy Versions.
  
 A program reads a message from a buffering ports via the :meth:`~.vthread.vtInPort.readMsg()` method.
  
 It can check the number of messages in the buffer through the :meth:`~.vthread.vtInPort.nMsg()` method.
 
-A program can wait for new message using the :meth:`~.vthread.vThread.wait()` method. 
+A program can wait for new message using the :meth:`~.vthread.vThread.wait()` method, or alternatively 
+wait for a message and read the first available message through :meth:`~.vthread.vThread.waitForMsg()`.
+   
 The exact behavior depends on the type of buffer port (Sampling or Queuing) and will be explained in the following.
 
 Sampling Input Ports
@@ -229,6 +248,7 @@ A program can call :meth:`~.vthread.vThread.wait()` so that is woken up when a t
 
 	Call :meth:`~.vthread.vThread.wait()` only on empty queuing ports, 
 	otherwise the program will not be woken up (because the wakeup happens only at empty->non-empty transitions)!
+	Alternatively, use :meth:`~.vthread.vThread.waitForMsg()`
 	
 The following snippet demonstrates the use of a queuing port. 
 *myThread1* is a program that has a queuing input port *inP1*, while *stimThread* is firing messages to that port.
@@ -279,7 +299,22 @@ The following snippet demonstrates the use of a queuing port.
    
 .. figure:: ../_static/0220_queuingport.png 
  
- 
+Since Moddy 1.8, :meth:`~.vthread.vThread.waitForMsg()` is available. This method waits for a message on any of the
+specified ports and returns the first available message:
+
+
+.. code-block:: python
+
+    def runVThread(self):
+        while True:
+            # Wait for a message on either inP1 or inP2.
+            # Because 2 ports have been specified, waitForMsg returns a tuple with (msg, port) or None
+            rv = self.waitForMsg(30, [self.inP1, self.inP2])
+
+            # Wait for a message on inP2.
+            # Because 1 port has been specified, waitForMsg returns a just the msg or None
+            rv = self.waitForMsg(30, self.inP2)
+
 
 System Calls for Sequential Programs
 ====================================

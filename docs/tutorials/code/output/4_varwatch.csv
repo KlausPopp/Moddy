@@ -1,5 +1,5 @@
 #time;Action;Object;Port/Tmr;Value;requestTime;startTime;endTime;flightTime
-0,000000;VC;VC;VC.var1(WatchedVar);0x00000000
+0,000000;VC;VC;VC.var1(WatchedVar);
 0,000000;VC;VC;VC.var2(WatchedVar);
 0,000000;T-STOP;VC;VC.VCScTmr(Timer);
 0,000000;T-START;VC;VC.VCScTmr(Timer);2,000000

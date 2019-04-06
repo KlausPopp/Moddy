@@ -42,61 +42,52 @@ class myRcThread(vThread):
         
         self.busy(20,'2',bcWhiteOnBlue)
 
-class myUtilThread(vThread):
-    def __init__(self, sim ):
-        super().__init__(sim=sim, objName='utilThread', parentObj=None)
-        self.createPorts('out', ["toRcPort"])
         
-    def runVThread(self):
-        count = 0
-        while(True):
-            self.busy(10,'1',bcWhiteOnRed)
-            self.toRcPort.send(count, 1)
-            count += 1
+def utilThread(self):
+    count = 0
+    while(True):
+        self.busy(10,'1',bcWhiteOnRed)
+        self.toRcPort.send(count, 1)
+        count += 1
 
 
-class Stim(vSimpleProg):
-    def __init__(self, sim ):
-        super().__init__(sim=sim, objName='Stim', parentObj=None)
-        self.createPorts('out', ["rcPort"])
-        
-    def runVThread(self):
-        self.wait(2)
+def stimProg(self):
 
-        # @2s: initial start of rcTread 
-        self.rcPort.send('start',0)
-        self.wait(128)
-        
-        # @130s: restart rcThread, it has terminated, because it finished its main loop
-        self.rcPort.send('start',0)
-        self.wait(50)
-        
-        # @180s: kill rcThread
-        self.rcPort.send('kill',0)
-        self.wait(20)
-        
-        # @200s: restart rcThread, it has terminated because it has been killed
-        self.rcPort.send('start',0)
-        self.wait(90)
+    # @2s: initial start of rcTread 
+    self.waitUntil(2)
+    self.rcPort.send('start',0)
+    
+    # @130s: restart rcThread, it has terminated, because it finished its main loop
+    self.waitUntil(130)
+    self.rcPort.send('start',0)
+    
+    # @180s: kill rcThread
+    self.waitUntil(180)
+    self.rcPort.send('kill',0)
+    
+    # @200s: restart rcThread, it has terminated because it has been killed
+    self.waitUntil(200)
+    self.rcPort.send('start',0)
 
-        # @290s: restart rcThread, it has terminated because it finished its main loop
-        self.rcPort.send('start',0)
-        self.wait(70)
+    # @290s: restart rcThread, it has terminated because it finished its main loop
+    self.waitUntil(290)
+    self.rcPort.send('start',0)
+    self.wait(70)
 
 if __name__ == '__main__':
     simu = sim()
     simu.setDisplayTimeUnit('s')
     
-    sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+    sched = vtSchedRtos(sim=simu, objName="sched", parentObj=None)
     rcThread = myRcThread(simu)
-    utilThread = myUtilThread(simu)
+    utilThread = vThread( sim=simu, objName="utilThread", target=utilThread, elems={ 'out': 'toRcPort' } )
     sched.addVThread(rcThread, 0)
     sched.addVThread(utilThread, 1)
 
-    stim = Stim(simu)
-    stim.rcPort.bind(rcThread.threadControlPort)
+    stim = vSimpleProg( sim=simu, objName="Stim", target=stimProg, elems={ 'out': 'rcPort' } )
 
-    utilThread.toRcPort.bind(rcThread.fromUtilPort)
+    simu.smartBind([['rcThread.threadControlPort', 'Stim.rcPort'], 
+                    ['utilThread.toRcPort', 'rcThread.fromUtilPort'] ])
 
     # let simulator run
     try:

@@ -33,7 +33,7 @@ class vtSchedRtos(simPart):
     # A list of all vThreads is maintained in :attr:`_listVThreads`
 
     numPrio = 16
-    schedVThreadComTimeout = 20.0 # seconds
+    schedVThreadComTimeout = None #20.0 # seconds
 
     #
     # Methods to be called from the Simulator thread
@@ -418,7 +418,7 @@ class vtSchedRtos(simPart):
         self._scCallEvent.set()
         
         # wait until scheduler completed syscall
-        rv = vThread._scReturnEvent.wait(timeout=self.schedVThreadComTimeout + 1.0)
+        rv = vThread._scReturnEvent.wait(timeout=self.schedVThreadComTimeout + 1.0 if self.schedVThreadComTimeout is not None else None )
         
         if rv == False:
             if vThread._sim.isRunning() == False:
@@ -453,7 +453,7 @@ class vSimpleProg(vThread):
     
     def __init__(self, sim, **vThreadArgs):
         ''' See vThread.__init__ for arguments '''
-        vThread.__init__(self, sim, **vThreadArgs )
+        super().__init__(sim, **vThreadArgs )
         sched= vtSchedRtos(sim=sim, objName="sched", parentObj=self)
         sched.addVThread(self, 0)
         

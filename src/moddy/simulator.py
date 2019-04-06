@@ -8,7 +8,6 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
  
 '''
-from copy import deepcopy
 from moddy import ms,us,ns,VERSION
 from heapq import heappush, heappop
 from collections import deque  
@@ -53,6 +52,9 @@ class simBaseElement:
     
     def objName(self):
         return self._objName
+    
+    def __repr__(self):
+        return self.hierarchyNameWithType()
 
 
 class simPart(simBaseElement):
@@ -61,16 +63,22 @@ class simPart(simBaseElement):
     :param sim: Simulator instance
     :param objName: part's name
     :param parentObj: parent part. None if part has no parent. Defaults to None
+    :param dict elems: A dictionary with elements (ports and timers) to create, \
+    e.g. ``{ 'in': 'inPort1', 'out': ['outPort1', 'outPort2'], 'tmr' : 'timer1' }``
     """
-    def __init__(self, sim, objName, parentObj = None ):
+    def __init__(self, sim, objName, parentObj = None, elems=None ):
         super().__init__(sim, parentObj, objName, "Part")
         self._listPorts = []
         self._listTimers = []
         self._listSubParts = []     # child parts list
         self._listVarWatchers = []
         if not parentObj is None:
-            parentObj.addSubPart(self) 
+            parentObj.addSubPart(self)
+            
         sim.addPart(self)
+        
+        if elems is not None:
+            self.createElements(elems)
     
     def addSubPart(self, subPart):
         '''add subPart to list of subParts '''
@@ -216,6 +224,24 @@ class simPart(simBaseElement):
         for tmrName in listTimerNames:
             exec('self.%s = self.newTimer("%s", self.%sExpired)' % (tmrName,tmrName,tmrName)) 
     
+    def createElements(self, elems):
+        """
+        Create ports and timers based on a dictionary.
+        
+        :param dict elems: A dictionary with elements (ports and timers) to create, \
+        e.g. ``{ 'in': 'inPort1', 'out': ['outPort1', 'outPort2'], 'tmr' : 'timer1' }``
+        """
+        
+        for elType, names in elems.items():
+            if type(names) is str: names = [names]   # make a list if only a string is given
+            
+            if elType == 'tmr':
+                self.createTimers(names)
+            else:
+                self.createPorts(elType, names)
+                
+    
+    
     def startSim(self):
         '''Called from simulator when simulation begins'''
         pass
@@ -248,7 +274,7 @@ class simInputPort(simBaseElement):
     """
     def __init__(self, sim, part, name, msgReceivedFunc, ioPort=None):
         super().__init__(sim, part, name, "InPort")
-        self._outPort = None        # connected output port
+        self._outPorts = []         # connected output ports
         self._msgReceivedFunc = msgReceivedFunc # function that gets called when message arrives
         self._ioPort = ioPort       # reference to the IOPort which contains this inPort (None if not part of IOPort)
         
@@ -258,7 +284,7 @@ class simInputPort(simBaseElement):
         
     def isBound(self):
         """Report True if port is bound to an output port"""
-        return self._outPort is not None 
+        return len(self._outPorts) > 0 
     
 class simOutputPort(simBaseElement):
     """Simulator output port
@@ -349,11 +375,11 @@ class simOutputPort(simBaseElement):
         """bind an output port to an input port
         
         :param inputPort: input port to which this output port shall be bound
-        :raise AssertionError: if input port is already bound
+        :raise AssertionError: if input port is already bound to that output port
         
         """
-        assert(inputPort._outPort is None),"input port already bound"
-        inputPort._outPort = self
+        assert(self not in inputPort._outPorts),"input port %s already bound to output port %s" % (inputPort, self)
+        inputPort._outPorts.append(self)
         self._listInPorts.append(inputPort)
     
     def isBound(self):
@@ -470,20 +496,20 @@ class simIOPort(simBaseElement):
         ''' Set color for messages leaving that IOport '''
         self._outPort._color = color
 
-    def peerPort(self):
-        ''' 
-        return the peer IOPort to which this port is bound to.
-        return None if there is none
-        '''
-        peer = None
-        if self._inPort.isBound():
-            p = self._inPort._outPort   # get reference to the peer
-            if p._ioPort is not None:
-                p = p._ioPort._inPort
-                if p in self._outPort._listInPorts:
-                    peer = p._ioPort
-        return peer         
          
+    def peerPorts(self):
+        ''' 
+        return all peer IOPorts to which this port is bound to.
+        return list of peer ports (empty list if none)
+        '''
+        listPeers = []
+        if self._inPort.isBound():
+            for p in self._inPort._outPorts:   
+                if p._ioPort is not None:
+                    p = p._ioPort._inPort
+                    if p in self._outPort._listInPorts:
+                        listPeers.append(p._ioPort)
+        return listPeers         
         
 class simTimer(simBaseElement):
     """Simulator Timer
@@ -694,6 +720,27 @@ class sim:
     def outputPorts(self):
         return self._listOutPorts
     
+    def findPortByName(self, portHierarchyName):
+        '''
+        Find a port (input or output or IO) by its hierarchy name
+        :param string portHierarchyName: e.g. "part1.ioPort1" or "part1.ioPort1.inPort"
+        :return port: the found port
+        :raises ValueError: if port not found
+        '''
+        for part in self._listParts:
+            for port in part._listPorts:
+                #print("findPortByName %s %s" % (port.hierarchyName(), port._typeStr ))
+                if port.hierarchyName() == portHierarchyName:
+                    return port
+                
+                if port._typeStr == "IOPort":
+                    if port._inPort.hierarchyName() == portHierarchyName:
+                        return port._inPort
+                    if port._outPort.hierarchyName() == portHierarchyName:
+                        return port._outPort
+                    
+        raise(ValueError("Port not found %s" % portHierarchyName))
+
     #
     # Part management
     # 
@@ -975,7 +1022,45 @@ class sim:
                     print ("%10s %s" %  (self.timeStr(te.traceTime), te.transVal.__str__()), file=sys.stderr)
 
     
+    def smartBind( self, bindings ):
+        """
+        Create many port bindings at once using simple lists.
+        
+        Example:
+        
+        .. code-block:: python
+        
+            simu.smartBind( [ 
+                ['App.outPort1', 'Dev1.inPort', 'Dev2.inPort'],
+                ['App.ioPort1', 'Server.netPort' ]  ])
+                
+        :param list bindings: Each list element must be a list of strings, which specifies ports that shall be \
+        connected to each other. The strings must specify the hierarchy names of the ports.
+         
+        """
 
+        for binding in bindings:
+            self._singleSmartBind(binding)
 
+    def _singleSmartBind( self, binding ):
+        # determine output and input ports
+        outPorts = []
+        inPorts = []
+        
+        for portName in binding:
+            port = self.findPortByName(portName)
+            if port._typeStr == "OutPort":
+                outPorts.append(port)
+            elif port._typeStr == "IOPort":
+                outPorts.append(port._outPort)
+                inPorts.append(port._inPort)
+            elif port._typeStr == "InPort":
+                inPorts.append(port)
+                
+        # bind all output ports to all input ports
+        for outPort in outPorts:
+            for inPort in inPorts:
+                if outPort._ioPort is None or (outPort._ioPort != inPort._ioPort):
+                    outPort.bind(inPort)
 
-
+            

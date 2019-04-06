@@ -496,11 +496,11 @@ class svgSeqD(object):
         # draw only if both Parts have been added to sd
         if fromPart != toPart and self.hasPart(fromPart) and self.hasPart(toPart):
             msgColor = "black"
-            # Take the color of the output port sending this message
-            if e.subObj._outPort._color is not None:
-                msgColor = e.subObj._outPort._color
-                        
             fireEvent = e.transVal
+            # Take the color of the output port sending this message
+            if fireEvent._port._color is not None:
+                msgColor = fireEvent._port._color
+                        
             # if message specifies a specific color, take this color
             if fireEvent._msgColor is not None:
                 msgColor = fireEvent._msgColor

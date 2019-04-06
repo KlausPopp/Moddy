@@ -13,3 +13,5 @@ def moddyCreateDirsAndOpenOutputFile( filePath ):
     if os.path.dirname(filePath) != "":
         os.makedirs(os.path.dirname(filePath), exist_ok=True);
     return open(filePath, 'w')
+
+    

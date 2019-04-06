@@ -8,7 +8,7 @@ Simulator Core
 These are the user relevant methods of the simulator core:
 
 .. autoclass:: moddy.simulator.sim
-   :members: run, setDisplayTimeUnit, timeStr
+   :members: run, setDisplayTimeUnit, timeStr, smartBind
    
 SimPart
 --------------

@@ -1,8 +1,4 @@
 '''
-Created on 12.02.2017
-
-@author: Klaus Popp
-
 Simulate the behavior of a (extremely simplified) car infotainment system.
 
 The main state is simulated with a Moddy Finite state machine. (Off, Booting, NormalOp etc).
@@ -11,6 +7,8 @@ The normal state has several nested sub-state machines, such as
  'Volume' - manages the audio volume
 
 The Stim part simulates user events.
+
+@author: klauspopp@gmx.de
 
 '''
 
@@ -168,49 +166,47 @@ class CarInfoSystem(simFsmPart):
                 self._volume -= 1
                 self.topFsm().event('VolChangeDone')
  
-class Stim(vSimpleProg):   
-    def __init__(self, sim):
-        super().__init__(sim=sim, objName="Stim", parentObj=None)
-        self.createPorts('out', ['powerPort', 'ignitionPort', 'buttonPort']) 
-        self.createPorts('SamplingIn', ['audioPort', 'visualPort']) 
-        self.ignitionPort.setColor('red')
-        self.buttonPort.setColor('blue')
-        
-    def runVThread(self):
-        while True:
-            self.powerPort.send('on',1)
-            self.wait(2)
-            self.buttonPort.send('PowerButton',1)
-            self.wait(8)
-            self.buttonPort.send( 'NaviButton', 0.5)
-            self.wait(2)
-            self.buttonPort.send( 'VolKnobRight', 0.5)
-            self.buttonPort.send( 'VolKnobRight', 0.5)
-            self.wait(1)
-            self.buttonPort.send( 'VolKnobLeft', 0.5)
-            self.wait(1)
-            self.buttonPort.send( 'MuteButton', 0.5)
-            self.wait(1)
-            self.buttonPort.send( 'VolKnobRight', 0.5)
-            self.wait(5)
-            self.ignitionPort.send('off',1)
-            self.wait(2)
-            self.powerPort.send('off',1)
-            self.wait(None)
+def stimProg(self):
+    self.ignitionPort.setColor('red')
+    self.buttonPort.setColor('blue')
+    while True:
+        self.powerPort.send('on',1)
+        self.wait(2)
+        self.buttonPort.send('PowerButton',1)
+        self.wait(8)
+        self.buttonPort.send( 'NaviButton', 0.5)
+        self.wait(2)
+        self.buttonPort.send( 'VolKnobRight', 0.5)
+        self.buttonPort.send( 'VolKnobRight', 0.5)
+        self.wait(1)
+        self.buttonPort.send( 'VolKnobLeft', 0.5)
+        self.wait(1)
+        self.buttonPort.send( 'MuteButton', 0.5)
+        self.wait(1)
+        self.buttonPort.send( 'VolKnobRight', 0.5)
+        self.wait(5)
+        self.ignitionPort.send('off',1)
+        self.wait(2)
+        self.powerPort.send('off',1)
+        self.wait(None)
     
          
         
 if __name__ == '__main__':         
     simu = sim()
     cis = CarInfoSystem(simu, "CarInfoSys")
-    stim = Stim(simu)
-    
+    stim = vSimpleProg( sim=simu, objName="Stim", target=stimProg, 
+                        elems={ 'out': ['powerPort', 'ignitionPort', 'buttonPort'],
+                                'SamplingIn': ['audioPort', 'visualPort']} )
+
     # bind ports
-    stim.powerPort.bind(cis.powerPort)
-    stim.ignitionPort.bind(cis.ignitionPort)
-    stim.buttonPort.bind(cis.buttonPort)
-    cis.visualPort.bind(stim.visualPort)
-    cis.audioPort.bind(stim.audioPort)
+    simu.smartBind( [ 
+        ['Stim.powerPort', 'CarInfoSys.powerPort'],
+        ['Stim.ignitionPort', 'CarInfoSys.ignitionPort'],
+        ['Stim.buttonPort', 'CarInfoSys.buttonPort'],
+        ['Stim.visualPort', 'CarInfoSys.visualPort'],
+        ['Stim.audioPort', 'CarInfoSys.audioPort'],
+    ])
         
     moddyGenerateFsmGraph( fsm=cis.fsm, fileName='output/3_carinfo_fsm.svg', keepGvFile=True)  
     

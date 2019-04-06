@@ -8,24 +8,19 @@ test lost messages
 
 from moddy import *
 
-class Producer(vSimpleProg):
-    def __init__(self, sim):
-        super().__init__(sim=sim, objName="Producer", parentObj=None)
-        self.createPorts('out', ['netPort']) 
-
-    def runVThread(self):
-        self.netPort.injectLostMessageErrorBySequence(2)
-        self.netPort.injectLostMessageErrorBySequence(5)
-        self.netPort.injectLostMessageErrorBySequence(6)
-        while True:
-            self.wait(100*us)
-            self.netPort.send('test', 100*us)
-            self.busy(100*us, 'TX1', bcWhiteOnBlue)
-            self.netPort.send('test1', 100*us)
-            self.busy(100*us, 'TX2', bcWhiteOnRed)
-            self.wait(100*us)
-            self.netPort.send('Data1', 100*us)
-            self.busy(100*us, 'TX3', bcWhiteOnGreen)
+def producerProg(self):
+    self.netPort.injectLostMessageErrorBySequence(2)
+    self.netPort.injectLostMessageErrorBySequence(5)
+    self.netPort.injectLostMessageErrorBySequence(6)
+    while True:
+        self.wait(100*us)
+        self.netPort.send('test', 100*us)
+        self.busy(100*us, 'TX1', bcWhiteOnBlue)
+        self.netPort.send('test1', 100*us)
+        self.busy(100*us, 'TX2', bcWhiteOnRed)
+        self.wait(100*us)
+        self.netPort.send('Data1', 100*us)
+        self.busy(100*us, 'TX3', bcWhiteOnGreen)
 
 class Consumer(simPart):
     def __init__(self, sim):
@@ -40,8 +35,8 @@ if __name__ == '__main__':
     simu = sim()
     simu.setDisplayTimeUnit('us')
     
-    prod = Producer(simu)
-    cons = Consumer(simu)
+    prod = vSimpleProg( sim=simu, objName="Producer", target=producerProg, elems={ 'out': 'netPort' } )
+    cons = Consumer( simu )
 
     prod.netPort.bind(cons.netPort)
     

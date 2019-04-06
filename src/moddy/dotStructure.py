@@ -84,33 +84,6 @@ class DotStructure(object):
         self._outputPorts = outputPorts
         self._listSchedulers = []
         
-    def showStructure(self):
-        for part in self._topLevelParts:
-            self.showPart(part, 0)
-            
-        print("=== bindings ===")
-        ignInPorts = []
-        ignOutPorts = []
-        
-        for port in self._outputPorts:
-            if port not in ignOutPorts:
-                if port._ioPort is not None:
-                    # test if IOPort 
-                    peer = port._ioPort.peerPort()
-                    if peer is not None:
-                        # Has a peer port, make bidirectional connection
-                        print("C %s -- %s" %(port._ioPort.hierarchyName(), peer.hierarchyName()))
-                        # These ports are already connected, ignore them in the rest of the scan
-                        ignOutPorts.append(port)
-                        ignOutPorts.append(peer._outPort)
-                        ignInPorts.append(port._ioPort._inPort)
-                        ignInPorts.append(peer._inPort)
-                    
-                s = ""
-                for inPort in port._listInPorts:
-                    if not inPort in ignInPorts: 
-                        s += portOrIoPortHierarchyName(inPort) + ";" 
-                if s != "": print("A %s -> %s" %(portOrIoPortHierarchyName(port), s))
                     
     def showPart(self, part, level):
         lstr = "%" + str(3*level) + "s%s"
@@ -153,37 +126,41 @@ class DotStructure(object):
             
     def bindingsGen(self, level):
         lines = []
-        ignInPorts = []
-        ignOutPorts = []
+        knownBindings = []
         
         for port in self._outputPorts:
-            if port not in ignOutPorts:
-                if port._ioPort is not None:
-                    # test if IOPort 
-                    peer = port._ioPort.peerPort()
-                    if peer is not None:
+            ioPort = None
+            # test if IOPort 
+            if port._ioPort is not None:
+                ioPort = port._ioPort 
+                peers = ioPort.peerPorts()
+                
+                for peer in peers:
+                    #print( "port %s peer %s" % (ioPort, peer))
+                    if not ( ioPort._outPort, peer._inPort ) in knownBindings and not ( peer._outPort, ioPort._inPort ) in knownBindings:
+                        
                         # Has a peer port, make bidirectional connection
                         lines.append( [level, '%s -> %s  [dir=none penwidth=3 label="%s"]' % ( #[constraint=false]
                               moddyNameToDotName(portOrIoPortHierarchyName(port)),
                               moddyNameToDotName(peer.hierarchyName()),
                               p2pPortMsgTypes(port._ioPort._outPort, peer._outPort) 
                             )] )
-
+    
                         # These ports are already connected, ignore them in the rest of the scan
-                        ignOutPorts.append(port)
-                        ignOutPorts.append(peer._outPort)
-                        ignInPorts.append(port._ioPort._inPort)
-                        ignInPorts.append(peer._inPort)
+                        knownBindings.append( ( ioPort._outPort, peer._inPort ))
+                        knownBindings.append( ( peer._outPort, ioPort._inPort ))
+                        
                     
-                for inPort in port._listInPorts:
-                    if not inPort in ignInPorts:
-                        lines.append( [level, '%s -> %s [label="%s"]' % ( #[constraint=false]
-                              moddyNameToDotName(portOrIoPortHierarchyName(port)),
-                              moddyNameToDotName(portOrIoPortHierarchyName(inPort)),
-                              portMsgTypesToLabel(port.learnedMsgTypes()) ) ] )
+            for inPort in port._listInPorts:
+                if ioPort is None or not ( ioPort._outPort, inPort ) in knownBindings:
+                    lines.append( [level, '%s -> %s [label="%s"]' % ( #[constraint=false]
+                          moddyNameToDotName(portOrIoPortHierarchyName(port)),
+                          moddyNameToDotName(portOrIoPortHierarchyName(inPort)),
+                          portMsgTypesToLabel(port.learnedMsgTypes()) ) ] )
                          
          
         return lines
+
     
     def schedulerRelationsGen(self, level):
         lines = []
@@ -350,7 +327,6 @@ if __name__ == '__main__':
     ecDev1 = EcDevice(simu,"DEV1")
     ecDev2 = EcDevice(simu,"DEV2")
     sensor = Sensor(simu,"SENSOR")
-    cpu.app1.ecmPort.bind(ecm.appPort)
     ecm.ecPort._outPort.bind(ecDev1.ecPort._inPort)
     ecDev1.ecPort._outPort.bind(ecDev2.ecPort._inPort)
     ecDev2.ecPort._outPort.bind(ecm.ecPort._inPort)
@@ -358,8 +334,18 @@ if __name__ == '__main__':
     sensor.outPort.bind(ecDev2.uc.sensPort)
     # sensless, but test that a peer-to-peer port can be bound to an additional input port
     ecDev1.uc.fpgaPort._outPort.bind(sensor.pwrPort)
+    
+    # test 3 IO ports bound together (mesh)
+    cpu.app1.ecmPort.bind(ecm.appPort)
+    cpu.app2.ecmPort.bind(ecm.appPort)
+    cpu.app1.ecmPort.bind(cpu.app2.ecmPort)
 
+    #print("app1 in outports %s Peers %s" %  (cpu.app1.ecmPort._inPort._outPorts, cpu.app1.ecmPort.peerPorts()))
+    #print("app2 in outports %s" %  cpu.app2.ecmPort._inPort._outPorts)
+    #print("ecm in outports %s" %  ecm.appPort._inPort._outPorts)
     
+    for pName in ['SENSOR.outPort', 'DEV2.FPGA.ucPort', 'CPU.App1.ecmPort']:
+        print("findPortByName %s = %s" % (pName, simu.findPortByName(pName)))
     
-    moddyGenerateStructureGraph(simu, 'struct', keepGvFile=True)
+    moddyGenerateStructureGraph(simu, 'output/structTest.svg', keepGvFile=True)
     

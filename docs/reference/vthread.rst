@@ -8,7 +8,7 @@ Virtual Threads allow Moddy users to model sequential programs.
 Virtual Thread Class
 =============================================
 .. autoclass:: moddy.vthread.vThread
-   :members: runVThread, wait, waitUntil, busy, newVtSamplingInPort, newVtQueuingInPort, newVtSamplingIOPort, newVtQueuingIOPort, newVtTimer, createPorts, createVtTimers, TerminateException
+   :members: runVThread, wait, waitUntil, waitForMsg, busy, newVtSamplingInPort, newVtQueuingInPort, newVtSamplingIOPort, newVtQueuingIOPort, newVtTimer, createPorts, createVtTimers, TerminateException
 	
 Ports for Virtual Threads
 --------------------------
