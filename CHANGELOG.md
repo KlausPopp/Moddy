@@ -4,6 +4,16 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2019-08-25
+
+### Added
+- lib/pdu.py to model Protocol data units 
+- Add setMsgStartedFunc for input ports to inform receiver that message transmission has begun
+
+### Fixed
+- VERSION no longer a global variable that may collide with other SW components
+
+
 ## [1.8.0] - 2019-04-06
 
 ### Added
