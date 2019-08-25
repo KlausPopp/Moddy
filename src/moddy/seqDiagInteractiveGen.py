@@ -323,7 +323,7 @@ class TraceGenDynamicViewer(object):
         path = os.path.join(self.seqDiagInteractiveViewerPath(), fileName) 
         file = open( path, 'r' )
         text = file.read()
-        file.close
+        file.close()
         return text
     
     def genHtmlHead(self):
