@@ -8,7 +8,8 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
  
 '''
-from moddy import ms,us,ns,VERSION
+from moddy import ms,us,ns
+import moddy.version
 from heapq import heappush, heappop
 from collections import deque  
 from datetime import datetime
@@ -268,7 +269,7 @@ class simInputPort(simBaseElement):
     :param sim sim: Simulator instance
     :param simPart part: simPart that contains this port
     :param name: port name
-    :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``
+    :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``. May be None
     :param ioPort: reference to the IOPort which contains this inPort (None if not part of IOPort).  
     
     """
@@ -276,12 +277,28 @@ class simInputPort(simBaseElement):
         super().__init__(sim, part, name, "InPort")
         self._outPorts = []         # connected output ports
         self._msgReceivedFunc = msgReceivedFunc # function that gets called when message arrives
+        self._msgStartedFunc = None # function that gets called when message transmission has started on outPort
         self._ioPort = ioPort       # reference to the IOPort which contains this inPort (None if not part of IOPort)
         
     def msgEvent(self,msg):
         """called from bound outport when a new message is received"""
-        self._msgReceivedFunc(self,msg)
+        if self._msgReceivedFunc is not None:
+            self._msgReceivedFunc(self,msg)
         
+        
+    def usesMsgStartEvent(self):
+        return self._msgStartedFunc is not None
+    
+    def msgStartEvent(self, msg, outPort, flightTime ):
+        """
+        called from bound outport when a new message transmission just started
+        """
+        if self._msgStartedFunc is not None:
+            self._msgStartedFunc(self, msg, outPort, flightTime)
+
+    def setMsgStartedFunc(self, msgStartedFunc):
+        self._msgStartedFunc = msgStartedFunc
+
     def isBound(self):
         """Report True if port is bound to an output port"""
         return len(self._outPorts) > 0 
@@ -351,6 +368,13 @@ class simOutputPort(simBaseElement):
                 self._port._sendSchedule(event)
                 self._sim.addTraceEvent( simTraceEvent(self._port._parentObj, self._port, event, '>MSG(Q)') )
             self._port._seqNo += 1    
+
+        def notifyStart(self):
+            # tell all bound input ports that message transmission has begun
+            for inport in self._port._listInPorts:
+                if inport.usesMsgStartEvent():
+                    inport.msgStartEvent( self.__class__.msgUnserialize(self._serializedMsg), self, self._flightTime )
+
     
         @staticmethod
         def msgSerialize(msg):
@@ -402,6 +426,7 @@ class simOutputPort(simBaseElement):
     def _sendSchedule(self, event):
         event.execTime = self._sim.time() + event._flightTime
         self._sim.scheduleEvent(event)
+        event.notifyStart()
         
     
     def send(self, msg, flightTime):
@@ -509,7 +534,11 @@ class simIOPort(simBaseElement):
                     p = p._ioPort._inPort
                     if p in self._outPort._listInPorts:
                         listPeers.append(p._ioPort)
-        return listPeers         
+        return listPeers       
+    
+    # delegation methods to input port
+    def setMsgStartedFunc(self, msgStartedFunc):
+        self._inPort.setMsgStartedFunc(msgStartedFunc)   
         
 class simTimer(simBaseElement):
     """Simulator Timer
@@ -889,7 +918,7 @@ class sim:
             return 
         
         self.checkUnBoundPorts()
-        print ("SIM: Simulator %s starting" % (VERSION))
+        print ("SIM: Simulator %s starting" % (moddy.version.VERSION))
         self._startRealTime = datetime.now()
         
         # create stop event that fires at stop time
