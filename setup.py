@@ -10,7 +10,6 @@ import os
 import re
 
 sys.path.append("src")
-#from moddy.version import VERSION
 
 def read(fname):
     try:
