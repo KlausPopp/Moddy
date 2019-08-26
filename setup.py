@@ -47,7 +47,7 @@ setup(name='moddy',
     
     package_dir = { '': 'src'},
     
-    packages = [ 'moddy', 'moddy.seqDiagInteractiveViewer'],
+    packages = [ 'moddy', 'moddy.seqDiagInteractiveViewer', 'moddy.lib'],
     
     package_data={'moddy.seqDiagInteractiveViewer': ['*.css', '*.js']},
     
