@@ -515,7 +515,7 @@ class simIOPort(simBaseElement):
         ''' inject error on IoPorts output port 
         Refer to :func:`simOutputPort.injectLostMessageErrorBySequence` for details.
         '''
-        self._outPort.injectLostMessageErrorBySequence(self, nextSeq)
+        self._outPort.injectLostMessageErrorBySequence(nextSeq)
         
     def setColor(self, color):
         ''' Set color for messages leaving that IOport '''
@@ -1048,7 +1048,7 @@ class sim:
             print("%d Assertion failures during simulation" % self._numAssertionFailures, file=sys.stderr)
             for te in self._listTracedEvents: 
                 if te.action == "ASSFAIL":
-                    print ("%10s %s" %  (self.timeStr(te.traceTime), te.transVal.__str__()), file=sys.stderr)
+                    print ("%10s: %s: %s" %  (self.timeStr(te.traceTime), te.part, te.transVal.__str__()), file=sys.stderr)
 
     
     def smartBind( self, bindings ):
