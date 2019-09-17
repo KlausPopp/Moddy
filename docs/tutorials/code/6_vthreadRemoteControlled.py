@@ -32,12 +32,12 @@ class myRcThread(vThread):
             while self.fromUtilPort.nMsg() > 0:
                 self.addAnnotation('Got %s' % self.fromUtilPort.readMsg())
         
-        # In the 3th invocation generate a model assertion failure 
-        if self.threadInvocationCount == 3:
-            self.assertionFailed('3rd invocation assertion')
-
-        # In the 4rd invocation simulate an exception. This terminates the thread and the simulator
+        # In the 4th invocation generate a model assertion failure 
         if self.threadInvocationCount == 4:
+            self.assertionFailed('4rd invocation assertion')
+
+        # In the 5th invocation simulate an exception. This terminates the thread and the simulator
+        if self.threadInvocationCount == 5:
             raise ValueError("Test what happens in case of thread exceptions")
         
         self.busy(20,'2',bcWhiteOnBlue)
@@ -55,6 +55,14 @@ def stimProg(self):
 
     # @2s: initial start of rcTread 
     self.waitUntil(2)
+    self.rcPort.send('start',0)
+    
+    # @5s: kill rcThread
+    self.waitUntil(5)
+    self.rcPort.send('kill',0)
+    
+    # @7s: restart rcThread
+    self.waitUntil(7)
     self.rcPort.send('start',0)
     
     # @130s: restart rcThread, it has terminated, because it finished its main loop
