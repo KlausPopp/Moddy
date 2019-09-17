@@ -387,6 +387,13 @@ class vtSchedRtos(simPart):
             vThread._scCallReturnVal = returnCode    
             vThread._scReturnEvent.set()
             vThread.waitUntilThreadTerminated()
+
+            vThread._scRemainBusyTime = 0
+            vThread._scBusyStartTime = None
+            vThread._scAppStatus = ('',{})              # for status indicator   
+            vThread._scLastAppStatus = None           
+            vThread._scWaitEvents = None
+            vThread._scPendingCall = None
         
     
     def vtRemoteControl(self, vThread, action):

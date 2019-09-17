@@ -4,6 +4,14 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2019-09-17
+
+### Added
+- moddy/lib/traceSearch - to search for events in traced events
+
+### Fixed
+- restarted vthreads didn't work correctly if they have been busy before they have been killed 
+- simIOPort.injectLostMessageErrorBySequence didn't work
 
 ## [1.9.1] - 2019-08-26
 
