@@ -3,7 +3,7 @@ Created on 15.09.2019
 
 @author: klauspopp@gmx.de
 '''
-from moddy.simulator import sim
+from moddy.simulator import sim, simTraceEvent
 import fnmatch
 from reportlab.platypus import para
 
@@ -53,18 +53,28 @@ class TraceSearch(object):
         :param string textPat: message text with wildcards. If None, matches any 
         other parameters and return, see findEvent
         '''
-        return self.findEvent(part, startIdx, self.msgMatch, ("<MSG", textPat))
+        return self.findEvent(part, startIdx, self.msgMatch, ("<MSG", textPat), 
+                              partMatcher=self.subPartParentMatch)
 
     def findSndMsg(self, part, textPat, startIdx=None):
         '''
-        find next semt message by text pattern on message string representation 
+        find next sent message by text pattern on message string representation 
         "part" is the part sending the message
         :param string textPat: message text with wildcards. If None, matches any 
         other parameters and return, see findEvent
         '''
-        return self.findEvent(part, startIdx, self.msgMatch, (">MSG", textPat))
+        return self.findEvent(part, startIdx, self.msgMatch, (">MSG", textPat),
+                              partMatcher=self.subPartParentMatch)
     
-    
+    def findVc(self, varWatcher, textPat, startIdx=None):
+        '''
+        find next value change event by text pattern 
+        "varChanger" must be the varWatcher instance (hierarchy name not supported!)
+        :param string textPat: message text with wildcards. If None, matches any 
+        other parameters and return, see findEvent
+        '''
+        return self.findEvent(varWatcher, startIdx, self.tvStrMatch, ("VC", textPat),
+                              partMatcher=self.subPartMatch)
     
     
     def tvStrMatch(self, para, te):
@@ -83,14 +93,19 @@ class TraceSearch(object):
                 rv = True
         return rv
         
-    def findEvent(self, part, startIdx, matchFunc, matchFuncPara):
+    def findEvent(self, part, startIdx, matchFunc, matchFuncPara, partMatcher=None):
         '''
         find next traced event
         :param part: part hierarchy name or instance. If None, match any part
+            This is passed to partMatcher. So, depending on partMatcher, it can be
+            a part, a part hierarchy name, or a subpart
         :param startIdx: index in tracedEvents to start with (use curIdx if None)
+        :param partMatcher: function to call to check if trace event matches part
+            if None, use partMatch(te,p)
         :return: idx, te=the index and found event or None 
         :raises ValueError: if part name not found
         '''
+        if partMatcher is None: partMatcher = self.partMatch
         idx = startIdx if startIdx is not None else self.curIdx
         part = self.partTranslate(part)
 
@@ -98,19 +113,28 @@ class TraceSearch(object):
         for idx in range(idx, len(self.tracedEvents)):
             te = self.tracedEvents[idx]
             #print("COMPARING te %d: %s" % (idx, te))
-            if te.part == part or self.subPartMatch(part, te):
+            #if te.part == part or self.subPartMatch(part, te):
+            if partMatcher(te, part):
                 if matchFunc( matchFuncPara, te ):
                     rv = (idx,te)
                     break
         self.curIdx = idx + 1    
         return rv
+    
+    @staticmethod
+    def partMatch(te, p):
+        return te.part == p
         
-    def subPartMatch(self, part, te):
+    @staticmethod
+    def subPartParentMatch( te, p):
         subpart = te.subObj
         if subpart is None: return False
         
-        return subpart._parentObj == part
+        return subpart._parentObj == p
 
+    @staticmethod
+    def subPartMatch( te, p):
+        return te.subObj == p
         
     def partTranslate(self, part):
         '''
