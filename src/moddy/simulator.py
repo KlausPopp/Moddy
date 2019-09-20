@@ -346,8 +346,6 @@ class simOutputPort(simBaseElement):
             return self.__class__.msgUnserialize(self._serializedMsg).__str__()
         
         def execute(self):
-            # check if the message is marked as lost
-            self._isLost = self._port.isLostMessage()
 
             # pass the message to all bound input ports
             for inport in self._port._listInPorts:
@@ -426,7 +424,10 @@ class simOutputPort(simBaseElement):
     def _sendSchedule(self, event):
         event.execTime = self._sim.time() + event._flightTime
         self._sim.scheduleEvent(event)
-        event.notifyStart()
+        # check if the message is marked as lost
+        event._isLost = self.isLostMessage()
+        if not event._isLost:
+            event.notifyStart()
         
     
     def send(self, msg, flightTime):
