@@ -73,6 +73,8 @@ class simPart(simBaseElement):
         self._listTimers = []
         self._listSubParts = []     # child parts list
         self._listVarWatchers = []
+        self._stateInd = None
+        
         if not parentObj is None:
             parentObj.addSubPart(self)
             
@@ -107,6 +109,7 @@ class simPart(simBaseElement):
         :param text: text to show in life line
         :param dict appearance: appearance of state indicator. Dictionary with color values, e.g. ``{'boxStrokeColor':'black', 'boxFillColor':'green', 'textColor':'white'}``
         """
+        self._stateInd = text
         self._sim.setStateIndicator(self, text, appearance)
     
     def newInputPort(self, name, msgReceivedFunc):
@@ -715,6 +718,7 @@ class sim:
         self._disTimeScaleStr = "s"     # time scale string
         self._listTracedEvents = deque()# list of all traced events during execution
         self._listVariableWatches = []  # list of watched variables
+        self._listMonitors = []         # list of monitors (called on each simulator step)
         self._enableTracePrints = True
         self._stopOnAssertionFailure = False
         self._numAssertionFailures = 0
@@ -858,6 +862,28 @@ class sim:
         self.addTraceEvent(te)
         self._numAssertionFailures += 1
         
+    #
+    # Monitoring
+    # 
+    def addMonitor(self, monitorFunc):
+        '''
+        Register a function to be called at each simulator step
+        Usually used by monitors or stimulation routines
+        :param monitorFunc: function to call. Gets called with no arguments
+        '''
+        self._listMonitors.append(monitorFunc)
+        
+    def deleteMonitor(self, monitorFunc):
+        '''
+        Delete a monitor function that has been registered with 'addMonitor' before
+        :param monitorFunc: function to delete
+        :raises ValueError: if monitorFunc is not registered
+        '''
+        self._listMonitors.remove(monitorFunc)
+    
+    def callMonitors(self):
+        for monitorFunc in self._listMonitors:
+            monitorFunc()
     
     #
     # Simulator core routines
@@ -968,6 +994,8 @@ class sim:
                     raise
                 # Check for changed variables
                 self.watchVariables()
+                # Call monitors
+                self.callMonitors()
                 
                 if maxEvents is not None and self._numEvents >= maxEvents:
                     print("SIM: Simulator has got too many events (pass a higher number to run(maxEvents=n)")
