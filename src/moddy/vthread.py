@@ -404,6 +404,33 @@ class vThread(simPart):
             raise ValueError("waitUntil: target time already gone")
         return self.wait( time-self.time(), evList)
     
+    def waitForMonitor(self, timeout, monitorFunc):
+        '''
+        Suspend vThread until the 'monitorFunc' detects a match.
+        
+        Usefull for stimulation threads to wait until the model has reached some state.
+        The 'monitorFunc' is called from the simulator at each simulation step. 
+        If the 'monitorFunc' returns True, this function returns to caller.
+        
+        :param timeout: time to wait for monitor. If None, wait forever. A timeout value of 0 is invalid.
+        :param monitorFunc: the monitor function to be triggered at each simulation step. called without parameters
+            
+        :return: 'ok' if one of the monitor has returned True, 'timeout' if timeout
+
+        :raise TerminateException: if simulator stopped 
+        '''
+        self._monitorFunc = monitorFunc
+        self._sim.addMonitor(self.monitorExecute)
+        
+        res = self.wait(timeout, ["monitorEvent"])
+        
+        self._sim.deleteMonitor(self.monitorExecute)
+        return res
+    
+    def monitorExecute(self):
+        if self._monitorFunc() is True:
+            self._scheduler.wake( self, "monitorEvent")
+    
     def busy(self, time, status, statusAppearance={}):
         '''
         tell the scheduler how much time the current operation takes
