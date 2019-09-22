@@ -4,6 +4,15 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2019-09-21
+
+### Added
+- monitoring feature: sim.addMonitor/deleteMonitor and vThread.waitForMonitor
+- simPart _stateInd member to reflect the last text set via setStateIndicator
+
+### Fixed
+- Bug fix: lost message were propagated to input ports recvStart method
+
 ## [1.9.2] - 2019-09-17
 
 ### Added
