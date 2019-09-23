@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.vthread &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>moddy.vthread &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -562,6 +562,33 @@
         <span class="k">if</span> <span class="n">time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;waitUntil: target time already gone&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span> <span class="n">time</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="n">evList</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="vThread.waitForMonitor"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.waitForMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">waitForMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">monitorFunc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Suspend vThread until the &#39;monitorFunc&#39; detects a match.</span>
+<span class="sd">        </span>
+<span class="sd">        Usefull for stimulation threads to wait until the model has reached some state.</span>
+<span class="sd">        The &#39;monitorFunc&#39; is called from the simulator at each simulation step. </span>
+<span class="sd">        If the &#39;monitorFunc&#39; returns True, this function returns to caller.</span>
+<span class="sd">        </span>
+<span class="sd">        :param timeout: time to wait for monitor. If None, wait forever. A timeout value of 0 is invalid.</span>
+<span class="sd">        :param monitorFunc: the monitor function to be triggered at each simulation step. called without parameters</span>
+<span class="sd">            </span>
+<span class="sd">        :return: &#39;ok&#39; the monitor has returned True, &#39;timeout&#39; if timeout</span>
+
+<span class="sd">        :raise TerminateException: if simulator stopped </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_monitorFunc</span> <span class="o">=</span> <span class="n">monitorFunc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">addMonitor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitorExecute</span><span class="p">)</span>
+        
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;monitorEvent&quot;</span><span class="p">])</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">deleteMonitor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitorExecute</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+    
+    <span class="k">def</span> <span class="nf">monitorExecute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_monitorFunc</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler</span><span class="o">.</span><span class="n">wake</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;monitorEvent&quot;</span><span class="p">)</span>
     
 <div class="viewcode-block" id="vThread.busy"><a class="viewcode-back" href="../../reference/vthread.html#moddy.vthread.vThread.busy">[docs]</a>    <span class="k">def</span> <span class="nf">busy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">statusAppearance</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&#39;&#39;&#39;</span>

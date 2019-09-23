@@ -9,13 +9,13 @@
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 119)">
 <title>G</title>
 <polygon fill="white" stroke="none" points="-4,4 -4,-119 203.622,-119 203.622,4 -4,4"/>
-<g id="clust2" class="cluster"><title>cluster_Joe</title>
-<polygon fill="none" stroke="black" points="114.811,-8 114.811,-107 191.622,-107 191.622,-8 114.811,-8"/>
-<text text-anchor="start" x="144.217" y="-96" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">Joe</text>
-</g>
 <g id="clust1" class="cluster"><title>cluster_Bob</title>
 <polygon fill="none" stroke="black" points="8,-8 8,-107 84.8112,-107 84.8112,-8 8,-8"/>
 <text text-anchor="start" x="36.9056" y="-96" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">Bob</text>
+</g>
+<g id="clust2" class="cluster"><title>cluster_Joe</title>
+<polygon fill="none" stroke="black" points="114.811,-8 114.811,-107 191.622,-107 191.622,-8 114.811,-8"/>
+<text text-anchor="start" x="144.217" y="-96" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">Joe</text>
 </g>
 <!-- Bob__head -->
 <g id="node1" class="node"><title>Bob__head</title>

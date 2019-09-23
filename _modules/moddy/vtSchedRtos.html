@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.vtSchedRtos &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>moddy.vtSchedRtos &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -546,6 +546,13 @@
             <span class="n">vThread</span><span class="o">.</span><span class="n">_scCallReturnVal</span> <span class="o">=</span> <span class="n">returnCode</span>    
             <span class="n">vThread</span><span class="o">.</span><span class="n">_scReturnEvent</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
             <span class="n">vThread</span><span class="o">.</span><span class="n">waitUntilThreadTerminated</span><span class="p">()</span>
+
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scRemainBusyTime</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scBusyStartTime</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scAppStatus</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,{})</span>              <span class="c1"># for status indicator   </span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scLastAppStatus</span> <span class="o">=</span> <span class="kc">None</span>           
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scWaitEvents</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">vThread</span><span class="o">.</span><span class="n">_scPendingCall</span> <span class="o">=</span> <span class="kc">None</span>
         
     
     <span class="k">def</span> <span class="nf">vtRemoteControl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vThread</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>

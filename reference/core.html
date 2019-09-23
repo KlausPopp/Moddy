@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Simulator Core API Reference &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>Simulator Core API Reference &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -189,6 +189,37 @@
 <dt id="moddy.simulator.sim">
 <em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">sim</code><a class="reference internal" href="../_modules/moddy/simulator.html#sim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulator main class</p>
+<dl class="method">
+<dt id="moddy.simulator.sim.addMonitor">
+<code class="descname">addMonitor</code><span class="sig-paren">(</span><em>monitorFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.addMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.addMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a function to be called at each simulator step.
+Usually used by monitors or stimulation routines</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>monitorFunc</strong> – function to call. Gets called with no arguments</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.simulator.sim.deleteMonitor">
+<code class="descname">deleteMonitor</code><span class="sig-paren">(</span><em>monitorFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.deleteMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.deleteMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a monitor function that has been registered with ‘addMonitor’ before</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>monitorFunc</strong> – function to delete</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – if monitorFunc is not registered</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="moddy.simulator.sim.run">
 <code class="descname">run</code><span class="sig-paren">(</span><em>stopTime</em>, <em>maxEvents=100000</em>, <em>enableTracePrinting=True</em>, <em>stopOnAssertionFailure=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.run" title="Permalink to this definition">¶</a></dt>
@@ -489,13 +520,29 @@ If a value change is detected, a simulator trace event is generated</p>
 <li><strong>sim</strong> (<a class="reference internal" href="#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
 <li><strong>part</strong> (<a class="reference internal" href="#moddy.simulator.simPart" title="moddy.simulator.simPart"><em>simPart</em></a>) – simPart that contains this port</li>
 <li><strong>name</strong> – port name</li>
-<li><strong>msgReceivedFunc</strong> – callback function to call for message receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></li>
+<li><strong>msgReceivedFunc</strong> – callback function to call for message receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code>. May be None</li>
 <li><strong>ioPort</strong> – reference to the IOPort which contains this inPort (None if not part of IOPort).</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="moddy.simulator.simInputPort.setMsgStartedFunc">
+<code class="descname">setMsgStartedFunc</code><span class="sig-paren">(</span><em>msgStartedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simInputPort.setMsgStartedFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simInputPort.setMsgStartedFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>register a function that gets called when the bound output port
+begins a message transmission</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msgStartedFunc</strong> – callback function to call on message transmission start.
+Signature <code class="docutils literal notranslate"><span class="pre">func(inPort,</span> <span class="pre">msg,</span> <span class="pre">outPort,</span> <span class="pre">flightTime)</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -622,6 +669,14 @@ Refer to <a class="reference internal" href="#moddy.simulator.simOutputPort.inje
 <dt id="moddy.simulator.simIOPort.setColor">
 <code class="descname">setColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.setColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.setColor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set color for messages leaving that IOport</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.simulator.simIOPort.setMsgStartedFunc">
+<code class="descname">setMsgStartedFunc</code><span class="sig-paren">(</span><em>msgStartedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.setMsgStartedFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.setMsgStartedFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>register a function that gets called when the bound output port
+begins a message transmission</p>
+<p>Refer to <a class="reference internal" href="#moddy.simulator.simInputPort.setMsgStartedFunc" title="moddy.simulator.simInputPort.setMsgStartedFunc"><code class="xref py py-func docutils literal notranslate"><span class="pre">simInputPort.setMsgStartedFunc()</span></code></a> for details.</p>
 </dd></dl>
 
 </dd></dl>

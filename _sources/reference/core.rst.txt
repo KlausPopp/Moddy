@@ -8,7 +8,7 @@ Simulator Core
 These are the user relevant methods of the simulator core:
 
 .. autoclass:: moddy.simulator.sim
-   :members: run, setDisplayTimeUnit, timeStr, smartBind
+   :members: run, setDisplayTimeUnit, timeStr, smartBind, addMonitor, deleteMonitor
    
 SimPart
 --------------
@@ -22,6 +22,8 @@ These are the user relevant methods of the simPart class:
 Input Port
 --------------
 .. autoclass:: moddy.simulator.simInputPort
+   :members: setMsgStartedFunc
+ 
 
 Output Port
 --------------
@@ -31,7 +33,8 @@ Output Port
 I/O Port
 --------------
 .. autoclass:: moddy.simulator.simIOPort
-   :members: bind, loopBind, send, setColor, injectLostMessageErrorBySequence
+   :members: bind, loopBind, send, setColor, injectLostMessageErrorBySequence, setMsgStartedFunc
+
 
 Timer
 --------------

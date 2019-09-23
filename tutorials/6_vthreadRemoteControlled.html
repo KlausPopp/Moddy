@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Remote Controlled Threads &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>Remote Controlled Threads &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Remote Controlled Threads</a></li>
 <li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_helloProgram.html">Hello Demo as a Sequential Program</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
@@ -233,12 +234,12 @@ attribute, which means it will have a <em>threadControlPort</em>, through which 
             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">fromUtilPort</span><span class="o">.</span><span class="n">nMsg</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;Got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">fromUtilPort</span><span class="o">.</span><span class="n">readMsg</span><span class="p">())</span>
         
-        <span class="c1"># In the 3th invocation generate a model assertion failure </span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threadInvocationCount</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertionFailed</span><span class="p">(</span><span class="s1">&#39;3rd invocation assertion&#39;</span><span class="p">)</span>
-
-        <span class="c1"># In the 4rd invocation simulate an exception. This terminates the thread and the simulator</span>
+        <span class="c1"># In the 4th invocation generate a model assertion failure </span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threadInvocationCount</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertionFailed</span><span class="p">(</span><span class="s1">&#39;4rd invocation assertion&#39;</span><span class="p">)</span>
+
+        <span class="c1"># In the 5th invocation simulate an exception. This terminates the thread and the simulator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threadInvocationCount</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Test what happens in case of thread exceptions&quot;</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="s1">&#39;2&#39;</span><span class="p">,</span><span class="n">bcWhiteOnBlue</span><span class="p">)</span>
@@ -256,6 +257,14 @@ attribute, which means it will have a <em>threadControlPort</em>, through which 
 
     <span class="c1"># @2s: initial start of rcTread </span>
     <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># @5s: kill rcThread</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;kill&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># @7s: restart rcThread</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waitUntil</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">rcPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
     
     <span class="c1"># @130s: restart rcThread, it has terminated, because it finished its main loop</span>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.simulator &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>moddy.simulator &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -167,7 +167,8 @@
 <span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
 <span class="sd"> </span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="n">ms</span><span class="p">,</span><span class="n">us</span><span class="p">,</span><span class="n">ns</span><span class="p">,</span><span class="n">VERSION</span>
+<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="n">ms</span><span class="p">,</span><span class="n">us</span><span class="p">,</span><span class="n">ns</span>
+<span class="kn">import</span> <span class="nn">moddy.version</span>
 <span class="kn">from</span> <span class="nn">heapq</span> <span class="k">import</span> <span class="n">heappush</span><span class="p">,</span> <span class="n">heappop</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>  
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
@@ -231,6 +232,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_listTimers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listSubParts</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># child parts list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listVarWatchers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stateInd</span> <span class="o">=</span> <span class="kc">None</span>
+        
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parentObj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parentObj</span><span class="o">.</span><span class="n">addSubPart</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             
@@ -265,6 +268,7 @@
 <span class="sd">        :param text: text to show in life line</span>
 <span class="sd">        :param dict appearance: appearance of state indicator. Dictionary with color values, e.g. ``{&#39;boxStrokeColor&#39;:&#39;black&#39;, &#39;boxFillColor&#39;:&#39;green&#39;, &#39;textColor&#39;:&#39;white&#39;}``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stateInd</span> <span class="o">=</span> <span class="n">text</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="p">)</span></div>
     
 <div class="viewcode-block" id="simPart.newInputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simPart.newInputPort">[docs]</a>    <span class="k">def</span> <span class="nf">newInputPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msgReceivedFunc</span><span class="p">):</span>
@@ -427,7 +431,7 @@
 <span class="sd">    :param sim sim: Simulator instance</span>
 <span class="sd">    :param simPart part: simPart that contains this port</span>
 <span class="sd">    :param name: port name</span>
-<span class="sd">    :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``</span>
+<span class="sd">    :param msgReceivedFunc: callback function to call for message receiption. Signature ``func(port, msg)``. May be None</span>
 <span class="sd">    :param ioPort: reference to the IOPort which contains this inPort (None if not part of IOPort).  </span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -435,12 +439,35 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;InPort&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_outPorts</span> <span class="o">=</span> <span class="p">[]</span>         <span class="c1"># connected output ports</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_msgReceivedFunc</span> <span class="o">=</span> <span class="n">msgReceivedFunc</span> <span class="c1"># function that gets called when message arrives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msgStartedFunc</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># function that gets called when message transmission has started on outPort</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ioPort</span> <span class="o">=</span> <span class="n">ioPort</span>       <span class="c1"># reference to the IOPort which contains this inPort (None if not part of IOPort)</span>
         
     <span class="k">def</span> <span class="nf">msgEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;called from bound outport when a new message is received&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_msgReceivedFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msgReceivedFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msgReceivedFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">)</span>
         
+        
+    <span class="k">def</span> <span class="nf">usesMsgStartEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msgStartedFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    
+    <span class="k">def</span> <span class="nf">msgStartEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">outPort</span><span class="p">,</span> <span class="n">flightTime</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        called from bound outport when a new message transmission just started</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msgStartedFunc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msgStartedFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">outPort</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">)</span>
+
+<div class="viewcode-block" id="simInputPort.setMsgStartedFunc"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simInputPort.setMsgStartedFunc">[docs]</a>    <span class="k">def</span> <span class="nf">setMsgStartedFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msgStartedFunc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        register a function that gets called when the bound output port</span>
+<span class="sd">        begins a message transmission</span>
+<span class="sd">        </span>
+<span class="sd">        :param msgStartedFunc: callback function to call on message transmission start.</span>
+<span class="sd">            Signature ``func(inPort, msg, outPort, flightTime)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msgStartedFunc</span> <span class="o">=</span> <span class="n">msgStartedFunc</span></div>
+
     <span class="k">def</span> <span class="nf">isBound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Report True if port is bound to an output port&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outPorts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> </div>
@@ -488,8 +515,6 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">msgUnserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_serializedMsg</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
         
         <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="c1"># check if the message is marked as lost</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_isLost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">isLostMessage</span><span class="p">()</span>
 
             <span class="c1"># pass the message to all bound input ports</span>
             <span class="k">for</span> <span class="n">inport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
@@ -510,6 +535,13 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_sendSchedule</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">addTraceEvent</span><span class="p">(</span> <span class="n">simTraceEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_parentObj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="s1">&#39;&gt;MSG(Q)&#39;</span><span class="p">)</span> <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_seqNo</span> <span class="o">+=</span> <span class="mi">1</span>    
+
+        <span class="k">def</span> <span class="nf">notifyStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c1"># tell all bound input ports that message transmission has begun</span>
+            <span class="k">for</span> <span class="n">inport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">inport</span><span class="o">.</span><span class="n">usesMsgStartEvent</span><span class="p">():</span>
+                    <span class="n">inport</span><span class="o">.</span><span class="n">msgStartEvent</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">msgUnserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_serializedMsg</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flightTime</span> <span class="p">)</span>
+
     
         <span class="nd">@staticmethod</span>
         <span class="k">def</span> <span class="nf">msgSerialize</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
@@ -561,6 +593,10 @@
     <span class="k">def</span> <span class="nf">_sendSchedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="n">event</span><span class="o">.</span><span class="n">execTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">_flightTime</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">scheduleEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="c1"># check if the message is marked as lost</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">_isLost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isLostMessage</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">_isLost</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">notifyStart</span><span class="p">()</span>
         
     
 <div class="viewcode-block" id="simOutputPort.send"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simOutputPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
@@ -649,7 +685,7 @@
         <span class="sd">&#39;&#39;&#39; inject error on IoPorts output port </span>
 <span class="sd">        Refer to :func:`simOutputPort.injectLostMessageErrorBySequence` for details.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nextSeq</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="n">nextSeq</span><span class="p">)</span></div>
         
 <div class="viewcode-block" id="simIOPort.setColor"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Set color for messages leaving that IOport &#39;&#39;&#39;</span>
@@ -668,7 +704,17 @@
                     <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span><span class="o">.</span><span class="n">_inPort</span>
                     <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">_listInPorts</span><span class="p">:</span>
                         <span class="n">listPeers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">_ioPort</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">listPeers</span>         </div>
+        <span class="k">return</span> <span class="n">listPeers</span>       
+    
+    <span class="c1"># delegation methods to input port</span>
+<div class="viewcode-block" id="simIOPort.setMsgStartedFunc"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simIOPort.setMsgStartedFunc">[docs]</a>    <span class="k">def</span> <span class="nf">setMsgStartedFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msgStartedFunc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;         </span>
+<span class="sd">        register a function that gets called when the bound output port</span>
+<span class="sd">        begins a message transmission</span>
+<span class="sd">        </span>
+<span class="sd">        Refer to :func:`simInputPort.setMsgStartedFunc` for details.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inPort</span><span class="o">.</span><span class="n">setMsgStartedFunc</span><span class="p">(</span><span class="n">msgStartedFunc</span><span class="p">)</span>   </div></div>
         
 <div class="viewcode-block" id="simTimer"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.simTimer">[docs]</a><span class="k">class</span> <span class="nc">simTimer</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simulator Timer</span>
@@ -844,6 +890,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_disTimeScaleStr</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>     <span class="c1"># time scale string</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listTracedEvents</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span><span class="c1"># list of all traced events during execution</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_listVariableWatches</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of watched variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listMonitors</span> <span class="o">=</span> <span class="p">[]</span>         <span class="c1"># list of monitors (called on each simulator step)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_enableTracePrints</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stopOnAssertionFailure</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_numAssertionFailures</span> <span class="o">=</span> <span class="mi">0</span>
@@ -987,6 +1034,30 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addTraceEvent</span><span class="p">(</span><span class="n">te</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_numAssertionFailures</span> <span class="o">+=</span> <span class="mi">1</span>
         
+    <span class="c1">#</span>
+    <span class="c1"># Monitoring</span>
+    <span class="c1"># </span>
+<div class="viewcode-block" id="sim.addMonitor"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.addMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">addMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monitorFunc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Register a function to be called at each simulator step.</span>
+<span class="sd">        Usually used by monitors or stimulation routines</span>
+<span class="sd">        </span>
+<span class="sd">        :param monitorFunc: function to call. Gets called with no arguments</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listMonitors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">monitorFunc</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="sim.deleteMonitor"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.deleteMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">deleteMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monitorFunc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Delete a monitor function that has been registered with &#39;addMonitor&#39; before</span>
+<span class="sd">        </span>
+<span class="sd">        :param monitorFunc: function to delete</span>
+<span class="sd">        :raises ValueError: if monitorFunc is not registered</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_listMonitors</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">monitorFunc</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">callMonitors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">monitorFunc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listMonitors</span><span class="p">:</span>
+            <span class="n">monitorFunc</span><span class="p">()</span>
     
     <span class="c1">#</span>
     <span class="c1"># Simulator core routines</span>
@@ -1048,7 +1119,7 @@
             <span class="k">return</span> 
         
         <span class="bp">self</span><span class="o">.</span><span class="n">checkUnBoundPorts</span><span class="p">()</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;SIM: Simulator </span><span class="si">%s</span><span class="s2"> starting&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">VERSION</span><span class="p">))</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;SIM: Simulator </span><span class="si">%s</span><span class="s2"> starting&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">VERSION</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_startRealTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
         
         <span class="c1"># create stop event that fires at stop time</span>
@@ -1097,6 +1168,8 @@
                     <span class="k">raise</span>
                 <span class="c1"># Check for changed variables</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">watchVariables</span><span class="p">()</span>
+                <span class="c1"># Call monitors</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callMonitors</span><span class="p">()</span>
                 
                 <span class="k">if</span> <span class="n">maxEvents</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numEvents</span> <span class="o">&gt;=</span> <span class="n">maxEvents</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SIM: Simulator has got too many events (pass a higher number to run(maxEvents=n)&quot;</span><span class="p">)</span>
@@ -1178,7 +1251,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> Assertion failures during simulation&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numAssertionFailures</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">te</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listTracedEvents</span><span class="p">:</span> 
                 <span class="k">if</span> <span class="n">te</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;ASSFAIL&quot;</span><span class="p">:</span>
-                    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%10s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeStr</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">traceTime</span><span class="p">),</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">%10s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeStr</span><span class="p">(</span><span class="n">te</span><span class="o">.</span><span class="n">traceTime</span><span class="p">),</span> <span class="n">te</span><span class="o">.</span><span class="n">part</span><span class="p">,</span> <span class="n">te</span><span class="o">.</span><span class="n">transVal</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 
     
 <div class="viewcode-block" id="sim.smartBind"><a class="viewcode-back" href="../../reference/core.html#moddy.simulator.sim.smartBind">[docs]</a>    <span class="k">def</span> <span class="nf">smartBind</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bindings</span> <span class="p">):</span>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -582,6 +582,27 @@ delete the message content without affecting the sender or other receivers of th
 More specifically, <em>msg</em> is a “deep copy” of the original message;
 this means that also objects that are referenced in the message are copied.</p>
 <p>The usual task of receive callback method is to start timers or to send messages to other objects.</p>
+<div class="section" id="message-start-notification">
+<h4>Message Start Notification<a class="headerlink" href="#message-start-notification" title="Permalink to this headline">¶</a></h4>
+<p>Sometimes a message receiver needs to know when a message transmission starts. However,
+the standard input port callback is called at when the transmission is finished.</p>
+<p>If you want to get notified when a message transmission is started, you can register a function
+with <a class="reference internal" href="../reference/core.html#moddy.simulator.simInputPort.setMsgStartedFunc" title="moddy.simulator.simInputPort.setMsgStartedFunc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setMsgStartedFunc()</span></code></a> :</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NetPort</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># create network port</span>
+        <span class="c1"># Create an IO port, but don&#39;t install the normal receive callback</span>
+        <span class="c1"># Instead, install a function that gets called on message transmission start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_netPort</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">newIOPort</span><span class="p">(</span><span class="s1">&#39;netPort&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_netPort</span><span class="o">.</span><span class="n">setMsgStartedFunc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netPortRecvStart</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">netPortRecvStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inPort</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">outPort</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
+        <span class="c1"># gets called on message start</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="messages">
 <span id="id1"></span><h3>Messages<a class="headerlink" href="#messages" title="Permalink to this headline">¶</a></h3>

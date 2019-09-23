@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Virtual Thread Reference &mdash; Moddy Discrete Event Simulator 1.8.0 documentation</title>
+  <title>Virtual Thread Reference &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.8
+                1.10
               </div>
             
           
@@ -395,6 +395,33 @@ See svgSeqD.statusBox</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ if one of the events has been triggered (it does not tell you which one), ‘timeout’ if timeout</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.vthread.vThread.waitForMonitor">
+<code class="descname">waitForMonitor</code><span class="sig-paren">(</span><em>timeout</em>, <em>monitorFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.waitForMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.waitForMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suspend vThread until the ‘monitorFunc’ detects a match.</p>
+<p>Usefull for stimulation threads to wait until the model has reached some state.
+The ‘monitorFunc’ is called from the simulator at each simulation step. 
+If the ‘monitorFunc’ returns True, this function returns to caller.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timeout</strong> – time to wait for monitor. If None, wait forever. A timeout value of 0 is invalid.</li>
+<li><strong>monitorFunc</strong> – the monitor function to be triggered at each simulation step. called without parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ the monitor has returned True, ‘timeout’ if timeout</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
