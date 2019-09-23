@@ -300,6 +300,13 @@ class simInputPort(simBaseElement):
             self._msgStartedFunc(self, msg, outPort, flightTime)
 
     def setMsgStartedFunc(self, msgStartedFunc):
+        """
+        register a function that gets called when the bound output port
+        begins a message transmission
+        
+        :param msgStartedFunc: callback function to call on message transmission start.
+            Signature ``func(inPort, msg, outPort, flightTime)``
+        """
         self._msgStartedFunc = msgStartedFunc
 
     def isBound(self):
@@ -542,6 +549,12 @@ class simIOPort(simBaseElement):
     
     # delegation methods to input port
     def setMsgStartedFunc(self, msgStartedFunc):
+        '''         
+        register a function that gets called when the bound output port
+        begins a message transmission
+        
+        Refer to :func:`simInputPort.setMsgStartedFunc` for details.
+        '''
         self._inPort.setMsgStartedFunc(msgStartedFunc)   
         
 class simTimer(simBaseElement):
@@ -867,8 +880,9 @@ class sim:
     # 
     def addMonitor(self, monitorFunc):
         '''
-        Register a function to be called at each simulator step
+        Register a function to be called at each simulator step.
         Usually used by monitors or stimulation routines
+        
         :param monitorFunc: function to call. Gets called with no arguments
         '''
         self._listMonitors.append(monitorFunc)
@@ -876,6 +890,7 @@ class sim:
     def deleteMonitor(self, monitorFunc):
         '''
         Delete a monitor function that has been registered with 'addMonitor' before
+        
         :param monitorFunc: function to delete
         :raises ValueError: if monitorFunc is not registered
         '''

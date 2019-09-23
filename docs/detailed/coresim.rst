@@ -461,6 +461,33 @@ this means that also objects that are referenced in the message are copied.
 
 The usual task of receive callback method is to start timers or to send messages to other objects.
 
+
+Message Start Notification
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sometimes a message receiver needs to know when a message transmission starts. However,
+the standard input port callback is called at when the transmission is finished.
+
+If you want to get notified when a message transmission is started, you can register a function
+with :meth:`~.simInputPort.setMsgStartedFunc` :
+
+Example:
+
+.. code-block:: python
+
+    class NetPort():
+        def __init__(self):
+            
+            # create network port
+            # Create an IO port, but don't install the normal receive callback
+            # Instead, install a function that gets called on message transmission start  
+            self._netPort = switch.newIOPort('netPort', None)
+            self._netPort.setMsgStartedFunc(self.netPortRecvStart)
+
+        def netPortRecvStart(self, inPort, msg, outPort, flightTime):
+            # gets called on message start  
+
+
 .. _messages:
 
 Messages

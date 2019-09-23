@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - simPart _stateInd member to reflect the last text set via setStateIndicator
 
 ### Fixed
-- Bug fix: lost message were propagated to input ports recvStart method
+- lost message were propagated to input ports recvStart method
 
 ## [1.9.2] - 2019-09-17
 

@@ -415,7 +415,7 @@ class vThread(simPart):
         :param timeout: time to wait for monitor. If None, wait forever. A timeout value of 0 is invalid.
         :param monitorFunc: the monitor function to be triggered at each simulation step. called without parameters
             
-        :return: 'ok' if one of the monitor has returned True, 'timeout' if timeout
+        :return: 'ok' the monitor has returned True, 'timeout' if timeout
 
         :raise TerminateException: if simulator stopped 
         '''
