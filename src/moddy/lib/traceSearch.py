@@ -5,7 +5,6 @@ Created on 15.09.2019
 '''
 from moddy.simulator import sim, simTraceEvent
 import fnmatch
-from reportlab.platypus import para
 
 class TraceSearch(object):
     '''
