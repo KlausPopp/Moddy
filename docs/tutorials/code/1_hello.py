@@ -4,15 +4,16 @@ Basic Moddy demo
 @author: klauspopp@gmx.de
 '''
 
-from moddy import *
+import moddy
 
-class Bob(simPart):
+
+class Bob(moddy.simPart):
     def __init__(self, sim, objName):
         # Initialize the parent class
-        super().__init__(sim=sim, objName=objName, 
-                         elems = {'in': 'ears', 
-                                  'out': 'mouth',
-                                  'tmr': 'thinkTmr'})
+        super().__init__(sim=sim, objName=objName,
+                         elems={'in': 'ears',
+                                'out': 'mouth',
+                                'tmr': 'thinkTmr'})
 
         self.reply = ""
 
@@ -21,27 +22,26 @@ class Bob(simPart):
             self.reply = "How are you?"
         else:
             self.reply = "Hm?"
-        
+
         self.thinkTmr.start(1.4)
         self.setStateIndicator("Think")
-        
 
     def thinkTmrExpired(self, timer):
         self.setStateIndicator("")
         self.mouth.send(self.reply, 1)
-        
+
     def startSim(self):
         # Let Bob start talking
         self.mouth.send("Hi Joe", 1)
 
 
-class Joe(simPart):
+class Joe(moddy.simPart):
     def __init__(self, sim, objName):
         # Initialize the parent class
         super().__init__(sim=sim, objName=objName,
-                         elems = {'in': 'ears', 
-                                  'out': 'mouth',
-                                  'tmr': 'thinkTmr'})
+                         elems={'in': 'ears',
+                                'out': 'mouth',
+                                'tmr': 'thinkTmr'})
 
         self.reply = ""
 
@@ -53,39 +53,38 @@ class Joe(simPart):
             self.reply = "Fine"
         else:
             self.reply = "Hm?"
-        
+
         self.thinkTmr.start(2)
         self.setStateIndicator("Think")
-        
 
     def thinkTmrExpired(self, timer):
         self.setStateIndicator("")
         self.mouth.send(self.reply, 1.5)
 
+
 if __name__ == '__main__':
-    simu = sim()
-    
-    bob    = Bob( simu, "Bob" )
-    joe    = Joe( simu, "Joe" )
-    
+    simu = moddy.sim()
+
+    bob = Bob(simu, "Bob")
+    joe = Joe(simu, "Joe")
+
     # bind ports
-    simu.smartBind([ ['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth'] ])
+    simu.smartBind([['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth']])
 
     # let simulator run
     simu.run(stopTime=12.0)
-    
+
     # Output sequence diagram
-    moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="output/1_hello.html", 
-                                  fmt="iaViewer", 
-                                  excludedElementList=[], 
-                                  timePerDiv = 1.0, 
-                                  pixPerDiv = 30,
-                                  title = "Hello Demo")    
+    moddy.moddyGenerateSequenceDiagram(sim=simu,
+                                 fileName="output/1_hello.html",
+                                 fmt="iaViewer",
+                                 excludedElementList=[],
+                                 timePerDiv=1.0,
+                                 pixPerDiv=30,
+                                 title="Hello Demo")
 
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, 'output/1_hello_structure.svg')
-    
-    # Output trace table
-    moddyGenerateTraceTable(simu, 'output/1_hello.csv' )
+    moddy.moddyGenerateStructureGraph(simu, 'output/1_hello_structure.svg')
 
+    # Output trace table
+    moddy.moddyGenerateTraceTable(simu, 'output/1_hello.csv')

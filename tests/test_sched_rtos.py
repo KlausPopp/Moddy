@@ -4,18 +4,19 @@ Created on 27.12.2018
 @author: klauspopp@gmx.de
 '''
 import unittest
-from moddy import *
-from tests.utils import *
+import moddy
+from utils import searchInMsg, searchAnn, searchTExp, \
+                        searchSta, baseFileName, funcName
 
 
 class TestSchedRtos(unittest.TestCase):
 
     def testScheduling(self):
-        busyAppearance = bcWhiteOnBlue
+        busyAppearance = moddy.BC_WHITE_ON_BLUE
         
-        class myThread1(vThread):
+        class myThread1(moddy.VThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='hiThread', parentObj=None)
+                super().__init__(sim=sim, obj_name='hiThread', parent_obj=None)
             def runVThread(self):
                 print("   VtHi1")
                 self.busy(50,'1',busyAppearance)
@@ -32,9 +33,9 @@ class TestSchedRtos(unittest.TestCase):
                     self.busy(10,'3',busyAppearance)
                     self.wait(5,[])
     
-        class myThread2(vThread):
+        class myThread2(moddy.VThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='lowThreadA', parentObj=None)
+                super().__init__(sim=sim, obj_name='lowThreadA', parent_obj=None)
             def runVThread(self):
                 print("   VtLoA1")
                 self.busy(50,'1',busyAppearance)
@@ -45,9 +46,9 @@ class TestSchedRtos(unittest.TestCase):
                 print("   VtLoA4")
                 self.busy(250,'3',busyAppearance)
             
-        class myThread3(vThread):
+        class myThread3(moddy.VThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='lowThreadB', parentObj=None)
+                super().__init__(sim=sim, obj_name='lowThreadB', parent_obj=None)
             def runVThread(self):
                 print("   VtLoB1")
                 self.busy(50,'1',busyAppearance)
@@ -58,8 +59,8 @@ class TestSchedRtos(unittest.TestCase):
                 print("   VtLoB4")
                 self.busy(250,'3',busyAppearance)
     
-        simu = sim()
-        sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+        simu = moddy.Sim()
+        sched= moddy.VtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
                 
         t1 = myThread1(simu)
         t2 = myThread2(simu)
@@ -69,7 +70,7 @@ class TestSchedRtos(unittest.TestCase):
         sched.addVThread(t3, 1)
         simu.run(400)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()), 
                                       fmt="iaViewerRef", 
                                       showPartsList=[t1,t2,t3],
@@ -77,7 +78,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
 
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchSta(trc, 0.0, t1), "1" )
         self.assertEqual(searchSta(trc, 0.0, t2), "PE" )
@@ -100,22 +101,22 @@ class TestSchedRtos(unittest.TestCase):
         self.assertEqual(searchSta(trc, 280.0, t1), "3" )
 
     def testQueingPort(self):
-        busyAppearance = bcWhiteOnBlue
+        busyAppearance = moddy.BC_WHITE_ON_BLUE
         
         # Block myThread1 22s from running. Test to see if messages arrive when thread initially preempted
         # Was a bug in moddy <= 1.7.1
-        class myBlockThread(vThread):
+        class myBlockThread(moddy.VThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Block', parentObj=None)
+                super().__init__(sim=sim, obj_name='Block', parent_obj=None)
 
             def runVThread(self):
                 self.busy(22, "Block")
                 self.wait(None)
         
-        class myThread1(vThread):
+        class myThread1(moddy.VThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('QueuingIn', ['inP1'])
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
+                self.create_ports('QueuingIn', ['inP1'])
             
             def getAllMsg(self):
                 lstMsg = []
@@ -126,7 +127,7 @@ class TestSchedRtos(unittest.TestCase):
                     except BufferError:
                         break
                 
-                self.addAnnotation(lstMsg)
+                self.annotation(lstMsg)
          
              
             def runVThread(self):
@@ -139,10 +140,10 @@ class TestSchedRtos(unittest.TestCase):
                     self.getAllMsg()
 
 
-        class stimThread(vSimpleProg):
+        class stimThread(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['toT1Port'])
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
+                self.create_ports('out', ['toT1Port'])
                                 
             def runVThread(self):
                 count=0
@@ -152,12 +153,12 @@ class TestSchedRtos(unittest.TestCase):
                     self.toT1Port.send('hello%d' % count,5)
 
 
-        simu = sim()
+        simu = moddy.Sim()
                         
         t1 = myThread1(simu)
         t2 = myBlockThread(simu)
         
-        sched = vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+        sched = moddy.VtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
         sched.addVThread(t1, 2)
         sched.addVThread(t2, 1)
         stim = stimThread(simu)
@@ -165,7 +166,7 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
                                       showPartsList=[stim,t1,t2],
@@ -173,7 +174,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 55.0, t1), "['hello1', 'hello2', 'hello3']" )
         self.assertEqual(searchAnn(trc, 65.0, t1), "['hello4']" )
@@ -182,11 +183,11 @@ class TestSchedRtos(unittest.TestCase):
         self.assertEqual(searchAnn(trc, 143.0, t1), "['hello8', 'hello9']" )
 
     def testQueingIOPort(self):
-        busyAppearance = bcWhiteOnBlue
-        class myThread1(vSimpleProg):
+        busyAppearance = moddy.BC_WHITE_ON_BLUE
+        class myThread1(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('QueuingIO', ['ioP1'])
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
+                self.create_ports('QueuingIO', ['ioP1'])
             
             def getAllMsg(self):
                 lstMsg = []
@@ -197,7 +198,7 @@ class TestSchedRtos(unittest.TestCase):
                     except BufferError:
                         break
                 
-                self.addAnnotation(lstMsg)
+                self.annotation(lstMsg)
          
              
             def runVThread(self):
@@ -210,10 +211,10 @@ class TestSchedRtos(unittest.TestCase):
                     self.getAllMsg()
 
 
-        class stimThread(vSimpleProg):
+        class stimThread(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['toT1Port'])
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
+                self.create_ports('out', ['toT1Port'])
                                 
             def runVThread(self):
                 count=0
@@ -223,16 +224,16 @@ class TestSchedRtos(unittest.TestCase):
                     self.toT1Port.send('hello%d' % count,5)
 
 
-        simu = sim()
+        simu = moddy.Sim()
                         
         t1 = myThread1(simu)
         
         stim = stimThread(simu)
-        stim.toT1Port.bind(t1.ioP1._inPort)
+        stim.toT1Port.bind(t1.ioP1._in_port)
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
@@ -240,7 +241,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 33.0, t1), "['hello1']" )
         self.assertEqual(searchAnn(trc, 35.0, t1), "['hello2']" )
@@ -252,15 +253,15 @@ class TestSchedRtos(unittest.TestCase):
 
 
     def testSamplingPort(self):
-        busyAppearance = bcWhiteOnBlue
-        class myThread1(vSimpleProg):
+        busyAppearance = moddy.BC_WHITE_ON_BLUE
+        class myThread1(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('SamplingIn', ['inP1'])
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
+                self.create_ports('SamplingIn', ['inP1'])
                 
             def showMsg(self):
                 msg = self.inP1.readMsg(default='No message')
-                self.addAnnotation(msg)
+                self.annotation(msg)
                 
             def runVThread(self):
                 cycle=0
@@ -273,10 +274,10 @@ class TestSchedRtos(unittest.TestCase):
                     self.wait(20,[self.inP1])
 
 
-        class stimThread(vSimpleProg):
+        class stimThread(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['toT1Port'])
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
+                self.create_ports('out', ['toT1Port'])
                                 
             def runVThread(self):
                 count=0
@@ -286,7 +287,7 @@ class TestSchedRtos(unittest.TestCase):
                     self.toT1Port.send('hello%d' % count,5)
 
 
-        simu = sim()
+        simu = moddy.Sim()
                         
         t1 = myThread1(simu)
         
@@ -295,7 +296,7 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
@@ -303,7 +304,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
          
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 0.0, t1), "No message" )
         self.assertEqual(searchAnn(trc, 18.0, t1), "No message" )
@@ -312,10 +313,10 @@ class TestSchedRtos(unittest.TestCase):
         self.assertEqual(searchAnn(trc, 188.0, t1), "hello12" )
 
     def testVtTimer(self):
-        busyAppearance = bcWhiteOnBlue
-        class myThread1(vThread):
+        busyAppearance = moddy.BC_WHITE_ON_BLUE
+        class myThread1(moddy.VThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
                 self.createVtTimers(['tmr1'])
                 
             def runVThread(self):
@@ -324,20 +325,20 @@ class TestSchedRtos(unittest.TestCase):
                     cycle += 1
                     self.tmr1.start(16)
                     self.busy(18,cycle,busyAppearance)
-                    self.addAnnotation("A Fired " + str(self.tmr1.hasFired()))
+                    self.annotation("A Fired " + str(self.tmr1.hasFired()))
                     self.tmr1.start(20)
                     rv = self.wait(100,[self.tmr1])
-                    self.addAnnotation("B rv " + rv)
+                    self.annotation("B rv " + rv)
                     self.tmr1.start(20)
                     rv = self.wait(30,[])
-                    self.addAnnotation("C rv " + rv)
+                    self.annotation("C rv " + rv)
                     self.tmr1.start(40)
                     rv = self.wait(30,[self.tmr1])
-                    self.addAnnotation("D Fired " + str(self.tmr1.hasFired()) + " rv " + rv)
+                    self.annotation("D Fired " + str(self.tmr1.hasFired()) + " rv " + rv)
                     self.tmr1.stop()
 
-        simu = sim()
-        sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+        simu = moddy.Sim()
+        sched= moddy.VtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
                         
         t1 = myThread1(simu)
         sched.addVThread(t1, 0)
@@ -345,7 +346,7 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()), 
                                       fmt="iaViewerRef", 
                                       showPartsList=[t1],
@@ -353,7 +354,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
 
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 18.0, t1), "A Fired True" )
         self.assertEqual(searchAnn(trc, 38.0, t1), "B rv ok" )

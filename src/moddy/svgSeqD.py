@@ -13,8 +13,8 @@ TODO Inkskape Zoom factor wrong when no size in svg
 '''
 import svgwrite
 from math import *
-from moddy import ms,us,ns
-from moddy.simulator import sim, simVariableWatcher
+from . import MS, US, NS
+from .sim_core import Sim, SimVariableWatcher
 from builtins import str
 
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
@@ -100,7 +100,7 @@ class SdPart(object):
         
     def isVarDump(self):
         ''' return True if this sdPart belongs to a variable watcher '''
-        if type(self.simPart) is simVariableWatcher:
+        if type(self.simPart) is SimVariableWatcher:
             return True
         else:
             return False
@@ -182,7 +182,7 @@ class svgSeqD(object):
         ''' add list of parts to drawing. '''
         for part in partList:
             self._listParts.append(part)
-            sdPart = SdPart( part, sim.StateIndTransVal("",{}))
+            sdPart = SdPart( part, Sim.StateIndTransVal("",{}))
             self._dictParts[part.hierarchyName()] = sdPart
             
             sdPart.lifeLineBoxWidth = self.statusBoxWidth
@@ -192,7 +192,7 @@ class svgSeqD(object):
         ''' add list of variables to drawing. '''
         for var in varList:
             self._listVars.append(var)
-            sdPart = SdPart( var, sim.StateIndTransVal("",{}))
+            sdPart = SdPart( var, Sim.StateIndTransVal("",{}))
             self._dictParts[var.hierarchyName()] = sdPart
             
             sdPart.lifeLineBoxWidth = self.variableBoxWidth
@@ -478,7 +478,7 @@ class svgSeqD(object):
         
 
         
-    def timeStr(self,time):
+    def time_str(self,time):
         """return a formatted time string of <time> based on the display scale"""
         tmfmt = "%.1f" % (time / self._disTimeScale)
         return tmfmt + self._disTimeUnit
@@ -490,58 +490,58 @@ class svgSeqD(object):
 
     def drawMsg(self, e, areaStartTime, areaStartY):
         fromPart = e.part
-        toPart = e.subObj._parentObj
+        toPart = e.sub_obj._parentObj
         #assert(fromPart != toPart)
-        #print("drawMsg", e.traceTime, fromPart.objName(), toPart.objName())
+        #print("drawMsg", e.traceTime, fromPart.obj_name(), toPart.obj_name())
         # draw only if both Parts have been added to sd
         if fromPart != toPart and self.hasPart(fromPart) and self.hasPart(toPart):
             msgColor = "black"
-            fireEvent = e.transVal
+            fireEvent = e.trans_val
             # Take the color of the output port sending this message
             if fireEvent._port._color is not None:
                 msgColor = fireEvent._port._color
                         
             # if message specifies a specific color, take this color
-            if fireEvent._msgColor is not None:
-                msgColor = fireEvent._msgColor
+            if fireEvent._msg_color is not None:
+                msgColor = fireEvent._msg_color
             
-            start = ( self.simPartMap(fromPart).sdLifeLineX, self.timeYPos( fireEvent.execTime - fireEvent._flightTime, areaStartTime, areaStartY ))
-            end = ( self.simPartMap(toPart).sdLifeLineX, self.timeYPos( fireEvent.execTime, areaStartTime, areaStartY ))
+            start = ( self.simPartMap(fromPart).sdLifeLineX, self.timeYPos( fireEvent.exec_time - fireEvent._flight_time, areaStartTime, areaStartY ))
+            end = ( self.simPartMap(toPart).sdLifeLineX, self.timeYPos( fireEvent.exec_time, areaStartTime, areaStartY ))
             if( start[1] >= areaStartY):
                 # only show line if it begins within the current area
-                self.msgLine(start, end, fireEvent.msgText(), color=msgColor, lostMsg=fireEvent._isLost)
+                self.msgLine(start, end, fireEvent.msg_text(), color=msgColor, lostMsg=fireEvent._is_lost)
             elif end[1] >= areaStartY:
                 # message line only Partly on the area. Show only the Part in the area
                 # Don't show message text
                 dx = end[0]-start[0]
                 dy = end[1]-start[1]
                 start = (end[0] - ( ((end[1]-areaStartY)/dy) * dx), areaStartY)
-                self.msgLine(start, end, fireEvent.msgText(), showText=False, color=msgColor, lostMsg=fireEvent._isLost)
+                self.msgLine(start, end, fireEvent.msg_text(), showText=False, color=msgColor, lostMsg=fireEvent._is_lost)
     
     def drawTmrExp(self, e, areaStartTime, areaStartY):
         part = e.part
-        tmr = e.subObj
-        #print("drawTmrExp", e.traceTime, part.objName())
+        tmr = e.sub_obj
+        #print("drawTmrExp", e.traceTime, part.obj_name())
         # draw only if part shown and timer is not excluded
         if self.hasPart(part) and not tmr in self._listHiddenElements and not 'allTimers' in self._listHiddenElements: 
             end = ( self.simPartMap(part).sdLifeLineX, self.timeYPos( e.traceTime, areaStartTime, areaStartY ))
             start = ( end[0]-50, end[1])
             if( start[1] >= areaStartY):
-                self.msgLine(start, end, tmr.objName(), color="blue")
+                self.msgLine(start, end, tmr.obj_name(), color="blue")
         
     def drawAnnotation(self, e, areaStartTime, areaStartY):
         part = e.part
-        #print("drawAnn", e.traceTime, e.transVal)
+        #print("drawAnn", e.traceTime, e.trans_val)
         if self.hasPart(part):
             pos = ( self.simPartMap(part).sdLifeLineX, self.timeYPos( e.traceTime, areaStartTime, areaStartY ))
             if( pos[1] >= areaStartY):
-                self.annotation(pos, e.transVal)
+                self.annotation(pos, e.trans_val)
 
     def drawAssertionFail(self, e, areaStartTime, areaStartY):
         part = e.part
         
-        print("drawAssFail", e.traceTime, e.transVal)
-        text = '### ASSERTION FAIL:' + e.transVal
+        print("drawAssFail", e.traceTime, e.trans_val)
+        text = '### ASSERTION FAIL:' + e.trans_val
         if part is None or not self.hasPart(part):
             x = self.firstPartOffset[0]
             withLine = False
@@ -569,24 +569,24 @@ class svgSeqD(object):
     
     def drawObjStatus(self, e, areaStartTime, areaStartY):
         part = e.part
-        #print("drawAct", e.traceTime, e.transVal)
+        #print("drawAct", e.traceTime, e.trans_val)
         if self.hasPart(part):
             sdPart = self.simPartMap(part)
-            self.drawLifeLineBox(sdPart, e.traceTime, e.transVal, 
+            self.drawLifeLineBox(sdPart, e.traceTime, e.trans_val, 
                                  areaStartTime=areaStartTime, areaStartY=areaStartY)
 
     
     def drawVarChange(self, e, areaStartTime, areaStartY):
-        varObj = e.subObj
+        varObj = e.sub_obj
         if self.hasPart(varObj):
             sdPart = self.simPartMap(varObj)
             
-            if e.transVal is None:
+            if e.trans_val is None:
                 tvString = ""
             else:
-                tvString = e.transVal
+                tvString = e.trans_val
             
-            transVal = sim.StateIndTransVal(tvString,{'boxFillColor':'black', 'boxStrokeColor':'white', 'textColor': 'white'})
+            transVal = Sim.StateIndTransVal(tvString,{'boxFillColor':'black', 'boxStrokeColor':'white', 'textColor': 'white'})
             self.drawLifeLineBox(sdPart, e.traceTime, transVal,  
                                  areaStartTime=areaStartTime, areaStartY=areaStartY)
             
@@ -596,7 +596,7 @@ class svgSeqD(object):
         # on each part, draw a status box from the last event to the end of the area
         for part in self._listParts + self._listVars:
             sdPart = self.simPartMap(part)
-            #print("drawEndObjStatus %s %s" % (part.objName(), sdPart.sdAction))
+            #print("drawEndObjStatus %s %s" % (part.obj_name(), sdPart.sdAction))
             ind = sdPart.sdAction
             if ind.text != "":
                 minTime = sdPart.sdActionTime
@@ -633,7 +633,7 @@ class svgSeqD(object):
         assert(self._rightMostPartX != 0),"drawParts not called yet?"
         assert(self.timeMarkEach * self.pixPerSecond > 20),"Time markers too tight"
         while t <= endTime:
-            self.timeMarkerLine((0, self.timeYPos( t, startTime, areaStartY )), self._rightMostPartX, self.timeStr(t))
+            self.timeMarkerLine((0, self.timeYPos( t, startTime, areaStartY )), self._rightMostPartX, self.time_str(t))
             t += self.timeMarkEach
          
          

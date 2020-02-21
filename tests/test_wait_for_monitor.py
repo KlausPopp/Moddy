@@ -4,8 +4,9 @@ Created on 21.09.2019
 @author: klauspopp@gmx.de
 '''
 import unittest
-from moddy import *
-from tests.utils import *
+import moddy
+from utils import searchAnn,  \
+                         baseFileName, funcName
 
 
 class TestWaitForMonitor(unittest.TestCase):
@@ -13,9 +14,9 @@ class TestWaitForMonitor(unittest.TestCase):
  
     def testMonitor(self):
 
-        class myThread1(vSimpleProg):
+        class myThread1(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
            
              
             def runVThread(self):
@@ -25,27 +26,27 @@ class TestWaitForMonitor(unittest.TestCase):
                     self.wait(10)
                     cycle += 1
                     
-        class stimThread(vSimpleProg):
+        class stimThread(moddy.VSimpleProg):
             def __init__(self, sim, supervisedThread ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.supervisedThread = supervisedThread 
             def runVThread(self):
                 self.waitForMonitor(None, self.monitorFunc1)
-                self.addAnnotation('got mon1')
+                self.annotation('got mon1')
                 self.waitForMonitor(None, self.monitorFunc3)
-                self.addAnnotation('got mon3')
+                self.annotation('got mon3')
                 if self.waitForMonitor(10, self.monitorFunc1) == 'timeout':
-                    self.addAnnotation('tout waiting for mon1')
+                    self.annotation('tout waiting for mon1')
 
             def monitorFunc1(self):
                 # called in the context of the simulator!
-                return self.supervisedThread._stateInd == "DEL#1"
+                return self.supervisedThread._state_ind == "DEL#1"
                     
             def monitorFunc3(self):
                 # called in the context of the simulator!
-                return self.supervisedThread._stateInd == "DEL#3"
+                return self.supervisedThread._state_ind == "DEL#3"
 
-        simu = sim()
+        simu = moddy.Sim()
                         
         t1 = myThread1(simu)
         
@@ -53,7 +54,7 @@ class TestWaitForMonitor(unittest.TestCase):
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
@@ -61,7 +62,7 @@ class TestWaitForMonitor(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 40.0, stim), "got mon1" )
         self.assertEqual(searchAnn(trc, 120.0, stim), "got mon3" )

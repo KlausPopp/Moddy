@@ -7,11 +7,13 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
 '''
-from moddy.simulator import sim, simPart
-from moddy.utils import moddyCreateDirsAndOpenOutputFile
-
 import subprocess
 import os
+
+from .sim_core import Sim
+from .sim_part import SimPart
+from .utils import moddyCreateDirsAndOpenOutputFile
+
 
 
 def moddyGenerateStructureGraph( sim, fileName, keepGvFile=False ):
@@ -47,9 +49,9 @@ def portOrIoPortHierarchyName(port):
 def portOrIoPortObjName(port):
     ''' return port name or if port is part of IOPort, the IOPorts Name'''
     if port._ioPort is not None:
-        return port._ioPort.objName()
+        return port._ioPort.obj_name()
     else:
-        return port.objName()
+        return port.obj_name()
 
 def p2pPortMsgTypes(port1,port2):
     ''' join the message types of the two ports '''
@@ -100,20 +102,20 @@ class DotStructure(object):
         if part._typeStr == "scheduler":
             # show schedulers as an ellipse-node, and without subparts
             lines.append( [level, '%s [label=%s shape=ellipse];' % 
-                           (moddyNameToDotName(part.hierarchyName()), moddyNameToDotName(part.objName()))])
+                           (moddyNameToDotName(part.hierarchyName()), moddyNameToDotName(part.obj_name()))])
             self._listSchedulers.append(part)
             
         else:
             # normal part is shown as a subgraph
             lines.append( [level, 'subgraph %s {' % subgraphName(part.hierarchyName())])
-            lines.append( [level+1, 'label=<<B>%s</B>>' % part.objName()] )
+            lines.append( [level+1, 'label=<<B>%s</B>>' % part.obj_name()] )
             
             # now the ports
             listPorts = part._listPorts
             if len(listPorts) > 0:
                 for port in listPorts:
                     lines.append( [level+1, '%s [label=%s];' % 
-                                   (moddyNameToDotName(port.hierarchyName()), moddyNameToDotName(port.objName()))  ])
+                                   (moddyNameToDotName(port.hierarchyName()), moddyNameToDotName(port.obj_name()))  ])
                 
                     
             # now the subparts
@@ -137,22 +139,22 @@ class DotStructure(object):
                 
                 for peer in peers:
                     #print( "port %s peer %s" % (ioPort, peer))
-                    if not ( ioPort._outPort, peer._inPort ) in knownBindings and not ( peer._outPort, ioPort._inPort ) in knownBindings:
+                    if not ( ioPort._out_port, peer._in_port ) in knownBindings and not ( peer._out_port, ioPort._in_port ) in knownBindings:
                         
                         # Has a peer port, make bidirectional connection
                         lines.append( [level, '%s -> %s  [dir=none penwidth=3 label="%s"]' % ( #[constraint=false]
                               moddyNameToDotName(portOrIoPortHierarchyName(port)),
                               moddyNameToDotName(peer.hierarchyName()),
-                              p2pPortMsgTypes(port._ioPort._outPort, peer._outPort) 
+                              p2pPortMsgTypes(port._ioPort._out_port, peer._out_port) 
                             )] )
     
                         # These ports are already connected, ignore them in the rest of the scan
-                        knownBindings.append( ( ioPort._outPort, peer._inPort ))
-                        knownBindings.append( ( peer._outPort, ioPort._inPort ))
+                        knownBindings.append( ( ioPort._out_port, peer._in_port ))
+                        knownBindings.append( ( peer._out_port, ioPort._in_port ))
                         
                     
-            for inPort in port._listInPorts:
-                if ioPort is None or not ( ioPort._outPort, inPort ) in knownBindings:
+            for inPort in port._list_in_ports:
+                if ioPort is None or not ( ioPort._out_port, inPort ) in knownBindings:
                     lines.append( [level, '%s -> %s [label="%s"]' % ( #[constraint=false]
                           moddyNameToDotName(portOrIoPortHierarchyName(port)),
                           moddyNameToDotName(portOrIoPortHierarchyName(inPort)),
@@ -230,9 +232,9 @@ if __name__ == '__main__':
     from moddy.vthread import vThread
 
     
-    class Cpu(simPart):
-        def __init__(self, sim, objName, parentObj = None):
-            super().__init__(sim, objName, parentObj)
+    class Cpu(SimPart):
+        def __init__(self, sim, obj_name, parent_obj = None):
+            super().__init__(sim, obj_name, parent_obj)
             self.sched = vtSchedRtos(sim, "schedCpu", self)
             self.app1 = App(sim,"App1", self)
             self.app2 = App(sim,"App2", self)
@@ -241,22 +243,22 @@ if __name__ == '__main__':
             self.sched.addVThread(self.app2, 2)
             
     class App(vThread):
-        def __init__(self, sim, objName, parentObj = None):
-            super().__init__(sim, objName, parentObj )
+        def __init__(self, sim, obj_name, parent_obj = None):
+            super().__init__(sim, obj_name, parent_obj )
     
-            self.createPorts('SamplingIO', ['ecmPort'])
+            self.create_ports('SamplingIO', ['ecmPort'])
 
         def runVThread(self):
             while True:
                 pass
         
             
-    class EcMaster(simPart):
+    class EcMaster(SimPart):
         
-        def __init__(self, sim, objName, parentObj = None):
-            super().__init__(sim, objName, parentObj)
+        def __init__(self, sim, obj_name, parent_obj = None):
+            super().__init__(sim, obj_name, parent_obj)
     
-            self.createPorts('io', ['appPort','ecPort'])
+            self.create_ports('io', ['appPort','ecPort'])
             
     
         def appPortRecv(self, port, msg):
@@ -265,12 +267,12 @@ if __name__ == '__main__':
             pass    
     
 
-    class EcDevice(simPart):
+    class EcDevice(SimPart):
         
-        def __init__(self, sim, objName, parentObj = None):
-            super().__init__(sim, objName, parentObj)
+        def __init__(self, sim, obj_name, parent_obj = None):
+            super().__init__(sim, obj_name, parent_obj)
     
-            self.createPorts('io', ['ecPort','ucPort'])
+            self.create_ports('io', ['ecPort','ucPort'])
             
             self.uc = self.EcUc(sim, self)
             self.fpga = self.EcFpga(sim, self)
@@ -283,12 +285,12 @@ if __name__ == '__main__':
         def ucPortRecv(self, port, msg):
             pass
     
-        class EcUc(simPart):
+        class EcUc(SimPart):
             
-            def __init__(self, sim, parentObj):
-                super().__init__(sim, "uC", parentObj)
-                self.createPorts('in', ['sensPort'])
-                self.createPorts('io', ['escPort', 'fpgaPort'])
+            def __init__(self, sim, parent_obj):
+                super().__init__(sim, "uC", parent_obj)
+                self.create_ports('in', ['sensPort'])
+                self.create_ports('io', ['escPort', 'fpgaPort'])
 
                 
             def escPortRecv(self, port, msg):
@@ -300,52 +302,52 @@ if __name__ == '__main__':
             def sensPortRecv(self, port, msg):
                 pass
 
-        class EcFpga(simPart):
+        class EcFpga(SimPart):
             
-            def __init__(self, sim, parentObj):
-                super().__init__(sim, "FPGA", parentObj)
-                self.createPorts('io', ['ucPort'])
+            def __init__(self, sim, parent_obj):
+                super().__init__(sim, "FPGA", parent_obj)
+                self.create_ports('io', ['ucPort'])
                 
             def ucPortRecv(self, port, msg):
                 pass
 
-    class Sensor(simPart):
+    class Sensor(SimPart):
         
-        def __init__(self, sim, objName, parentObj = None):
-            super().__init__(sim, objName, parentObj)
+        def __init__(self, sim, obj_name, parent_obj = None):
+            super().__init__(sim, obj_name, parent_obj)
     
-            self.createPorts('out', ['outPort'])
-            self.createPorts('in', ['pwrPort'])
+            self.create_ports('out', ['outPort'])
+            self.create_ports('in', ['pwrPort'])
             
         def pwrPortRecv(self, port, msg):
                 pass
     
    
-    simu = sim()
+    simu = Sim()
     cpu = Cpu(simu,"CPU")
     ecm = EcMaster(simu,"ECM")
     ecDev1 = EcDevice(simu,"DEV1")
     ecDev2 = EcDevice(simu,"DEV2")
     sensor = Sensor(simu,"SENSOR")
-    ecm.ecPort._outPort.bind(ecDev1.ecPort._inPort)
-    ecDev1.ecPort._outPort.bind(ecDev2.ecPort._inPort)
-    ecDev2.ecPort._outPort.bind(ecm.ecPort._inPort)
+    ecm.ecPort._out_port.bind(ecDev1.ecPort._in_port)
+    ecDev1.ecPort._out_port.bind(ecDev2.ecPort._in_port)
+    ecDev2.ecPort._out_port.bind(ecm.ecPort._in_port)
     sensor.outPort.bind(ecDev1.uc.sensPort)
     sensor.outPort.bind(ecDev2.uc.sensPort)
     # sensless, but test that a peer-to-peer port can be bound to an additional input port
-    ecDev1.uc.fpgaPort._outPort.bind(sensor.pwrPort)
+    ecDev1.uc.fpgaPort._out_port.bind(sensor.pwrPort)
     
     # test 3 IO ports bound together (mesh)
     cpu.app1.ecmPort.bind(ecm.appPort)
     cpu.app2.ecmPort.bind(ecm.appPort)
     cpu.app1.ecmPort.bind(cpu.app2.ecmPort)
 
-    #print("app1 in outports %s Peers %s" %  (cpu.app1.ecmPort._inPort._outPorts, cpu.app1.ecmPort.peerPorts()))
-    #print("app2 in outports %s" %  cpu.app2.ecmPort._inPort._outPorts)
-    #print("ecm in outports %s" %  ecm.appPort._inPort._outPorts)
+    #print("app1 in outports %s Peers %s" %  (cpu.app1.ecmPort._in_port._outPorts, cpu.app1.ecmPort.peerPorts()))
+    #print("app2 in outports %s" %  cpu.app2.ecmPort._in_port._outPorts)
+    #print("ecm in outports %s" %  ecm.appPort._in_port._outPorts)
     
     for pName in ['SENSOR.outPort', 'DEV2.FPGA.ucPort', 'CPU.App1.ecmPort']:
-        print("findPortByName %s = %s" % (pName, simu.findPortByName(pName)))
+        print("findPortByName %s = %s" % (pName, simu.find_port_by_name(pName)))
     
     moddyGenerateStructureGraph(simu, 'output/structTest.svg', keepGvFile=True)
     

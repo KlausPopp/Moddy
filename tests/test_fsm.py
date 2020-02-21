@@ -4,35 +4,36 @@ Created on 25.12.2018
 @author: klauspopp@gmx.de
 '''
 import unittest
-from moddy import *
-from tests.utils import *
+import moddy
+from utils import searchInMsg, searchAnn, searchTExp, \
+                        searchSta, baseFileName, funcName
 
 class TestFsm(unittest.TestCase):
     '''
     Test the moddy FSM with sub-fsms
     '''
 
-    class CarInfoSystem(simFsmPart):
+    class CarInfoSystem(moddy.SimFsmPart):
     
-        def __init__(self, sim, objName):
-            statusBoxReprMap = {
-                'Off':      (None, bcBlackOnWhite),
-                'Standby':  ('SBY', bcWhiteOnRed),
-                'Booting':  ('BOOT', bcWhiteOnBlue),
-                'NormalOp': ('NORM', bcWhiteOnGreen),
-                'Shutdown':  ('SD', bcWhiteOnRed)
+        def __init__(self, sim, obj_name):
+            status_box_repr_map = {
+                'Off':      (None, moddy.BC_BLACK_ON_WHITE),
+                'Standby':  ('SBY', moddy.BC_WHITE_ON_RED),
+                'Booting':  ('BOOT', moddy.BC_WHITE_ON_BLUE),
+                'NormalOp': ('NORM', moddy.BC_WHITE_ON_GREEN),
+                'Shutdown':  ('SD', moddy.BC_WHITE_ON_RED)
             }
             
             
-            super().__init__(sim=sim, objName=objName, fsm=self.FSM(), statusBoxReprMap=statusBoxReprMap)
+            super().__init__(sim=sim, obj_name=obj_name, fsm=self.FSM(), status_box_repr_map=status_box_repr_map)
     
             # Ports & Timers
-            self.createPorts('in', ['powerPort', 'ignitionPort', 'buttonPort'])
-            self.createPorts('out', ['audioPort', 'visualPort'])
-            self.createTimers(['bootTmr', 'shutdownTmr', 'clockTmr'])
+            self.create_ports('in', ['powerPort', 'ignitionPort', 'buttonPort'])
+            self.create_ports('out', ['audioPort', 'visualPort'])
+            self.create_timers(['bootTmr', 'shutdownTmr', 'clockTmr'])
     
             
-        class FSM(Fsm):
+        class FSM(moddy.Fsm):
             def __init__(self):
                 
                 transitions = { 
@@ -106,7 +107,7 @@ class TestFsm(unittest.TestCase):
                 self.event(msg) # Message are directly the event names
             
             # Nested state machine CarInfo System Applications
-            class ApplicationsFsm(Fsm):
+            class ApplicationsFsm(moddy.Fsm):
             
                 def __init__(self, parentFsm):
                     
@@ -122,12 +123,12 @@ class TestFsm(unittest.TestCase):
                     super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
                     
                 def State_Radio_Entry(self):
-                    self.moddyPart().addAnnotation('Radio activated')
+                    self.moddyPart().annotation('Radio activated')
             
                 def State_Navi_Entry(self):
-                    self.moddyPart().addAnnotation('Navi activated')
+                    self.moddyPart().annotation('Navi activated')
                     
-            class VolumeFsm(Fsm):
+            class VolumeFsm(moddy.Fsm):
             
                 def __init__(self, parentFsm):
                     self._volume = 50
@@ -164,13 +165,13 @@ class TestFsm(unittest.TestCase):
                     self._volume -= 1
                     self.topFsm().event('VolChangeDone')
      
-    class Stim(vSimpleProg):   
+    class Stim(moddy.VSimpleProg):   
         def __init__(self, sim):
-            super().__init__(sim=sim, objName="Stim", parentObj=None)
-            self.createPorts('out', ['powerPort', 'ignitionPort', 'buttonPort']) 
-            self.createPorts('SamplingIn', ['audioPort', 'visualPort']) 
-            self.ignitionPort.setColor('red')
-            self.buttonPort.setColor('blue')
+            super().__init__(sim=sim, obj_name="Stim", parent_obj=None)
+            self.create_ports('out', ['powerPort', 'ignitionPort', 'buttonPort']) 
+            self.create_ports('SamplingIn', ['audioPort', 'visualPort']) 
+            self.ignitionPort.set_color('red')
+            self.buttonPort.set_color('blue')
             
         def runVThread(self):
             while True:
@@ -196,7 +197,7 @@ class TestFsm(unittest.TestCase):
 
 
     def testCarInfo(self):
-        simu = sim()
+        simu = moddy.Sim()
         cis = TestFsm.CarInfoSystem(simu, "CarInfoSys")
         stim = TestFsm.Stim(simu)
         
@@ -209,7 +210,7 @@ class TestFsm(unittest.TestCase):
             
         simu.run(100)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                   fileName="output/%s_%s.html" % (baseFileName(), funcName()),  
                                   fmt="iaViewerRef", 
                                   showPartsList=[stim, cis], 
@@ -217,7 +218,7 @@ class TestFsm(unittest.TestCase):
                                   pixPerDiv = 30,
                                   title = "Car Info FSM Test") 
            
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
 
         # check CarInfo Main states
         self.assertEqual(searchSta(trc, 1.0, cis), "SBY" )    

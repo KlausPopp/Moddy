@@ -9,9 +9,9 @@
 
 '''
 
-import moddy.seqDiagInteractiveViewer
-from moddy.svgSeqD import moddyGenerateSvgSequenceDiagram
-from moddy.utils import moddyCreateDirsAndOpenOutputFile
+from moddy import seq_diag_interactive_viewer
+from .svgSeqD import moddyGenerateSvgSequenceDiagram
+from .utils import moddyCreateDirsAndOpenOutputFile
 import os
 import sys
 
@@ -99,7 +99,7 @@ def moddyGenerateSequenceDiagram( sim,
     partsList = []
     for part in allParts:
         if type(part) is str:
-            part = sim.findPartByName(part)
+            part = sim.find_part_by_name(part)
         if part not in excludedElementList:
             partsList.append(part)
 
@@ -108,7 +108,7 @@ def moddyGenerateSequenceDiagram( sim,
     varList = []
     for var in showVarList:
         if type(var) is str:
-            var = sim.findWatchedVariableByName(var)
+            var = sim.find_watched_variable_by_name(var)
         varList.append(var)
 
 
@@ -124,7 +124,7 @@ def moddyGenerateSequenceDiagram( sim,
     
     out += '<script>\n'
     out += dv.genHeader()
-    out += dv.genTraceOutput(sim.tracedEvents())
+    out += dv.genTraceOutput(sim.traced_events())
     out += '</script>\n'
     
     out += dv.genScript()
@@ -176,11 +176,11 @@ class TraceGenDynamicViewer(object):
         if te.action == ">MSG" or te.action == "T-START": return False
         if te.part is None: return True     # global event
         if te.action == "VC":
-            if not self.hasPart(te.subObj): return False
+            if not self.hasPart(te.sub_obj): return False
         else:    
             if not self.hasPart(te.part): return False
         if te.action == "<MSG":
-            if not self.hasPart(te.subObj._parentObj): return False
+            if not self.hasPart(te.sub_obj.parent_obj): return False
         return True     
     
     def genHeader(self):
@@ -195,7 +195,7 @@ class TraceGenDynamicViewer(object):
 
         out += "g_moddyDiagramParts = [\n"
         for part in self._listAllParts:
-            out += '{ name: "%s", tp: "%s" },\n' % (part.hierarchyName(), 
+            out += '{ name: "%s", tp: "%s" },\n' % (part.hierarchy_name(), 
                                               "Part" if part in self._listParts else "Var")
         out += '];\n'
         
@@ -231,7 +231,7 @@ class TraceGenDynamicViewer(object):
         for e in evList:
             if self.shallEventBeShown(e):
                 if e.action == "VC": 
-                    partNo = self.partNo(e.subObj)
+                    partNo = self.partNo(e.sub_obj)
                 else:
                     partNo = self.partNo(e.part)
 
@@ -245,32 +245,32 @@ class TraceGenDynamicViewer(object):
             
                 # Messages
                 if e.action == "<MSG":
-                    fireEvent = e.transVal
+                    fireEvent = e.trans_val
                     mid = 's: %d, b: %g, txt: "%s", l:%s' % (
-                        self.partNo(e.subObj._parentObj),
-                        fireEvent.execTime - fireEvent._flightTime,
-                        fireEvent.msgText(),
-                        '"t"' if fireEvent._isLost else '"f"')
+                        self.partNo(e.sub_obj.parent_obj),
+                        fireEvent.exec_time - fireEvent._flight_time,
+                        fireEvent.msg_text(),
+                        '"t"' if fireEvent._is_lost else '"f"')
                     
                     # generate colored messages
                     msgColor = None
                     if fireEvent._port._color is not None: msgColor = fireEvent._port._color
-                    if fireEvent._msgColor is not None:
-                        msgColor = fireEvent._msgColor
+                    if fireEvent._msg_color is not None:
+                        msgColor = fireEvent._msg_color
                     if msgColor is not None: mid += ', c:"%s"' % msgColor 
                     
                     doOutput = True
                         
                 # Timer event
                 elif e.action == "T-EXP":
-                    tmr = e.subObj
+                    tmr = e.sub_obj
                     if not tmr in self._listExcludedElements and not 'allTimers' in self._listExcludedElements:
-                        mid = 'txt: "%s"' % (e.subObj.objName())
+                        mid = 'txt: "%s"' % (e.sub_obj.obj_name())
                         doOutput = True
          
                 # Annotations
                 elif e.action == "ANN" or e.action == "ASSFAIL":
-                    mid = 'txt: "%s"' % (e.transVal.__str__())
+                    mid = 'txt: "%s"' % (e.trans_val.__str__())
                     doOutput = True
                     
                 # Status
@@ -280,7 +280,7 @@ class TraceGenDynamicViewer(object):
                     currentVal = ps['current']
                      
                     
-                    tv = e.transVal.__str__() if e.transVal is not None else ''
+                    tv = e.trans_val.__str__() if e.trans_val is not None else ''
                     if currentVal != tv:
                         # generate box for just ended period
                         if currentVal != "" :
@@ -288,7 +288,7 @@ class TraceGenDynamicViewer(object):
                             doOutput = True
                         #print("%f: p=%d tv=%s currentVal=%s doOutput %s" %(e.traceTime, partNo, tv, currentVal, doOutput))
                         ps['current'] = tv
-                        ps['currentApp'] = e.transVal.appearance if e.action == "STA" else vcAppearance
+                        ps['currentApp'] = e.trans_val.appearance if e.action == "STA" else vcAppearance
                         ps['lastChange'] = e.traceTime
                         
                 if doOutput:
@@ -315,11 +315,13 @@ class TraceGenDynamicViewer(object):
         return mid
     
     def seqDiagInteractiveViewerPath(self):
-        ''' get path relative to output directory to the seqDiagInteractiveViewer directory '''
-        return os.path.dirname(os.path.relpath(moddy.seqDiagInteractiveViewer.__file__, self._outDir))
+        ''' get path relative to output directory to the seq_diag_interactive_viewer directory '''
+        s = os.path.dirname(os.path.relpath(seq_diag_interactive_viewer.__file__, self._outDir))
+        print(s)
+        return s
     
     def readseqDiagInteractiveViewerFile(self, fileName):
-        ''' read fileName from seqDiagInteractiveViewer directory and return its content '''
+        ''' read fileName from seq_diag_interactive_viewer directory and return its content '''
         path = os.path.join(self.seqDiagInteractiveViewerPath(), fileName) 
         file = open( path, 'r' )
         text = file.read()
@@ -330,7 +332,7 @@ class TraceGenDynamicViewer(object):
         return '<html>\n<head>\n<script src="https://d3js.org/d3.v5.min.js"></script>\n';
 
     def getHtmlStyle(self):
-        cssFile = "seqDiagInteractiveViewer.css"
+        cssFile = "seq_diag_interactive_viewer.css"
         out = ""
         
         if self.referFiles:
@@ -359,7 +361,7 @@ class TraceGenDynamicViewer(object):
             <div id='diagram'></div>\n'''
     
     def genScript(self):
-        scriptFile = "seqDiagInteractiveViewer.js"
+        scriptFile = "seq_diag_interactive_viewer.js"
         out = ""
         
         if self.referFiles:

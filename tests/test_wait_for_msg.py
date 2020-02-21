@@ -4,18 +4,20 @@ Created on 28.03.2019
 @author: klauspopp@gmx.de
 '''
 import unittest
-from moddy import *
-from tests.utils import *
+import moddy
+from utils import searchAnn,  \
+                         baseFileName, funcName
+
 
 
 class TestWaitForMsg(unittest.TestCase):
 
     def testMultiPort(self):
 
-        class myThread1(vSimpleProg):
+        class myThread1(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('QueuingIn', ['inP1', 'inP2'])
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
+                self.create_ports('QueuingIn', ['inP1', 'inP2'])
             
              
             def runVThread(self):
@@ -24,13 +26,13 @@ class TestWaitForMsg(unittest.TestCase):
                     
                     for _ in range(4):
                         rv = self.waitForMsg(30, [self.inP1, self.inP2])
-                        self.addAnnotation(rv)
+                        self.annotation(rv)
                     
-        class stimThread(vSimpleProg):
+        class stimThread(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['port1', 'port2'])
-                self.port2.setColor("blue")
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
+                self.create_ports('out', ['port1', 'port2'])
+                self.port2.set_color("blue")
                                 
             def runVThread(self):
                 while True:
@@ -44,7 +46,7 @@ class TestWaitForMsg(unittest.TestCase):
                     self.wait(None)
 
 
-        simu = sim()
+        simu = moddy.Sim()
                         
         t1 = myThread1(simu)
         
@@ -54,7 +56,7 @@ class TestWaitForMsg(unittest.TestCase):
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
@@ -62,7 +64,7 @@ class TestWaitForMsg(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 30.0, t1), "('hello1 a', Thread.inP1(InPort))" )
         self.assertEqual(searchAnn(trc, 35.0, t1), "('hello2 a', Thread.inP2(InPort))" )
@@ -72,10 +74,10 @@ class TestWaitForMsg(unittest.TestCase):
 
     def testSinglePort(self):
 
-        class myThread1(vSimpleProg):
+        class myThread1(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('QueuingIn', ['inP1'])
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
+                self.create_ports('QueuingIn', ['inP1'])
             
              
             def runVThread(self):
@@ -84,12 +86,12 @@ class TestWaitForMsg(unittest.TestCase):
                     
                     for _ in range(4):
                         rv = self.waitForMsg(30, self.inP1)
-                        self.addAnnotation(rv)
+                        self.annotation(rv)
                     
-        class stimThread(vSimpleProg):
+        class stimThread(moddy.VSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['port1'])
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
+                self.create_ports('out', ['port1'])
                                 
             def runVThread(self):
                 while True:
@@ -103,7 +105,7 @@ class TestWaitForMsg(unittest.TestCase):
                     self.wait(None)
 
 
-        simu = sim()
+        simu = moddy.Sim()
                         
         t1 = myThread1(simu)
         
@@ -112,7 +114,7 @@ class TestWaitForMsg(unittest.TestCase):
         
         simu.run(200)
         
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/%s_%s.html" % (baseFileName(), funcName()),
                                       fmt="iaViewerRef", 
                                       showPartsList=[stim,t1],
@@ -120,7 +122,7 @@ class TestWaitForMsg(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.tracedEvents()
+        trc = simu.traced_events()
         
         self.assertEqual(searchAnn(trc, 30.0, t1), "hello a" )
         self.assertEqual(searchAnn(trc, 30.0, t1, 2), "hello b" )

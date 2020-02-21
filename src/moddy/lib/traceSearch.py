@@ -80,7 +80,7 @@ class TraceSearch(object):
         mType, textPat = para
         rv = False
         if te.action == mType:
-            if self.wildcardMatch(te.transVal.__str__(), textPat):
+            if self.wildcardMatch(te.trans_val.__str__(), textPat):
                 rv = True
         return rv
 
@@ -88,7 +88,7 @@ class TraceSearch(object):
         mType, textPat = para
         rv = False
         if te.action == mType:
-            if self.wildcardMatch(te.transVal.msgText(), textPat):
+            if self.wildcardMatch(te.trans_val.msg_text(), textPat):
                 rv = True
         return rv
         
@@ -126,14 +126,14 @@ class TraceSearch(object):
         
     @staticmethod
     def subPartParentMatch( te, p):
-        subpart = te.subObj
+        subpart = te.sub_obj
         if subpart is None: return False
         
         return subpart._parentObj == p
 
     @staticmethod
     def subPartMatch( te, p):
-        return te.subObj == p
+        return te.sub_obj == p
         
     def partTranslate(self, part):
         '''

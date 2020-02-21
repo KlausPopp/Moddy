@@ -13,8 +13,8 @@ from moddy.lib.net.ethernet import ethBCastAddr, ethFlightTime, ethHdrLen
 class EthUnmanagedSwitch(simPart):
     
     
-    def __init__(self, sim, objName, numPorts, netSpeed):
-        super().__init__(sim=sim, objName=objName) 
+    def __init__(self, sim, obj_name, numPorts, netSpeed):
+        super().__init__(sim=sim, obj_name=obj_name) 
 
         self._numPorts = numPorts
         self._netSpeed = netSpeed

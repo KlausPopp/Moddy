@@ -9,8 +9,8 @@
 '''
 
 import csv
-from moddy.simulator import timeUnit2Factor
-from moddy.utils import moddyCreateDirsAndOpenOutputFile
+from .sim_core import time_unit_to_factor
+from .utils import moddyCreateDirsAndOpenOutputFile
 
 
 def moddyGenerateTraceTable( sim, fileName, **kwargs):
@@ -34,7 +34,7 @@ class TraceToCsv():
     def __init__(self, evList, timeUnit="s", floatComma="," ):
         self._evList = evList
         self._timeUnit = timeUnit
-        self._timeUnitFactor = timeUnit2Factor(timeUnit)
+        self._timeUnitFactor = time_unit_to_factor(timeUnit)
         self._floatComma = floatComma
          
     def timeFmt(self, time):
@@ -67,24 +67,24 @@ class TraceToCsv():
                 p = te.part.hierarchyName()
             row.append(p)
             
-            if te.subObj is not None:
-                row.append(te.subObj.hierarchyNameWithType())
+            if te.sub_obj is not None:
+                row.append(te.sub_obj.hierarchyNameWithType())
             else:
                 row.append('')
-            if te.transVal is not None:
+            if te.trans_val is not None:
                 if(te.action.find('MSG') != -1):
                     # print request, begin, end, flightTime and msg in separate columns
-                    fireEvent = te.transVal
-                    row.append("(***LOST***)" if fireEvent._isLost else fireEvent.msgText())
+                    fireEvent = te.trans_val
+                    row.append("(***LOST***)" if fireEvent._is_lost else fireEvent.msg_text())
                     row.append(self.timeFmt(fireEvent._requestTime))
-                    row.append(self.timeFmt(fireEvent.execTime - fireEvent._flightTime))
-                    row.append(self.timeFmt(fireEvent.execTime))
-                    row.append(self.timeFmt(fireEvent._flightTime))
+                    row.append(self.timeFmt(fireEvent.exec_time - fireEvent._flight_time))
+                    row.append(self.timeFmt(fireEvent.exec_time))
+                    row.append(self.timeFmt(fireEvent._flight_time))
                 elif(te.action.find('T-') != -1):
-                    timeoutFmt = te.transVal
+                    timeoutFmt = te.trans_val
                     row.append(self.timeFmt(timeoutFmt._timeout))
                 else:
-                    row.append(te.transVal.__str__())
+                    row.append(te.trans_val.__str__())
             else:
                 row.append('')
             

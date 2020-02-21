@@ -21,8 +21,8 @@ def baseFileName():
 def searchTrc( trc, time, subObj, action, nthMatch=1):
     nMatches = 0
     for e in trc:
-        #print("searchTrc %f %s %s" % (e.traceTime, e.subObj.hierarchyName(), e.action))
-        if e.traceTime == time and e.subObj == subObj and e.action == action:
+        #print("searchTrc %f %s %s" % (e.traceTime, e.sub_obj.hierarchyName(), e.action))
+        if e.traceTime == time and e.sub_obj == subObj and e.action == action:
             nMatches += 1
             if nMatches == nthMatch:
                 return e
@@ -31,17 +31,17 @@ def searchTrc( trc, time, subObj, action, nthMatch=1):
 def searchInMsg(trc, time, port, nthMatch=1):
     e = searchTrc( trc, time, port, "<MSG", nthMatch)
     if e is None: raise RuntimeError("searchInMsg not found")
-    return e.transVal.msgText()
+    return e.trans_val.msg_text()
 
 def searchAnn(trc, time, part, nthMatch=1):
     e = searchTrc( trc, time, part, "ANN", nthMatch)
     if e is None: raise RuntimeError("searchAnn not found")
-    return e.transVal.__str__()
+    return e.trans_val.__str__()
 
 def searchSta(trc, time, part, nthMatch=1):
     e = searchTrc( trc, time, part, "STA", nthMatch)
     if e is None: raise RuntimeError("searchSta not found")
-    return e.transVal.__str__()
+    return e.trans_val.__str__()
 
 def searchTExp(trc, time, subObj, nthMatch=1):
     e = searchTrc( trc, time, subObj, "T-EXP", nthMatch)
