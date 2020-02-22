@@ -218,7 +218,7 @@ class TestFsm(unittest.TestCase):
                                   pixPerDiv = 30,
                                   title = "Car Info FSM Test") 
            
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
 
         # check CarInfo Main states
         self.assertEqual(searchSta(trc, 1.0, cis), "SBY" )    

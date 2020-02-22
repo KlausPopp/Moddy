@@ -64,7 +64,7 @@ class TestWaitForMsg(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 30.0, t1), "('hello1 a', Thread.inP1(InPort))" )
         self.assertEqual(searchAnn(trc, 35.0, t1), "('hello2 a', Thread.inP2(InPort))" )
@@ -122,7 +122,7 @@ class TestWaitForMsg(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 30.0, t1), "hello a" )
         self.assertEqual(searchAnn(trc, 30.0, t1, 2), "hello b" )

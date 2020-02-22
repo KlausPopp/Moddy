@@ -472,7 +472,7 @@ class VThread(SimPart):
         """
 
         port = VtSamplingInPort(self._sim, name, self)
-        self.add_input_port(port)
+        self.add_port(port)
         return port
 
     def newVtQueuingInPort(self, name):
@@ -482,7 +482,7 @@ class VThread(SimPart):
         :param name: name of port
         """
         port = VtQueuingInPort(self._sim, name, self)
-        self.add_input_port(port)
+        self.add_port(port)
         return port
 
     def newVtSamplingIOPort(self, name):
@@ -493,7 +493,7 @@ class VThread(SimPart):
         """
         port = VtIOPort(self._sim, name, self, VtSamplingInPort(
             self._sim, name + 'In', self))
-        self.add_io_port(port)
+        self.add_port(port)
         return port
 
     def newVtQueuingIOPort(self, name):
@@ -504,7 +504,7 @@ class VThread(SimPart):
         """
         port = VtIOPort(self._sim, name, self, VtQueuingInPort(
             self._sim, name + 'In', self))
-        self.add_io_port(port)
+        self.add_port(port)
         return port
 
     def newVtTimer(self, name):

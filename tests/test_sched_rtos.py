@@ -78,7 +78,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
 
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchSta(trc, 0.0, t1), "1" )
         self.assertEqual(searchSta(trc, 0.0, t2), "PE" )
@@ -174,7 +174,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 55.0, t1), "['hello1', 'hello2', 'hello3']" )
         self.assertEqual(searchAnn(trc, 65.0, t1), "['hello4']" )
@@ -241,7 +241,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 33.0, t1), "['hello1']" )
         self.assertEqual(searchAnn(trc, 35.0, t1), "['hello2']" )
@@ -304,7 +304,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
          
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 0.0, t1), "No message" )
         self.assertEqual(searchAnn(trc, 18.0, t1), "No message" )
@@ -354,7 +354,7 @@ class TestSchedRtos(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
 
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 18.0, t1), "A Fired True" )
         self.assertEqual(searchAnn(trc, 38.0, t1), "B rv ok" )

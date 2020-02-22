@@ -11,8 +11,10 @@
 import pickle
 from heapq import heappush, heappop
 from collections import deque
-from .sim_base import SimBaseElement, SimEvent, SimTraceEvent
+
+from .sim_base import SimBaseElement, SimEvent
 from .sim_base import add_elem_to_list
+from .sim_trace import SimTraceEvent
 
 
 class SimInputPort(SimBaseElement):
@@ -124,7 +126,7 @@ class SimOutputPort(SimBaseElement):
             # pass the message to all bound input ports
             for inport in self._port._list_in_ports:
 
-                self._sim.add_trace_event(SimTraceEvent(
+                self._sim.tracing.add_trace_event(SimTraceEvent(
                     self._port.parent_obj, inport, self, '<MSG'))
 
                 if not self._is_lost:
@@ -141,7 +143,7 @@ class SimOutputPort(SimBaseElement):
             if self._port._list_pending_msg:
                 event = self._port._list_pending_msg[0]
                 self._port._send_schedule(event)
-                self._sim.add_trace_event(SimTraceEvent(
+                self._sim.tracing.add_trace_event(SimTraceEvent(
                     self._port.parent_obj, self._port, event, '>MSG(Q)'))
             self._port._seq_no += 1
 
@@ -234,7 +236,7 @@ class SimOutputPort(SimBaseElement):
         if not self._list_pending_msg:
             # no pending messages, send now
             self._send_schedule(event)
-            self._sim.add_trace_event(SimTraceEvent(
+            self._sim.tracing.add_trace_event(SimTraceEvent(
                 self.parent_obj, self, event, '>MSG'))
 
         self._list_pending_msg.append(event)
@@ -299,6 +301,14 @@ class SimIOPort(SimBaseElement):
         else:
             self._in_port = special_in_port
             self._in_port._io_port = self
+
+    def in_port(self):
+        ''' Return the input port '''
+        return self._in_port
+
+    def out_port(self):
+        ''' Return the output port '''
+        return self._out_port
 
     def bind(self, other_io_port):
         ''' Bind IOPort to another IOPort, in/out will be crossed '''
@@ -382,7 +392,7 @@ class SimTimer(SimBaseElement):
 
         def execute(self):
             self._timer._pending_event = None
-            self._sim.add_trace_event(SimTraceEvent(
+            self._sim.tracing.add_trace_event(SimTraceEvent(
                 self._timer.parent_obj, self._timer, None, 'T-EXP'))
             self._timer._elapsed_func(self._timer)
 
@@ -423,7 +433,7 @@ class SimTimer(SimBaseElement):
         :raise: AttributeError if timeout <= 0
         '''
         self._start(timeout)
-        self._sim.add_trace_event(SimTraceEvent(
+        self._sim.tracing.add_trace_event(SimTraceEvent(
             self.parent_obj, self,
             self.TimeoutFmt(self._sim, timeout), 'T-START'))
 
@@ -434,7 +444,7 @@ class SimTimer(SimBaseElement):
 
     def stop(self):
         '''Stop timer. Does nothing if timer not running'''
-        self._sim.add_trace_event(SimTraceEvent(
+        self._sim.tracing.add_trace_event(SimTraceEvent(
             self.parent_obj, self, None, 'T-STOP'))
         self._stop()
 
@@ -444,7 +454,7 @@ class SimTimer(SimBaseElement):
 
         :param timeout: Timer will fire after *timeout*
         '''
-        self._sim.add_trace_event(SimTraceEvent(
+        self._sim.tracing.add_trace_event(SimTraceEvent(
             self.parent_obj, self,
             self.TimeoutFmt(self._sim, timeout), 'T-RESTA'))
         self._stop()

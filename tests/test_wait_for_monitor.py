@@ -62,7 +62,7 @@ class TestWaitForMonitor(unittest.TestCase):
                                       timePerDiv = 10, 
                                       pixPerDiv = 30)  
   
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
         
         self.assertEqual(searchAnn(trc, 40.0, stim), "got mon1" )
         self.assertEqual(searchAnn(trc, 120.0, stim), "got mon3" )

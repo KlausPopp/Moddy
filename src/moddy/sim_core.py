@@ -16,28 +16,25 @@ from collections import deque
 from datetime import datetime
 
 from .version import VERSION
-from .sim_base import SimEvent, SimTraceEvent
+from .sim_base import SimEvent
 from .sim_base import add_elem_to_list, time_unit_to_factor
 from .sim_parts_mgr import SimPartsManager
+from .sim_trace import SimTraceEvent, SimTracing
 
 
 class Sim:
     '''Simulator main class'''
+
     def __init__(self):
         self.parts_mgr = SimPartsManager()
+        self.tracing = SimTracing()
+        self.tracing.set_time_func(self.time)
         # a heapq with list of pending events takes pendingEvent objects, sorted by execTime
         self._list_events = []
-        self._time = 0.0      # current simulator time
-        self._list_in_ports = []
-        self._list_out_ports = []
-        self._list_timers = []
-        self._dis_time_scale = 1        # time scale factor
-        self._dis_time_scale_str = "s"     # time scale string
-        self._list_traced_events = deque()  # list of all traced events during execution
+        self._time = 0.0  # current simulator time
         self._list_variable_watches = []  # list of watched variables
         # list of monitors (called on each simulator step)
         self._list_monitors = []
-        self._enable_trace_prints = True
         self._stop_on_assertion_failure = False
         self._num_assertion_failures = 0
         self._is_running = False
@@ -45,59 +42,6 @@ class Sim:
         self._stop_event = None
         self._num_events = 0
         self._start_real_time = None
-
-    #
-    # Port Management
-    #
-    def add_input_port(self, port):
-        '''Add input port to simulators list'''
-        add_elem_to_list(self._list_in_ports, port, "Simulator input ports")
-
-    def add_output_port(self, port):
-        '''Add output port to simulators list'''
-        add_elem_to_list(self._list_out_ports, port, "Simulator output ports")
-
-    def check_unbound_ports(self):
-        '''
-        Check if all ports are connected
-        print warnings for unconnected ports
-        '''
-        for port in self._list_in_ports + self._list_out_ports:
-            if not port.is_bound():
-                print("SIM: WARNING: Port %s not bound" %
-                      (port.hierarchy_name_with_type()))
-
-    def add_timer(self, timer):
-        '''Add timer to list of timers'''
-        add_elem_to_list(self._list_timers, timer, "Simulator timers")
-
-    def output_ports(self):
-        ''' return list of all output ports '''
-        return self._list_out_ports
-
-    def find_port_by_name(self, port_hierarchy_name):
-        '''
-        Find a port (input or output or IO) by its hierarchy name
-        :param str port_hierarchy_name: e.g. \
-            "part1.ioPort1" or "part1.ioPort1.inPort"
-        :return port: the found port
-        :raises ValueError: if port not found
-        '''
-        for part in self.parts_mgr.all_parts():
-            for port in part._listPorts:
-                # print("findPortByName %s %s" % (port.hierarchy_name(),
-                # port._typeStr ))
-                if port.hierarchy_name() == port_hierarchy_name:
-                    return port
-
-                if port._typeStr == "IOPort":
-                    if port._in_port.hierarchy_name() == port_hierarchy_name:
-                        return port._in_port
-                    if port._out_port.hierarchy_name() == port_hierarchy_name:
-                        return port._out_port
-
-        raise ValueError("Port not found %s" % port_hierarchy_name)
-
 
     #
     # Variable watching
@@ -257,14 +201,14 @@ class Sim:
         :raise: exceptions coming from model or simulator
 
         '''
-        self._enable_trace_prints = enable_trace_printing
+        self.tracing.enable_trace_prints(enable_trace_printing)
         self._stop_on_assertion_failure = stop_on_assertion_failure
 
         if self._has_run:
             print("SIM: run() can be called only once", file=sys.stderr)
             return
 
-        self.check_unbound_ports()
+        self.parts_mgr.check_unbound_ports()
         print("SIM: Simulator %s starting" % (VERSION))
         self._start_real_time = datetime.now()
 
@@ -287,7 +231,7 @@ class Sim:
             while True:
                 if not self._list_events:
                     print("SIM: Simulator has no more events")
-                    break   # no more events, stop
+                    break  # no more events, stop
 
                 # get next event to execute
                 # heap is a priority queue. heappop extracts the event with
@@ -304,7 +248,7 @@ class Sim:
                     print("SIM: Stops because stopTime reached")
                     break
 
-                #print("SIM: Exec event", event, self._time)
+                # print("SIM: Exec event", event, self._time)
                 try:
                     # Catch model exceptions
                     event.execute()
@@ -343,88 +287,18 @@ class Sim:
         for part in self.parts_mgr.walk_parts():
             part.terminate_sim()
 
-    #
-    # Tracing and display routines
-    #
-    def add_trace_event(self, trace_ev):
-        ''' Add new event to Trace list, timestamp it, print it'''
-        trace_ev.traceTime = self._time
-        self._list_traced_events.append(trace_ev)
-
-        if self._enable_trace_prints:
-            trace_str = "TRC: %10s %s" % (self.time_str(trace_ev.traceTime),
-                                          trace_ev)
-            print(trace_str)
-
-    def traced_events(self):
-        ''' return list of traced events'''
-        return self._list_traced_events
-
-    def annotation(self, part, text):
-        '''
-        User routine to add an annotation to a life line at the
-        current simulation time
-        '''
-        trace_ev = SimTraceEvent(part, part, text, 'ANN')
-        self.add_trace_event(trace_ev)
-
-    class StateIndTransVal:
-        '''
-        class to hold the text and appearance of a state indicator
-        '''
-        # pylint: disable=too-few-public-methods
-        def __init__(self, text, appearance):
-            self.text = text
-            self.appearance = appearance
-
-        def __str__(self):
-            return self.text
-
-    def set_state_indicator(self, part, text, appearance=None):
-        '''
-        User routine to indicate the current state of a part.
-        Can be also used to indicate
-        UML execution specification to a life line
-        at the current simulation time.
-        An empty text flags 'no state' which removes the indication from the
-        life line
-
-        :param SimPart part: affected part
-        :param str text: text to display (Empty string to clear indicator)
-        :param dict appearance: (default: {}) colors for indicator
-        '''
-        trace_ev = SimTraceEvent(
-            part, part, self.StateIndTransVal(text, appearance), 'STA')
-        self.add_trace_event(trace_ev)
-
-    def set_display_time_unit(self, unit):
-        '''
-        Define how the simulator prints/displays time units
-
-        :param str unit: can be "s", "ms", "us", "ns"
-
-        '''
-        self._dis_time_scale_str = unit
-        self._dis_time_scale = time_unit_to_factor(unit)
-
-    def time_str(self, time):
-        '''
-        return a formatted time string of *time* based on the display scale
-        '''
-        tmfmt = "%.1f" % (time / self._dis_time_scale)
-        return tmfmt + self._dis_time_scale_str
-
     def print_assertion_failures(self):
         '''Print all traced assertion failures to stderr'''
         if self._num_assertion_failures > 0:
             print("%d Assertion failures during simulation" %
                   self._num_assertion_failures, file=sys.stderr)
-            for trace_ev in self._list_traced_events:
+            for trace_ev in self.tracing.traced_events():
                 if trace_ev.action == "ASSFAIL":
-                    print("%10s: %s: %s" % (self.time_str(trace_ev.traceTime),
-                                            trace_ev.part,
-                                            trace_ev.trans_val.__str__()),
-                          file=sys.stderr)
+                    print("%10s: %s: %s" % (self.tracing.time_str(
+                        trace_ev.traceTime),
+                        trace_ev.part,
+                        trace_ev.trans_val.__str__()),
+                        file=sys.stderr)
 
     def smart_bind(self, bindings):
         '''
@@ -454,7 +328,8 @@ class Sim:
         in_ports = []
 
         for port_name in binding:
-            port = self.find_port_by_name(port_name)
+            port = self.parts_mgr.find_port_by_name(port_name)
+
             if port._type_str == "OutPort":
                 out_ports.append(port)
             elif port._type_str == "IOPort":
@@ -470,3 +345,9 @@ class Sim:
                     (out_port._io_port != in_port._io_port):
 
                     out_port.bind(in_port)
+
+    def time_str(self, time):
+        '''
+        return a formatted time string of *time* based on the display scale
+        '''
+        return self.tracing.time_str(time)

@@ -78,7 +78,7 @@ class TestSimulatorMsgPassing(unittest.TestCase):
                                            timePerDiv=1.0,
                                            pixPerDiv=30)
 
-        trc = simu.traced_events()
+        trc = simu.tracing.traced_events()
 
         # check if first message is correctly received on both consumers in trace
         self.assertEqual(searchInMsg(trc, 5.0, cons1.cons_port),

@@ -124,7 +124,7 @@ def moddyGenerateSequenceDiagram( sim,
     
     out += '<script>\n'
     out += dv.genHeader()
-    out += dv.genTraceOutput(sim.traced_events())
+    out += dv.genTraceOutput(sim.tracing.traced_events())
     out += '</script>\n'
     
     out += dv.genScript()

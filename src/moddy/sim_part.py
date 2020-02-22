@@ -29,15 +29,15 @@ class SimPart(SimBaseElement):
         super().__init__(sim, parent_obj, obj_name, "Part")
         self._list_ports = []
         self._list_timers = []
-        self._list_subparts = []     # child parts list
+        self._list_subparts = []  # child parts list
         self._list_var_watchers = []
         self._state_ind = None
 
         if parent_obj is not None:
             parent_obj.add_sub_part(self)
-        
-        if sim is not None and parent_obj is None:
-            sim.parts_mgr.add_top_level_part(self)
+        else:
+            if sim is not None:
+                sim.parts_mgr.add_top_level_part(self)
 
         if elems is not None:
             self.create_elements(elems)
@@ -55,9 +55,13 @@ class SimPart(SimBaseElement):
         ''' return list of child parts '''
         return self._list_subparts
 
+    def ports(self):
+        ''' return all ports of that part '''
+        return self._list_ports
+    
     def annotation(self, text):
         '''Add annotation from model at current simulation time'''
-        self._sim.annotation(self, text)
+        self._sim.tracing.annotation(self, text)
 
     def assertion_failed(self, assertion_str, frame_idx=1):
         '''
@@ -69,7 +73,7 @@ class SimPart(SimBaseElement):
         :param frameIdx: traceback frame index \
             (1 if caller's frame, 2 if caller-caller's frame...)
         '''
-        self._sim.assertion_failed(self, assertion_str, frame_idx+1)
+        self._sim.assertion_failed(self, assertion_str, frame_idx + 1)
 
     def set_state_indicator(self, text, appearance=None):
         '''set part's state from model at simulation time
@@ -81,7 +85,7 @@ class SimPart(SimBaseElement):
             'textColor':'white'}``
         '''
         self._state_ind = text
-        self._sim.set_state_indicator(self, text, appearance)
+        self._sim.tracing.set_state_indicator(self, text, appearance)
 
     def new_input_port(self, name, msg_received_func):
         '''
@@ -93,7 +97,7 @@ class SimPart(SimBaseElement):
 
         '''
         port = SimInputPort(self._sim, self, name, msg_received_func)
-        self.add_input_port(port)
+        self.add_port(port)
         return port
 
     def new_output_port(self, name):
@@ -103,7 +107,7 @@ class SimPart(SimBaseElement):
         :param name: name of port
         '''
         port = SimOutputPort(self._sim, self, name)
-        self.add_output_port(port)
+        self.add_port(port)
         return port
 
     def new_io_port(self, name, msg_received_func):
@@ -116,7 +120,7 @@ class SimPart(SimBaseElement):
 
         '''
         port = SimIOPort(self._sim, self, name, msg_received_func)
-        self.add_io_port(port)
+        self.add_port(port)
         return port
 
     def new_timer(self, name, elapsed_func):
@@ -147,43 +151,22 @@ class SimPart(SimBaseElement):
         self.add_var_watcher(watcher)
         return watcher
 
-    def add_input_port(self, port):
+    def add_port(self, port):
         '''
-        Add an input port to this part and to simulator
+        Add a port to this part
         :param port: port to add
         :raise: RuntimeError If port already in this part
         '''
-        add_elem_to_list(self._list_ports, port, self.__str__()+":ports")
-        self._sim.add_input_port(port)
-
-    def add_output_port(self, port):
-        '''
-        Add an output port to this part and to simulator
-        :param port: port to add
-        :raise: RuntimeError If port already in this part
-        '''
-        add_elem_to_list(self._list_ports, port, self.__str__()+":ports")
-        self._sim.add_output_port(port)
-
-    def add_io_port(self, port):
-        '''
-        Add an I/O port to this part and to simulator
-        :param port: port to add
-        :raise: RuntimeError If port already in this part
-        '''
-        add_elem_to_list(self._list_ports, port, self.__str__()+":ports")
-        self._sim.add_output_port(port._out_port)
-        self._sim.add_input_port(port._in_port)
+        add_elem_to_list(self._list_ports, port, self.__str__() + ":ports")
 
     def add_timer(self, timer):
         '''
-        Add a timer port to this part and to simulator
+        Add a timer port to this part
 
         :param timer: timer to add
         :raise: RuntimeError If timer already in this part
         '''
-        add_elem_to_list(self._list_timers, timer, self.__str__()+":timers")
-        self._sim.add_timer(timer)
+        add_elem_to_list(self._list_timers, timer, self.__str__() + ":timers")
 
     def add_var_watcher(self, var_watcher):
         '''
@@ -193,7 +176,7 @@ class SimPart(SimBaseElement):
         :raise: RuntimeError If watcher already in this part
         '''
         add_elem_to_list(self._list_var_watchers, var_watcher,
-                         self.__str__()+":var_watchers")
+                         self.__str__() + ":var_watchers")
         self._sim.add_var_watcher(var_watcher)
 
     def create_ports(self, ptype, list_port_names):
@@ -251,7 +234,7 @@ class SimPart(SimBaseElement):
 
         for el_type, names in elems.items():
             if isinstance(names, str):
-                names = [names]   # make a list if only a string is given
+                names = [names]  # make a list if only a string is given
 
             if el_type == 'tmr':
                 self.create_timers(names)
@@ -261,13 +244,11 @@ class SimPart(SimBaseElement):
     def start_sim(self):
         '''Called from simulator when simulation begins'''
 
-
     def terminate_sim(self):
         '''
         Called from simulator when simulation stops. Terminate block
         (e.g. stop threads)
         '''
-
 
     def time(self):
         '''Get current simulation time'''

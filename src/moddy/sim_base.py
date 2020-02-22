@@ -22,7 +22,7 @@ def time_unit_to_factor(unit):
     elif unit == "ns":
         factor = NS
     else:
-        assert(False), "Illegal time unit " + unit
+        raise ValueError("Illegal time unit %s" % (unit))
     return factor
 
 
@@ -98,26 +98,4 @@ class SimEvent():
 
     def execute(self):
         '''Execute the event'''
-
-class SimTraceEvent:
-    '''
-    simTraceEvents are the objects that are added to the simulators trace
-    buffer
-    '''
-    # pylint: disable=too-few-public-methods
-    def __init__(self, part, sub_obj, tv, act):
-        self.trace_time = -1  # when the event occurred
-        self.part = part      # generating part
-        self.sub_obj = sub_obj# timer or port
-        self.trans_val = tv   # Transport value (e.g. message)
-        self.action = act     # action string
-
-    def __repr__(self):
-        trace_str = "%-8s" % (self.action)
-        if self.sub_obj is not None:
-            trace_str += self.sub_obj.hierarchy_name_with_type()
-        if self.trans_val is not None:
-            trace_str += " // %s" % self.trans_val.__str__()
-        return trace_str
-
 
