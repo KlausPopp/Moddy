@@ -11,8 +11,8 @@
 import pickle
 from heapq import heappush, heappop
 from collections import deque
-from .sim_core import SimBaseElement, SimEvent, SimTraceEvent
-from .sim_core import add_elem_to_list
+from .sim_base import SimBaseElement, SimEvent, SimTraceEvent
+from .sim_base import add_elem_to_list
 
 
 class SimInputPort(SimBaseElement):

@@ -15,196 +15,16 @@ from heapq import heappush, heappop
 from collections import deque
 from datetime import datetime
 
-from . import MS, US, NS
 from .version import VERSION
-
-
-def time_unit_to_factor(unit):
-    '''Convert time unit to factor'''
-    if unit == "s":
-        factor = 1.0
-    elif unit == "ms":
-        factor = MS
-    elif unit == "us":
-        factor = US
-    elif unit == "ns":
-        factor = NS
-    else:
-        assert(False), "Illegal time unit " + unit
-    return factor
-
-def add_elem_to_list(lst, elem, list_name):
-    '''
-    Add elem to lst
-    :lst list: list to add element to
-    :elem: element to add to list
-    :list_name str: list name to add to exception
-    :raise: RuntimeError if elem already in list
-    '''
-    if elem in lst:
-        raise RuntimeError("element %s already in %s" % (elem, list_name))
-    lst.append(elem)
-
-class SimBaseElement:
-    '''
-    Moddy simulator base class
-    Base class for parts, ports, ...
-
-    :param sim: Simulator instance
-    :param parent_obj: parent part. None if part has no parent.
-    :param obj_name: part's name
-    :param type_str: type of object as a string
-    '''
-
-    def __init__(self, sim, parent_obj, obj_name, type_str):
-        self._sim = sim
-        self.parent_obj = parent_obj
-        self._obj_name = obj_name
-        self.type_str = type_str
-
-    def hierarchy_name(self):
-        '''
-        Return the element name within the hierarchy.
-        E.g. Top.Lower.myName
-        '''
-        if self.parent_obj is None:
-            return self._obj_name
-        return self.parent_obj.hierarchy_name() + "." + self._obj_name
-
-    def hierarchy_name_with_type(self):
-        '''
-        Return the element name within the hierarch including the element type
-        E.g. "Top.Lower.myName (Inport)"
-        '''
-        return self.hierarchy_name() + "(" + self.type_str + ")"
-
-    def obj_name(self):
-        '''
-        :return string: object name (without hierarchy)
-        '''
-        return self._obj_name
-
-    def __repr__(self):
-        return self.hierarchy_name_with_type()
-
-    def __str__(self):
-        return self.hierarchy_name()
-
-
-
-class SimEvent():
-    '''
-    Base class of all simulator events
-    '''
-    def __init__(self):
-        self._cancelled = False
-        self.exec_time = None
-
-    def __lt__(self, other):
-        return self.exec_time < other.exec_time
-
-    def execute(self):
-        '''Execute the event'''
-
-class SimVariableWatcher(SimBaseElement):
-    '''
-    The VariableWatcher class watches a variable for changes.
-    The variable is referenced by the moddy part and its variable name
-    within the part.
-    It can be a variable in the part itself or a subobject "obj1.subobj.a"
-
-    The class provides the checkValueChanged() method. In moddy,
-    the simulator should call this function
-    after each event (or step) to see if the value has changed
-    '''
-
-    def __init__(self, sim, part, var_name, format_string):
-        '''
-        :param sim sim: simulator object
-        :param simPart part: part which contains the variable
-        :param str varName: Variable name as seen part scope
-        :param str formatString: print format like string to format value
-        '''
-        super().__init__(sim, part, var_name, "WatchedVar")
-        self._var_name = var_name
-        self._last_value = None
-        self._format_string = format_string
-
-    def current_value(self):
-        '''return current value of watched var'''
-        # pylint: disable=eval-used, bare-except
-        try:
-            cur_val = eval('self.parent_obj.' + self._var_name)
-        except:
-            cur_val = None
-        return cur_val
-
-    def __str__(self):
-        cur_val = self.current_value()
-        if cur_val is None:
-            ret_val = ''
-        else:
-            ret_val = self._format_string % (cur_val)
-        return ret_val
-
-    def check_value_changed(self):
-        '''
-        Check if the variable value has changed
-        :return: Changed, newVal
-
-        Changed is True if value has changed since last call to
-        check_value_changed()
-        newVal is returned also if value not changed
-
-        If the variable value cannot be evaluated
-        (e.g. because the variable does not exist (anymore))
-        the variables value is set to None (no exception is raised)
-
-        '''
-        old_val = self._last_value
-        cur_val = self.current_value()
-        changed = False
-
-        if cur_val != old_val:
-            self._last_value = cur_val
-            changed = True
-
-        return (changed, cur_val)
-
-    def var_name(self):
-        '''
-        :return: Name of watched variable
-        '''
-        return self._var_name
-
-
-class SimTraceEvent:
-    '''
-    simTraceEvents are the objects that are added to the simulators trace
-    buffer
-    '''
-    # pylint: disable=too-few-public-methods
-    def __init__(self, part, sub_obj, tv, act):
-        self.trace_time = -1  # when the event occurred
-        self.part = part      # generating part
-        self.sub_obj = sub_obj# timer or port
-        self.trans_val = tv   # Transport value (e.g. message)
-        self.action = act     # action string
-
-    def __repr__(self):
-        trace_str = "%-8s" % (self.action)
-        if self.sub_obj is not None:
-            trace_str += self.sub_obj.hierarchy_name_with_type()
-        if self.trans_val is not None:
-            trace_str += " // %s" % self.trans_val.__str__()
-        return trace_str
+from .sim_base import SimEvent, SimTraceEvent
+from .sim_base import add_elem_to_list, time_unit_to_factor
+from .sim_parts_mgr import SimPartsManager
 
 
 class Sim:
     '''Simulator main class'''
-    # pylint: disable=too-many-instance-attributes, too-many-public-methods
     def __init__(self):
-        self._list_parts = []       # list of all parts
+        self.parts_mgr = SimPartsManager()
         # a heapq with list of pending events takes pendingEvent objects, sorted by execTime
         self._list_events = []
         self._time = 0.0      # current simulator time
@@ -263,9 +83,9 @@ class Sim:
         :return port: the found port
         :raises ValueError: if port not found
         '''
-        for part in self._list_parts:
+        for part in self.parts_mgr.all_parts():
             for port in part._listPorts:
-                #print("findPortByName %s %s" % (port.hierarchy_name(),
+                # print("findPortByName %s %s" % (port.hierarchy_name(),
                 # port._typeStr ))
                 if port.hierarchy_name() == port_hierarchy_name:
                     return port
@@ -278,32 +98,6 @@ class Sim:
 
         raise ValueError("Port not found %s" % port_hierarchy_name)
 
-    #
-    # Part management
-    #
-    def add_part(self, part):
-        '''Add part to simulators part list'''
-        add_elem_to_list(self._list_parts, part, "Simulator Parts")
-
-    def top_level_parts(self):
-        ''' get list of top level parts '''
-        tl_parts = []
-        for part in self._list_parts:
-            if part.parent_obj is None:
-                tl_parts.append(part)
-        return tl_parts
-
-    def find_part_by_name(self, part_hierarchy_name):
-        '''
-        Find a part by its hierarchy name
-        :param string part_hierarchy_name: e.g. "part1.subpart.subsubpart"
-        :return simPart part: the found part
-        :raises ValueError: if part not found
-        '''
-        for part in self._list_parts:
-            if part.hierarchy_name() == part_hierarchy_name:
-                return part
-        raise ValueError("Part not found %s" % part_hierarchy_name)
 
     #
     # Variable watching
@@ -428,8 +222,7 @@ class Sim:
         ''' stop simulator '''
         self._is_running = False
         elapsed_time = datetime.now() - self._start_real_time
-        for part in self._list_parts:
-            part.terminate_sim()
+        self._terminate_all_parts()
         print("SIM: Simulator stopped at", self.time_str(self._time) +
               ". Executed %d events in %.3f seconds" %
               (self._num_events, elapsed_time.total_seconds()))
@@ -484,8 +277,7 @@ class Sim:
         self._has_run = True
         # report initial value of watched variables
         self.watch_variables_current_value()
-        for part in self._list_parts:
-            part.start_sim()
+        self._start_all_parts()
         # Check for changed variables
         self.watch_variables()
 
@@ -542,6 +334,14 @@ class Sim:
     def is_running(self):
         ''' Return if simulator is running '''
         return self._is_running
+
+    def _start_all_parts(self):
+        for part in self.parts_mgr.walk_parts():
+            part.start_sim()
+
+    def _terminate_all_parts(self):
+        for part in self.parts_mgr.walk_parts():
+            part.terminate_sim()
 
     #
     # Tracing and display routines

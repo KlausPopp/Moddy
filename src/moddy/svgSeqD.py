@@ -14,8 +14,8 @@ TODO Inkskape Zoom factor wrong when no size in svg
 import svgwrite
 from math import *
 from . import MS, US, NS
-from .sim_core import Sim, SimVariableWatcher
-from builtins import str
+from .sim_var_watch import SimVariableWatcher
+from .sim_core import Sim
 
 _fontStyle = "font: 9pt Verdana, Helvetica, Arial, sans-serif"
 _fontStyleTitle = "font: 20pt Verdana, Helvetica, Arial, sans-serif"

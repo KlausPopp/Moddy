@@ -99,7 +99,7 @@ def moddyGenerateSequenceDiagram( sim,
     partsList = []
     for part in allParts:
         if type(part) is str:
-            part = sim.find_part_by_name(part)
+            part = sim.parts_mgr.find_part_by_name(part)
         if part not in excludedElementList:
             partsList.append(part)
 

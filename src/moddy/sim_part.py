@@ -8,8 +8,10 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
 '''
-from .sim_core import SimBaseElement, SimVariableWatcher, add_elem_to_list
+from .sim_base import SimBaseElement, add_elem_to_list
+from .sim_var_watch import SimVariableWatcher
 from .sim_ports import SimInputPort, SimOutputPort, SimIOPort, SimTimer
+
 
 class SimPart(SimBaseElement):
     '''an instance of SimPart forms a moddy object
@@ -31,10 +33,11 @@ class SimPart(SimBaseElement):
         self._list_var_watchers = []
         self._state_ind = None
 
-        if not parent_obj is None:
+        if parent_obj is not None:
             parent_obj.add_sub_part(self)
-
-        sim.add_part(self)
+        
+        if sim is not None and parent_obj is None:
+            sim.parts_mgr.add_top_level_part(self)
 
         if elems is not None:
             self.create_elements(elems)
@@ -47,6 +50,10 @@ class SimPart(SimBaseElement):
         '''
         add_elem_to_list(self._list_subparts, sub_part, self.__str__() +
                          ":subparts")
+
+    def sub_parts(self):
+        ''' return list of child parts '''
+        return self._list_subparts
 
     def annotation(self, text):
         '''Add annotation from model at current simulation time'''
