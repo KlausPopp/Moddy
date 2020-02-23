@@ -177,7 +177,7 @@ class SimPart(SimBaseElement):
         '''
         add_elem_to_list(self._list_var_watchers, var_watcher,
                          self.__str__() + ":var_watchers")
-        self._sim.add_var_watcher(var_watcher)
+        self._sim.var_watch_mgr.add_var_watcher(var_watcher)
 
     def create_ports(self, ptype, list_port_names):
         '''

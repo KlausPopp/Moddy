@@ -7,7 +7,8 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
 '''
-from .sim_base import SimBaseElement
+from .sim_base import SimBaseElement, add_elem_to_list
+from .sim_trace import SimTraceEvent
 
 
 class SimVariableWatcher(SimBaseElement):
@@ -17,7 +18,7 @@ class SimVariableWatcher(SimBaseElement):
     within the part.
     It can be a variable in the part itself or a subobject "obj1.subobj.a"
 
-    The class provides the checkValueChanged() method. In moddy,
+    The class provides the check_value_changed() method. In moddy,
     the simulator should call this function
     after each event (or step) to see if the value has changed
     '''
@@ -80,3 +81,56 @@ class SimVariableWatcher(SimBaseElement):
         :return: Name of watched variable
         '''
         return self._var_name
+
+
+class SimVarWatchManager:
+    '''
+    Class that tracks all watched variables
+    '''
+
+    def __init__(self, sim_tracing):
+        self._sim_tracing = sim_tracing
+
+        self._list_variable_watches = []  # list of watched variables
+
+    def add_var_watcher(self, var_watcher):
+        '''Add watcher to watcher list'''
+        add_elem_to_list(self._list_variable_watches, var_watcher,
+                         "Simulator Watcher")
+
+    def watch_variables(self):
+        '''
+        Check all registered variables for changes.
+        Generate a trace event for all changed variables
+        '''
+        for var_watcher in self._list_variable_watches:
+            changed, _ = var_watcher.check_value_changed()
+            if changed:
+                new_val_str = var_watcher.__str__()
+                trace_ev = SimTraceEvent(var_watcher.parent_obj,
+                                         var_watcher, new_val_str, 'VC')
+                self._sim_tracing.add_trace_event(trace_ev)
+
+    def watch_variables_current_value(self):
+        '''
+        Generate a trace event for all watched variables with their
+        current value.
+        Used at start of simulator to report the initial values
+        '''
+        for var_watcher in self._list_variable_watches:
+            trace_ev = SimTraceEvent(var_watcher.parent_obj,
+                                     var_watcher, var_watcher.__str__(), 'VC')
+            self._sim_tracing.add_trace_event(trace_ev)
+
+    def find_watched_variable_by_name(self, variable_hierarchy_name):
+        '''
+        Find a watched variable by its hierarchy name
+        :param str variable_hierarchy_name: e.g. "part1.variable"
+        :return SimVariableWatcher: the found variable watcher
+        :raises ValueError: if variable not found
+        '''
+        for var_watcher in self._list_variable_watches:
+            if var_watcher.hierarchy_name() == variable_hierarchy_name:
+                return var_watcher
+        raise ValueError("Watched Variable not found %s" %
+                         variable_hierarchy_name)

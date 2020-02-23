@@ -108,7 +108,7 @@ def moddyGenerateSequenceDiagram( sim,
     varList = []
     for var in showVarList:
         if type(var) is str:
-            var = sim.find_watched_variable_by_name(var)
+            var = sim.var_watch_mgr.find_watched_variable_by_name(var)
         varList.append(var)
 
 

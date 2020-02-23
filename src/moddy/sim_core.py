@@ -17,9 +17,10 @@ from datetime import datetime
 
 from .version import VERSION
 from .sim_base import SimEvent
-from .sim_base import add_elem_to_list, time_unit_to_factor
+from .sim_base import add_elem_to_list
 from .sim_parts_mgr import SimPartsManager
 from .sim_trace import SimTraceEvent, SimTracing
+from .sim_var_watch import SimVarWatchManager
 
 
 class Sim:
@@ -29,10 +30,11 @@ class Sim:
         self.parts_mgr = SimPartsManager()
         self.tracing = SimTracing()
         self.tracing.set_time_func(self.time)
-        # a heapq with list of pending events takes pendingEvent objects, sorted by execTime
+        self.var_watch_mgr = SimVarWatchManager(self.tracing)
+        # a heapq with list of pending events takes pendingEvent objects, 
+        # sorted by execTime
         self._list_events = []
         self._time = 0.0  # current simulator time
-        self._list_variable_watches = []  # list of watched variables
         # list of monitors (called on each simulator step)
         self._list_monitors = []
         self._stop_on_assertion_failure = False
@@ -43,50 +45,6 @@ class Sim:
         self._num_events = 0
         self._start_real_time = None
 
-    #
-    # Variable watching
-    #
-    def add_var_watcher(self, var_watcher):
-        '''Add watcher to simulators watcher list'''
-        add_elem_to_list(self._list_variable_watches, var_watcher,
-                         "Simulator Watcher")
-
-    def watch_variables(self):
-        '''
-        Check all registered variables for changes.
-        Generate a trace event for all changed variables
-        '''
-        for var_watcher in self._list_variable_watches:
-            changed, _ = var_watcher.checkValueChanged()
-            if changed:
-                new_val_str = var_watcher.__str__()
-                trace_ev = SimTraceEvent(var_watcher.parent_obj,
-                                         var_watcher, new_val_str, 'VC')
-                self.add_trace_event(trace_ev)
-
-    def watch_variables_current_value(self):
-        '''
-        Generate a trace event for all watched variables with their
-        current value.
-        Used at start of simulator to report the initial values
-        '''
-        for var_watcher in self._list_variable_watches:
-            trace_ev = SimTraceEvent(var_watcher.parent_obj,
-                                     var_watcher, var_watcher.__str__(), 'VC')
-            self.add_trace_event(trace_ev)
-
-    def find_watched_variable_by_name(self, variable_hierarchy_name):
-        '''
-        Find a watched variable by its hierarchy name
-        :param str variable_hierarchy_name: e.g. "part1.variable"
-        :return SimVariableWatcher: the found variable watcher
-        :raises ValueError: if variable not found
-        '''
-        for var_watcher in self._list_variable_watches:
-            if var_watcher.hierarchy_name() == variable_hierarchy_name:
-                return var_watcher
-        raise ValueError("Watched Variable not found %s" %
-                         variable_hierarchy_name)
 
     #
     # Model Assertions
@@ -109,7 +67,7 @@ class Sim:
                                           os.path.basename(file_name),
                                           line_number)
         trace_ev = SimTraceEvent(part, part, te_str, 'ASSFAIL')
-        self.add_trace_event(trace_ev)
+        self.tracing.add_trace_event(trace_ev)
         self._num_assertion_failures += 1
 
     #
@@ -220,10 +178,10 @@ class Sim:
         self._is_running = True
         self._has_run = True
         # report initial value of watched variables
-        self.watch_variables_current_value()
+        self.var_watch_mgr.watch_variables_current_value()
         self._start_all_parts()
         # Check for changed variables
-        self.watch_variables()
+        self.var_watch_mgr.watch_variables()
 
         self._num_events = 0
 
@@ -258,7 +216,7 @@ class Sim:
                     # re-raise model exception
                     raise
                 # Check for changed variables
-                self.watch_variables()
+                self.var_watch_mgr.watch_variables()
                 # Call monitors
                 self.call_monitors()
 

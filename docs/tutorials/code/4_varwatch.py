@@ -2,7 +2,7 @@
 @author: klauspopp@gmx.de
 '''
 
-from moddy import *
+import moddy
 
 def varChangerProg(self):
     self.var1 = 0
@@ -23,16 +23,16 @@ def varChangerProg(self):
         self.wait(3)
 
 if __name__ == '__main__':
-    simu = sim()
-    vc = vSimpleProg( sim=simu, objName="VC", target=varChangerProg )
+    simu = moddy.Sim()
+    vc = moddy.VSimpleProg( sim=simu, obj_name="VC", target=varChangerProg )
 
-    var1watch = vc.newVarWatcher('var1', "0x%08x")
-    var2watch = vc.newVarWatcher('var2', "%s")
+    var1watch = vc.new_var_watcher('var1', "0x%08x")
+    var2watch = vc.new_var_watcher('var2', "%s")
         
     simu.run(10)
-    moddyGenerateTraceTable( simu, 'output/4_varwatch.csv')
+    moddy.moddyGenerateTraceTable( simu, 'output/4_varwatch.csv')
 
-    moddyGenerateSequenceDiagram( sim=simu, 
+    moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                   fileName="output/4_varwatch.html", 
                                   fmt="iaViewer", 
                                   showPartsList=['VC'],

@@ -9,7 +9,7 @@
 '''
 
 import csv
-from .sim_core import time_unit_to_factor
+from .sim_base import time_unit_to_factor
 from .utils import moddyCreateDirsAndOpenOutputFile
 
 
@@ -25,7 +25,7 @@ def moddyGenerateTraceTable( sim, fileName, **kwargs):
      * timeUnit="s" - time unit for all time stamps in table ('s', 'ms', 'us', 'ns')
      * floatComma=',' - Comma character for float numbers
     '''
-    trc = TraceToCsv(sim.tracedEvents(),**kwargs)
+    trc = TraceToCsv(sim.tracing.traced_events(),**kwargs)
     trc.save(fileName)
 
 
@@ -64,20 +64,22 @@ class TraceToCsv():
             if te.part is None:
                 p = 'Global'
             else:
-                p = te.part.hierarchyName()
+                p = te.part.hierarchy_name()
             row.append(p)
             
             if te.sub_obj is not None:
-                row.append(te.sub_obj.hierarchyNameWithType())
+                row.append(te.sub_obj.hierarchy_name_with_type())
             else:
                 row.append('')
             if te.trans_val is not None:
                 if(te.action.find('MSG') != -1):
                     # print request, begin, end, flightTime and msg in separate columns
                     fireEvent = te.trans_val
-                    row.append("(***LOST***)" if fireEvent._is_lost else fireEvent.msg_text())
-                    row.append(self.timeFmt(fireEvent._requestTime))
-                    row.append(self.timeFmt(fireEvent.exec_time - fireEvent._flight_time))
+                    row.append("(***LOST***)" if fireEvent._is_lost else 
+                               fireEvent.msg_text())
+                    row.append(self.timeFmt(fireEvent._request_time))
+                    row.append(self.timeFmt(fireEvent.exec_time - 
+                                            fireEvent._flight_time))
                     row.append(self.timeFmt(fireEvent.exec_time))
                     row.append(self.timeFmt(fireEvent._flight_time))
                 elif(te.action.find('T-') != -1):
