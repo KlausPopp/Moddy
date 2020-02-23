@@ -12,6 +12,7 @@ from .sim_base import SimBaseElement
 from .sim_part import SimPart
 from .sim_base import add_elem_to_list
 from .sim_ports import SimOutputPort, SimIOPort
+from moddy.sim_ports import SimInputPort
 
 
 class SimPartsManager:
@@ -132,3 +133,49 @@ class SimPartsManager:
                         return port.out_port()
 
         raise ValueError("Port not found %s" % port_hierarchy_name)
+
+    def smart_bind(self, bindings):
+        '''
+        Create many port bindings at once using simple lists.
+
+        Example:
+
+        .. code-block:: python
+
+            simu.smartBind( [
+                ['App.outPort1', 'Dev1.inPort', 'Dev2.inPort'],
+                ['App.ioPort1', 'Server.netPort' ]  ])
+
+        :param list bindings: Each list element must be a list of strings, \
+            which specifies ports that shall be \
+            connected to each other. \
+            The strings must specify the hierarchy names of the ports.
+
+        '''
+
+        for binding in bindings:
+            self._single_smart_bind(binding)
+
+    def _single_smart_bind(self, binding):
+        # determine output and input ports
+        out_ports = []
+        in_ports = []
+
+        for port_name in binding:
+            port = self.find_port_by_name(port_name)
+
+            if isinstance(port, SimOutputPort):
+                out_ports.append(port)
+            elif isinstance(port, SimIOPort):
+                out_ports.append(port.out_port())
+                in_ports.append(port.in_port())
+            elif isinstance(port, SimInputPort):
+                in_ports.append(port)
+
+        # bind all output ports to all input ports
+        for out_port in out_ports:
+            for in_port in in_ports:
+                if out_port.io_port() is None or \
+                        (out_port.io_port() != in_port.io_port()):
+
+                    out_port.bind(in_port)

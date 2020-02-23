@@ -6,50 +6,51 @@ Created on 27.03.2019
 test binding of multiple output ports to a single input port
 '''
 
-from moddy import *
+import moddy
+from moddy import MS, US
 
 def producerProg(self):
-    self.netPort2.setColor('blue')
+    self.netPort2.set_color('blue')
     while True:
-        self.wait(100*us)
-        self.netPort1.send('test1a', 100*us)
-        self.netPort2.send('test2a', 100*us)
-        self.busy(100*us, 'TX1', bcWhiteOnBlue)
-        self.netPort1.send('test1b', 100*us)
-        self.busy(100*us, 'TX1', bcWhiteOnBlue)
-        self.netPort2.send('test2b', 100*us)
+        self.wait(100*US)
+        self.netPort1.send('test1a', 100*US)
+        self.netPort2.send('test2a', 100*US)
+        self.busy(100*US, 'TX1', moddy.BC_WHITE_ON_BLUE)
+        self.netPort1.send('test1b', 100*US)
+        self.busy(100*US, 'TX1', moddy.BC_WHITE_ON_BLUE)
+        self.netPort2.send('test2b', 100*US)
 
 def consumerProg(self):
     while True:
         msg = self.waitForMsg( timeout=None, ports=self.netPort )
-        self.addAnnotation('got message ' + msg)
+        self.annotation('got message ' + msg)
  
             
 if __name__ == '__main__':
-    simu = sim()
-    simu.setDisplayTimeUnit('us')
+    simu = moddy.Sim()
+    simu.tracing.set_display_time_unit('us')
     
-    prod = vSimpleProg( sim=simu, objName="Producer", target=producerProg, elems={ 'out': ['netPort1', 'netPort2'] } )
-    cons = vSimpleProg( sim=simu, objName="Consumer", target=consumerProg, elems={ 'QueuingIn': 'netPort' } )
+    prod = moddy.VSimpleProg( sim=simu, obj_name="Producer", target=producerProg, elems={ 'out': ['netPort1', 'netPort2'] } )
+    cons = moddy.VSimpleProg( sim=simu, obj_name="Consumer", target=consumerProg, elems={ 'QueuingIn': 'netPort' } )
 
     # bind two output ports to same input port
-    simu.smartBind( [ [ 'Producer.netPort1', 'Producer.netPort2', 'Consumer.netPort'] ] )
+    simu.smart_bind( [ [ 'Producer.netPort1', 'Producer.netPort2', 'Consumer.netPort'] ] )
 
     # let simulator run
     try:
-        simu.run(stopTime=3*ms)
+        simu.run(stop_time=3*MS)
         
     except: raise
     finally:
         # create sequence diagram
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=simu, 
                                       fileName="output/7_multiPortBinding.html", 
                                       fmt="iaViewer", 
                                       showPartsList=["Producer","Consumer"],
                                       excludedElementList=['allTimers'], 
                                       title="Multi Port Binding",
-                                      timePerDiv = 50*us, 
+                                      timePerDiv = 50*US, 
                                       pixPerDiv = 30)    
         # Output model structure graph
-        moddyGenerateStructureGraph(simu, 'output/7_multiPortBinding_structure.svg')
+        moddy.moddyGenerateStructureGraph(simu, 'output/7_multiPortBinding_structure.svg')
         

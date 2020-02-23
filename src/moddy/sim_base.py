@@ -89,9 +89,11 @@ class SimEvent():
     '''
     Base class of all simulator events
     '''
+
     def __init__(self):
         self._cancelled = False
         self.exec_time = None
+        self._cancelled = False
 
     def __lt__(self, other):
         return self.exec_time < other.exec_time
@@ -99,3 +101,10 @@ class SimEvent():
     def execute(self):
         '''Execute the event'''
 
+    def cancel(self):
+        '''Cancel event'''
+        self._cancelled = True
+
+    def is_cancelled(self):
+        '''Return True if event has been cancelled'''
+        return self._cancelled

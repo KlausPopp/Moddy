@@ -24,7 +24,8 @@ def moddyGenerateStructureGraph( sim, fileName, keepGvFile=False ):
     :param fileName: the relative filename including '.svg'
     :param keepGvFile: if True, don't delete graphviz input file
     '''
-    ds = DotStructure(sim.topLevelParts(), sim.outputPorts())
+    ds = DotStructure(sim.parts_mgr.top_level_parts(), 
+                      sim.parts_mgr.all_output_ports())
     ds.dotGen(fileName, keepGvFile)
 
 def space(indent):
@@ -41,10 +42,10 @@ def subgraphName( partHierarchyName ):
 
 def portOrIoPortHierarchyName(port):
     ''' return port name or if port is part of IOPort, the IOPorts Name'''
-    if port._ioPort is not None:
-        return port._ioPort.hierarchyName()
+    if port.io_port() is not None:
+        return port.io_port().hierarchy_name()
     else:
-        return port.hierarchyName()
+        return port.hierarchy_name()
     
 def portOrIoPortObjName(port):
     ''' return port name or if port is part of IOPort, the IOPorts Name'''
@@ -55,7 +56,7 @@ def portOrIoPortObjName(port):
 
 def p2pPortMsgTypes(port1,port2):
     ''' join the message types of the two ports '''
-    msgTypes = port1.learnedMsgTypes() + port2.learnedMsgTypes()
+    msgTypes = port1.learned_msg_types() + port2.learned_msg_types()
     l = []
     for msgType in msgTypes:
         if not msgType in l:
@@ -99,27 +100,28 @@ class DotStructure(object):
     def partStructureGen(self, part, level):
         lines = []
         
-        if part._typeStr == "scheduler":
+        if part.type_str == "scheduler":
             # show schedulers as an ellipse-node, and without subparts
             lines.append( [level, '%s [label=%s shape=ellipse];' % 
-                           (moddyNameToDotName(part.hierarchyName()), moddyNameToDotName(part.obj_name()))])
+                           (moddyNameToDotName(part.hierarchy_name()), moddyNameToDotName(part.obj_name()))])
             self._listSchedulers.append(part)
             
         else:
             # normal part is shown as a subgraph
-            lines.append( [level, 'subgraph %s {' % subgraphName(part.hierarchyName())])
+            lines.append( [level, 'subgraph %s {' % subgraphName(part.hierarchy_name())])
             lines.append( [level+1, 'label=<<B>%s</B>>' % part.obj_name()] )
             
             # now the ports
-            listPorts = part._listPorts
+            listPorts = part.ports()
             if len(listPorts) > 0:
                 for port in listPorts:
                     lines.append( [level+1, '%s [label=%s];' % 
-                                   (moddyNameToDotName(port.hierarchyName()), moddyNameToDotName(port.obj_name()))  ])
+                                   (moddyNameToDotName(port.hierarchy_name()), 
+                                    moddyNameToDotName(port.obj_name()))  ])
                 
                     
             # now the subparts
-            for subPart in part._listSubParts:
+            for subPart in part.sub_parts():
                 lines += self.partStructureGen(subPart, level+1)
     
             lines.append( [level, '}' ])
@@ -133,7 +135,7 @@ class DotStructure(object):
         for port in self._outputPorts:
             ioPort = None
             # test if IOPort 
-            if port._ioPort is not None:
+            if port.io_port() is not None:
                 ioPort = port._ioPort 
                 peers = ioPort.peerPorts()
                 
@@ -144,7 +146,7 @@ class DotStructure(object):
                         # Has a peer port, make bidirectional connection
                         lines.append( [level, '%s -> %s  [dir=none penwidth=3 label="%s"]' % ( #[constraint=false]
                               moddyNameToDotName(portOrIoPortHierarchyName(port)),
-                              moddyNameToDotName(peer.hierarchyName()),
+                              moddyNameToDotName(peer.hierarchy_name()),
                               p2pPortMsgTypes(port._ioPort._out_port, peer._out_port) 
                             )] )
     
@@ -158,7 +160,7 @@ class DotStructure(object):
                     lines.append( [level, '%s -> %s [label="%s"]' % ( #[constraint=false]
                           moddyNameToDotName(portOrIoPortHierarchyName(port)),
                           moddyNameToDotName(portOrIoPortHierarchyName(inPort)),
-                          portMsgTypesToLabel(port.learnedMsgTypes()) ) ] )
+                          portMsgTypesToLabel(port.learned_msg_types()) ) ] )
                          
          
         return lines
@@ -175,17 +177,17 @@ class DotStructure(object):
                         firstPort = thread._listPorts[0]
     
                         prio = thread._scPrio
-                        destNode = moddyNameToDotName(firstPort.hierarchyName())
+                        destNode = moddyNameToDotName(firstPort.hierarchy_name())
     
                         lines.append( [level, 
                                        '%s -> %s [lhead=%s label="%s" color=lightblue fontsize=8 fontcolor=lightblue ]' % 
-                                       ( moddyNameToDotName(sched.hierarchyName()),
+                                       ( moddyNameToDotName(sched.hierarchy_name()),
                                          destNode,
-                                         "cluster_" + moddyNameToDotName(thread.hierarchyName()),
+                                         "cluster_" + moddyNameToDotName(thread.hierarchy_name()),
                                          prio ) ] )
                 else:
                     print("WARNING: Thread %s has no ports. Scheduler connection cannot be shown in structure" % 
-                          thread.hierarchyName())
+                          thread.hierarchy_name())
         return lines
         
     def dotGen(self, fileName, keepGvFile):

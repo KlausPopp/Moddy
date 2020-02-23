@@ -40,7 +40,7 @@ class SimVariableWatcher(SimBaseElement):
         # pylint: disable=eval-used, bare-except
         try:
             cur_val = eval('self.parent_obj.' + self._var_name)
-        except:
+        except NameError:
             cur_val = None
         return cur_val
 

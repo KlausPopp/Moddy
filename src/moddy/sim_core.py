@@ -21,6 +21,7 @@ from .sim_monitor import SimMonitorManager
 
 
 class Sim:
+    # pylint: disable=too-many-instance-attributes
     '''Simulator main class'''
 
     def __init__(self):
@@ -45,19 +46,10 @@ class Sim:
         return self._time
 
     def schedule_event(self, event):
-        # TODO add members to SimBaseEvent
-        '''schedule a new event for execution.
-        Event must have members
-        - exec_time
-        - cancelled
-        - execute()
-        - __lt__()
+        '''
+        schedule a new event for execution.
         '''
         heappush(self._list_events, event)
-
-    def cancel_event(self, event):
-        '''Cancel an already scheduled event'''
-        event._cancelled = True
 
     def stop(self):
         ''' stop simulator '''
@@ -134,7 +126,7 @@ class Sim:
                 # heap is a priority queue. heappop extracts the event with
                 # the smallest execution time
                 event = heappop(self._list_events)
-                if event._cancelled:
+                if event.is_cancelled():
                     continue
 
                 self._num_events += 1
@@ -146,10 +138,11 @@ class Sim:
                     break
 
                 # print("SIM: Exec event", event, self._time)
+                # pylint: disable=bare-except
                 try:
                     # Catch model exceptions
                     event.execute()
-                except:
+                except Exception:
                     print("SIM: Caught exception while executing event %s" %
                           event, file=sys.stderr)
                     # re-raise model exception
@@ -202,33 +195,7 @@ class Sim:
             The strings must specify the hierarchy names of the ports.
 
         '''
-
-        for binding in bindings:
-            self._single_smart_bind(binding)
-
-    def _single_smart_bind(self, binding):
-        # determine output and input ports
-        out_ports = []
-        in_ports = []
-
-        for port_name in binding:
-            port = self.parts_mgr.find_port_by_name(port_name)
-
-            if port._type_str == "OutPort":
-                out_ports.append(port)
-            elif port._type_str == "IOPort":
-                out_ports.append(port._out_port)
-                in_ports.append(port._in_port)
-            elif port._type_str == "InPort":
-                in_ports.append(port)
-
-        # bind all output ports to all input ports
-        for out_port in out_ports:
-            for in_port in in_ports:
-                if out_port._io_port is None or \
-                    (out_port._io_port != in_port._io_port):
-
-                    out_port.bind(in_port)
+        self.parts_mgr.smart_bind(bindings)
 
     def time_str(self, time):
         '''

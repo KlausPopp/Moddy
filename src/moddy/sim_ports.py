@@ -29,10 +29,11 @@ class SimInputPort(SimBaseElement):
         (None if not part of IOPort).
 
     '''
+
     # pylint: disable=too-many-arguments
     def __init__(self, sim, part, name, msg_received_func, io_port=None):
         super().__init__(sim, part, name, "InPort")
-        self._out_ports = []         # connected output ports
+        self._out_ports = []  # connected output ports
         # function that gets called when message arrives
         self._msg_received_func = msg_received_func
         # function that gets called when message transmission has started on
@@ -74,6 +75,17 @@ class SimInputPort(SimBaseElement):
         '''Report True if port is bound to an output port'''
         return len(self._out_ports) > 0
 
+    def out_ports(self):
+        '''Return list of connected output ports'''
+        return self._out_ports
+
+    def io_port(self):
+        '''
+        Return IOPort to which this input port belongs
+        (None if not in an IO Port)
+        '''
+        return self._io_port
+
 
 class SimOutputPort(SimBaseElement):
     '''Simulator output port
@@ -90,6 +102,7 @@ class SimOutputPort(SimBaseElement):
 
     class FireEvent(SimEvent):
         ''' Event that is passed to scheduler to send a message '''
+
         # pylint: disable=too-many-instance-attributes
         def __init__(self, sim, port, msg, flight_time):
             super().__init__()
@@ -98,10 +111,10 @@ class SimOutputPort(SimBaseElement):
             self._serialized_msg = self.__class__.msg_serialize(msg)
             self._msg_color = msg.msgColor if hasattr(msg, 'msgColor') \
                 else None
-            self._flight_time = flight_time # message transmit time
-            self._request_time = sim.time() # time when application called send()
-            self.exec_time = -1             # when message arrives at input port
-            self._is_lost = False           # Flags that message is a lost message
+            self._flight_time = flight_time  # message transmit time
+            self._request_time = sim.time()  # time when application called send()
+            self.exec_time = -1  # when message arrives at input port
+            self._is_lost = False  # Flags that message is a lost message
 
         def __str__(self):
             '''Create a user readable form of the event. Used by tracer'''
@@ -137,7 +150,7 @@ class SimOutputPort(SimBaseElement):
                     inport.msg_event(msg_copy)
 
             # remove me from pending queue
-            #print(self, "exec", len(self._port._list_pending_msg))
+            # print(self, "exec", len(self._port._list_pending_msg))
             self._port._list_pending_msg.popleft()
             # and send next message in queue
             if self._port._list_pending_msg:
@@ -175,7 +188,8 @@ class SimOutputPort(SimBaseElement):
         self._list_pending_msg = deque()
         # color for messages leaving that port
         self._color = color
-        # reference to the IOPort which contains this outPort (None if not part of IOPort)
+        # reference to the IOPort which contains this outPort
+        # (None if not part of IOPort)
         self._io_port = io_port
         # learned message types that left this port
         self._list_msg_types = []
@@ -192,9 +206,9 @@ class SimOutputPort(SimBaseElement):
 
         '''
         add_elem_to_list(input_port._out_ports, self,
-                         input_port.__str__()+":outPorts")
+                         input_port.__str__() + ":outPorts")
         add_elem_to_list(self._list_in_ports, input_port,
-                         self.__str__()+":inPorts")
+                         self.__str__() + ":inPorts")
 
     def is_bound(self):
         '''Report True if port is bound to at least one input port'''
@@ -240,7 +254,7 @@ class SimOutputPort(SimBaseElement):
                 self.parent_obj, self, event, '>MSG'))
 
         self._list_pending_msg.append(event)
-        #print(self, "sendlp", len(self._list_pending_msg))
+        # print(self, "sendlp", len(self._list_pending_msg))
 
     def set_color(self, color):
         ''' Set color for messages leaving that port '''
@@ -258,9 +272,9 @@ class SimOutputPort(SimBaseElement):
         # add the sequence number to be lost to the _lostSeqHeap,
         # if this sequence is not already there
         # this maintains the heap sequence.
-        if not lost_seq in self._lost_seq_heap:
+        if lost_seq not in self._lost_seq_heap:
             heappush(self._lost_seq_heap, lost_seq)
-        #print("lostSeqHeap=", self._lostSeqHeap)
+        # print("lostSeqHeap=", self._lostSeqHeap)
 
     def is_lost_message(self):
         '''
@@ -269,11 +283,22 @@ class SimOutputPort(SimBaseElement):
         sequence heap
         '''
         if len(self._lost_seq_heap) > 0 and self._seq_no == \
-            self._lost_seq_heap[0]:
+                self._lost_seq_heap[0]:
 
             heappop(self._lost_seq_heap)
             return True
         return False
+
+    def io_port(self):
+        '''
+        Return IOPort to which this output port belongs
+        (None if not in an IO Port)
+        '''
+        return self._io_port
+
+    def in_ports(self):
+        ''' Return list of connected input ports'''
+        return self._list_in_ports
 
 
 class SimIOPort(SimBaseElement):
@@ -421,7 +446,7 @@ class SimTimer(SimBaseElement):
         if timeout <= 0:
             raise AttributeError(self.hierarchy_name() +
                                  "timeout must be greate than 0")
-        event = self.TimerEvent(self._sim, self, self._sim.time()+timeout)
+        event = self.TimerEvent(self._sim, self, self._sim.time() + timeout)
         self._sim.schedule_event(event)
         self._pending_event = event
 
@@ -439,7 +464,7 @@ class SimTimer(SimBaseElement):
 
     def _stop(self):
         if self._pending_event is not None:
-            self._sim.cancel_event(self._pending_event)
+            self._pending_event.cancel()
             self._pending_event = None
 
     def stop(self):
