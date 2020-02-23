@@ -9,18 +9,15 @@
 
 '''
 import sys
-import inspect
-import os
 from heapq import heappush, heappop
-from collections import deque
 from datetime import datetime
 
 from .version import VERSION
 from .sim_base import SimEvent
-from .sim_base import add_elem_to_list
 from .sim_parts_mgr import SimPartsManager
-from .sim_trace import SimTraceEvent, SimTracing
+from .sim_trace import SimTracing
 from .sim_var_watch import SimVarWatchManager
+from .sim_monitor import SimMonitorManager
 
 
 class Sim:
@@ -28,78 +25,20 @@ class Sim:
 
     def __init__(self):
         self.parts_mgr = SimPartsManager()
-        self.tracing = SimTracing()
-        self.tracing.set_time_func(self.time)
+        self.tracing = SimTracing(self.time)
         self.var_watch_mgr = SimVarWatchManager(self.tracing)
-        # a heapq with list of pending events takes pendingEvent objects, 
+        self.monitor_mgr = SimMonitorManager()
+
+        # a heapq with list of pending events takes pendingEvent objects,
         # sorted by execTime
         self._list_events = []
         self._time = 0.0  # current simulator time
-        # list of monitors (called on each simulator step)
-        self._list_monitors = []
         self._stop_on_assertion_failure = False
-        self._num_assertion_failures = 0
         self._is_running = False
         self._has_run = False
         self._stop_event = None
         self._num_events = 0
         self._start_real_time = None
-
-
-    #
-    # Model Assertions
-    #
-    def assertion_failed(self, part, assertion_str, frame_idx=1):
-        '''
-        Add an assertion failure trace event.
-        Increment global assertion failure counter.
-        Stop simulator if configured so.
-
-        :param simPart part: the related simPart. None if global assertion
-        :param string assertion_str: error message to display
-        :param int frame_idx: traceback frame index \
-            (1 if caller's frame, 2 if caller-caller's frame...)
-        '''
-        _, file_name, line_number, function_name, _, _ = \
-            inspect.stack()[frame_idx]
-
-        te_str = "%s: in %s, (%s::%d)" % (assertion_str, function_name,
-                                          os.path.basename(file_name),
-                                          line_number)
-        trace_ev = SimTraceEvent(part, part, te_str, 'ASSFAIL')
-        self.tracing.add_trace_event(trace_ev)
-        self._num_assertion_failures += 1
-
-    #
-    # Monitoring
-    #
-    def add_monitor(self, monitor_func):
-        '''
-        Register a function to be called at each simulator step.
-        Usually used by monitors or stimulation routines
-
-        :param monitor_func: function to call. Gets called with no arguments
-        '''
-        self._list_monitors.append(monitor_func)
-
-    def delete_monitor(self, monitor_func):
-        '''
-        Delete a monitor function that has been registered with 'addMonitor'
-        before
-
-        :param monitor_func: function to delete
-        :raises ValueError: if monitorFunc is not registered
-        '''
-        self._list_monitors.remove(monitor_func)
-
-    def call_monitors(self):
-        ''' Run all monitors '''
-        for monitor_func in self._list_monitors:
-            monitor_func()
-
-    #
-    # Simulator core routines
-    #
 
     def time(self):
         ''' Return current simulation time '''
@@ -128,7 +67,7 @@ class Sim:
         print("SIM: Simulator stopped at", self.time_str(self._time) +
               ". Executed %d events in %.3f seconds" %
               (self._num_events, elapsed_time.total_seconds()))
-        self.print_assertion_failures()
+        self.tracing.print_assertion_failures()
 
     def run(self,
             stop_time,
@@ -218,7 +157,7 @@ class Sim:
                 # Check for changed variables
                 self.var_watch_mgr.watch_variables()
                 # Call monitors
-                self.call_monitors()
+                self.monitor_mgr.call_monitors()
 
                 if max_events is not None and self._num_events >= max_events:
                     print(
@@ -227,7 +166,7 @@ class Sim:
                     break
 
                 if self._stop_on_assertion_failure and \
-                   self._num_assertion_failures > 0:
+                   self.tracing.assertion_failures() > 0:
                     print("SIM: Stops due to Assertion Failure")
                     break
         finally:
@@ -244,19 +183,6 @@ class Sim:
     def _terminate_all_parts(self):
         for part in self.parts_mgr.walk_parts():
             part.terminate_sim()
-
-    def print_assertion_failures(self):
-        '''Print all traced assertion failures to stderr'''
-        if self._num_assertion_failures > 0:
-            print("%d Assertion failures during simulation" %
-                  self._num_assertion_failures, file=sys.stderr)
-            for trace_ev in self.tracing.traced_events():
-                if trace_ev.action == "ASSFAIL":
-                    print("%10s: %s: %s" % (self.tracing.time_str(
-                        trace_ev.traceTime),
-                        trace_ev.part,
-                        trace_ev.trans_val.__str__()),
-                        file=sys.stderr)
 
     def smart_bind(self, bindings):
         '''

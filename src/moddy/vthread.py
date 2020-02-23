@@ -433,11 +433,11 @@ class VThread(SimPart):
         :raise TerminateException: if simulator stopped
         '''
         self._monitorFunc = monitorFunc
-        self._sim.add_monitor(self.monitorExecute)
+        self._sim.monitor_mgr.add_monitor(self.monitorExecute)
 
         res = self.wait(timeout, ["monitorEvent"])
 
-        self._sim.delete_monitor(self.monitorExecute)
+        self._sim.monitor_mgr.delete_monitor(self.monitorExecute)
         return res
 
     def monitorExecute(self):

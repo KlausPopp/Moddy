@@ -7,7 +7,10 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
 '''
+import os
 import sys
+import inspect
+
 from collections import deque
 
 from .sim_base import time_unit_to_factor
@@ -41,21 +44,18 @@ class SimTracing:
     Simulator Tracing and logging
     '''
 
-    def __init__(self):
+    def __init__(self, time_func):
         # list of all traced events during execution
         self._list_traced_events = deque()
         self._dis_time_scale = 1  # time scale factor
         self._dis_time_scale_str = "s"  # time scale string
         self._enable_trace_prints = False
-        self._time_func = None
+        self._time_func = time_func
+        self._num_assertion_failures = 0
 
     def enable_trace_prints(self, enable_prints):
         ''' enable/disable trace prints '''
         self._enable_trace_prints = enable_prints
-
-    def set_time_func(self, time_func):
-        ''' set the function to retrieve current simulation time '''
-        self._time_func = time_func
 
     def add_trace_event(self, trace_ev):
         ''' Add new event to Trace list, timestamp it, print it'''
@@ -125,3 +125,44 @@ class SimTracing:
         '''
         tmfmt = "%.1f" % (time / self._dis_time_scale)
         return tmfmt + self._dis_time_scale_str
+
+    #
+    # Model Assertions
+    #
+    def assertion_failed(self, part, assertion_str, frame_idx=1):
+        '''
+        Add an assertion failure trace event.
+        Increment global assertion failure counter.
+        Stop simulator if configured so.
+
+        :param simPart part: the related simPart. None if global assertion
+        :param string assertion_str: error message to display
+        :param int frame_idx: traceback frame index \
+            (1 if caller's frame, 2 if caller-caller's frame...)
+        '''
+        _, file_name, line_number, function_name, _, _ = \
+            inspect.stack()[frame_idx]
+
+        te_str = "%s: in %s, (%s::%d)" % (assertion_str, function_name,
+                                          os.path.basename(file_name),
+                                          line_number)
+        trace_ev = SimTraceEvent(part, part, te_str, 'ASSFAIL')
+        self.add_trace_event(trace_ev)
+        self._num_assertion_failures += 1
+
+    def assertion_failures(self):
+        ''' Return number of assertion failures '''
+        return self._num_assertion_failures
+
+    def print_assertion_failures(self):
+        '''Print all traced assertion failures to stderr'''
+        if self._num_assertion_failures > 0:
+            print("%d Assertion failures during simulation" %
+                  self._num_assertion_failures, file=sys.stderr)
+            for trace_ev in self.traced_events():
+                if trace_ev.action == "ASSFAIL":
+                    print("%10s: %s: %s" % (self.time_str(
+                        trace_ev.trace_time),
+                        trace_ev.part,
+                        trace_ev.trans_val.__str__()),
+                        file=sys.stderr)
