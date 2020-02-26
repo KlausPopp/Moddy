@@ -107,27 +107,28 @@ class SimOutputPort(SimBaseElement):
         def __init__(self, sim, port, msg, flight_time):
             super().__init__()
             self._sim = sim
-            self._port = port
+            self.port = port
             self._serialized_msg = self.__class__.msg_serialize(msg)
-            self._msg_color = msg.msgColor if hasattr(msg, 'msgColor') \
+            self.msg_color = msg.msgColor if hasattr(msg, 'msgColor') \
                 else None
-            self._flight_time = flight_time  # message transmit time
-            self._request_time = sim.time()  # time when application called send()
+            self.flight_time = flight_time  # message transmit time
+            # time when application called send()
+            self._request_time = sim.time()
             self.exec_time = -1  # when message arrives at input port
-            self._is_lost = False  # Flags that message is a lost message
+            self.is_lost = False  # Flags that message is a lost message
 
         def __str__(self):
             '''Create a user readable form of the event. Used by tracer'''
             return "%s req=%s beg=%s end=%s dur=%s msg=[%s]" % \
-            ("(LOST)" if self._is_lost else "",
-             self._sim.time_str(self._request_time),
-             self._sim.time_str(self.exec_time - self._flight_time),
-             self._sim.time_str(self.exec_time),
-             self._sim.time_str(self._flight_time),
-             self.msg_text())
+                ("(LOST)" if self.is_lost else "",
+                 self._sim.time_str(self._request_time),
+                 self._sim.time_str(self.exec_time - self.flight_time),
+                 self._sim.time_str(self.exec_time),
+                 self._sim.time_str(self.flight_time),
+                 self.msg_text())
 
         def __repr__(self):
-            return self._port.obj_name() + "#fireEvent"
+            return self.port.obj_name() + "#fireEvent"
 
         def msg_text(self):
             ''' return message's __str__ '''
@@ -137,12 +138,12 @@ class SimOutputPort(SimBaseElement):
         def execute(self):
 
             # pass the message to all bound input ports
-            for inport in self._port._list_in_ports:
+            for inport in self.port.in_ports():
 
                 self._sim.tracing.add_trace_event(SimTraceEvent(
-                    self._port.parent_obj, inport, self, '<MSG'))
+                    self.port.parent_obj, inport, self, '<MSG'))
 
-                if not self._is_lost:
+                if not self.is_lost:
                     # make a deep copy (by using pickle) of the message,
                     # so that application can modify the message
                     msg_copy = self.__class__.msg_unserialize(
@@ -150,24 +151,24 @@ class SimOutputPort(SimBaseElement):
                     inport.msg_event(msg_copy)
 
             # remove me from pending queue
-            # print(self, "exec", len(self._port._list_pending_msg))
-            self._port._list_pending_msg.popleft()
+            # print(self, "exec", len(self.port._list_pending_msg))
+            self.port.pending_msg().popleft()
             # and send next message in queue
-            if self._port._list_pending_msg:
-                event = self._port._list_pending_msg[0]
-                self._port._send_schedule(event)
+            if self.port.pending_msg():
+                event = self.port.pending_msg()[0]
+                self.port.send_schedule(event)
                 self._sim.tracing.add_trace_event(SimTraceEvent(
-                    self._port.parent_obj, self._port, event, '>MSG(Q)'))
-            self._port._seq_no += 1
+                    self.port.parent_obj, self.port, event, '>MSG(Q)'))
+            self.port._seq_no += 1
 
         def notify_start(self):
             '''
             tell all bound input ports that message transmission has begun
             '''
-            for inport in self._port._list_in_ports:
+            for inport in self.port.in_ports():
                 if inport.uses_msg_start_event():
                     inport.msg_start_event(self.__class__.msg_unserialize(
-                        self._serialized_msg), self, self._flight_time)
+                        self._serialized_msg), self, self.flight_time)
 
         @staticmethod
         def msg_serialize(msg):
@@ -187,7 +188,7 @@ class SimOutputPort(SimBaseElement):
         # list of pending messages (not yet fired)
         self._list_pending_msg = deque()
         # color for messages leaving that port
-        self._color = color
+        self.color = color
         # reference to the IOPort which contains this outPort
         # (None if not part of IOPort)
         self._io_port = io_port
@@ -205,9 +206,9 @@ class SimOutputPort(SimBaseElement):
         :raise RuntimeError: if input port is already bound to that output port
 
         '''
-        add_elem_to_list(input_port._out_ports, self,
+        add_elem_to_list(input_port.out_ports(), self,
                          input_port.__str__() + ":outPorts")
-        add_elem_to_list(self._list_in_ports, input_port,
+        add_elem_to_list(self.in_ports(), input_port,
                          self.__str__() + ":inPorts")
 
     def is_bound(self):
@@ -220,7 +221,7 @@ class SimOutputPort(SimBaseElement):
         Will be displayed in Structure Graphs
         '''
         msg_type = type(msg).__name__
-        if not msg_type in self._list_msg_types:
+        if msg_type not in self._list_msg_types:
             self._list_msg_types.append(msg_type)
 
     def learned_msg_types(self):
@@ -230,12 +231,17 @@ class SimOutputPort(SimBaseElement):
         '''
         return self._list_msg_types
 
-    def _send_schedule(self, event):
-        event.exec_time = self._sim.time() + event._flight_time
+    def pending_msg(self):
+        ''' Return list of pending messages '''
+        return self._list_pending_msg
+
+    def send_schedule(self, event):
+        ''' schedule a send event '''
+        event.exec_time = self._sim.time() + event.flight_time
         self._sim.schedule_event(event)
         # check if the message is marked as lost
-        event._is_lost = self.is_lost_message()
-        if not event._is_lost:
+        event.is_lost = self.is_lost_message()
+        if not event.is_lost:
             event.notify_start()
 
     def send(self, msg, flight_time):
@@ -249,7 +255,7 @@ class SimOutputPort(SimBaseElement):
         event = self.FireEvent(self._sim, self, msg, flight_time)
         if not self._list_pending_msg:
             # no pending messages, send now
-            self._send_schedule(event)
+            self.send_schedule(event)
             self._sim.tracing.add_trace_event(SimTraceEvent(
                 self.parent_obj, self, event, '>MSG'))
 
@@ -258,7 +264,7 @@ class SimOutputPort(SimBaseElement):
 
     def set_color(self, color):
         ''' Set color for messages leaving that port '''
-        self._color = color
+        self.color = color
 
     def inject_lost_message_error_by_sequence(self, next_seq):
         '''
@@ -363,7 +369,7 @@ class SimIOPort(SimBaseElement):
 
     def set_color(self, color):
         ''' Set color for messages leaving that IOport '''
-        self._out_port._color = color
+        self._out_port.color = color
 
     def peer_ports(self):
         '''

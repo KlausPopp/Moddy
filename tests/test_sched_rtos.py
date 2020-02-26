@@ -70,13 +70,12 @@ class TestSchedRtos(unittest.TestCase):
         sched.add_vthread(t3, 1)
         simu.run(400)
         
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="output/%s_%s.html" % (baseFileName(), funcName()), 
-                                      fmt="iaViewerRef", 
-                                      showPartsList=[t1,t2,t3],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 10, 
-                                      pixPerDiv = 30)  
+        moddy.gen_interactive_sequence_diagram( sim=simu, 
+                                      file_name="output/%s_%s.html" % (baseFileName(), funcName()), 
+                                      show_parts_list=[t1,t2,t3],
+                                      excluded_element_list=['allTimers'], 
+                                      time_per_div = 10, 
+                                      pix_per_div = 30)  
 
         trc = simu.tracing.traced_events()
         
@@ -166,13 +165,12 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="output/%s_%s.html" % (baseFileName(), funcName()),
-                                      fmt="iaViewerRef", 
-                                      showPartsList=[stim,t1,t2],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 10, 
-                                      pixPerDiv = 30)  
+        moddy.gen_interactive_sequence_diagram( sim=simu, 
+                                      file_name="output/%s_%s.html" % (baseFileName(), funcName()),
+                                      show_parts_list=[stim,t1,t2],
+                                      excluded_element_list=['allTimers'], 
+                                      time_per_div = 10, 
+                                      pix_per_div = 30)  
   
         trc = simu.tracing.traced_events()
         
@@ -233,13 +231,12 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="output/%s_%s.html" % (baseFileName(), funcName()),
-                                      fmt="iaViewerRef", 
-                                      showPartsList=[stim,t1],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 10, 
-                                      pixPerDiv = 30)  
+        moddy.gen_interactive_sequence_diagram( sim=simu, 
+                                      file_name="output/%s_%s.html" % (baseFileName(), funcName()),
+                                      show_parts_list=[stim,t1],
+                                      excluded_element_list=['allTimers'], 
+                                      time_per_div = 10, 
+                                      pix_per_div = 30)  
   
         trc = simu.tracing.traced_events()
         
@@ -296,13 +293,12 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="output/%s_%s.html" % (baseFileName(), funcName()),
-                                      fmt="iaViewerRef", 
-                                      showPartsList=[stim,t1],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 10, 
-                                      pixPerDiv = 30)  
+        moddy.gen_interactive_sequence_diagram( sim=simu, 
+                                      file_name="output/%s_%s.html" % (baseFileName(), funcName()),
+                                      show_parts_list=[stim,t1],
+                                      excluded_element_list=['allTimers'], 
+                                      time_per_div = 10, 
+                                      pix_per_div = 30)  
          
         trc = simu.tracing.traced_events()
         
@@ -346,13 +342,12 @@ class TestSchedRtos(unittest.TestCase):
         
         simu.run(200)
         
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="output/%s_%s.html" % (baseFileName(), funcName()), 
-                                      fmt="iaViewerRef", 
-                                      showPartsList=[t1],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 10, 
-                                      pixPerDiv = 30)  
+        moddy.gen_interactive_sequence_diagram( sim=simu, 
+                                      file_name="output/%s_%s.html" % (baseFileName(), funcName()), 
+                                      show_parts_list=[t1],
+                                      excluded_element_list=['allTimers'], 
+                                      time_per_div = 10, 
+                                      pix_per_div = 30)  
 
         trc = simu.tracing.traced_events()
         

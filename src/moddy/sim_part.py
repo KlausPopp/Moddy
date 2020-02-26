@@ -58,7 +58,7 @@ class SimPart(SimBaseElement):
     def ports(self):
         ''' return all ports of that part '''
         return self._list_ports
-    
+
     def annotation(self, text):
         '''Add annotation from model at current simulation time'''
         self._sim.tracing.annotation(self, text)

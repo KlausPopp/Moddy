@@ -59,11 +59,11 @@ class SimTracing:
 
     def add_trace_event(self, trace_ev):
         ''' Add new event to Trace list, timestamp it, print it'''
-        trace_ev.traceTime = self._time_func()
+        trace_ev.trace_time = self._time_func()
         self._list_traced_events.append(trace_ev)
 
         if self._enable_trace_prints:
-            trace_str = "TRC: %10s %s" % (self.time_str(trace_ev.traceTime),
+            trace_str = "TRC: %10s %s" % (self.time_str(trace_ev.trace_time),
                                           trace_ev)
             print(trace_str)
 

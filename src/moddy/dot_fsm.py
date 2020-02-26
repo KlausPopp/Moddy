@@ -8,7 +8,7 @@
 
 '''
 from .fsm import isSubFsmSpecification
-from .utils import moddyCreateDirsAndOpenOutputFile
+from .utils import create_dirs_and_open_output_file
 
 import subprocess
 import os
@@ -118,7 +118,7 @@ class DotFsm(object):
         
         # Output the DOT file as filename.dot e.g. test.svg.gv
         dotFile = "%s.gv" % fileName
-        f = moddyCreateDirsAndOpenOutputFile(dotFile)
+        f = create_dirs_and_open_output_file(dotFile)
         for line in lines:
             f.write("%s%s\n" % (space(line[0]), line[1]))
         f.close()

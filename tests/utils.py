@@ -22,7 +22,7 @@ def searchTrc( trc, time, subObj, action, nthMatch=1):
     nMatches = 0
     for e in trc:
         #print("searchTrc %f %s %s" % (e.traceTime, e.sub_obj.hierarchyName(), e.action))
-        if e.traceTime == time and e.sub_obj == subObj and e.action == action:
+        if e.trace_time == time and e.sub_obj == subObj and e.action == action:
             nMatches += 1
             if nMatches == nthMatch:
                 return e

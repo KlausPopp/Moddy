@@ -12,7 +12,7 @@ import os
 
 from .sim_core import Sim
 from .sim_part import SimPart
-from .utils import moddyCreateDirsAndOpenOutputFile
+from .utils import create_dirs_and_open_output_file
 
 
 
@@ -216,7 +216,7 @@ class DotStructure(object):
         # Output the DOT file as filename.dot e.g. test.svg.gv
         dotFile = "%s.gv" % fileName
         #print("fileName=%s" % dotFile )
-        f = moddyCreateDirsAndOpenOutputFile(dotFile)
+        f = create_dirs_and_open_output_file(dotFile)
         for line in lines:
             f.write("%s%s\n" % (space(line[0]), line[1]))
         f.close()
