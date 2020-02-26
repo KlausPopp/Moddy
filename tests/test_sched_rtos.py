@@ -17,7 +17,7 @@ class TestSchedRtos(unittest.TestCase):
         class myThread1(moddy.VThread):
             def __init__(self, sim ):
                 super().__init__(sim=sim, obj_name='hiThread', parent_obj=None)
-            def runVThread(self):
+            def run_vthread(self):
                 print("   VtHi1")
                 self.busy(50,'1',busyAppearance)
                 print("   VtHi2")
@@ -36,7 +36,7 @@ class TestSchedRtos(unittest.TestCase):
         class myThread2(moddy.VThread):
             def __init__(self, sim ):
                 super().__init__(sim=sim, obj_name='lowThreadA', parent_obj=None)
-            def runVThread(self):
+            def run_vthread(self):
                 print("   VtLoA1")
                 self.busy(50,'1',busyAppearance)
                 print("   VtLoA2")
@@ -49,7 +49,7 @@ class TestSchedRtos(unittest.TestCase):
         class myThread3(moddy.VThread):
             def __init__(self, sim ):
                 super().__init__(sim=sim, obj_name='lowThreadB', parent_obj=None)
-            def runVThread(self):
+            def run_vthread(self):
                 print("   VtLoB1")
                 self.busy(50,'1',busyAppearance)
                 print("   VtLoB2")
@@ -65,9 +65,9 @@ class TestSchedRtos(unittest.TestCase):
         t1 = myThread1(simu)
         t2 = myThread2(simu)
         t3 = myThread3(simu)
-        sched.addVThread(t1, 0)
-        sched.addVThread(t2, 1)
-        sched.addVThread(t3, 1)
+        sched.add_vthread(t1, 0)
+        sched.add_vthread(t2, 1)
+        sched.add_vthread(t3, 1)
         simu.run(400)
         
         moddy.moddyGenerateSequenceDiagram( sim=simu, 
@@ -109,7 +109,7 @@ class TestSchedRtos(unittest.TestCase):
             def __init__(self, sim ):
                 super().__init__(sim=sim, obj_name='Block', parent_obj=None)
 
-            def runVThread(self):
+            def run_vthread(self):
                 self.busy(22, "Block")
                 self.wait(None)
         
@@ -122,7 +122,7 @@ class TestSchedRtos(unittest.TestCase):
                 lstMsg = []
                 while True:
                     try:
-                        msg = self.inP1.readMsg()
+                        msg = self.inP1.read_msg()
                         lstMsg.append(msg)
                     except BufferError:
                         break
@@ -130,7 +130,7 @@ class TestSchedRtos(unittest.TestCase):
                 self.annotation(lstMsg)
          
              
-            def runVThread(self):
+            def run_vthread(self):
                 cycle=0
                 while True:
                     cycle += 1
@@ -145,7 +145,7 @@ class TestSchedRtos(unittest.TestCase):
                 super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.create_ports('out', ['toT1Port'])
                                 
-            def runVThread(self):
+            def run_vthread(self):
                 count=0
                 while True:
                     count+=1
@@ -159,8 +159,8 @@ class TestSchedRtos(unittest.TestCase):
         t2 = myBlockThread(simu)
         
         sched = moddy.VtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
-        sched.addVThread(t1, 2)
-        sched.addVThread(t2, 1)
+        sched.add_vthread(t1, 2)
+        sched.add_vthread(t2, 1)
         stim = stimThread(simu)
         stim.toT1Port.bind(t1.inP1)
         
@@ -193,7 +193,7 @@ class TestSchedRtos(unittest.TestCase):
                 lstMsg = []
                 while True:
                     try:
-                        msg = self.ioP1.readMsg()
+                        msg = self.ioP1.read_msg()
                         lstMsg.append(msg)
                     except BufferError:
                         break
@@ -201,7 +201,7 @@ class TestSchedRtos(unittest.TestCase):
                 self.annotation(lstMsg)
          
              
-            def runVThread(self):
+            def run_vthread(self):
                 cycle=0
                 while True:
                     cycle += 1
@@ -216,7 +216,7 @@ class TestSchedRtos(unittest.TestCase):
                 super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.create_ports('out', ['toT1Port'])
                                 
-            def runVThread(self):
+            def run_vthread(self):
                 count=0
                 while True:
                     count+=1
@@ -260,10 +260,10 @@ class TestSchedRtos(unittest.TestCase):
                 self.create_ports('SamplingIn', ['inP1'])
                 
             def showMsg(self):
-                msg = self.inP1.readMsg(default='No message')
+                msg = self.inP1.read_msg(default='No message')
                 self.annotation(msg)
                 
-            def runVThread(self):
+            def run_vthread(self):
                 cycle=0
                 while True:
                     cycle += 1
@@ -279,7 +279,7 @@ class TestSchedRtos(unittest.TestCase):
                 super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.create_ports('out', ['toT1Port'])
                                 
-            def runVThread(self):
+            def run_vthread(self):
                 count=0
                 while True:
                     count+=1
@@ -317,15 +317,15 @@ class TestSchedRtos(unittest.TestCase):
         class myThread1(moddy.VThread):
             def __init__(self, sim ):
                 super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
-                self.createVtTimers(['tmr1'])
+                self.create_vt_timers(['tmr1'])
                 
-            def runVThread(self):
+            def run_vthread(self):
                 cycle=0
                 while True:
                     cycle += 1
                     self.tmr1.start(16)
                     self.busy(18,cycle,busyAppearance)
-                    self.annotation("A Fired " + str(self.tmr1.hasFired()))
+                    self.annotation("A Fired " + str(self.tmr1.has_fired()))
                     self.tmr1.start(20)
                     rv = self.wait(100,[self.tmr1])
                     self.annotation("B rv " + rv)
@@ -334,14 +334,14 @@ class TestSchedRtos(unittest.TestCase):
                     self.annotation("C rv " + rv)
                     self.tmr1.start(40)
                     rv = self.wait(30,[self.tmr1])
-                    self.annotation("D Fired " + str(self.tmr1.hasFired()) + " rv " + rv)
+                    self.annotation("D Fired " + str(self.tmr1.has_fired()) + " rv " + rv)
                     self.tmr1.stop()
 
         simu = moddy.Sim()
         sched= moddy.VtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
                         
         t1 = myThread1(simu)
-        sched.addVThread(t1, 0)
+        sched.add_vthread(t1, 0)
         
         
         simu.run(200)

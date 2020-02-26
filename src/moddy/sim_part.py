@@ -73,7 +73,7 @@ class SimPart(SimBaseElement):
         :param frameIdx: traceback frame index \
             (1 if caller's frame, 2 if caller-caller's frame...)
         '''
-        self._sim.assertion_failed(self, assertion_str, frame_idx + 1)
+        self._sim.tracing.assertion_failed(self, assertion_str, frame_idx + 1)
 
     def set_state_indicator(self, text, appearance=None):
         '''set part's state from model at simulation time

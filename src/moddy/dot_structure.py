@@ -241,8 +241,8 @@ if __name__ == '__main__':
             self.app1 = App(sim,"App1", self)
             self.app2 = App(sim,"App2", self)
             
-            self.sched.addVThread(self.app1, 1)
-            self.sched.addVThread(self.app2, 2)
+            self.sched.add_vthread(self.app1, 1)
+            self.sched.add_vthread(self.app2, 2)
             
     class App(vThread):
         def __init__(self, sim, obj_name, parent_obj = None):
@@ -250,7 +250,7 @@ if __name__ == '__main__':
     
             self.create_ports('SamplingIO', ['ecmPort'])
 
-        def runVThread(self):
+        def run_vthread(self):
             while True:
                 pass
         

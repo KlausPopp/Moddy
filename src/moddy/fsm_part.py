@@ -42,25 +42,25 @@ class SimFsmPart(SimPart):
         # Bring state machine into initial state
         self.fsm.startFsm()
         
-    def create_ports(self, ptype, listPortNames):
+    def create_ports(self, ptype, list_port_names):
         # Override simPart method to route all events to central handlers
         '''
         Convinience functions to create multiple ports at once.
         
         :param ptype: Type of ports, must be one of 'in', 'out' or 'io'
-        :param list listPortNames: list of port names to create
+        :param list list_port_names: list of port names to create
         
         The function creates for each port a member variable with this name in the part.
         
         '''
         if ptype == 'in':
-            for portName in listPortNames:
+            for portName in list_port_names:
                 exec('self.%s = self.new_input_port("%s", self.msg_recv)' % (portName,portName)) #TODO 
         elif ptype == 'io':
-            for portName in listPortNames:
+            for portName in list_port_names:
                 exec('self.%s = self.new_io_port("%s", self.msg_recv)' % (portName,portName)) #TODO
         else:
-            super().create_ports(ptype, listPortNames)
+            super().create_ports(ptype, list_port_names)
         
     def create_timers(self, listTimerNames):
         # Override simPart method to route all events to central handlers
