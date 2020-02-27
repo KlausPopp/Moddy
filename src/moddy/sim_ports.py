@@ -343,8 +343,8 @@ class SimIOPort(SimBaseElement):
 
     def bind(self, other_io_port):
         ''' Bind IOPort to another IOPort, in/out will be crossed '''
-        self._out_port.bind(other_io_port._in_port)
-        other_io_port._out_port.bind(self._in_port)
+        self._out_port.bind(other_io_port.in_port())
+        other_io_port.out_port().bind(self.in_port())
 
     def loop_bind(self):
         ''' Loop in/out ports of an IO port together '''
@@ -377,12 +377,12 @@ class SimIOPort(SimBaseElement):
         return list of peer ports (empty list if none)
         '''
         list_peers = []
-        if self._in_port.isBound():
-            for port in self._in_port._outPorts:
-                if port._ioPort is not None:
-                    port = port._ioPort._in_port
-                    if port in self._out_port._list_in_ports:
-                        list_peers.append(port._ioPort)
+        if self._in_port.is_bound():
+            for port in self.in_port().out_ports():
+                if port.io_port() is not None:
+                    port = port.io_port().in_port()
+                    if port in self.out_port().in_ports():
+                        list_peers.append(port.io_port())
         return list_peers
 
     # delegation methods to input port
@@ -425,7 +425,7 @@ class SimTimer(SimBaseElement):
             self._timer._pending_event = None
             self._sim.tracing.add_trace_event(SimTraceEvent(
                 self._timer.parent_obj, self._timer, None, 'T-EXP'))
-            self._timer._elapsed_func(self._timer)
+            self._timer.elapsed_func(self._timer)
 
     class TimeoutFmt:
         # pylint: disable=too-few-public-methods
@@ -443,7 +443,7 @@ class SimTimer(SimBaseElement):
         # current scheduled event (None if timer stopped)
         self._pending_event = None
         # function that gets called when time elapsed
-        self._elapsed_func = elapsed_func
+        self.elapsed_func = elapsed_func
 
     def _start(self, timeout):
         if self._pending_event is not None:

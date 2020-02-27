@@ -23,9 +23,9 @@ def moddyGenerateFsmGraph( fsm, fileName, keepGvFile=False ):
     :param keepGvFile: if True, don't delete graphviz input file
     '''
     df = DotFsm(fsm)
-    df.dotGen(fileName, keepGvFile)
+    df.dot_gen(fileName, keepGvFile)
 
-def space(indent):
+def _space(indent):
     istr = "%" + str(3*indent) + "s"
     return istr % ""
 
@@ -101,7 +101,7 @@ class DotFsm(object):
         return lines, initialState        
             
         
-    def dotGen(self, fileName, keepGvFile):
+    def dot_gen(self, file_name, keep_gv_file):
         level = 0
         lines=[]
         lines.append( [level, 'digraph G {'] )
@@ -117,13 +117,13 @@ class DotFsm(object):
         lines.append( [level, '}' ])
         
         # Output the DOT file as filename.dot e.g. test.svg.gv
-        dotFile = "%s.gv" % fileName
+        dotFile = "%s.gv" % file_name
         f = create_dirs_and_open_output_file(dotFile)
         for line in lines:
-            f.write("%s%s\n" % (space(line[0]), line[1]))
+            f.write("%s%s\n" % (_space(line[0]), line[1]))
         f.close()
-        subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % fileName])
-        print("Saved FSM graph to %s"  % fileName)
-        if not keepGvFile:
+        subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % file_name])
+        print("Saved FSM graph to %s"  % file_name)
+        if not keep_gv_file:
             os.unlink(dotFile)
             

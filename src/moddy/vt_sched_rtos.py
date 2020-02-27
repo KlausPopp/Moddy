@@ -71,7 +71,6 @@ class VtSchedRtos(SimPart):
 
         # Initialize the parent class
         super().__init__(sim=sim, obj_name=obj_name, parent_obj=parent_obj)
-        self._type_str = "scheduler"  # overwrite "part" (ugly)
 
         self._list_vthreads = []
         # create list of lists, one list for each prio
@@ -108,6 +107,10 @@ class VtSchedRtos(SimPart):
 
         if not v_thread.remote_controlled:
             self.vt_state_machine(v_thread, 'start')
+
+    def threads(self):
+        ''' return list of threads '''
+        return self._list_vthreads
 
     def start_sim(self):
         self.schedule()
