@@ -84,6 +84,8 @@ class SimPart(SimBaseElement):
         ``{'boxStrokeColor':'black', 'boxFillColor':'green', \
             'textColor':'white'}``
         '''
+        if appearance is None:
+            appearance = {}
         self._state_ind = text
         self._sim.tracing.set_state_indicator(self, text, appearance)
 

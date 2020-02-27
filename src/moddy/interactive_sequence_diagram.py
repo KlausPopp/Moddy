@@ -339,7 +339,7 @@ class TraceGenDynamicViewer:
         if current_val != trans_val:
             # generate box for just ended period
             if current_val != "":
-                print(shadow['currentApp'])
+                # print(shadow['currentApp'])
                 mid = self._sta_vc_output(shadow['lastChange'],
                                           current_val,
                                           shadow['currentApp'])

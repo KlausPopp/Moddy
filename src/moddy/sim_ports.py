@@ -113,7 +113,7 @@ class SimOutputPort(SimBaseElement):
                 else None
             self.flight_time = flight_time  # message transmit time
             # time when application called send()
-            self._request_time = sim.time()
+            self.request_time = sim.time()
             self.exec_time = -1  # when message arrives at input port
             self.is_lost = False  # Flags that message is a lost message
 
@@ -121,7 +121,7 @@ class SimOutputPort(SimBaseElement):
             '''Create a user readable form of the event. Used by tracer'''
             return "%s req=%s beg=%s end=%s dur=%s msg=[%s]" % \
                 ("(LOST)" if self.is_lost else "",
-                 self._sim.time_str(self._request_time),
+                 self._sim.time_str(self.request_time),
                  self._sim.time_str(self.exec_time - self.flight_time),
                  self._sim.time_str(self.exec_time),
                  self._sim.time_str(self.flight_time),
@@ -433,10 +433,10 @@ class SimTimer(SimBaseElement):
 
         def __init__(self, sim, timeout):
             self._sim = sim
-            self._timeout = timeout
+            self.timeout = timeout
 
         def __str__(self):
-            return self._sim.time_str(self._timeout)
+            return self._sim.time_str(self.timeout)
 
     def __init__(self, sim, part, name, elapsed_func):
         super().__init__(sim, part, name, "Timer")

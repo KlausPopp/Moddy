@@ -27,7 +27,7 @@ from .fsm import Fsm
 from moddy.fsm_part import SimFsmPart
 
 from moddy.interactive_sequence_diagram import gen_interactive_sequence_diagram
-from moddy.trace_to_csv import moddyGenerateTraceTable
+from moddy.trace_to_csv import generate_trace_table
 from moddy.dot_structure import gen_dot_structure_graph
 
 from moddy.dot_fsm import moddyGenerateFsmGraph
