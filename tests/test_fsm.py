@@ -46,7 +46,7 @@ class TestFsm(unittest.TestCase):
                         [('PowerButton', 'Booting'),
                          ('IgnitionOn', 'Booting')],
                     'Booting':
-                        [('bootTmr_Expired', 'NormalOp')],
+                        [('bootTmr_expired', 'NormalOp')],
                     'NormalOp':
                          # The following two lines specify nested state machines, executing in parallel
                         [('Apps' , TestFsm.CarInfoSystem.FSM.ApplicationsFsm ),  
@@ -56,54 +56,54 @@ class TestFsm(unittest.TestCase):
                          ('IgnitionOff', 'Shutdown'),
                          # This transition is triggered whenever clockTmr expires, transition to self, 
                          # executes the 'Do' methode
-                         ('clockTmr_Expired', 'NormalOp')], 
+                         ('clockTmr_expired', 'NormalOp')], 
                     'Shutdown':
-                        [('shutdownTmr_Expired', 'Standby')],
+                        [('shutdownTmr_expired', 'Standby')],
                     'ANY':
                         [('PowerRemoved', 'Off')]
                 }
                 
-                super().__init__( dictTransitions=transitions )
+                super().__init__( dict_transitions=transitions )
                     
             
             # Off actions    
-            def State_Off_Entry(self):
+            def state_Off_entry(self):
                 print("State_Off_Entry")
-                self.moddyPart().bootTmr.stop()
-                self.moddyPart().shutdownTmr.stop()
-                self.moddyPart().clockTmr.stop()
+                self.moddy_part().bootTmr.stop()
+                self.moddy_part().shutdownTmr.stop()
+                self.moddy_part().clockTmr.stop()
             # Booting actions
-            def State_Booting_Entry(self):
+            def state_Booting_entry(self):
                 print("Booting_Entry")
-                self.moddyPart().bootTmr.start(5)
+                self.moddy_part().bootTmr.start(5)
         
             # Shutdown actions
-            def State_Shutdown_Entry(self):
-                self.moddyPart().shutdownTmr.start(2)
+            def state_Shutdown_entry(self):
+                self.moddy_part().shutdownTmr.start(2)
             
             # Cursor Blink in NormalOp state
-            def State_NormalOp_Entry(self):
+            def state_NormalOp_entry(self):
                 self._clockTime = 100
                 
-            def State_NormalOp_Do(self):
-                self.moddyPart().clockTmr.start(5)                
-                self.moddyPart().visualPort.send('time %d' % self._clockTime, 0.1 )
+            def state_NormalOp_do(self):
+                self.moddy_part().clockTmr.start(5)                
+                self.moddy_part().visualPort.send('time %d' % self._clockTime, 0.1 )
                 self._clockTime += 5
                 
             # Message handlers
-            def State_ANY_powerPort_Msg(self,msg):
+            def state_any_powerPort_msg(self,msg):
                 if msg == 'on':
                     self.event('PowerApplied')
                 elif msg == 'off':
                     self.event('PowerRemoved')
                                 
-            def State_ANY_ignitionPort_Msg(self, msg):
+            def state_any_ignitionPort_msg(self, msg):
                 if msg == 'on':
                     self.event('IgnitionOn')
                 elif msg == 'off':
                     self.event('IgnitionOff')
     
-            def State_ANY_buttonPort_Msg(self, msg):            
+            def state_any_buttonPort_msg(self, msg):            
                 self.event(msg) # Message are directly the event names
             
             # Nested state machine CarInfo System Applications
@@ -120,13 +120,13 @@ class TestFsm(unittest.TestCase):
                             [('RadioButton', 'Radio')]
                     }
                     
-                    super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
+                    super().__init__( dict_transitions=transitions, parent_fsm=parentFsm )
                     
-                def State_Radio_Entry(self):
-                    self.moddyPart().annotation('Radio activated')
+                def state_Radio_entry(self):
+                    self.moddy_part().annotation('Radio activated')
             
-                def State_Navi_Entry(self):
-                    self.moddyPart().annotation('Navi activated')
+                def state_Navi_entry(self):
+                    self.moddy_part().annotation('Navi activated')
                     
             class VolumeFsm(moddy.Fsm):
             
@@ -149,21 +149,21 @@ class TestFsm(unittest.TestCase):
                              ('VolKnobRight', 'On')]
                     }
                     
-                    super().__init__( dictTransitions=transitions, parentFsm=parentFsm )
+                    super().__init__( dict_transitions=transitions, parent_fsm=parentFsm )
                     
-                def State_On_Do(self):
-                    self.moddyPart().audioPort.send('volume=%d' % self._volume, 0.1)
+                def state_On_do(self):
+                    self.moddy_part().audioPort.send('volume=%d' % self._volume, 0.1)
                     
-                def State_Mute_Do(self):
-                    self.moddyPart().audioPort.send('volume=%d' % 0, 0.1)
+                def state_Mute_do(self):
+                    self.moddy_part().audioPort.send('volume=%d' % 0, 0.1)
     
-                def State_IncVol_Entry(self):
+                def state_IncVol_entry(self):
                     self._volume += 1
-                    self.topFsm().event('VolChangeDone')
+                    self.top_fsm().event('VolChangeDone')
     
-                def State_DecVol_Entry(self):
+                def state_DecVol_entry(self):
                     self._volume -= 1
-                    self.topFsm().event('VolChangeDone')
+                    self.top_fsm().event('VolChangeDone')
      
     class Stim(moddy.VSimpleProg):   
         def __init__(self, sim):
@@ -173,7 +173,7 @@ class TestFsm(unittest.TestCase):
             self.ignitionPort.set_color('red')
             self.buttonPort.set_color('blue')
             
-        def runVThread(self):
+        def run_vthread(self):
             while True:
                 self.powerPort.send('on',1)
                 self.wait(2)
@@ -210,12 +210,11 @@ class TestFsm(unittest.TestCase):
             
         simu.run(100)
         
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="output/%s_%s.html" % (baseFileName(), funcName()),  
-                                  fmt="iaViewerRef", 
-                                  showPartsList=[stim, cis], 
-                                  timePerDiv = 0.3, 
-                                  pixPerDiv = 30,
+        moddy.gen_interactive_sequence_diagram( sim=simu, 
+                                  file_name="output/%s_%s.html" % (baseFileName(), funcName()),  
+                                  show_parts_list=[stim, cis], 
+                                  time_per_div = 0.3, 
+                                  pix_per_div = 30,
                                   title = "Car Info FSM Test") 
            
         trc = simu.tracing.traced_events()

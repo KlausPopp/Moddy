@@ -7,7 +7,7 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
 '''
-from .fsm import isSubFsmSpecification
+from .fsm import is_sub_fsm_specification
 from .utils import create_dirs_and_open_output_file
 
 import subprocess
@@ -56,7 +56,7 @@ class DotFsm(object):
         lines = []
         initialState = None
         
-        dictTransitions = fsm.getDictTransitions()
+        dictTransitions = fsm.get_dict_transitions()
         # States
         for state, listTrans in dictTransitions.items():
             if state == '':
@@ -73,7 +73,7 @@ class DotFsm(object):
         # Transitions
         for fromState, listTrans in dictTransitions.items():
             for trans in listTrans:
-                subFsmCls = isSubFsmSpecification(trans)
+                subFsmCls = is_sub_fsm_specification(trans)
                 if subFsmCls is not None:
                     subFsmName, cls = trans
                     # subfsm specification, instantiate subfsm

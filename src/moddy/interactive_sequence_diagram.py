@@ -71,7 +71,8 @@ def gen_interactive_sequence_diagram(sim,
          * pixPerDiv=25 - pixels per time grid division. Optional, default:25.
            Note: The interactive viewer dynamically adjust the time scale
            depending on the current time
-           scale factor and uses *timePerDiv* and *pixPerDiv* only as an
+           scale factor and uses *
+           timePerDiv* and *pixPerDiv* only as an
            hint for the initial scale factor.
 
          * partSpacing=300 - horizontal spacing in pixels between parts.
