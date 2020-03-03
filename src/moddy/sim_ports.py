@@ -325,10 +325,10 @@ class SimIOPort(SimBaseElement):
         # pylint: disable=too-many-arguments
 
         super().__init__(sim, part, name, "IOPort")
-        self._out_port = SimOutputPort(sim, part, name + "Out", io_port=self)
+        self._out_port = SimOutputPort(sim, part, name + "_out", io_port=self)
         if special_in_port is None:
             self._in_port = SimInputPort(
-                sim, part, name + "In", msg_received_func, io_port=self)
+                sim, part, name + "_in", msg_received_func, io_port=self)
         else:
             self._in_port = special_in_port
             self._in_port._io_port = self

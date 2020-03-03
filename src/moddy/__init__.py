@@ -27,10 +27,10 @@ from .fsm import Fsm
 from moddy.fsm_part import SimFsmPart
 
 from moddy.interactive_sequence_diagram import gen_interactive_sequence_diagram
-from moddy.trace_to_csv import generate_trace_table
+from moddy.trace_to_csv import gen_trace_table
 from moddy.dot_structure import gen_dot_structure_graph
 
-from moddy.dot_fsm import moddyGenerateFsmGraph
+from moddy.dot_fsm import gen_fsm_graph
 
 AUTHOR_NAME = 'Klaus Popp'
 AUTHOR_EMAIL = 'klauspopp@gmx.de'

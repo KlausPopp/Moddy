@@ -584,7 +584,7 @@ class VThread(SimPart):
         :param name: name of port
         """
         port = VtIOPort(self._sim, name, self, VtSamplingInPort(
-            self._sim, name + 'In', self))
+            self._sim, name + '_in', self))
         self.add_port(port)
         return port
 
@@ -595,7 +595,7 @@ class VThread(SimPart):
         :param name: name of port
         """
         port = VtIOPort(self._sim, name, self, VtQueuingInPort(
-            self._sim, name + 'In', self))
+            self._sim, name + '_in', self))
         self.add_port(port)
         return port
 

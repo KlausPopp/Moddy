@@ -13,7 +13,7 @@ from .sim_base import time_unit_to_factor
 from .utils import create_dirs_and_open_output_file
 
 
-def generate_trace_table(sim, file_name, **kwargs):
+def gen_trace_table(sim, file_name, **kwargs):
     '''
     Moddy high level function to create trace tables as .csv.
 

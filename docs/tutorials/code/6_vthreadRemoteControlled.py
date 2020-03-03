@@ -83,28 +83,28 @@ def stimProg(self):
     self.wait(70)
 
 if __name__ == '__main__':
-    simu = moddy.Sim()
-    simu.tracing.set_display_time_unit('s')
+    SIMU = moddy.Sim()
+    SIMU.tracing.set_display_time_unit('s')
     
-    sched = moddy.VtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
-    rcThread = myRcThread(simu)
-    utilThread = moddy.VThread( sim=simu, obj_name="utilThread", target=utilThread, elems={ 'out': 'toRcPort' } )
+    sched = moddy.VtSchedRtos(sim=SIMU, obj_name="sched", parent_obj=None)
+    rcThread = myRcThread(SIMU)
+    utilThread = moddy.VThread( sim=SIMU, obj_name="utilThread", target=utilThread, elems={ 'out': 'toRcPort' } )
     sched.add_vthread(rcThread, 0)
     sched.add_vthread(utilThread, 1)
 
-    stim = moddy.VSimpleProg( sim=simu, obj_name="Stim", target=stimProg, elems={ 'out': 'rcPort' } )
+    stim = moddy.VSimpleProg( sim=SIMU, obj_name="Stim", target=stimProg, elems={ 'out': 'rcPort' } )
 
-    simu.smart_bind([['rcThread._thread_control_port', 'Stim.rcPort'], 
+    SIMU.smart_bind([['rcThread._thread_control_port', 'Stim.rcPort'], 
                     ['utilThread.toRcPort', 'rcThread.fromUtilPort'] ])
 
     # let simulator run
     try:
-        simu.run(stop_time=400, stop_on_assertion_failure=False)
+        SIMU.run(stop_time=400, stop_on_assertion_failure=False)
         
     except: raise
     finally:
         # create SVG drawing
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=SIMU, 
                                       fileName="output/6_vthreadRemoteControlled.html", 
                                       fmt="iaViewer", 
                                       showPartsList=[ "utilThread", "rcThread", "Stim"],

@@ -206,8 +206,21 @@ class TraceGenDynamicViewer:
         Generate js header with moddyDiagramArgs and
         moddyDiagramParts
         '''
+        camel_case_map = {
+            'time_per_div': 'timePerDiv',
+            'pix_per_div': 'pixPerDiv',
+            'part_spacing': 'partSpacing',
+            'part_box_size': 'partBoxSize',
+            'status_box_width': 'statusBoxWidth',
+            'variable_box_width': 'variableBoxWidth',
+            'var_spacing': 'varSpacing',
+        }
+
         out = "g_moddyDiagramArgs = {"
         for key, value in self._kwargs.items():
+            # convert to camelcase key (js program still uses camel case)
+            key = camel_case_map.get(key, key)
+
             if isinstance(value, str):
                 out += '%s: "%s", ' % (key, value)
             else:

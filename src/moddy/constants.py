@@ -1,3 +1,13 @@
+'''
+:mod:`constants` -- Moddy constants
+=======================================================================
+
+.. module:: constants
+   :synopsis: Moddy constants
+.. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
+
+'''
+
 # Time factors
 NS = 1E-9
 US = 1E-6

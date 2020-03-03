@@ -13,6 +13,7 @@ from . import MS, US, NS
 
 def time_unit_to_factor(unit):
     '''Convert time unit to factor'''
+    unit = unit.lower()
     if unit == "s":
         factor = 1.0
     elif unit == "ms":

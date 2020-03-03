@@ -1,152 +1,174 @@
 '''
-2_sergw: A tutorial that models a serial gateway to show the use of moddy vThreads
+2_sergw: A tutorial that models a serial GATEWAY to show the use of moddy
+VThreads
 
 @author: Klaus Popp
 '''
+# because the filename doesn't conform to snake case style ...
+# pylint: disable=C0103
 
-from moddy import *
+import moddy
+from moddy import US, MS
 
 
-class Gateway(simPart):
+class Gateway(moddy.SimPart):
+    ''' Model of the Gateway '''
+
     def __init__(self, sim):
         # Initialize the parent class
-        super().__init__(sim=sim, objName="GW")
-        
-        # Create a scheduler
-        self.sched = vtSchedRtos(sim=sim, objName="sched", parentObj=self)
-        
-        # Create a Rx and a Tx thread
-        self.rxThread = vThread( sim=sim, objName="RxThr", target=self.RxThread, parentObj=self,
-                         elems={ 'QueuingIn': 'serPort', 'out': 'netPort'} )
-        self.txThread = vThread( sim=sim, objName="TxThr", target=self.TxThread, parentObj=self, 
-                         elems={ 'QueuingIn': 'netPort', 'out': 'serPort'} )
-        
-        # add threads to scheduler
-        self.sched.addVThread(self.rxThread, prio=1)
-        self.sched.addVThread(self.txThread, prio=2)
+        super().__init__(sim=sim, obj_name="GW")
 
+        # Create a scheduler
+        self.sched = moddy.VtSchedRtos(sim=sim, obj_name="sched",
+                                       parent_obj=self)
+
+        # Create a Rx and a Tx thread
+        self.rx_thread = moddy.VThread(sim=sim, obj_name="RxThr",
+                                       target=self.rx_thread_task,
+                                       parent_obj=self,
+                                       elems={'QueuingIn': 'ser_port',
+                                              'out': 'net_port'})
+        self.tx_thread = moddy.VThread(sim=sim, obj_name="TxThr",
+                                       target=self.tx_thread_task,
+                                       parent_obj=self,
+                                       elems={'QueuingIn': 'net_port',
+                                              'out': 'ser_port'})
+
+        # add threads to scheduler
+        self.sched.add_vthread(self.rx_thread, prio=1)
+        self.sched.add_vthread(self.tx_thread, prio=2)
 
     @staticmethod
-    def RxThread(self):
-        # note: self is the instance of the vThread
+    def rx_thread_task(v_thead: moddy.VThread):
+        ''' Gateway receive thread '''
+        # note: v_thead is the instance of the vThread
         while True:
             # Wait until serial data available
-            if self.serPort.nMsg() == 0:
-                self.wait( timeout=None, evList=[self.serPort])
-            
-            # Read serial data. Simulate read from HW Fifo (each message is only one char)
-            # Simulate fifo depth of 8 (if more than 8 messages received, Fifo overflow)
-            nChars = self.serPort.nMsg()
-            
-            msgStr = ''
-            for _ in range(nChars):
-                msgStr += self.serPort.readMsg()
+            if v_thead.ser_port.n_msg() == 0:
+                v_thead.wait(timeout=None, ev_list=[v_thead.ser_port])
 
-            if nChars > 8:
-                self.addAnnotation('FIFO overflow!')
-                nChars = 8
-                msgStr = msgStr[:nChars]
-                
-            # Simulate reading from HW Fifo takes time (20us per char, really slow CPU...)
-            self.busy( nChars * 20 *us, 'RFIFO', bcWhiteOnRed)
-            
+            # Read serial data. Simulate read from HW Fifo
+            # (each message is only one char)
+            # Simulate fifo depth of 8 (if more than 8 messages received,
+            # Fifo overflow)
+            n_chars = v_thead.ser_port.n_msg()
+
+            msg_str = ''
+            for _ in range(n_chars):
+                msg_str += v_thead.ser_port.read_msg()
+
+            if n_chars > 8:
+                v_thead.annotation('FIFO overflow!')
+                n_chars = 8
+                msg_str = msg_str[:n_chars]
+
+            # Simulate reading from HW Fifo takes time
+            # (20us per char, really slow CPU...)
+            v_thead.busy(n_chars * 20 * US, 'RFIFO', moddy.BC_WHITE_ON_RED)
+
             # push data to network
-            self.busy( 150*us, 'TXNET', bcWhiteOnGreen)
-            
-            self.netPort.send( msgStr, 100*us)
+            v_thead.busy(150 * US, 'TXNET', moddy.BC_WHITE_ON_GREEN)
 
-            
+            v_thead.net_port.send(msg_str, 100 * US)
+
     @staticmethod
-    def TxThread(self):
-        # note: self is the instance of the vThread
+    def tx_thread_task(v_thread: moddy.VThread):
+        ''' Gateway transmit thread '''
+        # note: v_thread is the instance of the vThread
         while True:
-            if self.netPort.nMsg() == 0:
-                self.wait( timeout=None, evList=[self.netPort])
-            
-            self.busy( 100*us, 'RXNET', bcWhiteOnGreen)
-            
-            # read one message
-            msg = self.netPort.readMsg()
+            if v_thread.net_port.n_msg() == 0:
+                v_thread.wait(timeout=None, ev_list=[v_thread.net_port])
 
-            self.busy( len(msg) * 20*us, 'TXFIFO', bcWhiteOnRed)
-        
+            v_thread.busy(100 * US, 'RXNET', moddy.BC_WHITE_ON_GREEN)
+
+            # read one message
+            msg = v_thread.net_port.read_msg()
+
+            v_thread.busy(len(msg) * 20 * US, 'TXFIFO', moddy.BC_WHITE_ON_RED)
+
             # push to serial port
             for c in msg:
-                self.serPort.send( c, serFlightTime(c))
-            
+                v_thread.ser_port.send(c, ser_flight_time(c))
 
-def clientProg(self):
-    # note: self is the instance of the vThread
+
+def client_prog(v_thread: moddy.VThread):
+    ''' Network CLIENT '''
+    # note: v_thread is the instance of the vThread
     while True:
-        self.wait(1.2*ms)
-        self.netPort.send('test', 100*us)
-        self.busy(100*us, 'TX1', bcWhiteOnBlue)
-        self.netPort.send('test1', 100*us)
-        self.busy(100*us, 'TX2', bcWhiteOnRed)
-        self.wait(2.3*ms)
-        self.netPort.send('Data1', 100*us)
-        self.busy(100*us, 'TX3', bcWhiteOnGreen)
+        v_thread.wait(1.2 * MS)
+        v_thread.net_port.send('test', 100 * US)
+        v_thread.busy(100 * US, 'TX1', moddy.BC_WHITE_ON_BLUE)
+        v_thread.net_port.send('test1', 100 * US)
+        v_thread.busy(100 * US, 'TX2', moddy.BC_WHITE_ON_RED)
+        v_thread.wait(2.3 * MS)
+        v_thread.net_port.send('Data1', 100 * US)
+        v_thread.busy(100 * US, 'TX3', moddy.BC_WHITE_ON_GREEN)
 
-def serDevProg(self):
-    # note: self is the instance of the vThread
-    
+
+def ser_dev_prog(v_thread: moddy.VThread):
+    ''' Serial Device '''
+    # note: v_thread is the instance of the vThread
+
     # set blue color for messages from SerDev
-    self.serPort._outPort.setColor('blue')
+    v_thread.ser_port.out_port().set_color('blue')
     while True:
         # Generate some serial output
-        self.wait(2*ms)
-        
-        msgStr = 'abc'
-        for c in msgStr: 
-            self.serPort.send(c, serFlightTime(c))
-        
-        self.wait(1*ms)
-        
-        msgStr = 'Hello-World' 
-        for c in msgStr: 
-            self.serPort.send(c, serFlightTime(c))
-            
+        v_thread.wait(2 * MS)
+
+        msg_str = 'abc'
+        for c in msg_str:
+            v_thread.ser_port.send(c, ser_flight_time(c))
+
+        v_thread.wait(1 * MS)
+
+        msg_str = 'Hello-World'
+        for c in msg_str:
+            v_thread.ser_port.send(c, ser_flight_time(c))
 
 
-def serFlightTime(txString):
-    ''' Compute flight time for txString (baudrate=115200) '''
-    timePerChar = (1.0/115200) * 10 
-    return timePerChar * len(txString)
+def ser_flight_time(tx_string):
+    ''' Compute flight time for tx_string (baudrate=115200) '''
+    time_per_char = (1.0 / 115200) * 10
+    return time_per_char * len(tx_string)
 
 
 if __name__ == '__main__':
-    simu = sim()
-    simu.setDisplayTimeUnit('us')
-    
-    client= vSimpleProg( sim=simu, objName="Client", target=clientProg, elems={ 'QueuingIO': 'netPort' } )
-    serDev = vSimpleProg( sim=simu, objName="SerDev", target=serDevProg, elems={ 'QueuingIO': 'serPort' } )
-    gateway = Gateway(simu)
-    
+    SIMU = moddy.Sim()
+    SIMU.tracing.set_display_time_unit('US')
+
+    CLIENT = moddy.VSimpleProg(sim=SIMU, obj_name="Client",
+                               target=client_prog,
+                               elems={'QueuingIO': 'net_port'})
+    SERDEV = moddy.VSimpleProg(sim=SIMU, obj_name="SerDev",
+                               target=ser_dev_prog,
+                               elems={'QueuingIO': 'ser_port'})
+    GATEWAY = Gateway(SIMU)
+
     # Bind ports
-    simu.smartBind( [
-        [ 'SerDev.serPortOut', 'GW.RxThr.serPort'],
-        [ 'SerDev.serPortIn',  'GW.TxThr.serPort'],
-        [ 'Client.netPortIn',  'GW.RxThr.netPort'],
-        [ 'Client.netPortOut', 'GW.TxThr.netPort'],
+    SIMU.smart_bind([
+        ['SerDev.ser_port_out', 'GW.RxThr.ser_port'],
+        ['SerDev.ser_port_in', 'GW.TxThr.ser_port'],
+        ['Client.net_port_in', 'GW.RxThr.net_port'],
+        ['Client.net_port_out', 'GW.TxThr.net_port'],
     ])
-    
-    
+
     # let simulator run
     try:
-        simu.run(stopTime=12*ms)
-        
-    except: raise
+        SIMU.run(stop_time=12 * MS)
+
+    except Exception as exception:
+        raise exception
     finally:
         # create sequence diagram
-        moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="output/2_sergw.html", 
-                                      fmt="iaViewer", 
-                                      showPartsList=["Client", "GW.RxThr", "GW.TxThr", "SerDev"],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 50*us, 
-                                      pixPerDiv = 30,
-                                      title = "Serial Gateway Demo")    
-    
+        moddy.gen_interactive_sequence_diagram(
+            sim=SIMU,
+            file_name="output/2_sergw.html",
+            show_parts_list=["Client", "GW.RxThr",
+                             "GW.TxThr", "SerDev"],
+            excluded_element_list=['allTimers'],
+            time_per_div=50 * US,
+            pix_per_div=30,
+            title="Serial Gateway Demo")
+
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, 'output/2_sergw_structure.svg')
-        
+    moddy.gen_dot_structure_graph(SIMU, 'output/2_sergw_structure.svg')

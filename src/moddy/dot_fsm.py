@@ -7,123 +7,143 @@
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
 '''
-from .fsm import is_sub_fsm_specification
-from .utils import create_dirs_and_open_output_file
-
 import subprocess
 import os
 
+from .fsm import is_sub_fsm_specification
+from .utils import create_dirs_and_open_output_file
 
-def moddyGenerateFsmGraph( fsm, fileName, keepGvFile=False ):
-    ''' 
-    Generate a Fsm Graph of an fsm using the GraphViz dot tool
-    
-    :param fsm: an instance of the fsm
-    :param fileName: the relative filename including '.svg'  
-    :param keepGvFile: if True, don't delete graphviz input file
+
+def gen_fsm_graph(fsm, file_name, keep_gv_file=False):
     '''
-    df = DotFsm(fsm)
-    df.dot_gen(fileName, keepGvFile)
+    Generate a Fsm Graph of an fsm using the GraphViz dot tool
+
+    :param fsm: an instance of the fsm
+    :param file_name: the relative filename including '.svg'
+    :param keep_gv_file: if True, don't delete graphviz input file
+    '''
+    dot_fsm = DotFsm(fsm)
+    dot_fsm.dot_gen(file_name, keep_gv_file)
+
 
 def _space(indent):
-    istr = "%" + str(3*indent) + "s"
+    istr = "%" + str(3 * indent) + "s"
     return istr % ""
 
 
-def mapStateNames(name,state):
-    if state == '': s = 'INIT'
-    else: s = state
+def map_state_names(name, state):
+    if state == '':
+        s = 'INIT'
+    else:
+        s = state
+
     if name != '':
         s = name + '_' + s
     return s
+
 
 class DotFsm(object):
     '''
     Display the an fsm via the DOT language (Graphviz)
     States are vizualized as nodes
-    Subfsms are drawn in separate subgraphs, an edge is drawn from the main state to the 
+    Subfsms are drawn in separate subgraphs, an edge is drawn from the main state to the
     initial state in the subfsm
     '''
+
     def __init__(self, fsm):
         self._fsm = fsm
-    
-    def fsmGen(self, level, fsm, name='', isSubFsm=False):
+
+    def fsm_gen(self, level, fsm, name='', is_sub_fsm=False):
         '''
         generate the dot language statements for a (sub)fsm
-        return lines,initialState
-        initialState is only valid on subFsms
+        return lines,initial_state
+        initial_state is only valid on subFsms
         '''
         lines = []
-        initialState = None
-        
-        dictTransitions = fsm.get_dict_transitions()
+        initial_state = None
+
+        dict_transitions = fsm.get_dict_transitions()
         # States
-        for state, listTrans in dictTransitions.items():
+        for state, list_trans in dict_transitions.items():
             if state == '':
-                s = '%s [style=invisible];' % mapStateNames(name,state)
-                if isSubFsm:
-                    s = None
+                sstr = '%sstr [style=invisible];' % \
+                    map_state_names(name, state)
+                if is_sub_fsm:
+                    sstr = None
             elif state == 'ANY':
-                s = '%s [label="from any state" shape=none];' % mapStateNames(name,state)
+                sstr = '%sstr [label="from any state" shape=none];' % \
+                    map_state_names(name, state)
             else:
-                s = '%s [label=%s];' % (mapStateNames(name,state), state)
-            if s is not None:
-                lines.append( [level, s] )
-        
+                sstr = '%sstr [label=%sstr];' % \
+                    (map_state_names(name, state), state)
+            if sstr is not None:
+                lines.append([level, sstr])
+
         # Transitions
-        for fromState, listTrans in dictTransitions.items():
-            for trans in listTrans:
-                subFsmCls = is_sub_fsm_specification(trans)
-                if subFsmCls is not None:
-                    subFsmName, cls = trans
+        for from_state, list_trans in dict_transitions.items():
+            for trans in list_trans:
+                sub_fsm_cls = is_sub_fsm_specification(trans)
+                if sub_fsm_cls is not None:
+                    sub_fsm_name, cls = trans
                     # subfsm specification, instantiate subfsm
-                    subFsm = subFsmCls(parentFsm = fsm)
-                    lines.append( [level, 'subgraph cluster_%s {  ' % (subFsmName)])
-                    lines.append( [level+1, 'label="%s";' % (subFsmName)])
+                    sub_fsm = sub_fsm_cls(parentFsm=fsm)
+                    lines.append([level, 'subgraph cluster_%s {  ' %
+                                  (sub_fsm_name)])
+                    lines.append([level + 1, 'label="%s";' %
+                                  (sub_fsm_name)])
 
                     # draw subfsm
-                    subLines, subInitialState = self.fsmGen( level+1, subFsm, 
-                                                             name=subFsmName, isSubFsm=True )
-                    lines += subLines
-                    lines.append( [level, '}' ])
-                    
+                    sub_lines, sub_initial_state = \
+                        self.fsm_gen(level + 1, sub_fsm,
+                                     name=sub_fsm_name, is_sub_fsm=True)
+                    lines += sub_lines
+                    lines.append([level, '}' ])
+
                     # draw edge from main state to subfsm initial state
-                    lines.append( [level, '%s -> %s [color=lightgrey];' % (mapStateNames(name,fromState),
-                                                                           subInitialState)] )
+                    lines.append([level, '%s -> %s [color=lightgrey];' %
+                                  (map_state_names(name, from_state),
+                                   sub_initial_state)])
                 else:
                     # normal transition
-                    event, toState = trans
-                    if isSubFsm and event == 'INITIAL':
-                        initialState = mapStateNames(name,toState)
+                    event, to_state = trans
+                    if is_sub_fsm and event == 'INITIAL':
+                        initial_state = map_state_names(name, to_state)
                     else:
-                        lines.append( [level, '%s -> %s [label="%s"];' % (mapStateNames(name,fromState), 
-                                                                          mapStateNames(name,toState), event)] )
-        return lines, initialState        
-            
-        
+                        lines.append([level, '%s -> %s [label="%s"];' %
+                                      (map_state_names(name, from_state),
+                                       map_state_names(name, to_state),
+                                       event)])
+        return lines, initial_state
+
     def dot_gen(self, file_name, keep_gv_file):
         level = 0
-        lines=[]
-        lines.append( [level, 'digraph G {'] )
-        lines.append( [level+1, 'rankdir=TB;'] )
-        lines.append( [level+1, 'graph [fontname = "helvetica" fontsize=10 fontnodesep=0.1];'] )
-        lines.append( [level+1, 'node [fontname = "helvetica" fontsize=10 shape=ellipse color=black height=.1];'] )
-        lines.append( [level+1, 'edge [fontname = "helvetica" color=black fontsize=8 fontcolor=black];'] )
+        lines = []
+        lines.append([level, 'digraph G {'])
+        lines.append([level + 1, 'rankdir=TB;'])
+        lines.append([level + 1,
+                      'graph [fontname = "helvetica" fontsize=10 '
+                      'fontnodesep=0.1];'])
+        lines.append([level + 1,
+                      'node [fontname = "helvetica" fontsize=10 '
+                      'shape=ellipse color=black height=.1];'])
+        lines.append([level + 1,
+                      'edge [fontname = "helvetica" color=black fontsize=8 '
+                      'fontcolor=black];'])
 
-        subLines, initialState = self.fsmGen( level+1, self._fsm)
-        lines += subLines
-                 
+        sub_lines, _ = self.fsm_gen(level + 1, self._fsm)
+        lines += sub_lines
+
         # finish
-        lines.append( [level, '}' ])
-        
+        lines.append([level, '}'])
+
         # Output the DOT file as filename.dot e.g. test.svg.gv
-        dotFile = "%s.gv" % file_name
-        f = create_dirs_and_open_output_file(dotFile)
+        dot_file = "%s.gv" % file_name
+        file_desc = create_dirs_and_open_output_file(dot_file)
         for line in lines:
-            f.write("%s%s\n" % (_space(line[0]), line[1]))
-        f.close()
-        subprocess.check_call(['dot', '-Tsvg', dotFile, '-o%s' % file_name])
-        print("Saved FSM graph to %s"  % file_name)
+            file_desc.write("%s%s\n" % (_space(line[0]), line[1]))
+        file_desc.close()
+        subprocess.check_call(['dot', '-Tsvg', dot_file, '-o%s' % file_name])
+        print("Saved FSM graph to %s" % file_name)
         if not keep_gv_file:
-            os.unlink(dotFile)
-            
+            os.unlink(dot_file)
+

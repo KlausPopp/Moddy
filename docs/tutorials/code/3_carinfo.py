@@ -193,14 +193,14 @@ def stimProg(self):
          
         
 if __name__ == '__main__':         
-    simu = sim()
-    cis = CarInfoSystem(simu, "CarInfoSys")
-    stim = vSimpleProg( sim=simu, objName="Stim", target=stimProg, 
+    SIMU = sim()
+    cis = CarInfoSystem(SIMU, "CarInfoSys")
+    stim = vSimpleProg( sim=SIMU, objName="Stim", target=stimProg, 
                         elems={ 'out': ['powerPort', 'ignitionPort', 'buttonPort'],
                                 'SamplingIn': ['audioPort', 'visualPort']} )
 
     # bind ports
-    simu.smartBind( [ 
+    SIMU.smartBind( [ 
         ['Stim.powerPort', 'CarInfoSys.powerPort'],
         ['Stim.ignitionPort', 'CarInfoSys.ignitionPort'],
         ['Stim.buttonPort', 'CarInfoSys.buttonPort'],
@@ -211,9 +211,9 @@ if __name__ == '__main__':
     moddyGenerateFsmGraph( fsm=cis.fsm, fileName='output/3_carinfo_fsm.svg', keepGvFile=True)  
     
     
-    simu.run(100)
+    SIMU.run(100)
     
-    moddyGenerateSequenceDiagram( sim=simu, 
+    moddyGenerateSequenceDiagram( sim=SIMU, 
                               fileName="output/3_carinfo.html", 
                               fmt="iaViewer", 
                               showPartsList=[stim, cis], 

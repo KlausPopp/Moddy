@@ -32,22 +32,22 @@ class Consumer(simPart):
  
             
 if __name__ == '__main__':
-    simu = sim()
-    simu.setDisplayTimeUnit('us')
+    SIMU = sim()
+    SIMU.setDisplayTimeUnit('us')
     
-    prod = vSimpleProg( sim=simu, objName="Producer", target=producerProg, elems={ 'out': 'netPort' } )
-    cons = Consumer( simu )
+    prod = vSimpleProg( sim=SIMU, objName="Producer", target=producerProg, elems={ 'out': 'netPort' } )
+    cons = Consumer( SIMU )
 
     prod.netPort.bind(cons.netPort)
     
     # let simulator run
     try:
-        simu.run(stopTime=3*ms)
+        SIMU.run(stopTime=3*ms)
         
     except: raise
     finally:
         # create SVG drawing
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddyGenerateSequenceDiagram( sim=SIMU, 
                                       fileName="output/5_lostMsg.html", 
                                       fmt="iaViewer", 
                                       showPartsList=["Producer","Consumer"],
@@ -57,5 +57,5 @@ if __name__ == '__main__':
                                       pixPerDiv = 30)    
 
         # Output trace table
-        moddyGenerateTraceTable(simu, 'output/5_lostMsg.csv', timeUnit="us" )
+        moddyGenerateTraceTable(SIMU, 'output/5_lostMsg.csv', timeUnit="us" )
         

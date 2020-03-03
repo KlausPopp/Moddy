@@ -27,23 +27,23 @@ def consumerProg(self):
  
             
 if __name__ == '__main__':
-    simu = moddy.Sim()
-    simu.tracing.set_display_time_unit('us')
+    SIMU = moddy.Sim()
+    SIMU.tracing.set_display_time_unit('us')
     
-    prod = moddy.VSimpleProg( sim=simu, obj_name="Producer", target=producerProg, elems={ 'out': ['netPort1', 'netPort2'] } )
-    cons = moddy.VSimpleProg( sim=simu, obj_name="Consumer", target=consumerProg, elems={ 'QueuingIn': 'netPort' } )
+    prod = moddy.VSimpleProg( sim=SIMU, obj_name="Producer", target=producerProg, elems={ 'out': ['netPort1', 'netPort2'] } )
+    cons = moddy.VSimpleProg( sim=SIMU, obj_name="Consumer", target=consumerProg, elems={ 'QueuingIn': 'netPort' } )
 
     # bind two output ports to same input port
-    simu.smart_bind( [ [ 'Producer.netPort1', 'Producer.netPort2', 'Consumer.netPort'] ] )
+    SIMU.smart_bind( [ [ 'Producer.netPort1', 'Producer.netPort2', 'Consumer.netPort'] ] )
 
     # let simulator run
     try:
-        simu.run(stop_time=3*MS)
+        SIMU.run(stop_time=3*MS)
         
     except: raise
     finally:
         # create sequence diagram
-        moddy.moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.moddyGenerateSequenceDiagram( sim=SIMU, 
                                       fileName="output/7_multiPortBinding.html", 
                                       fmt="iaViewer", 
                                       showPartsList=["Producer","Consumer"],
@@ -52,5 +52,5 @@ if __name__ == '__main__':
                                       timePerDiv = 50*US, 
                                       pixPerDiv = 30)    
         # Output model structure graph
-        moddy.moddyGenerateStructureGraph(simu, 'output/7_multiPortBinding_structure.svg')
+        moddy.moddyGenerateStructureGraph(SIMU, 'output/7_multiPortBinding_structure.svg')
         

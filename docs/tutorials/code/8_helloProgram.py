@@ -43,18 +43,18 @@ def joeProg(self: vSimpleProg):
 
 
 if __name__ == '__main__':
-    simu = sim()
+    SIMU = sim()
     
-    vSimpleProg( sim=simu, objName="Bob", target=bobProg, elems={ 'QueuingIO': 'head' } )
-    vSimpleProg( sim=simu, objName="Joe", target=joeProg, elems={ 'QueuingIO': 'head' } )
+    vSimpleProg( sim=SIMU, objName="Bob", target=bobProg, elems={ 'QueuingIO': 'head' } )
+    vSimpleProg( sim=SIMU, objName="Joe", target=joeProg, elems={ 'QueuingIO': 'head' } )
     
-    simu.smartBind([ ['Bob.head', 'Joe.head'] ])
+    SIMU.smartBind([ ['Bob.head', 'Joe.head'] ])
 
     # let simulator run
-    simu.run(stopTime=12.0)
+    SIMU.run(stopTime=12.0)
     
     # Output sequence diagram
-    moddyGenerateSequenceDiagram( sim=simu, 
+    moddyGenerateSequenceDiagram( sim=SIMU, 
                                   fileName="output/8_helloProgram.html", 
                                   fmt="iaViewer", 
                                   showPartsList=['Bob', 'Joe'], 
@@ -63,5 +63,5 @@ if __name__ == '__main__':
                                   title = "Hello Program Demo")    
 
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, 'output/8_hello_structure.svg')
+    moddyGenerateStructureGraph(SIMU, 'output/8_hello_structure.svg')
 
