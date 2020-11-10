@@ -1,4 +1,4 @@
-'''
+"""
 :mod:`fsm` -- Moddy Finite State Machine
 =======================================================================
 
@@ -6,13 +6,13 @@
    :synopsis: A general finite state machine with hierarchical state support
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
-'''
+"""
 
 
 def is_sub_fsm_specification(name_cls_tuple):
-    '''
+    """
     Test if the tuple from a transition list (name, classType)
-    is a subFsm specification '''
+    is a subFsm specification"""
     _, cls = name_cls_tuple
     if isinstance(cls, type):
         return cls
@@ -21,7 +21,7 @@ def is_sub_fsm_specification(name_cls_tuple):
 
 class Fsm:
     # pylint: disable=too-many-instance-attributes
-    '''
+    """
     A finite state machine.
     Subclass your FSM from this class.
 
@@ -122,7 +122,7 @@ class Fsm:
             '':
                 [('INITIAL', 'off')],
             'off':
-                [('PowerApplied', 'Standby')],
+                [('PowerApplied', 'standby')],
             'standby':
                 [('PowerButtonPressed', 'normal_op')],
             'normal_op':
@@ -162,7 +162,7 @@ class Fsm:
         The dict key is the state, and the values are a list of transition from
         that state. Each transition consists of a tuple (event, targetState).
     :param Fsm parentFsm: The parent Finite State Machine. None if no parent.
-    '''
+    """
 
     def __init__(self, dict_transitions, parent_fsm=None):
         self.state = None
@@ -191,16 +191,17 @@ class Fsm:
                         self._list_events.append(event)
 
                     if not self.state_exists(to_state):
-                        raise RuntimeError("to_state %s doesn't exist" %
-                                           to_state)
-                    if to_state == 'any':
+                        raise RuntimeError(
+                            "to_state %s doesn't exist" % to_state
+                        )
+                    if to_state == "any":
                         raise RuntimeError("ANY cannot be a target state")
 
         # check for initial event and remove it
         try:
-            idx_initial = self._list_events.index('INITIAL')
+            idx_initial = self._list_events.index("INITIAL")
         except ValueError:
-            raise Exception('INITIAL event missing')
+            raise Exception("INITIAL event missing")
 
         del self._list_events[idx_initial]
 
@@ -208,11 +209,11 @@ class Fsm:
     # Public API
     #
     def get_dict_transitions(self):
-        ''' return the transition dictionary '''
+        """ return the transition dictionary """
         return self._dict_transitions
 
     def exec_state_dependent_method(self, method_name, deep, *args, **kwargs):
-        '''
+        """
         Execute the state specific methods:
 
         The method ``self.state_ANY_<method_name>(*args,**kwargs)``
@@ -225,38 +226,38 @@ class Fsm:
         :param deep: if True, then for each currently active sub_fsm, the
             _exec_state_method is called
         :return: True if at least one method exists
-        '''
+        """
         handled = 0
 
         if deep is True:
             for sub_fsm in self._list_child_fsms:
-                if sub_fsm.exec_state_dependent_method(method_name,
-                                                       True, *args,
-                                                       **kwargs):
+                if sub_fsm.exec_state_dependent_method(
+                    method_name, True, *args, **kwargs
+                ):
                     handled += 1
 
-        if self._exec_state_method('any', method_name, *args, **kwargs):
+        if self._exec_state_method("any", method_name, *args, **kwargs):
             handled += 1
         if self._exec_state_method(self.state, method_name, *args, **kwargs):
             handled += 1
         return handled > 0
 
     def set_state_change_callback(self, callback):
-        '''
+        """
         Register a method that is called whenever the state of the fsm changes
 
         :param callback: function to be called on state changes
-        '''
+        """
         self._state_change_callback = callback
 
     def has_event(self, ev_name):
-        '''
+        """
         check if the event is known by the fsm or a currently active
         statemachine.
 
         :return: True if event is known by the fsm or a currently active
         statemachine
-        '''
+        """
         ret_val = False
         if ev_name in self._list_events:
             ret_val = True
@@ -268,32 +269,32 @@ class Fsm:
         return ret_val
 
     def start_fsm(self):
-        ''' start the FSM. Fire event ``INITIAL`` '''
+        """ start the FSM. Fire event ``INITIAL`` """
         if self.state is not None:
             raise RuntimeError("start_fsm state wrong")
-        self._event('INITIAL')
+        self._event("INITIAL")
 
     def event(self, ev_name):
-        '''
+        """
         Execute an Event in the *ANY* and current state.
 
         :param ev_name: event to execute
         :raise AssertionError: if the current state is None.
         :return: True if the event causes a state change, False if not.
-        '''
-        assert(self.state is not None), "Did you call start_fsm?"
+        """
+        assert self.state is not None, "Did you call start_fsm?"
         return self._event(ev_name)
 
     def top_fsm(self):
-        ''' get a reference to the topmost Fsm in the hierarchy '''
+        """ get a reference to the topmost Fsm in the hierarchy """
         return self._top_fsm
 
     def moddy_part(self):
-        '''
+        """
         return a reference of the moddy part this fsm is contained in
         (regardless of the fsm nesting level).
         return None if it is not included in a moddy part
-        '''
+        """
         part = None
         try:
             part = self.top_fsm().the_moddy_part
@@ -305,14 +306,14 @@ class Fsm:
     # Internal methods
     #
     def _exec_state_method(self, state, method_name, *args, **kwargs):
-        '''
+        """
         Execute a state specific method that might exist in the fsm subclass
 
         The method self.State_<stateName>_<method_name>(*args) is called if
         it exists, True is returned.
         If it doesn't exist, nothing happens, but False is returned.
 
-        '''
+        """
         full_method_name = "state_%s_%s" % (state, method_name)
 
         func = getattr(self, full_method_name, None)
@@ -323,12 +324,12 @@ class Fsm:
         return True
 
     def state_exists(self, state):
-        ''' test if state exists '''
+        """ test if state exists """
         return state in self._dict_transitions
 
     def goto_state(self, state):
-        ''' change fsm state '''
-        if state == 'any' or self.state_exists(state) is False:
+        """ change fsm state """
+        if state == "any" or self.state_exists(state) is False:
             raise RuntimeError("goto_state invalid state %s" % state)
 
         if self.state != state:  # ignore self transitions
@@ -339,11 +340,11 @@ class Fsm:
                 # terminate subFsms
                 self.terminate_sub_fsms()
                 # call current state Exit method
-                self.exec_state_dependent_method('exit', False)
+                self.exec_state_dependent_method("exit", False)
 
             # enter new state
             self.state = state
-            self.exec_state_dependent_method('entry', False)
+            self.exec_state_dependent_method("entry", False)
 
             # Start any possible nested fsms
             self.start_sub_fsms()
@@ -354,15 +355,15 @@ class Fsm:
         if self.state == state:
             # only execute this if the state was not again
             # changed by the Entry methods...
-            self.exec_state_dependent_method('do', False)
+            self.exec_state_dependent_method("do", False)
         # print("+++ RETURN FROM %s GOTO STATE %s" %
         # (type(self).__name__,state))
 
     def _event(self, ev_name):
-        '''
+        """
         Execute an Event in the "ANY" and current state.
         Returns True if the event causes a state change, False if not.
-        '''
+        """
         # Check if there is a matching transition
         old_state = self.state
 
@@ -373,7 +374,7 @@ class Fsm:
             # Check all transitions in ANY state and current state
             trans_lists = []
             try:
-                trans_lists.append(self._dict_transitions['any'])
+                trans_lists.append(self._dict_transitions["any"])
             except KeyError:
                 # ANY state may not exist
                 pass
@@ -382,7 +383,7 @@ class Fsm:
                 trans_lists.append(self._dict_transitions[self.state])
             else:
                 # events in uninitialized state
-                trans_lists.append(self._dict_transitions[''])
+                trans_lists.append(self._dict_transitions[""])
 
             # print("+++ %s EVENT %s in state %s" %
             # (type(self).__name__, ev_name, self.state))
@@ -399,10 +400,10 @@ class Fsm:
         return old_state != self.state
 
     def pass_event_to_sub_fsms(self, ev_name):
-        '''
+        """
         check if the current state has subFsms which handle the event
         if event handled by sub_fsm, return True
-        '''
+        """
         handled = False
         for sub_fsm in self._list_child_fsms:
             if sub_fsm.has_event(ev_name):
@@ -414,7 +415,7 @@ class Fsm:
         return handled
 
     def start_sub_fsms(self):
-        ''' start all subfsms in current master state '''
+        """ start all subfsms in current master state """
         trans_list = self._dict_transitions[self.state]
         for trans in trans_list:
             sub_fsm_cls = is_sub_fsm_specification(trans)
@@ -427,7 +428,7 @@ class Fsm:
                 sub_fsm.start_fsm()
 
     def terminate_sub_fsms(self):
-        ''' terminate all started sub fsms '''
+        """ terminate all started sub fsms """
         for sub_fsm in self._list_child_fsms:
-            sub_fsm.exec_state_dependent_method('exit', False)
+            sub_fsm.exec_state_dependent_method("exit", False)
         self._list_child_fsms = []

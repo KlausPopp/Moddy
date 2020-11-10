@@ -83,3 +83,26 @@ Recommended, so that port callbacks are snake_case named.
 
 e.g. "serPort" -> "ser_port"
 
+Rename your state callbacks in FSMs 
+-----------------------------------------------------------
+
+State_xxx_Entry -> state_xxx_entry
+State_xxx_Exit -> state_xxx_exit
+State_xxx_Do -> state_xxx_do
+State_ANY_xxx -> state_any_xxx
+
+
+Rename message and timer callbacks
+-----------------------------------------------------------
+
+xxx_Msg -> xxx_msg
+xxx_Expired -> xxx_expired
+
+Rename your states in FSMs (optional)
+-----------------------------------------------------------
+
+Recommended, so that fsm callbacks are snake_case named.
+
+e.g. "Off" -> "off"
+
+
