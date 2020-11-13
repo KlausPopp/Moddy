@@ -1,4 +1,4 @@
-'''
+"""
 :mod:`interactive_sequence_diagram` -- Interactive Sequence Diagram Generator
 ==============================================================================
 
@@ -7,25 +7,26 @@
    :synopsis: Moddy Interactive Sequence Diagram Generator
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
-'''
+"""
 
 import os
 
 from moddy import seq_diag_interactive_viewer
-from moddy.constants import BC_WHITE_ON_BLACK
 from .utils import create_dirs_and_open_output_file
 
 
-def gen_interactive_sequence_diagram(sim,
-                                     file_name,
-                                     show_parts_list=None,
-                                     excluded_element_list=None,
-                                     show_var_list=None,
-                                     refer_files=False,
-                                     **kwargs):
+def gen_interactive_sequence_diagram(
+    sim,
+    file_name,
+    show_parts_list=None,
+    excluded_element_list=None,
+    show_var_list=None,
+    refer_files=False,
+    **kwargs,
+):
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
-    '''
+    """
     Moddy function to create sequence diagrams.
     The function is supposed to be called after the simulator has stopped.
     It takes the recorded events from the simulator instance.
@@ -90,7 +91,7 @@ def gen_interactive_sequence_diagram(sim,
 
          * varSpacing = 180 - pixels between variables
 
-    '''
+    """
     if excluded_element_list is None:
         excluded_element_list = []
 
@@ -118,18 +119,23 @@ def gen_interactive_sequence_diagram(sim,
         var_list.append(var)
 
     out_dir = os.path.dirname(file_name)
-    viewer = TraceGenDynamicViewer(out_dir, parts_list, var_list,
-                                   excluded_element_list, refer_files,
-                                   **kwargs)
+    viewer = TraceGenDynamicViewer(
+        out_dir,
+        parts_list,
+        var_list,
+        excluded_element_list,
+        refer_files,
+        **kwargs,
+    )
 
     out = viewer.gen_html_head()
     out += viewer.get_html_style()
     out += viewer.get_html_mid_1()
 
-    out += '<script>\n'
+    out += "<script>\n"
     out += viewer.gen_header()
     out += viewer.gen_trace_output(sim.tracing.traced_events())
-    out += '</script>\n'
+    out += "</script>\n"
 
     out += viewer.gen_script()
     out += viewer.gen_html_tail()
@@ -143,13 +149,20 @@ def gen_interactive_sequence_diagram(sim,
 
 class TraceGenDynamicViewer:
     # pylint: disable=too-many-instance-attributes
-    '''
+    """
     Class to generate the different elements of the HTML file
     for the dynamic viewer
-    '''
+    """
 
-    def __init__(self, outDir, parts_list, var_list,
-                 excluded_element_list, refer_files, **kwargs):
+    def __init__(
+        self,
+        outDir,
+        parts_list,
+        var_list,
+        excluded_element_list,
+        refer_files,
+        **kwargs,
+    ):
         # pylint: disable=too-many-arguments
         self._list_parts = parts_list
         self._list_vars = var_list
@@ -170,19 +183,20 @@ class TraceGenDynamicViewer:
         for part in self._list_all_parts:
             self._part_shadow.append(
                 {
-                    'current': '',
-                    'lastChange': None,
-                    'action': "VC" if part in self._list_vars else "STA"
-                })
+                    "current": "",
+                    "lastChange": None,
+                    "action": "VC" if part in self._list_vars else "STA",
+                }
+            )
 
     def has_part(self, part):
-        ''' Test if simPart is in Drawing '''
+        """ Test if simPart is in Drawing """
         return part in self._list_all_parts
 
     def part_no(self, part):
-        '''
+        """
         Raises ValueError if the part is not present.
-        '''
+        """
         return self._list_all_parts.index(part)
 
     def _shall_event_be_shown(self, trace_ev):
@@ -202,18 +216,18 @@ class TraceGenDynamicViewer:
         return True
 
     def gen_header(self):
-        '''
+        """
         Generate js header with moddyDiagramArgs and
         moddyDiagramParts
-        '''
+        """
         camel_case_map = {
-            'time_per_div': 'timePerDiv',
-            'pix_per_div': 'pixPerDiv',
-            'part_spacing': 'partSpacing',
-            'part_box_size': 'partBoxSize',
-            'status_box_width': 'statusBoxWidth',
-            'variable_box_width': 'variableBoxWidth',
-            'var_spacing': 'varSpacing',
+            "time_per_div": "timePerDiv",
+            "pix_per_div": "pixPerDiv",
+            "part_spacing": "partSpacing",
+            "part_box_size": "partBoxSize",
+            "status_box_width": "statusBoxWidth",
+            "variable_box_width": "variableBoxWidth",
+            "var_spacing": "varSpacing",
         }
 
         out = "g_moddyDiagramArgs = {"
@@ -224,21 +238,22 @@ class TraceGenDynamicViewer:
             if isinstance(value, str):
                 out += '%s: "%s", ' % (key, value)
             else:
-                out += '%s: %s, ' % (key, value)
+                out += "%s: %s, " % (key, value)
 
-        out += '};\n'
+        out += "};\n"
 
         out += "g_moddyDiagramParts = [\n"
         for part in self._list_all_parts:
-            out += '{ name: "%s", tp: "%s" },\n' % \
-                (part.hierarchy_name(),
-                 "Part" if part in self._list_parts else "Var")
-        out += '];\n'
+            out += '{ name: "%s", tp: "%s" },\n' % (
+                part.hierarchy_name(),
+                "Part" if part in self._list_parts else "Var",
+            )
+        out += "];\n"
 
         return out
 
     def gen_trace_output(self, ev_list):
-        '''
+        """
         generate js array with traced events
         events belonging to parts which are not shown are omitted
 
@@ -261,7 +276,7 @@ class TraceGenDynamicViewer:
         sc: box stroke color
         fc: box fill color
 
-        '''
+        """
         out = "g_moddyTracedEvents = [\n"
         last_event_ts = None
 
@@ -275,7 +290,7 @@ class TraceGenDynamicViewer:
 
         # generate a final status event for all parts
         out += self._gen_closing_sta(last_event_ts)
-        out += '];\n'
+        out += "];\n"
         return out
 
     def _gen_output_for_event(self, event):
@@ -285,17 +300,20 @@ class TraceGenDynamicViewer:
             part_no = self.part_no(event.part)
 
         hdr = '{ tp: "%s", t: %g, p: %d, ' % (
-            event.action, event.trace_time, part_no)
+            event.action,
+            event.trace_time,
+            part_no,
+        )
 
         mid = None
 
         dispatch = {
-            '<MSG':     self._gen_output_for_msg_event,
-            'T-EXP':    self._gen_output_for_tmr_event,
-            'ANN':      self._gen_output_for_ann_event,
-            'ASSFAIL':  self._gen_output_for_ann_event,
-            'STA':      self._gen_output_for_sta_event,
-            'VC':       self._gen_output_for_sta_event,
+            "<MSG": self._gen_output_for_msg_event,
+            "T-EXP": self._gen_output_for_tmr_event,
+            "ANN": self._gen_output_for_ann_event,
+            "ASSFAIL": self._gen_output_for_ann_event,
+            "STA": self._gen_output_for_sta_event,
+            "VC": self._gen_output_for_sta_event,
         }
 
         try:
@@ -304,7 +322,7 @@ class TraceGenDynamicViewer:
             mid = None
 
         if mid:
-            out = hdr + mid + '}, \n'
+            out = hdr + mid + "}, \n"
             return out
         return None
 
@@ -314,7 +332,8 @@ class TraceGenDynamicViewer:
             self.part_no(event.sub_obj.parent_obj),
             fire_event.exec_time - fire_event.flight_time,
             fire_event.msg_text(),
-            '"t"' if fire_event.is_lost else '"f"')
+            '"t"' if fire_event.is_lost else '"f"',
+        )
 
         # generate colored messages
         msg_color = None
@@ -332,8 +351,10 @@ class TraceGenDynamicViewer:
     def _gen_output_for_tmr_event(self, event, _):
         mid = None
         tmr = event.sub_obj
-        if tmr not in self._list_excluded_elements and \
-                'allTimers' not in self._list_excluded_elements:
+        if (
+            tmr not in self._list_excluded_elements
+            and "allTimers" not in self._list_excluded_elements
+        ):
             mid = 'txt: "%s"' % (event.sub_obj.obj_name())
         return mid
 
@@ -342,42 +363,57 @@ class TraceGenDynamicViewer:
         return 'txt: "%s"' % (event.trans_val.__str__())
 
     def _gen_output_for_sta_event(self, event, part_no):
-        vc_appearance = BC_WHITE_ON_BLACK
+        vc_appearance = {
+            "boxStrokeColor": "white",
+            "boxFillColor": "black",
+            "textColor": "white",
+        }
         mid = None
         shadow = self._part_shadow[part_no]
-        current_val = shadow['current']
+        current_val = shadow["current"]
 
-        trans_val = event.trans_val.__str__() if event.trans_val is not None \
-            else ''
+        trans_val = (
+            event.trans_val.__str__() if event.trans_val is not None else ""
+        )
 
         if current_val != trans_val:
             # generate box for just ended period
             if current_val != "":
                 # print(shadow['currentApp'])
-                mid = self._sta_vc_output(shadow['lastChange'],
-                                          current_val,
-                                          shadow['currentApp'])
+                mid = self._sta_vc_output(
+                    shadow["lastChange"], current_val, shadow["currentApp"]
+                )
             # print("%f: p=%d trans_val=%s current_val=%s do_output %s"
             # %(event.trace_time, part_no, trans_val, current_val, do_output))
-            shadow['current'] = trans_val
-            shadow['currentApp'] = event.trans_val.appearance \
-                if event.action == "STA" else vc_appearance
-            shadow['lastChange'] = event.trace_time
+            shadow["current"] = trans_val
+            shadow["currentApp"] = (
+                event.trans_val.appearance
+                if event.action == "STA"
+                else vc_appearance
+            )
+            shadow["lastChange"] = event.trace_time
         return mid
 
     def _gen_closing_sta(self, last_event_ts):
         out = "// close STA/VC\n"
         idx = 0
         for shadow in self._part_shadow:
-            if shadow['current'] != "" and \
-                 shadow['lastChange'] < last_event_ts:
+            if (
+                shadow["current"] != ""
+                and shadow["lastChange"] < last_event_ts
+            ):
 
                 out += '{ tp: "%s", t: %g, p: %d, ' % (
-                    shadow["action"], last_event_ts, idx)
-                out += self._sta_vc_output(shadow['lastChange'],
-                                           shadow['current'],
-                                           shadow['currentApp'])
-                out += '}, \n'
+                    shadow["action"],
+                    last_event_ts,
+                    idx,
+                )
+                out += self._sta_vc_output(
+                    shadow["lastChange"],
+                    shadow["current"],
+                    shadow["currentApp"],
+                )
+                out += "}, \n"
             idx += 1
         return out
 
@@ -388,42 +424,46 @@ class TraceGenDynamicViewer:
         return mid
 
     def seq_diag_interactive_viewer_path(self):
-        '''
+        """
         get path relative to output directory to the
         seq_diag_interactive_viewer directory
-        '''
+        """
         path = os.path.dirname(
-            os.path.relpath(seq_diag_interactive_viewer.__file__,
-                            self._out_dir))
+            os.path.relpath(
+                seq_diag_interactive_viewer.__file__, self._out_dir
+            )
+        )
         return path
 
     def readseq_diag_interactive_viewer_file(self, file_name):
-        '''
+        """
         read file_name from seq_diag_interactive_viewer directory and
         return its content
-        '''
+        """
         path = os.path.join(self.seq_diag_interactive_viewer_path(), file_name)
-        file = open(path, 'r')
+        file = open(path, "r")
         text = file.read()
         file.close()
         return text
 
     @staticmethod
     def gen_html_head():
-        ''' return HTML fixed header '''
-        return '<html>\n<head>\n<script src=' + \
-               '"https://d3js.org/d3.v5.min.js">' + \
-               '</script>\n'
+        """ return HTML fixed header """
+        return (
+            "<html>\n<head>\n<script src="
+            + '"https://d3js.org/d3.v5.min.js">'
+            + "</script>\n"
+        )
 
     def get_html_style(self):
-        ''' return HTML code for CSS '''
+        """ return HTML code for CSS """
         css_file = "seq_diag_interactive_viewer.css"
         out = ""
 
         if self._refer_files:
-            out += '<link rel="stylesheet" type="text/css" href="%s">\n' % \
-                (os.path.join(self.seq_diag_interactive_viewer_path(),
-                              css_file))
+            out += '<link rel="stylesheet" type="text/css" href="%s">\n' % (
+                os.path.join(self.seq_diag_interactive_viewer_path(), css_file)
+            )
         else:
             out += "<style>\n"
             out += self.readseq_diag_interactive_viewer_file(css_file)
@@ -432,8 +472,8 @@ class TraceGenDynamicViewer:
 
     @staticmethod
     def get_html_mid_1():
-        ''' return HTML code for fixed elements '''
-        return '''</head>
+        """ return HTML code for fixed elements """
+        return """</head>
             <body>
             <div id="controls">
                 <div class="slider-wrapper">
@@ -447,48 +487,50 @@ class TraceGenDynamicViewer:
             <div id="scrollDummy"></div>
             <div id="title"></div>
             <div id="parts"></div>
-            <div id='diagram'></div>\n'''
+            <div id='diagram'></div>\n"""
 
     def gen_script(self):
-        ''' return HTML code for JS code '''
+        """ return HTML code for JS code """
         script_file = "seq_diag_interactive_viewer.js"
         out = ""
 
         if self._refer_files:
-            out += '<script src="%s"></script>\n' % \
-                (os.path.join(self.seq_diag_interactive_viewer_path(),
-                              script_file))
+            out += '<script src="%s"></script>\n' % (
+                os.path.join(
+                    self.seq_diag_interactive_viewer_path(), script_file
+                )
+            )
         else:
             out += "<script>\n"
             out += self.readseq_diag_interactive_viewer_file(script_file)
             out += "</script>\n"
 
         # generate code to check alert if browser is not compatible with ECMA6
-        out += '''<script>
+        out += """<script>
                 if (typeof getDiagramArgs !== "function") {
                     alert("Sorry, your browser does not support ecmascript 6.
                      Please use Chrome, Firefox, Edge...");
                 }
-                </script>\n'''
+                </script>\n"""
         return out
 
     @staticmethod
     def gen_html_tail():
-        ''' return HTML fixed tail '''
-        return '</body></html>\n'
+        """ return HTML fixed tail """
+        return "</body></html>\n"
 
     @staticmethod
     def _box_appearance(appearance):
         try:
-            box_stroke_color = appearance['boxStrokeColor']
+            box_stroke_color = appearance["boxStrokeColor"]
         except KeyError:
-            box_stroke_color = 'orange'
+            box_stroke_color = "orange"
         try:
-            box_fill_color = appearance['boxFillColor']
+            box_fill_color = appearance["boxFillColor"]
         except KeyError:
-            box_fill_color = 'white'
+            box_fill_color = "white"
         try:
-            text_color = appearance['textColor']
+            text_color = appearance["textColor"]
         except KeyError:
-            text_color = 'orange'
-        return (box_stroke_color, box_fill_color, text_color)
+            text_color = "orange"
+        return (text_color, box_fill_color, box_stroke_color)
