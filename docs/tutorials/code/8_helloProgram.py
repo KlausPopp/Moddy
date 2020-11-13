@@ -13,7 +13,7 @@ def bob_prog(self: moddy.VSimpleProg):
 
     while True:
         msg = self.wait_for_msg(None, self.head)
-        self.annotation("got message " + msg)
+        self.anotation("got message " + msg)
 
         self.busy(1.4, "Think")
 

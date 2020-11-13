@@ -1,29 +1,28 @@
-'''
+"""
 Created on 23.12.2018
 
 @author: klauspopp@gmx.de
-'''
+"""
 
 
 import unittest
 import moddy
-#from src import moddy
 
-from utils import searchInMsg, searchAnn, searchTExp, \
-    baseFileName, funcName
+from utils import searchInMsg, searchAnn, searchTExp, baseFileName, funcName
 
 
 class TestSimulatorMsgPassing(unittest.TestCase):
-    '''
+    """
     Test the simulator core
-    '''
+    """
+
     # pylint: disable=no-member
     class Consumer(moddy.SimPart):
         def __init__(self, sim, objName):
             super().__init__(sim=sim, obj_name=objName)
 
-            self.create_ports('in', ['cons_port'])
-            self.create_timers(['timeout_tmr'])
+            self.create_ports("in", ["cons_port"])
+            self.create_timers(["timeout_tmr"])
             self.timeout_tmr.restart(5.1)
 
         def cons_port_recv(self, _, msg):
@@ -39,21 +38,21 @@ class TestSimulatorMsgPassing(unittest.TestCase):
         def __init__(self, sim, objName):
             # Initialize the parent class
             super().__init__(sim=sim, obj_name=objName, parent_obj=None)
-            
-            # Ports
-            self.create_ports('out', ['prodPort'])
 
-        def runVThread(self):
+            # Ports
+            self.create_ports("out", ["prodPort"])
+
+        def run_vthread(self):
             print("rvt")
             submsg = {"subattr": 123}
             msg = {"submsg": submsg}
 
-            self.waitUntil(2)
+            self.wait_until(2)
             self.prodPort.send(msg, 3)
             # manipulate msg to test if deepcopy works
-            submsg['subattr'] = 234
+            submsg["subattr"] = 234
             self.prodPort.send(msg, 3)
-            submsg['subattr'] = 567
+            submsg["subattr"] = 567
             self.prodPort.send(msg, 0.0)
 
     def test_simulator_msg_passing(self):
@@ -69,48 +68,69 @@ class TestSimulatorMsgPassing(unittest.TestCase):
         # let simulator run
         simu.run(stop_time=100)
 
-        moddy.moddyGenerateSequenceDiagram(sim=simu,
-                                           showPartsList=[
-                                               "Prod", "Cons1", "Cons2"],
-                                           fileName="output/%s_%s.html" % (
-                                               baseFileName(), funcName()),
-                                           fmt="iaViewerRef",
-                                           timePerDiv=1.0,
-                                           pixPerDiv=30)
+        moddy.gen_interactive_sequence_diagram(
+            sim=simu,
+            show_parts_list=["Prod", "Cons1", "Cons2"],
+            file_name="output/%s_%s.html" % (baseFileName(), funcName()),
+            fmt="iaViewerRef",
+            time_per_div=1.0,
+            pix_per_div=30,
+        )
 
         trc = simu.tracing.traced_events()
 
-        # check if first message is correctly received on both consumers in trace
-        self.assertEqual(searchInMsg(trc, 5.0, cons1.cons_port),
-                         "{'submsg': {'subattr': 123}}")
-        self.assertEqual(searchInMsg(trc, 5.0, cons2.cons_port),
-                         "{'submsg': {'subattr': 123}}")
+        # check if first message is correctly received on both consumers
+        # in trace
+        self.assertEqual(
+            searchInMsg(trc, 5.0, cons1.cons_port),
+            "{'submsg': {'subattr': 123}}",
+        )
+        self.assertEqual(
+            searchInMsg(trc, 5.0, cons2.cons_port),
+            "{'submsg': {'subattr': 123}}",
+        )
 
         # check if first message is correctly received on both consumers as ANN
-        self.assertEqual(searchAnn(trc, 5.0, cons1),
-                         "{'submsg': {'subattr': 123}}")
-        self.assertEqual(searchAnn(trc, 5.0, cons2),
-                         "{'submsg': {'subattr': 123}}")
+        self.assertEqual(
+            searchAnn(trc, 5.0, cons1), "{'submsg': {'subattr': 123}}"
+        )
+        self.assertEqual(
+            searchAnn(trc, 5.0, cons2), "{'submsg': {'subattr': 123}}"
+        )
 
-        # check if second and third message is correctly received on both consumers in trace
-        self.assertEqual(searchInMsg(trc, 8.0, cons1.cons_port),
-                         "{'submsg': {'subattr': 234}}")
-        self.assertEqual(searchInMsg(trc, 8.0, cons2.cons_port),
-                         "{'submsg': {'subattr': 234}}")
-        self.assertEqual(searchInMsg(trc, 8.0, cons1.cons_port,
-                                     2), "{'submsg': {'subattr': 567}}")
-        self.assertEqual(searchInMsg(trc, 8.0, cons2.cons_port,
-                                     2), "{'submsg': {'subattr': 567}}")
+        # check if second and third message is correctly received on both
+        # consumers in trace
+        self.assertEqual(
+            searchInMsg(trc, 8.0, cons1.cons_port),
+            "{'submsg': {'subattr': 234}}",
+        )
+        self.assertEqual(
+            searchInMsg(trc, 8.0, cons2.cons_port),
+            "{'submsg': {'subattr': 234}}",
+        )
+        self.assertEqual(
+            searchInMsg(trc, 8.0, cons1.cons_port, 2),
+            "{'submsg': {'subattr': 567}}",
+        )
+        self.assertEqual(
+            searchInMsg(trc, 8.0, cons2.cons_port, 2),
+            "{'submsg': {'subattr': 567}}",
+        )
 
-        # check if second and third message is correctly received on both consumers as ANN
-        self.assertEqual(searchAnn(trc, 8.0, cons1),
-                         "{'submsg': {'subattr': 234}}")
-        self.assertEqual(searchAnn(trc, 8.0, cons2),
-                         "{'submsg': {'subattr': 234}}")
-        self.assertEqual(searchAnn(trc, 8.0, cons1, 2),
-                         "{'submsg': {'subattr': 567}}")
-        self.assertEqual(searchAnn(trc, 8.0, cons2, 2),
-                         "{'submsg': {'subattr': 567}}")
+        # check if second and third message is correctly received on
+        # both consumers as ANN
+        self.assertEqual(
+            searchAnn(trc, 8.0, cons1), "{'submsg': {'subattr': 234}}"
+        )
+        self.assertEqual(
+            searchAnn(trc, 8.0, cons2), "{'submsg': {'subattr': 234}}"
+        )
+        self.assertEqual(
+            searchAnn(trc, 8.0, cons1, 2), "{'submsg': {'subattr': 567}}"
+        )
+        self.assertEqual(
+            searchAnn(trc, 8.0, cons2, 2), "{'submsg': {'subattr': 567}}"
+        )
 
         # check timeouts
         self.assertEqual(searchTExp(trc, 13.0, cons1.timeout_tmr), True)
@@ -119,5 +139,5 @@ class TestSimulatorMsgPassing(unittest.TestCase):
         self.assertEqual(searchAnn(trc, 13.0, cons2), "Timeout")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
