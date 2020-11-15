@@ -8,7 +8,13 @@ Created on 23.12.2018
 import unittest
 import moddy
 
-from utils import searchInMsg, searchAnn, searchTExp, baseFileName, funcName
+from tests.utils import (
+    searchInMsg,
+    searchAnn,
+    searchTExp,
+    baseFileName,
+    funcName,
+)
 
 
 class TestSimulatorMsgPassing(unittest.TestCase):

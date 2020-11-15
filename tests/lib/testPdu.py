@@ -6,7 +6,6 @@ Created on 30.04.2019
 
 import unittest
 from moddy.lib.pdu import Pdu, PduDefragmenter
-from tests.utils import *
 
 
 class TestPdu(unittest.TestCase):
@@ -35,7 +34,8 @@ class TestPdu(unittest.TestCase):
         )
         self.assertEqual(ipPdu.byte_len(), 1020)
         self.assertEqual(
-            "IpPdu(1020) ihl=14 flags=0 src=192.1.1.2 dst=192.1.1.8 payld=RawPdu(1000)",
+            "IpPdu(1020) ihl=14 flags=0 src=192.1.1.2 dst=192.1.1.8 "
+            "payld=RawPdu(1000)",
             ipPdu.__repr__(),
         )
 

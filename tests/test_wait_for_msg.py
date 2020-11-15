@@ -5,7 +5,7 @@ Created on 28.03.2019
 """
 import unittest
 import moddy
-from utils import searchAnn, baseFileName, funcName
+from tests.utils import searchAnn, baseFileName, funcName
 
 
 class TestWaitForMsg(unittest.TestCase):
