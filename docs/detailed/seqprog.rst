@@ -37,7 +37,7 @@ Program Model
 	class Client(vSimpleProg):
 	    def __init__(self, sim):
 	        super().__init__(sim=sim, objName="Client", parentObj=None)
-	        self.createPorts('QueuingIO', ['netPort']) 
+	        self.create_ports('QueuingIO', ['netPort']) 
 	
 	    def runVThread(self):
 	        while True:
@@ -145,13 +145,13 @@ Recall from previous chapter:
 	* A sampling port buffers only the last received message.  
 	* A read from the sampling buffer does not consume the buffered message
 
-A sampling input port (:class:`~.vthread.vtSamplingInPort`) is created with the :meth:`~.vthread.vThread.createPorts()` 
+A sampling input port (:class:`~.vthread.vtSamplingInPort`) is created with the :meth:`~.vthread.vThread.create_ports()` 
 method, usually from the program's constructor:
 
 
 .. code-block:: python
 
-	self.createPorts('SamplingIn', ['inP1'])
+	self.create_ports('SamplingIn', ['inP1'])
 
 The :meth:`~.vthread.vtInPort.readMsg()` method on a sampling input port returns the most recent message received. 
 If no message at all was received, it returns either the "default" (if provided) or raises a BufferError exception. 
@@ -181,11 +181,11 @@ The following snippet demonstrates the use of a sampling port.
        class myThread1(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('SamplingIn', ['inP1'])
+                self.create_ports('SamplingIn', ['inP1'])
                 
             def showMsg(self):
                 msg = self.inP1.readMsg(default='No message')
-                self.addAnnotation(msg)
+                self.annotation(msg)
                 
             def runVThread(self):
                 cycle=0
@@ -201,7 +201,7 @@ The following snippet demonstrates the use of a sampling port.
         class stimThread(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['toT1Port'])
+                self.create_ports('out', ['toT1Port'])
                                 
             def runVThread(self):
                 count=0
@@ -225,13 +225,13 @@ Recall from previous chapter:
 	* A queuing port buffers all messages in a fifo queue. The queue depth is infinite. 
 	* A read from the buffer consumes the first message
 
-A queuing input port (:class:`~.vthread.vtQueuingInPort`) is created with the :meth:`~.vthread.vThread.createPorts()` 
+A queuing input port (:class:`~.vthread.vtQueuingInPort`) is created with the :meth:`~.vthread.vThread.create_ports()` 
 method, usually from the program's constructor:
 
 
 .. code-block:: python
 
-	self.createPorts('QueuingIn', ['inP1'])
+	self.create_ports('QueuingIn', ['inP1'])
 
 The :meth:`~.vthread.vtInPort.readMsg()` method on a queuing input port returns the first message of the queue. 
 If no message is in the queue, it raises a BufferError exception.
@@ -259,7 +259,7 @@ The following snippet demonstrates the use of a queuing port.
        class myThread1(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Thread', parentObj=None)
-                self.createPorts('QueuingIn', ['inP1'])
+                self.create_ports('QueuingIn', ['inP1'])
             
             def getAllMsg(self):
                 lstMsg = []
@@ -270,7 +270,7 @@ The following snippet demonstrates the use of a queuing port.
                     except BufferError:
                         break
                 
-                self.addAnnotation(lstMsg)
+                self.annotation(lstMsg)
          
              
             def runVThread(self):
@@ -286,7 +286,7 @@ The following snippet demonstrates the use of a queuing port.
         class stimThread(vSimpleProg):
             def __init__(self, sim ):
                 super().__init__(sim=sim, objName='Stim', parentObj=None)
-                self.createPorts('out', ['toT1Port'])
+                self.create_ports('out', ['toT1Port'])
                                 
             def runVThread(self):
                 count=0
@@ -455,7 +455,7 @@ Example for a vSimpleProg. This creates a moddy part "Producer" with a single th
 	class Producer(vSimpleProg):
 	    def __init__(self, sim):
 	        super().__init__(sim=sim, objName="Producer", parentObj=None)
-	        self.createPorts('out', ['netPort']) 
+	        self.create_ports('out', ['netPort']) 
 	
 	    def runVThread(self):
 	        while True:
@@ -498,7 +498,7 @@ Extract from tutorial 6_vthreadRemoteControlled.py:
 	class Stim(vSimpleProg):
 	    def __init__(self, sim ):
 	        super().__init__(sim=sim, objName='Stim', parentObj=None)
-	        self.createPorts('out', ["rcPort"])
+	        self.create_ports('out', ["rcPort"])
 	        
 	    def runVThread(self):
 	        self.wait(2)
@@ -538,4 +538,4 @@ On the ``threadControlPort``, only two string parameters are supported:
 
 .. note:: 
 	Variable persistence: When a thread is re-started, all local variables are lost and must be reinitialized. 
-	However, be aware that variables stored in the :class:`~.simulator.simPart` object (e.g. self.myvar) will survive a restart. 
+	However, be aware that variables stored in the :class:`~.simulator.SimPart` object (e.g. self.myvar) will survive a restart. 

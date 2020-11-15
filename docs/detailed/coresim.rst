@@ -16,8 +16,8 @@ The simulator is the first class you must instantiate. The simulator constructor
 
 .. code-block:: python
 
-	from moddy import *
-	simu = sim()
+	import moddy
+	simu = moddy.Sim()
 
 The *simu* variable has to be passed to the parts.
 
@@ -36,13 +36,15 @@ Time Unit
 Moddy's simulation time unit is seconds, i.e. the value 1.0 means one second. 
 Because the simulator uses a floating point type for the simulation time, any time unit can be used by the model.
 
-The globals *ms* (=1E-3), *us* (=1E-6) and *ns* (=1E-9) can be used conveniently to specify short times. Example:
+The globals *MS* (=1E-3), *US* (=1E-6) and *NS* (=1E-9) can be used conveniently to specify short times. Example:
 
 .. code-block:: python
+	from moddy import MS
 
-	mypart.port1.send('down', 1*ms)	
+	...
+	mypart.port1.send('down', 1*MS)	
 
-The `1*ms` passes the value ``(1*1E-3) = 0.001`` to the send function.
+The `1*MS` passes the value ``(1*1E-3) = 0.001`` to the send function.
 
 Setting the Time Unit for Trace Outputs during Simulation
 ---------------------------------------------------------
@@ -51,7 +53,7 @@ To define the time unit for simulation outputs, use
 
 .. code-block:: python
 	
-	simu.setDisplayTimeUnit( unit )
+	simu.set_display_time_unit( unit )
 
 where unit can be "s", "ms", "us" or "ns".
 
@@ -71,7 +73,7 @@ Current Simulation Time
 The simulator provides a time() method which can be used by parts to determine the current simulation time. 
 The time returned is the current simulation time in seconds.
 
-Within a part you access the :meth:`~.simPart.time()` function through 
+Within a part you access the :meth:`~.SimPart.time()` function through 
 
 .. code-block:: python
 	
@@ -82,16 +84,16 @@ Parts
  
 Parts are the component of the system that communicate to each other. 
 They are the base elements to form the structure of a model. 
-You create a part by creating an instance of a class derived from :class:`.simPart`. 
+You create a part by creating an instance of a class derived from :class:`.SimPart`. 
 This derived class contains the model code implementing the behavior of the part:
 
 	* The parts initialization code
 	* The port receive methods
 	* The timer expired methods
 	* Optionally: Methods that are executed at the beginning and the end of the 
-	  simulation. (:meth:`~.simPart.startSim()` and :meth:`~.simPart.terminateSim()`)
+	  simulation. (:meth:`~.SimPart.start_sim()` and :meth:`~.SimPart.terminate_sim()`)
 
-Here is a simple example of a part class derived from :class:`.simPart`.
+Here is a simple example of a part class derived from :class:`.SimPart`.
 
 For Python beginners: The *self* variable that is used in ever method is the reference to the own part 
 (comparable with *this* in C++).  
@@ -117,11 +119,11 @@ For Python beginners: The *self* variable that is used in ever method is the ref
 	            self.reply = "Hm?"
 	        
 	        self.thinkTmr.start(1.4)
-	        self.setStateIndicator("Think")
+	        self.set_state_indicator("Think")
 	        
 	
 	    def thinkTmrExpired(self, timer):
-	        self.setStateIndicator("")
+	        self.set_state_indicator("")
 	        self.mouth.send(self.reply, 1)
    
 
@@ -161,21 +163,21 @@ Optionally, a part may define methods that are called at the start or end of sim
 
 .. code-block:: python
 
-    def startSim(self):
+    def start_sim(self):
         '''Called from simulator when simulation begins'''
             
-    def terminateSim(self):
+    def terminate_sim(self):
         '''Called from simulator when simulation stops.	Terminate part (e.g. stop threads)'''
 
-If present, the :meth:`~.simPart.startSim()` method is called at the start of the simulation (i.e. at simulation time 0). 
-The simulator calls the :meth:`~.simPart.startSim()` method of all parts at the beginning of its run() method, 
-in the order the parts have been created. The typical actions in the :meth:`~.simPart.startSim()` routine are 
+If present, the :meth:`~.SimPart.start_sim()` method is called at the start of the simulation (i.e. at simulation time 0). 
+The simulator calls the :meth:`~.SimPart.start_sim()` method of all parts at the beginning of its run() method, 
+in the order the parts have been created. The typical actions in the :meth:`~.SimPart.start_sim()` routine are 
  	
  	* starting timers
 	* sending initial messages
 	
-If present, the `~.simPart.terminateSim()` method is called by the simulator when the simulation is terminated, 
-in the order the parts have been created. Typical actions of `~.simPart.terminateSim()` are
+If present, the `~.SimPart.terminate_sim()` method is called by the simulator when the simulation is terminated, 
+in the order the parts have been created. Typical actions of `~.SimPart.terminate_sim()` are
 
 	*	stopping threads
 	*	closing files
@@ -229,9 +231,9 @@ There are three ways to create ports:
 
 Using the low level methods:
 
-	* :meth:`~.simPart.newInPort`
-	* :meth:`~.simPart.newOutPort`
-	* :meth:`~.simPart.newIOPort`
+	* :meth:`~.SimPart.newInPort`
+	* :meth:`~.SimPart.newOutPort`
+	* :meth:`~.SimPart.new_io_Port`
 	
 Example:
 
@@ -240,7 +242,7 @@ Example:
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 		  ...
-	        self.ears = self.newInputPort( 'ears', self.earsRecv )
+	        self.ears = self.new_input_port( 'ears', self.earsRecv )
 
 This creates a new input port with the name *ears* and assigns the method *earsRecv()* as the callback method. 
 The resulting port object is assigned to the part variable ears.
@@ -249,7 +251,7 @@ The creation of an IO port is similar:
 
 .. code-block:: python
 
-	self.myIOPort1 = self.newIOPort( 'ioPort1', self.ioPort1Recv )
+	self.myIOPort1 = self.new_io_Port( 'ioPort1', self.ioPort1Recv )
 
 An output port has no receive callback method:
 
@@ -257,7 +259,7 @@ An output port has no receive callback method:
 
     self.myOutPort1 = self.newOutoutPort( 'outPort1' )
 
-To reduce the amount of typing, you can call the higher level function :meth:`~.simPart.createPorts`.
+To reduce the amount of typing, you can call the higher level function :meth:`~.SimPart.create_ports`.
 
 
 .. code-block:: python
@@ -265,7 +267,7 @@ To reduce the amount of typing, you can call the higher level function :meth:`~.
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 	        ...
-	        self.createPorts('in', ['ears'])
+	        self.create_ports('in', ['ears'])
 
 This essentially does exactly the same as the low level function above. 
 It creates a new port object, creates a new part variable self.ears and assigns the callback method *earsRecv*.
@@ -275,20 +277,20 @@ You can also create multiple ports with one call:
 
 .. code-block:: python
 
-	self.createPorts('in', ['inPort1', 'inPort2', 'inPort3'])
+	self.create_ports('in', ['inPort1', 'inPort2', 'inPort3'])
 
 Output ports and IO ports can be created with the same method:
 
 .. code-block:: python
 
-    self.createPorts('out', ['outPort1', 'outPort2', 'outPort3'])
-    self.createPorts('io', ['ioPort1', 'ioPort2', 'ioPort3'])
+    self.create_ports('out', ['outPort1', 'outPort2', 'outPort3'])
+    self.create_ports('io', ['ioPort1', 'ioPort2', 'ioPort3'])
 
 Usually, you will always use the high level methods, unless you need to create several input ports that 
 have the same receive method.
 
 Since Moddy 1.8, ports can be created even more simpler through the `elems` parameter to the 
-:class:`~.simPart` constructor. This is essentially the same as using the :meth:`~.simPart.createPorts`
+:class:`~.SimPart` constructor. This is essentially the same as using the :meth:`~.SimPart.create_ports`
 method, but requires less typing:
  
 .. code-block:: python
@@ -341,7 +343,7 @@ bound to the input port of the second port and vice versa. It doesn't matter on 
 	class myPart(simPart):
 	    def __init__(self, sim, objName):
 		  ...
-	        self.createPorts('io', ['ioPort1'])
+	        self.create_ports('io', ['ioPort1'])
 	
 	part1 = myPart( simu, 'part1' )
 	part2 = myPart( simu, 'part2' )
@@ -361,10 +363,10 @@ What you send to the output port will be received after the flight time at the i
 
 .. code-block:: python
 
-	ioPort.loopBind()
+	ioPort.loop_bind()
 	
 	
-Since Moddy 1.8, there is a new function :meth:`~.sim.smartBind` method. This method should
+Since Moddy 1.8, there is a new function :meth:`~.sim.smart_bind` method. This method should
 be used at the top level to bind all ports with a single call. In contrast to the 
 classic :meth:`~.simOutputPort.bind` method, you specify the hierarchy name of the ports
 as a string, instead of using their python references.   
@@ -374,7 +376,7 @@ Example:
 
 .. code-block:: python
 
-	simu.smartBind( [ 
+	simu.smart_bind( [ 
 	    ['App.outPort1', 'Dev1.inPort', 'Dev2.inPort'],		# binds the 3 ports together
 	    ['App.ioPort1', 'Server.netPort' ]  ])				# binds the 2 ports together
 	    
@@ -428,15 +430,15 @@ Receiving Messages
 -------------------
 
 When a message is received on an input port, the input ports callback method is called. 
-This receive method must be provided by the model, usually in the class derived from :class:`.simPart`.
-When you have created the port with :meth:`~.simPart.createPorts`, the method is called ``<portName>Recv``:
+This receive method must be provided by the model, usually in the class derived from :class:`.SimPart`.
+When you have created the port with :meth:`~.SimPart.create_ports`, the method is called ``<portName>Recv``:
 
 .. code-block:: python
 
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 		 ...
-	        self.createPorts('in', ['ears'])
+	        self.create_ports('in', ['ears'])
 	
 	    def earsRecv(self, port, msg):
 	        if msg == "Hi, How are you?":
@@ -469,7 +471,7 @@ Sometimes a message receiver needs to know when a message transmission starts. H
 the standard input port callback is called at when the transmission is finished.
 
 If you want to get notified when a message transmission is started, you can register a function
-with :meth:`~.simInputPort.setMsgStartedFunc` :
+with :meth:`~.simInputPort.set_msg_started_func` :
 
 Example:
 
@@ -481,8 +483,8 @@ Example:
             # create network port
             # Create an IO port, but don't install the normal receive callback
             # Instead, install a function that gets called on message transmission start  
-            self._netPort = switch.newIOPort('netPort', None)
-            self._netPort.setMsgStartedFunc(self.netPortRecvStart)
+            self._netPort = switch.new_io_Port('netPort', None)
+            self._netPort.set_msg_started_func(self.netPortRecvStart)
 
         def netPortRecvStart(self, inPort, msg, outPort, flightTime):
             # gets called on message start  
@@ -574,7 +576,7 @@ You can assign a color to an output port, e.g.
 
 .. code-block:: python
 
-	myOutPort.setColor("green")
+	myOutPort.set_color("green")
 
 In this case, all messages sent via this output ports are drawn in green.
 
@@ -601,11 +603,11 @@ Simulating Lost Messages
 You can force messages to be lost to simulate disturbed communication. 
 
 Therefore, output port and I/O Ports provide an API to inject a "message lost error". 
-If you call the :meth:`~.simOutputPort.injectLostMessageErrorBySequence` method of an output port you can force one or 
+If you call the :meth:`~.simOutputPort.inject_lost_message_error_by_sequence` method of an output port you can force one or 
 more of the following messages sent on this port to be lost. 
 
-``injectLostMessageErrorBySequence(0)`` will force the next message sent on that port to be lost, 
-``injectLostMessageErrorBySequence(1)`` the next but one message and so forth. 
+``inject_lost_message_error_by_sequence(0)`` will force the next message sent on that port to be lost, 
+``inject_lost_message_error_by_sequence(1)`` the next but one message and so forth. 
 Lost messages will not arrive at the input port.
 
 For example:
@@ -616,12 +618,12 @@ For example:
 	class Producer(vSimpleProg):
 	    def __init__(self, sim):
 	        super().__init__(sim=sim, objName="Producer", parentObj=None)
-	        self.createPorts('out', ['netPort']) 
+	        self.create_ports('out', ['netPort']) 
 	
 	    def runVThread(self):
-	        self.netPort.injectLostMessageErrorBySequence(2)
-	        self.netPort.injectLostMessageErrorBySequence(5)
-	        self.netPort.injectLostMessageErrorBySequence(6)
+	        self.netPort.inject_lost_message_error_by_sequence(2)
+	        self.netPort.inject_lost_message_error_by_sequence(5)
+	        self.netPort.inject_lost_message_error_by_sequence(6)
 	        while True:
 	            self.wait(100*us)
 	            self.netPort.send('test', 100*us)
@@ -666,19 +668,19 @@ A part can have any number of timers.
 All timers of a part must be explicitly created by a part. 
 This is usually done in the constructor (*__init__* method) of the part owning the timer. 
 There are two ways to create timers:
-Using the low level method newTimer():
+Using the low level method new_timer():
 
 .. code-block:: python
 	
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 		  ...
-	        self.thinkTmr = self.newTimer( 'thinkTmr', self.thinkTmrExpired )
+	        self.thinkTmr = self.new_timer( 'thinkTmr', self.thinkTmrExpired )
 
 This creates a new timer with the name *thinkTmr* and assigns the method *thinkTmrExpired()* as the callback method. 
 The resulting timer object is assigned to the part variable thinkTmr. 
 
-To reduce the amount of typing, you can call the higher level function :meth:`~.simPart.createTimers`.
+To reduce the amount of typing, you can call the higher level function :meth:`~.SimPart.create_timers`.
 
 
 .. code-block:: python
@@ -686,7 +688,7 @@ To reduce the amount of typing, you can call the higher level function :meth:`~.
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 	        ...
-	        self.createTimers(['thinkTmr'])
+	        self.create_timers(['thinkTmr'])
 
 This essentially does exactly the same as the low level function above. 
 It creates a new timer object, creates a new part variable *self.thinkTmr* and assigns the callback method 
@@ -699,10 +701,10 @@ You can also create multiple timers with one call:
 
 .. code-block:: python
 	
-        self.createTimers(['tmr1', 'tmr2'])
+        self.create_timers(['tmr1', 'tmr2'])
         
 Since Moddy 1.8, timers can be created even more simpler through the `elems` parameter to the 
-:class:`~.simPart` constructor. This is essentially the same as using the :meth:`~.simPart.createTimers`
+:class:`~.SimPart` constructor. This is essentially the same as using the :meth:`~.SimPart.create_timers`
 method, but requires less typing:
  
 .. code-block:: python
@@ -748,16 +750,16 @@ Timer Expiration Callback
 -------------------------
 
 When a timer expires, the timer's callback method is called. 
-This callback method must be provided by the model, usually in the class derived from :class:`.simPart`.
+This callback method must be provided by the model, usually in the class derived from :class:`.SimPart`.
 
-When you have created the port with :meth:`~.simPart.createTimers`, the method is called ``<timerName>Expired``:
+When you have created the port with :meth:`~.SimPart.create_timers`, the method is called ``<timerName>Expired``:
 
 .. code-block:: python
 	
 	class Bob(simPart):
 	    def __init__(self, sim, objName):
 		 ...
-	        self.createTimers(['thinkTmr'])
+	        self.create_timers(['thinkTmr'])
 	
 	    def thinkTmrExpired(self, timer):
 	        self.mouth.send(self.reply, 1)
@@ -776,27 +778,27 @@ Annotations
 The model can add annotations to the output (i.e. sequence diagrams and trace tables) to visualize 
 special events in the model.
 
-You add an annotation by calling the simPart's :meth:`~.simPart.addAnnotation` method:
+You add an annotation by calling the simPart's :meth:`~.SimPart.annotation` method:
 
 .. code-block:: python
 	
 	class Joe(simPart):
 	
 	    def earsRecv(self, port, msg):
-	        self.addAnnotation('got message ' + msg)
+	        self.annotation('got message ' + msg)
 	
 In a sequence diagram, an annotation is displayed on the part's life line at the current simulation time:
 
 .. figure:: ../_static/0050_annotation.png 
  
-The :meth:`~.simPart.addAnnotation` method expects a string as its argument. 
+The :meth:`~.SimPart.annotation` method expects a string as its argument. 
 It must be a single-line string. No special characters such as newline are allowed.
 
 State Indications
 ==================
 
 To visualize a part's state or to indicate which activity the part is currently performing, 
-you can use state indications. For this, you call the part's :meth:`~.simPart.setStateIndicator` method:
+you can use state indications. For this, you call the part's :meth:`~.SimPart.set_state_indicator` method:
 
 
 .. code-block:: python
@@ -805,19 +807,19 @@ you can use state indications. For this, you call the part's :meth:`~.simPart.se
 	     ...
 	    def earsRecv(self, port, msg):
 	        ...
-	        self.setStateIndicator("Think")
+	        self.set_state_indicator("Think")
 	        
 	
 	    def thinkTmrExpired(self, timer):
-	        self.setStateIndicator("")
+	        self.set_state_indicator("")
 
-The first parameter to :meth:`~.simPart.setStateIndicator` is text: 
+The first parameter to :meth:`~.SimPart.set_state_indicator` is text: 
 
 	* A non-empty string indicates the start of a new state or activity. 
 	  The text is displayed in sequence diagrams in vertical direction.
 	* An empty string ends the state or activity
  
-The second, optional parameter to setStateIndicator is appearance. 
+The second, optional parameter to set_state_indicator is appearance. 
 With this parameter, you can control the colors of state indicator. If present, it must be a python dictionary like this:
 
 .. code-block:: python
@@ -843,7 +845,7 @@ Watching Variables
 ==================
 
 Sometimes it is useful to watch the value of variables and how they are changing during simulation.
-Tell Moddy which variables to watch. You do this by calling the :meth:`~.simPart.newVarWatcher` method of a moddy part:
+Tell Moddy which variables to watch. You do this by calling the :meth:`~.SimPart.new_var_watcher` method of a moddy part:
 
 
 .. code-block:: python
@@ -865,14 +867,14 @@ Tell Moddy which variables to watch. You do this by calling the :meth:`~.simPart
 	if __name__ == '__main__':
 	    simu = sim()
 	    vc = VarChanger(simu)
-	    var1watch = vc.newVarWatcher('var1', "0x%08x")
-	    var2watch = vc.newVarWatcher('var2', "%s")
+	    var1watch = vc.new_var_watcher('var1', "0x%08x")
+	    var2watch = vc.new_var_watcher('var2', "%s")
 
-:meth:`~.simPart.newVarWatcher` expects as the first parameter the name of the variable to watch as a string, 
+:meth:`~.SimPart.new_var_watcher` expects as the first parameter the name of the variable to watch as a string, 
 e.g. "var1", or "subobj.var2" etc. The variable doesn't need to exist yet. 
 As shown in the above example for var2, it can be created during runtime.
 
-The second parameter to newVarWatcher is the format string that is used to format the variables value, e.g. ``0x%08x"``
+The second parameter to new_var_watcher is the format string that is used to format the variables value, e.g. ``0x%08x"``
 When you run now the simulator, you will see a "VC" event every time the value of a watched variable changes:
 
 

@@ -7,11 +7,12 @@ Moddy Finite State Machines
 Finite State Machine
 ====================
 .. autoclass:: moddy.fsm.Fsm
-   :members: event, execStateDependentMethod, startFsm, topFsm, moddyPart, setStateChangeCallback, hasEvent
+   :members: event, exec_state_dependent_method, start_fsm, top_fsm, 
+    moddy_part, set_state_change_callback, has_event
 
 .. _simFsmPartReference:
 
 Moddy Part using a Finite State Machine
 ========================================
-.. autoclass:: moddy.fsmPart.simFsmPart
-   :members: createPorts, createTimers
+.. autoclass:: moddy.fsm_part.SimFsmPart
+   :members: create_ports, create_timers

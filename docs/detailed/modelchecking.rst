@@ -19,7 +19,7 @@ A moddy part can call the following method to signal a problem
 
 .. code-block:: python
 	
-	self.assertionFailed('3rd invocation assertion')
+	self.assertion_failed('3rd invocation assertion')
 
 By default, such an assertion failure causes the simulation to stop, 
 unless you pass ``stopOnAssertionFailure=False`` to the simulators :meth:`~.simulator.sim.run()` method. 
@@ -83,11 +83,11 @@ Example:
                 self.supervisedThread = supervisedThread 
             def runVThread(self):
                 self.waitForMonitor(None, self.monitorFunc1)
-                self.addAnnotation('got mon1')
+                self.annotation('got mon1')
                 self.waitForMonitor(None, self.monitorFunc3)
-                self.addAnnotation('got mon3')
+                self.annotation('got mon3')
                 if self.waitForMonitor(10, self.monitorFunc1) == 'timeout':
-                    self.addAnnotation('tout waiting for mon1')
+                    self.annotation('tout waiting for mon1')
 
             def monitorFunc1(self):
                 # called in the context of the simulator!

@@ -33,16 +33,16 @@ class Fsm:
 
                 transitions = {
                     '':
-                        [('INITIAL', 'Off')],
-                    'Off':
-                        [('PowerApplied', 'Standby')],
-                    'Standby':
-                        [('PowerButtonPressed', 'NormalOp')],
-                    'NormalOp':
-                        [('PowerButtonPressed', 'Standby'),
-                         ('OsShutdown', 'Standby')],
+                        [('INITIAL', 'off')],
+                    'off':
+                        [('PowerApplied', 'standby')],
+                    'standby':
+                        [('PowerButtonPressed', 'normal_op')],
+                    'normal_op':
+                        [('PowerButtonPressed', 'standby'),
+                         ('OsShutdown', 'standby')],
                     'any':
-                        [('PowerRemoved', 'Off')]
+                        [('PowerRemoved', 'off')]
                 }
 
                 super().__init__( dictTransitions=transitions )
@@ -161,7 +161,7 @@ class Fsm:
     :param dict dict_transitions: a dictionary, with the transitions:
         The dict key is the state, and the values are a list of transition from
         that state. Each transition consists of a tuple (event, targetState).
-    :param Fsm parentFsm: The parent Finite State Machine. None if no parent.
+    :param Fsm parent_fsm: The parent Finite State Machine. None if no parent.
     """
 
     def __init__(self, dict_transitions, parent_fsm=None):
@@ -216,7 +216,7 @@ class Fsm:
         """
         Execute the state specific methods:
 
-        The method ``self.state_ANY_<method_name>(*args,**kwargs)``
+        The method ``self.state_any_<method_name>(*args,**kwargs)``
         is called if it exists.
 
         The method ``self.state_<stateName>_<method_name>(*args,**kwargs)``

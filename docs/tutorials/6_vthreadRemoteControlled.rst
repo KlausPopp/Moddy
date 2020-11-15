@@ -16,7 +16,7 @@ This demo also shows
 
 	* That messages on input ports get lost while a thread is dead
 	* That thread instance variables (e.g. *threadInvocationCount*) survive a thread restart
-	* What happens if a thread calls *assertionFailed*
+	* What happens if a thread calls *assertion_failed*
 	* What happens if a thread throws an Exception
 
 

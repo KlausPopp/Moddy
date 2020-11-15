@@ -1,4 +1,4 @@
-'''
+"""
 :mod:`simulator` -- Moddy Simulator core
 ========================================
 
@@ -7,7 +7,7 @@
    :synopsis: Moddy Simulator Core Routines
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 
-'''
+"""
 import sys
 from heapq import heappush, heappop
 from datetime import datetime
@@ -22,7 +22,7 @@ from .sim_monitor import SimMonitorManager
 
 class Sim:
     # pylint: disable=too-many-instance-attributes
-    '''Simulator main class'''
+    """Simulator main class"""
 
     def __init__(self):
         self.parts_mgr = SimPartsManager()
@@ -42,31 +42,36 @@ class Sim:
         self._start_real_time = None
 
     def time(self):
-        ''' Return current simulation time '''
+        """ Return current simulation time """
         return self._time
 
     def schedule_event(self, event):
-        '''
+        """
         schedule a new event for execution.
-        '''
+        """
         heappush(self._list_events, event)
 
     def stop(self):
-        ''' stop simulator '''
+        """ stop simulator """
         self._is_running = False
         elapsed_time = datetime.now() - self._start_real_time
         self._terminate_all_parts()
-        print("SIM: Simulator stopped at", self.time_str(self._time) +
-              ". Executed %d events in %.3f seconds" %
-              (self._num_events, elapsed_time.total_seconds()))
+        print(
+            "SIM: Simulator stopped at",
+            self.time_str(self._time)
+            + ". Executed %d events in %.3f seconds"
+            % (self._num_events, elapsed_time.total_seconds()),
+        )
         self.tracing.print_assertion_failures()
 
-    def run(self,
-            stop_time,
-            max_events=100000,
-            enable_trace_printing=True,
-            stop_on_assertion_failure=True):
-        '''
+    def run(
+        self,
+        stop_time,
+        max_events=100000,
+        enable_trace_printing=True,
+        stop_on_assertion_failure=True,
+    ):
+        """
 
         run the simulator until
 
@@ -89,7 +94,7 @@ class Sim:
             Just print info at end of simulation
         :raise: exceptions coming from model or simulator
 
-        '''
+        """
         self.tracing.enable_trace_prints(enable_trace_printing)
         self._stop_on_assertion_failure = stop_on_assertion_failure
 
@@ -130,7 +135,7 @@ class Sim:
                     continue
 
                 self._num_events += 1
-                assert(self._time <= event.exec_time), "time can't go backward"
+                assert self._time <= event.exec_time, "time can't go backward"
                 self._time = event.exec_time
 
                 if event == self._stop_event:
@@ -143,8 +148,11 @@ class Sim:
                     # Catch model exceptions
                     event.execute()
                 except Exception:
-                    print("SIM: Caught exception while executing event %s" %
-                          event, file=sys.stderr)
+                    print(
+                        "SIM: Caught exception while executing event %s"
+                        % event,
+                        file=sys.stderr,
+                    )
                     # re-raise model exception
                     raise
                 # Check for changed variables
@@ -155,18 +163,21 @@ class Sim:
                 if max_events is not None and self._num_events >= max_events:
                     print(
                         "SIM: Simulator has got too many events "
-                        "(pass a higher number to run(maxEvents=n)")
+                        "(pass a higher number to run(maxEvents=n)"
+                    )
                     break
 
-                if self._stop_on_assertion_failure and \
-                   self.tracing.assertion_failures() > 0:
+                if (
+                    self._stop_on_assertion_failure
+                    and self.tracing.assertion_failures() > 0
+                ):
                     print("SIM: Stops due to Assertion Failure")
                     break
         finally:
             self.stop()
 
     def is_running(self):
-        ''' Return if simulator is running '''
+        """ Return if simulator is running """
         return self._is_running
 
     def _start_all_parts(self):
@@ -178,27 +189,27 @@ class Sim:
             part.terminate_sim()
 
     def smart_bind(self, bindings):
-        '''
+        """
         Create many port bindings at once using simple lists.
 
         Example:
 
         .. code-block:: python
 
-            simu.smartBind( [
-                ['App.outPort1', 'Dev1.inPort', 'Dev2.inPort'],
-                ['App.ioPort1', 'Server.netPort' ]  ])
+            simu.smart_bind( [
+                ['App.out_port1', 'Dev1.in_port', 'Dev2.in_port'],
+                ['App.io_port1', 'Server.net_port' ]  ])
 
         :param list bindings: Each list element must be a list of strings, \
             which specifies ports that shall be \
             connected to each other. \
             The strings must specify the hierarchy names of the ports.
 
-        '''
+        """
         self.parts_mgr.smart_bind(bindings)
 
     def time_str(self, time):
-        '''
+        """
         return a formatted time string of *time* based on the display scale
-        '''
+        """
         return self.tracing.time_str(time)

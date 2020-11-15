@@ -94,9 +94,9 @@ Before you can work with an FSM, you must instantiate and start it:
 .. code-block:: python
 
 	comp = Computer()
-	comp.startFsm()
+	comp.start_fsm()
 
-The :meth:`~.fsm.Fsm.startFsm()` method issues automatically the 'INITIAL' event and transits to the initial state. 
+The :meth:`~.fsm.Fsm.start_fsm()` method issues automatically the 'INITIAL' event and transits to the initial state. 
 
 To force transitions of the FSM, your model generates FSM events using the :meth:`~.fsm.Fsm.event()` method. 
 
@@ -175,7 +175,7 @@ The mechanisms to execute the Entry/Exit/Do Actions can be used also directly fo
 Consider the following situation: The object implementing the FSM should receive data from another object, 
 but how the data is processed, depends on the FSMs state.
 
-For this purpose, the FSM class provides :meth:`~.fsm.Fsm.execStateDependentMethod()`.
+For this purpose, the FSM class provides :meth:`~.fsm.Fsm.exec_state_dependent_method()`.
  
 Example: The "Computer" shall receive data only when it is in "NormalOp" State:
 
@@ -193,7 +193,7 @@ Now, when you execute
 
 .. code-block:: python
 
-    comp.execStateDependentMethod( 'ReceiveData', True, data='123' )        
+    comp.exec_state_dependent_method( 'ReceiveData', True, data='123' )        
 
 the ``State_<state>_ReceiveData`` function with the argument ``data='123'`` of the corresponding state is 
 executed (or none if no such method exists for the current state).
@@ -202,7 +202,7 @@ The detailed signature is
 
 .. code-block:: python
 
-	methodWasCalled = execStateDependentMethod(methodName, deep, *args, **kwargs):
+	methodWasCalled = exec_state_dependent_method(methodName, deep, *args, **kwargs):
 
 where 
 
@@ -333,11 +333,11 @@ A sub-state machine can get a reference to the next higher level FSM using the _
 
     self._parentFsm.event('MyEvent')
 
-If you want to send an event to the highest level FSM, use the :meth:`~.fsm.Fsm.topFsm()` method:
+If you want to send an event to the highest level FSM, use the :meth:`~.fsm.Fsm.top_fsm()` method:
 
 .. code-block:: python
 
-    self.topFsm().event('MyEvent')
+    self.top_fsm().event('MyEvent')
 
 
 .. _detailed_fsmPart:
@@ -376,9 +376,9 @@ and pass an instance of this class to the simFsmPart's constructor:
 			statusBoxReprMap=statusBoxReprMap)
 	
 	        # Ports & Timers
-	        self.createPorts('in', ['powerPort', 'ignitionPort', 'buttonPort'])
-	        self.createPorts('out', ['audioPort', 'visualPort'])
-	        self.createTimers(['bootTmr', 'shutdownTmr', 'clockTmr'])
+	        self.create_ports('in', ['powerPort', 'ignitionPort', 'buttonPort'])
+	        self.create_ports('out', ['audioPort', 'visualPort'])
+	        self.create_timers(['bootTmr', 'shutdownTmr', 'clockTmr'])
 	
 	        
 	    class FSM(Fsm):

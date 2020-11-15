@@ -68,7 +68,7 @@ class SimInputPort(SimBaseElement):
 
         :param msg_started_func: callback function to call on \
             message transmission start.\
-            Signature ``func(inPort, msg, outPort, flightTime)``
+            Signature ``func(in_port, msg, out_port, flight_time)``
         """
         self._msg_started_func = msg_started_func
 

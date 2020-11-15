@@ -33,37 +33,43 @@ To model the behavior of Bob, we define a class "Bob", which creates the ports a
 
 .. code-block:: python
 
-	class Bob(simPart):
-	    def __init__(self, sim, objName):
-	        # Initialize the parent class
-	        super().__init__(sim=sim, objName=objName, 
-	                         elems = {'in': 'ears', 
-	                                  'out': 'mouth',
-	                                  'tmr': 'thinkTmr'})
-		...
+	import moddy
+
+
+	class Bob(moddy.SimPart):
+		''' Model of Bob '''
+		def __init__(self, sim, obj_name):
+			# Initialize the parent class
+			super().__init__(sim=sim, obj_name=obj_name,
+							 elems={'in': 'ears',
+									'out': 'mouth',
+									'tmr': 'think_tmr'})
+    ...
+								
 
 The main program creates an instance of Bob and Joe like this
 
 .. code-block:: python
 
-    simu = sim()
-    
-    bob    = Bob( simu, "Bob" )
-    joe    = Joe( simu, "Joe" )
+    SIMU = moddy.Sim()
+
+    Bob(SIMU, "Bob")
+    Joe(SIMU, "Joe")
 
 
 To allow Joe to hear what Bob says, we "bind" the ears of Joe to the mouth of Bob and vice versa. 
 
 .. code-block:: python
 
-    simu.smartBind([ ['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth'] ])
+    SIMU.smart_bind([['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth']])
+
 
 Moddy can also output the structure of the model. After you created the structure, call |genStruct|:
 
 .. code-block:: python
     
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, '1_hello_structure.svg')
+	moddy.gen_dot_structure_graph(SIMU, 'output/1_hello_structure.svg')
 
 This is the resulting structure graph:
 
@@ -82,22 +88,22 @@ For example, Bob's behavior will be modelled as follows:
 
 .. code-block:: python
 
-	class Bob(simPart)
-	
-	    ...
-	    def earsRecv(self, port, msg):
-	        if msg == "Hi, How are you?":
-	            self.reply = "How are you?"
-	        else:
-	            self.reply = "Hm?"
-	        
-	        self.thinkTmr.start(1.4)
-	        self.setStateIndicator("Think")
-        
-	
-	    def thinkTmrExpired(self, timer):
-	        self.setStateIndicator("")
-	        self.mouth.send(self.reply, 1)
+    ...
+    def ears_recv(self, _, msg):
+        ''' Callback for message reception on ears port '''
+        if msg == "Hi, How are you?":
+            self.reply = "How are you?"
+        else:
+            self.reply = "Hm?"
+
+        self.think_tmr.start(1.4)
+        self.set_state_indicator("Think")
+
+    def think_tmr_expired(self, _):
+        ''' Callback for think_tmr expiration '''
+        self.set_state_indicator("")
+        # pylint: disable=no-member
+        self.mouth.send(self.reply, 1)
 
 Ports and Messages
 ==================
@@ -105,7 +111,7 @@ A message is send always from an "Output Port" to an "Input Port".
 
 A part can have many Ports to communicate with other parts.
 
-A message is send via the sending port's :meth:`~.simOutputPort.send` method:
+A message is send via the sending port's :meth:`~.SimOutputPort.send` method:
 
 .. code-block:: python
 
@@ -119,44 +125,47 @@ which gets passed the message just received:
 
 .. code-block:: python
 
-    def earsRecv(self, port, msg):
+    def ears_recv(self, _, msg):
+        ''' Callback for message reception on ears port '''
         if msg == "Hi, How are you?":
             self.reply = "How are you?"
         else:
             self.reply = "Hm?"
-        
-        self.thinkTmr.start(1.4)
-        self.setStateIndicator("Think")
+
+        self.think_tmr.start(1.4)
+        self.set_state_indicator("Think")
+
 
 .. note::
-	This receive routine must be called always *<portName>Recv*.
+	This receive routine must be called always *<portName>_recv*.
 
 Timers
 ======
 A part can have many timers to control its own behavior.
 A timer is stopped by default.
 
-	* You start the timer via :meth:`~.simTimer.start()`.
-	* You stop (cancel) the timer via :meth:`~.simTimer.stop()`
-	* You can restart an already running timer via :meth:`~.simTimer.restart()`.
+	* You start the timer via :meth:`~.SimTimer.start()`.
+	* You stop (cancel) the timer via :meth:`~.SimTimer.stop()`
+	* You can restart an already running timer via :meth:`~.SimTimer.restart()`.
 	
 .. code-block:: python
 
-	def thinkTmrExpired(self, timer):
-	        self.setStateIndicator("")
-	        self.mouth.send(self.reply, 1)
+    def think_tmr_expired(self, _):
+        ''' Callback for think_tmr expiration '''
+        self.set_state_indicator("")
+        self.mouth.send(self.reply, 1)
 
 .. note::
-	The expiration routine must be called always *<timerName>Expired*.
+	The expiration routine must be called always *<timerName>_expired*.
 
 Running Simulator
 ================= 
-After the parts and bindings were created, the simulator can :meth:`~.sim.run`
+After the parts and bindings were created, the simulator can :meth:`~.Sim.run`
 
 .. code-block:: python
 
     # let simulator run
-    simu.run(stopTime=12.0)
+    SIMU.run(stop_time=12.0)
 
 Here we stop the simulator after 12 seconds. If no limit is given, 
 the simulator would run until no more events to execute. 
@@ -205,16 +214,15 @@ Generating the Sequence Diagram
 Moddy can generate a sequence diagram from the simulation results. 
 The sequence diagram is generated as a as HTML.
 After simulation run, the following code generates the sequence diagram. 
-For details, see :func:`~.seqDiagInteractiveGen.moddyGenerateSequenceDiagram`:
+For details, see :func:`~.interactive_sequence_diagram.gen_interactive_seq_diagram`:
 
 .. code-block:: python
 
-    moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="1_hello.html", 
-                                  fmt="iaViewer", 
-                                  excludedElementList=[], 
-                                  timePerDiv = 1.0, 
-                                  pixPerDiv = 30) 
+    moddy.gen_interactive_sequence_diagram(SIMU,
+                                           file_name="output/1_hello.html",
+                                           time_per_div=1.0,
+                                           pix_per_div=30,
+                                           title="Hello Demo")
 
 This is the result:
 
@@ -226,8 +234,8 @@ Notes:
 
 	* The black arrows are messages
 	* The blue arrows are timer expiration events
-  	* The orange boxes are visualized "states" or "activities" that were generated by the model via :meth:`~.simPart.setStateIndicator`.
-	* The red messages are annotations that were generated by the model via :meth:`~.simPart.addAnnotation`
+  	* The orange boxes are visualized "states" or "activities" that were generated by the model via :meth:`~.SimPart.set_state_indicator`.
+	* The red messages are annotations that were generated by the model via :meth:`~.SimPart.annotation`
 
 
 

@@ -18,7 +18,7 @@ class SimFsmPart(SimPart):
     :param sim: Simulator instance
     :param obj_name: part name
     :param Fsm fsm: the state machine (Fsm class) object created by caller
-    :param parentObj: parent part. None if part has no parent. Defaults to None
+    :param parent_obj: parent part. None if part has no parent. Defaults to None
     :param dict statusBoxReprMap: defines how each state is shown in
             sequence diagrams' status boxes
             Must be a dictionary with the state names as keys.
