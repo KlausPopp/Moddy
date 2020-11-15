@@ -24,7 +24,7 @@ def eth_bcast_addr():
     return "FF:FF:FF:FF:FF:FF"
 
 
-def eth_flight_time(netSpeed, nBytes):
+def eth_flight_time(net_speed, n_bytes):
     """
     Compute flight time of an Ethernet frame
     If nBytes are below the minimum Ethernet frame length,
@@ -33,10 +33,10 @@ def eth_flight_time(netSpeed, nBytes):
     :param nBytes: number of bytes to transmit
     :return: transmission time on wire in seconds
     """
-    return ((max(64, nBytes) * 10) + 96) / netSpeed
+    return ((max(64, n_bytes) * 10) + 96) / net_speed
 
 
-def ethPdu(src, dst, ethType, payload):
+def eth_pdu(src, dst, eth_type, payload):
     """
     Create an Ethernet Pdu
     :param str src: Source MAC address
@@ -47,6 +47,6 @@ def ethPdu(src, dst, ethType, payload):
     """
     return Pdu(
         "Eth",
-        {"src": src, "dst": dst, "type": ethType, "payld": payload},
+        {"src": src, "dst": dst, "type": eth_type, "payld": payload},
         eth_hdr_len(),
     )

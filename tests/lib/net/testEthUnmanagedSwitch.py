@@ -5,47 +5,48 @@ Created on 08.04.2019
 """
 
 import unittest
-from moddy import *
-from moddy.lib.net.ethernet import ethBCastAddr, ethFlightTime, ethPdu
+import moddy
+from moddy import US, MS
+from moddy.lib.net.ethernet import eth_bcast_addr, eth_flight_time, eth_pdu
 from moddy.lib.net.ethUnmanagedSwitch import EthUnmanagedSwitch
 from moddy.lib.pdu import Pdu
-from tests.utils import *
+from tests.utils import baseFileName, funcName
 
 
 class TestEthUnmanagedSwitch1GB(unittest.TestCase):
-    netSpeed = 1e9  # 1GBit/s
+    net_speed = 1e9  # 1GBit/s
 
     @classmethod
-    def ethPduSend(cls, port, src, dst, payload):
-        pdu = ethPdu(src, dst, ethType=0x0800, payload=payload)
-        port.send(pdu, ethFlightTime(cls.netSpeed, pdu.byteLen()))
+    def eth_pdu_send(cls, port, src, dst, payload):
+        pdu = eth_pdu(src, dst, eth_type=0x0800, payload=payload)
+        port.send(pdu, eth_flight_time(cls.net_speed, pdu.byte_len()))
 
     @classmethod
-    def ethClient1Prog(cls, self: vThread):
+    def eth_client1_prog(cls, self: moddy.VThread):
         src = "00:c0:3a:00:00:01"
         while True:
-            self.waitUntil(20 * us)
+            self.wait_until(20 * US)
             # client2 not yet known, switch will send message to all ports
-            cls.ethPduSend(
-                self.netPort,
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
                 "00:c0:3a:00:00:02",
                 Pdu("Data", {"stream": "Hello from Client1"}, 1000),
             )
 
             # send broadcast
-            self.waitUntil(140 * us)
-            cls.ethPduSend(
-                self.netPort,
+            self.wait_until(140 * US)
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
-                ethBCastAddr(),
+                eth_bcast_addr(),
                 Pdu("Data", {"stream": "Hello to all"}, 1000),
             )
 
             # simulate incoming traffic on all ports
-            self.waitUntil(200 * us)
-            cls.ethPduSend(
-                self.netPort,
+            self.wait_until(200 * US)
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
                 "00:c0:3a:00:00:02",
                 Pdu("Data", {"stream": "Hello from Client1"}, 1000),
@@ -54,22 +55,22 @@ class TestEthUnmanagedSwitch1GB(unittest.TestCase):
             self.wait(None)
 
     @classmethod
-    def ethClient2Prog(cls, self: vThread):
+    def eth_client2_prog(cls, self: moddy.VThread):
         src = "00:c0:3a:00:00:02"
         while True:
-            self.waitUntil(60 * us)
+            self.wait_until(60 * US)
             # client1 already known, switch will send message only to client1
-            cls.ethPduSend(
-                self.netPort,
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
                 "00:c0:3a:00:00:01",
                 Pdu("Data", {"stream": "Hello from Client2"}, 1500),
             )
 
             # simulate incoming traffic on all ports
-            self.waitUntil(200 * us)
-            cls.ethPduSend(
-                self.netPort,
+            self.wait_until(200 * US)
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
                 "00:c0:3a:00:00:01",
                 Pdu("Data", {"stream": "Hello from Client2"}, 1000),
@@ -78,74 +79,73 @@ class TestEthUnmanagedSwitch1GB(unittest.TestCase):
             self.wait(None)
 
     @classmethod
-    def ethClient3Prog(cls, self: vThread):
+    def eth_client3_prog(cls, self: moddy.VThread):
         src = "00:c0:3a:00:00:03"
         while True:
-            self.waitUntil(100 * us)
+            self.wait_until(100 * US)
             # client2 already known, switch will send message only to client2
-            cls.ethPduSend(
-                self.netPort,
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
                 "00:c0:3a:00:00:02",
                 Pdu("Data", {"stream": "Hello from Client3"}, 500),
             )
             # simulate incoming traffic on all ports
-            self.waitUntil(200 * us)
-            cls.ethPduSend(
-                self.netPort,
+            self.wait_until(200 * US)
+            cls.eth_pdu_send(
+                self.net_port,
                 src,
-                ethBCastAddr(),
+                eth_bcast_addr(),
                 Pdu("Data", {"stream": "Hello to all"}, 1500),
             )
             self.wait(None)
 
-    def testBasicSwitchFunctions(self):
+    def test_basic_switch_functions(self):
 
-        simu = sim()
+        simu = moddy.Sim()
 
-        switch = EthUnmanagedSwitch(
-            simu, "SWITCH", numPorts=3, netSpeed=self.__class__.netSpeed
+        EthUnmanagedSwitch(
+            simu, "SWITCH", num_ports=3, net_speed=self.__class__.net_speed
         )
-        vSimpleProg(
+        moddy.VSimpleProg(
             sim=simu,
-            objName="Comp1",
-            target=self.__class__.ethClient1Prog,
-            elems={"QueuingIO": "netPort"},
+            obj_name="Comp1",
+            target=self.__class__.eth_client1_prog,
+            elems={"QueuingIO": "net_port"},
         )
-        vSimpleProg(
+        moddy.VSimpleProg(
             sim=simu,
-            objName="Comp2",
-            target=self.__class__.ethClient2Prog,
-            elems={"QueuingIO": "netPort"},
+            obj_name="Comp2",
+            target=self.__class__.eth_client2_prog,
+            elems={"QueuingIO": "net_port"},
         )
-        vSimpleProg(
+        moddy.VSimpleProg(
             sim=simu,
-            objName="Comp3",
-            target=self.__class__.ethClient3Prog,
-            elems={"QueuingIO": "netPort"},
+            obj_name="Comp3",
+            target=self.__class__.eth_client3_prog,
+            elems={"QueuingIO": "net_port"},
         )
 
-        simu.smartBind(
+        simu.smart_bind(
             [
-                ["SWITCH.Port0", "Comp1.netPort"],
-                ["SWITCH.Port1", "Comp2.netPort"],
-                ["SWITCH.Port2", "Comp3.netPort"],
+                ["SWITCH.Port0", "Comp1.net_port"],
+                ["SWITCH.Port1", "Comp2.net_port"],
+                ["SWITCH.Port2", "Comp3.net_port"],
             ]
         )
 
-        simu.setDisplayTimeUnit("us")
+        simu.tracing.set_display_time_unit("US")
         # let simulator run
-        simu.run(stopTime=10 * ms)
+        simu.run(stop_time=10 * MS)
 
         # Output sequence diagram
-        moddyGenerateSequenceDiagram(
+        moddy.gen_interactive_sequence_diagram(
             sim=simu,
-            fileName="output/%s_%s.html" % (baseFileName(), funcName()),
-            fmt="iaViewer",
-            showPartsList=["Comp1", "Comp2", "Comp3", "SWITCH"],
-            excludedElementList=["allTimers"],
-            timePerDiv=10 * us,
-            pixPerDiv=30,
+            file_name="output/%s_%s.html" % (baseFileName(), funcName()),
+            show_parts_list=["Comp1", "Comp2", "Comp3", "SWITCH"],
+            excluded_element_list=["allTimers"],
+            time_per_div=10 * US,
+            pix_per_div=30,
         )
 
 
