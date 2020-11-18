@@ -1,11 +1,9 @@
 """
 :mod:`constants` -- Moddy constants
 =======================================================================
-
 .. module:: constants
    :synopsis: Moddy constants
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
-
 """
 
 # Time factors
@@ -29,7 +27,7 @@ BC_WHITE_ON_RED = {
     "textColor": "white",
 }
 #: constant for white on blue status box
-BC_WHITE_ON_RED = {
+BC_WHITE_ON_BLUE = {
     "boxStrokeColor": "blue",
     "boxFillColor": "blue",
     "textColor": "white",

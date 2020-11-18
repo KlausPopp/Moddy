@@ -366,13 +366,13 @@ and pass an instance of this class to the simFsmPart's constructor:
 	
 	class CarInfoSystem(simFsmPart):
 	
-	    def __init__(self, sim, objName):
+	    def __init__(self, sim, obj_name):
 	        statusBoxReprMap = {
 				...	
 	        }
 	        
 	        
-	        super().__init__(sim=sim, objName=objName, fsm=self.FSM(), 
+	        super().__init__(sim=sim, obj_name=obj_name, fsm=self.FSM(), 
 			statusBoxReprMap=statusBoxReprMap)
 	
 	        # Ports & Timers
@@ -419,7 +419,7 @@ To define how the FSM state are represented on the part's life line, you define 
 
 	class CarInfoSystem(simFsmPart):
 	
-	    def __init__(self, sim, objName):
+	    def __init__(self, sim, obj_name):
 	
 	        statusBoxReprMap = {
 	            'Off':      (None, blackOnWhite),

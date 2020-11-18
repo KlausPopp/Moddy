@@ -36,16 +36,16 @@ Program Model
 	
 	class Client(vSimpleProg):
 	    def __init__(self, sim):
-	        super().__init__(sim=sim, objName="Client", parentObj=None)
+	        super().__init__(sim=sim, obj_name="Client", parent_obj=None)
 	        self.create_ports('QueuingIO', ['netPort']) 
 	
-	    def runVThread(self):
+	    def run_vthread(self):
 	        while True:
-	            self.wait(1.2*ms)
-	            self.netPort.send('test', 100*us)
-	            self.busy(100*us, 'TX1', whiteOnBlue)
-	            self.netPort.send('test1', 100*us)
-	            self.busy(100*us, 'TX2', whiteOnRed)
+	            self.wait(1.2*MS)
+	            self.netPort.send('test', 100*US)
+	            self.busy(100*US, 'TX1', whiteOnBlue)
+	            self.netPort.send('test1', 100*US)
+	            self.busy(100*US, 'TX2', whiteOnRed)
    
 .. figure:: ../_static/0200_vthread.png 
  
@@ -57,17 +57,17 @@ In the above example, you see a very simple sequential program, that is
 	* Performing a send "TX2" operation, which takes 100 |microseconds|
 
 Moddy parts derived from :class:`~.vthread.vThread` or :class:`~.vtSchedRtos.vSimpleProg` 
-must implement a method :meth:`~.vthread.vThread.runVThread`. This method contains your sequential program model. 
+must implement a method :meth:`~.vthread.vThread.run_vthread`. This method contains your sequential program model. 
 
 It is called at the start of the simulation time (simulation time 0).
 
-The :meth:`~.vthread.vThread.runVThread` method is not supposed to exit/return, that's why it contains an endless loop. 
+The :meth:`~.vthread.vThread.run_vthread` method is not supposed to exit/return, that's why it contains an endless loop. 
 (However, for remote controlled vThreads it makes sense to exit/return, see :ref:`remote-controlled-thread` 
 for more information)
 
 Since Moddy 1.8, you don't need a subclass of :class:`~.vthread.vThread` or :class:`~.vtSchedRtos.vSimpleProg` anymore. 
 You can pass instead a function to the constructor of :class:`~.vthread.vThread` or :class:`~.vtSchedRtos.vSimpleProg` via
-the `target` parameter. This function (in the example below ``bobProg`` is then called from :meth:`~.vthread.vThread.runVThread`:
+the `target` parameter. This function (in the example below ``bobProg`` is then called from :meth:`~.vthread.vThread.run_vthread`:
 
 .. code-block:: python
 
@@ -76,15 +76,15 @@ the `target` parameter. This function (in the example below ``bobProg`` is then 
 	    self.head.send("Hi Joe", 1)
 	    
 	    while True:
-	        msg = self.waitForMsg(None, self.head)
+	        msg = self.wait_for_msg(None, self.head)
 
 	if __name__ == '__main__':
 	    simu = sim()
     
-	    vSimpleProg( sim=simu, objName="Bob", target=bobProg, elems={ 'QueuingIO': 'head' } )
+	    vSimpleProg( sim=simu, obj_name="Bob", target=bobProg, elems={ 'QueuingIO': 'head' } )
 
 
-The program model in :meth:`~.vthread.vThread.runVThread` can control the timing of the program via "system calls":
+The program model in :meth:`~.vthread.vThread.run_vthread` can control the timing of the program via "system calls":
 
 	* :meth:`~.vthread.vThread.wait()` delays the program execution for a specified time or 
 	  until an event occurred, indicating that the program is idle. No status box is shown on 
@@ -95,7 +95,7 @@ The program model in :meth:`~.vthread.vThread.runVThread` can control the timing
 	
 .. note::
  
-	Moddy executes each :meth:`~.vthread.vThread.runVThread` method in a separate python thread. 
+	Moddy executes each :meth:`~.vthread.vThread.run_vthread` method in a separate python thread. 
 	But don't worry: Race conditions resulting from concurrent execution cannot occur in Moddy, 
 	because Moddy executes exactly only one thread at each time, either the simulator thread or one of the vThreads. 
 	There is no need to protect your data via mutexes.
@@ -128,12 +128,12 @@ There are two types of buffering ports
 
 Buffering input ports are derived from :class:`~.vthread.vtInPort`.
  
-A program reads a message from a buffering ports via the :meth:`~.vthread.vtInPort.readMsg()` method.
+A program reads a message from a buffering ports via the :meth:`~.vthread.vtInPort.read_msg()` method.
  
-It can check the number of messages in the buffer through the :meth:`~.vthread.vtInPort.nMsg()` method.
+It can check the number of messages in the buffer through the :meth:`~.vthread.vtInPort.n_msg()` method.
 
 A program can wait for new message using the :meth:`~.vthread.vThread.wait()` method, or alternatively 
-wait for a message and read the first available message through :meth:`~.vthread.vThread.waitForMsg()`.
+wait for a message and read the first available message through :meth:`~.vthread.vThread.wait_for_msg()`.
    
 The exact behavior depends on the type of buffer port (Sampling or Queuing) and will be explained in the following.
 
@@ -153,18 +153,18 @@ method, usually from the program's constructor:
 
 	self.create_ports('SamplingIn', ['inP1'])
 
-The :meth:`~.vthread.vtInPort.readMsg()` method on a sampling input port returns the most recent message received. 
+The :meth:`~.vthread.vtInPort.read_msg()` method on a sampling input port returns the most recent message received. 
 If no message at all was received, it returns either the "default" (if provided) or raises a BufferError exception. 
 
-If you call :meth:`~.vthread.vtInPort.readMsg()` and now new message has arrived since the 
-last :meth:`~.vthread.vtInPort.readMsg()` call, you get the same message again. Example:
+If you call :meth:`~.vthread.vtInPort.read_msg()` and now new message has arrived since the 
+last :meth:`~.vthread.vtInPort.read_msg()` call, you get the same message again. Example:
 
 
 .. code-block:: python
 
-	msg = self.inP1.readMsg(default='123')
+	msg = self.inP1.read_msg(default='123')
 
-The :meth:`~.vthread.vtInPort.nMsg()` method returns 0 if no message was received at 0, or 1 otherwise. 
+The :meth:`~.vthread.vtInPort.n_msg()` method returns 0 if no message was received at 0, or 1 otherwise. 
 A program can call :meth:`~.vthread.vThread.wait()` so that is woken up if a message arrives on the port:
 
 .. code-block:: python
@@ -180,14 +180,14 @@ The following snippet demonstrates the use of a sampling port.
 
        class myThread1(vSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
                 self.create_ports('SamplingIn', ['inP1'])
                 
             def showMsg(self):
-                msg = self.inP1.readMsg(default='No message')
+                msg = self.inP1.read_msg(default='No message')
                 self.annotation(msg)
                 
-            def runVThread(self):
+            def run_vthread(self):
                 cycle=0
                 while True:
                     cycle += 1
@@ -200,10 +200,10 @@ The following snippet demonstrates the use of a sampling port.
 
         class stimThread(vSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.create_ports('out', ['toT1Port'])
                                 
-            def runVThread(self):
+            def run_vthread(self):
                 count=0
                 while True:
                     count+=1
@@ -233,10 +233,10 @@ method, usually from the program's constructor:
 
 	self.create_ports('QueuingIn', ['inP1'])
 
-The :meth:`~.vthread.vtInPort.readMsg()` method on a queuing input port returns the first message of the queue. 
+The :meth:`~.vthread.vtInPort.read_msg()` method on a queuing input port returns the first message of the queue. 
 If no message is in the queue, it raises a BufferError exception.
  
-The :meth:`~.vthread.vtInPort.nMsg()` method returns the number of messages in the queue (0 if none).
+The :meth:`~.vthread.vtInPort.n_msg()` method returns the number of messages in the queue (0 if none).
 
 A program can call :meth:`~.vthread.vThread.wait()` so that is woken up when a the first message an empty queue arrives on the port:
 
@@ -248,7 +248,7 @@ A program can call :meth:`~.vthread.vThread.wait()` so that is woken up when a t
 
 	Call :meth:`~.vthread.vThread.wait()` only on empty queuing ports, 
 	otherwise the program will not be woken up (because the wakeup happens only at empty->non-empty transitions)!
-	Alternatively, use :meth:`~.vthread.vThread.waitForMsg()`
+	Alternatively, use :meth:`~.vthread.vThread.wait_for_msg()`
 	
 The following snippet demonstrates the use of a queuing port. 
 *myThread1* is a program that has a queuing input port *inP1*, while *stimThread* is firing messages to that port.
@@ -258,14 +258,14 @@ The following snippet demonstrates the use of a queuing port.
 
        class myThread1(vSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
                 self.create_ports('QueuingIn', ['inP1'])
             
             def getAllMsg(self):
                 lstMsg = []
                 while True:
                     try:
-                        msg = self.inP1.readMsg()
+                        msg = self.inP1.read_msg()
                         lstMsg.append(msg)
                     except BufferError:
                         break
@@ -273,7 +273,7 @@ The following snippet demonstrates the use of a queuing port.
                 self.annotation(lstMsg)
          
              
-            def runVThread(self):
+            def run_vthread(self):
                 cycle=0
                 while True:
                     cycle += 1
@@ -285,10 +285,10 @@ The following snippet demonstrates the use of a queuing port.
 
         class stimThread(vSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.create_ports('out', ['toT1Port'])
                                 
-            def runVThread(self):
+            def run_vthread(self):
                 count=0
                 while True:
                     count+=1
@@ -299,21 +299,21 @@ The following snippet demonstrates the use of a queuing port.
    
 .. figure:: ../_static/0220_queuingport.png 
  
-Since Moddy 1.8, :meth:`~.vthread.vThread.waitForMsg()` is available. This method waits for a message on any of the
+Since Moddy 1.8, :meth:`~.vthread.vThread.wait_for_msg()` is available. This method waits for a message on any of the
 specified ports and returns the first available message:
 
 
 .. code-block:: python
 
-    def runVThread(self):
+    def run_vthread(self):
         while True:
             # Wait for a message on either inP1 or inP2.
-            # Because 2 ports have been specified, waitForMsg returns a tuple with (msg, port) or None
-            rv = self.waitForMsg(30, [self.inP1, self.inP2])
+            # Because 2 ports have been specified, wait_for_msg returns a tuple with (msg, port) or None
+            rv = self.wait_for_msg(30, [self.inP1, self.inP2])
 
             # Wait for a message on inP2.
-            # Because 1 port has been specified, waitForMsg returns a just the msg or None
-            rv = self.waitForMsg(30, self.inP2)
+            # Because 1 port has been specified, wait_for_msg returns a just the msg or None
+            rv = self.wait_for_msg(30, self.inP2)
 
 
 System Calls for Sequential Programs
@@ -358,7 +358,7 @@ First, you create the scheduler object:
 
 .. code-block:: python
 
-	sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+	sched= vtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
 
 Then you add the threads (subclasses of vThread) that shall be scheduled by the scheduler:
 
@@ -378,8 +378,8 @@ Example snippet:
 
        class myThread1(vThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='hiThread', parentObj=None)
-            def runVThread(self):
+                super().__init__(sim=sim, obj_name='hiThread', parent_obj=None)
+            def run_vthread(self):
                 print("   VtHi1")
                 self.busy(50,'1',busyAppearance)
                 print("   VtHi2")
@@ -397,8 +397,8 @@ Example snippet:
     
         class myThread2(vThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='lowThreadA', parentObj=None)
-            def runVThread(self):
+                super().__init__(sim=sim, obj_name='lowThreadA', parent_obj=None)
+            def run_vthread(self):
                 print("   VtLoA1")
                 self.busy(50,'1',busyAppearance)
                 print("   VtLoA2")
@@ -410,8 +410,8 @@ Example snippet:
             
         class myThread3(vThread):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='lowThreadB', parentObj=None)
-            def runVThread(self):
+                super().__init__(sim=sim, obj_name='lowThreadB', parent_obj=None)
+            def run_vthread(self):
                 print("   VtLoB1")
                 self.busy(50,'1',busyAppearance)
                 print("   VtLoB2")
@@ -422,7 +422,7 @@ Example snippet:
                 self.busy(250,'3',busyAppearance)
     
         simu = sim()
-        sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+        sched= vtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
                 
         t1 = myThread1(simu)
         t2 = myThread2(simu)
@@ -454,13 +454,13 @@ Example for a vSimpleProg. This creates a moddy part "Producer" with a single th
 
 	class Producer(vSimpleProg):
 	    def __init__(self, sim):
-	        super().__init__(sim=sim, objName="Producer", parentObj=None)
+	        super().__init__(sim=sim, obj_name="Producer", parent_obj=None)
 	        self.create_ports('out', ['netPort']) 
 	
-	    def runVThread(self):
+	    def run_vthread(self):
 	        while True:
-	            self.wait(100*us)
-	            self.netPort.send('test', 100*us)
+	            self.wait(100*US)
+	            self.netPort.send('test', 100*US)
 
 
 .. _remote-controlled-thread:
@@ -491,16 +491,16 @@ Extract from tutorial 6_vthreadRemoteControlled.py:
 
 	class myRcThread(vThread):
 	    def __init__(self, sim ):
-	       super().__init__(sim=sim, objName='rcThread', parentObj=None, 
+	       super().__init__(sim=sim, obj_name='rcThread', parent_obj=None, 
 							remoteControlled=True)
 	
 	# This thread controls the remote controllable vThread
 	class Stim(vSimpleProg):
 	    def __init__(self, sim ):
-	        super().__init__(sim=sim, objName='Stim', parentObj=None)
+	        super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
 	        self.create_ports('out', ["rcPort"])
 	        
-	    def runVThread(self):
+	    def run_vthread(self):
 	        self.wait(2)
 	
 	        # @2s: initial start of rcTread 
@@ -514,7 +514,7 @@ Extract from tutorial 6_vthreadRemoteControlled.py:
 	if __name__ == '__main__':
 	    simu = sim()
 	    
-	    sched= vtSchedRtos(sim=simu, objName="sched", parentObj=None)
+	    sched= vtSchedRtos(sim=simu, obj_name="sched", parent_obj=None)
 	    rcThread = myRcThread(simu)
 	    ...
 	    sched.addVThread(rcThread, 0)
@@ -526,13 +526,13 @@ Extract from tutorial 6_vthreadRemoteControlled.py:
 
 On the ``threadControlPort``, only two string parameters are supported:
 
-    * **start** - Start or restart the vThread's :meth:`~.vthread.vThread.runVThread` method. 
-      If the :meth:`~.vthread.vThread.runVThread` is already active, the start message is ignored.
+    * **start** - Start or restart the vThread's :meth:`~.vthread.vThread.run_vthread` method. 
+      If the :meth:`~.vthread.vThread.run_vthread` is already active, the start message is ignored.
 	  
-    * **kill** - Force the :meth:`~.vthread.vThread.runVThread` to abort the 
+    * **kill** - Force the :meth:`~.vthread.vThread.run_vthread` to abort the 
       current :meth:`~.vthread.vThread.busy()` or :meth:`~.vthread.vThread.wait()` 
       call by raising a vThread.KillException. 
-      When the :meth:`~.vthread.vThread.runVThread` has terminated, all pending timers are stopped, 
+      When the :meth:`~.vthread.vThread.run_vthread` has terminated, all pending timers are stopped, 
       all receive queues in the input ports are cleared and no messages can be received while terminated. 
       The kill message is ignored if the vThread is already terminated.
 

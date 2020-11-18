@@ -66,24 +66,24 @@ This is a simple example:
 .. code-block:: python
 	
 	moddyGenerateSequenceDiagram( sim=simu, 
-	                  fileName="myExample.html", 
+	                  file_name="myExample.html", 
 	                  fmt="iaViewer", 
-	                  showPartsList=["Bob", "Joe"],
-	                  timePerDiv = 1.0) 
+	                  show_parts_list=["Bob", "Joe"],
+	                  time_per_div = 1.0) 
 
 A more complex case:
 
 .. code-block:: python
 
         moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="2_sergw.html", 
+                                      file_name="2_sergw.html", 
                                       fmt="iaViewerRef", 
                                       title="Serial Gateway Demo",
-                                      showPartsList=[client, gateway.rxThread,
+                                      show_parts_list=[client, gateway.rxThread,
                                        gateway.txThread, serDev],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 50*us, 
-                                      pixPerDiv = 30)    
+                                      excluded_element_List=['allTimers'], 
+                                      time_per_div = 50*US, 
+                                      pix_per_div = 30)    
 
 Here, no timer expiration events are shown, the time division is set to 50|micro|s and each 
 time division occupies 30 pixels.
@@ -138,25 +138,25 @@ In simple cases, you call:
 .. code-block:: python
 
 	moddyGenerateSequenceDiagram( sim=simu, 
-	                  fileName="myExample.html", 
+	                  file_name="myExample.html", 
 	                  fmt="svgInHtml", 
-	                  showPartsList=["Bob", "Joe"],
-	                  timePerDiv = 1.0) 
+	                  show_parts_list=["Bob", "Joe"],
+	                  time_per_div = 1.0) 
    
 A more complex case:
 
 .. code-block:: python
 
         moddyGenerateSequenceDiagram( sim=simu, 
-                                      fileName="2_sergw.html", 
+                                      file_name="2_sergw.html", 
                                       fmt="svgInHtml", 
-                                      timeRange=(1.0*ms,None),
+                                      timeRange=(1.0*MS,None),
                                       title="Serial Gateway Demo",
-                                      showPartsList=[client, gateway.rxThread,
+                                      show_parts_list=[client, gateway.rxThread,
                                        gateway.txThread, serDev],
-                                      excludedElementList=['allTimers'], 
-                                      timePerDiv = 50*us, 
-                                      pixPerDiv = 30)    
+                                      excluded_element_List=['allTimers'], 
+                                      time_per_div = 50*US, 
+                                      pix_per_div = 30)    
 
 Here, the sequence diagram begins at time 1.0ms, no timer expiration events are shown, 
 the time division is set to 50|micro|s and each time division occupies 30 pixels.
@@ -221,7 +221,7 @@ To generate a trace table, call :func:`~.traceToCsv.moddyGenerateTraceTable()` a
 
 .. code-block:: python
 
-    moddyGenerateTraceTable(simu, fileName='1_hello.csv', timeUnit=1.0)
+    moddyGenerateTraceTable(simu, file_name='1_hello.csv', timeUnit=1.0)
 
 Where *timeUnit* specifies the time unit for all time stamps in table ('s', 'ms', 'us', 'ns').
 
@@ -256,7 +256,7 @@ To generate a state machine graph, just call :func:`~.dotFsm.moddyGenerateFsmGra
 
 .. code-block:: python
 
-    moddyGenerateFsmGraph( fsm=cis.fsm, fileName='3_carinfo_fsm.svg')
+    moddyGenerateFsmGraph( fsm=cis.fsm, file_name='3_carinfo_fsm.svg')
 
 .. note:: There is currently no way to influence the appearance of the graph.
 

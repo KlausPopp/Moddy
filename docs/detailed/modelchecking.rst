@@ -22,7 +22,7 @@ A moddy part can call the following method to signal a problem
 	self.assertion_failed('3rd invocation assertion')
 
 By default, such an assertion failure causes the simulation to stop, 
-unless you pass ``stopOnAssertionFailure=False`` to the simulators :meth:`~.simulator.sim.run()` method. 
+unless you pass ``stop_on_assertion_failure=False`` to the simulators :meth:`~.simulator.sim.run()` method. 
 In this case, the simulator gathers all assertions during the simulation 
 and prints a summary at the end of the simulation:
 
@@ -30,7 +30,7 @@ and prints a summary at the end of the simulation:
 .. code-block:: console
 	
 	1 Assertion failures during simulation
-	    260.0s 3rd invocation assertion: in runVThread, (6_vthreadRemoteControlled.py::37)
+	    260.0s 3rd invocation assertion: in run_vthread, (6_vthreadRemoteControlled.py::37)
 
 Assertion failures are also displayed in the sequence diagram in purple color: 
  
@@ -67,10 +67,10 @@ Example:
 
         class myThread1(vSimpleProg):
             def __init__(self, sim ):
-                super().__init__(sim=sim, objName='Thread', parentObj=None)
+                super().__init__(sim=sim, obj_name='Thread', parent_obj=None)
            
              
-            def runVThread(self):
+            def run_vthread(self):
                 cycle = 0
                 while True:
                     self.busy(30, 'DEL#%d' % cycle)
@@ -79,9 +79,9 @@ Example:
                     
         class stimThread(vSimpleProg):
             def __init__(self, sim, supervisedThread ):
-                super().__init__(sim=sim, objName='Stim', parentObj=None)
+                super().__init__(sim=sim, obj_name='Stim', parent_obj=None)
                 self.supervisedThread = supervisedThread 
-            def runVThread(self):
+            def run_vthread(self):
                 self.waitForMonitor(None, self.monitorFunc1)
                 self.annotation('got mon1')
                 self.waitForMonitor(None, self.monitorFunc3)

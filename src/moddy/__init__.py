@@ -32,7 +32,6 @@ from moddy.dot_structure import gen_dot_structure_graph
 
 from moddy.dot_fsm import gen_fsm_graph
 
-AUTHOR_NAME = 'Klaus Popp'
-AUTHOR_EMAIL = 'klauspopp@gmx.de'
-CYEAR = '2020'
-
+AUTHOR_NAME = "Klaus Popp"
+AUTHOR_EMAIL = "klauspopp@gmx.de"
+CYEAR = "2020"
