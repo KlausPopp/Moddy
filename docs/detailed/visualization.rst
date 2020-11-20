@@ -249,7 +249,7 @@ An example state machine graph (from tutorial ``3_carinfo.py``):
 .. figure:: ../_static/0440_fsm.png 
  
 
-The "Apps" and "Vol" boxes are sub-states of the "NormalOp" state.
+The "Apps" and "Vol" boxes are sub-states of the "normal_op" state.
 
 To generate a state machine graph, just call :func:`~.dotFsm.moddyGenerateFsmGraph()` after state machine instantiation.
 

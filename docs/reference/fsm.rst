@@ -10,7 +10,7 @@ Finite State Machine
    :members: event, exec_state_dependent_method, start_fsm, top_fsm, 
     moddy_part, set_state_change_callback, has_event
 
-.. _simFsmPartReference:
+.. _SimFsmPartReference:
 
 Moddy Part using a Finite State Machine
 ========================================

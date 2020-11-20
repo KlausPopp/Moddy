@@ -166,7 +166,7 @@ class Fsm:
 
     def __init__(self, dict_transitions, parent_fsm=None):
         self.state = None
-        self._parent_fsm = parent_fsm
+        self.parent_fsm = parent_fsm
         self.the_moddy_part = None  # set by simFsmPart
 
         # set reference to top level Fsm
