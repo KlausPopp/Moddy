@@ -7,5 +7,5 @@ This demo demonstrates how multiple output ports can be connected to a single in
 
 The simulation outputs:
 
- :download:`The sequence diagram <code/output/7_multiPortBinding.html>`
+ :download:`The sequence diagram <code/output/7_multi_port_binding.html>`
 

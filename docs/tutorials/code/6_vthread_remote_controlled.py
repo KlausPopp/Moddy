@@ -13,7 +13,7 @@ To demonstrate what happens if threads throw exceptions or model assertions
 import moddy
 
 
-class myRcThread(moddy.VThread):
+class MyRcThread(moddy.VThread):
     def __init__(self, sim):
         super().__init__(
             sim=sim,
@@ -50,7 +50,7 @@ class myRcThread(moddy.VThread):
         self.busy(20, "2", moddy.BC_WHITE_ON_BLUE)
 
 
-def utilThread(self):
+def util_prog(self):
     count = 0
     while True:
         self.busy(10, "1", moddy.BC_WHITE_ON_RED)
@@ -58,7 +58,7 @@ def utilThread(self):
         count += 1
 
 
-def stimProg(self):
+def stim_prog(self):
 
     # @2s: initial start of rcTread
     self.wait_until(2)
@@ -97,18 +97,18 @@ if __name__ == "__main__":
     SIMU.tracing.set_display_time_unit("s")
 
     SCHED = moddy.VtSchedRtos(sim=SIMU, obj_name="sched", parent_obj=None)
-    rcThread = myRcThread(SIMU)
-    utilThread = moddy.VThread(
+    rc_thread = MyRcThread(SIMU)
+    util_thread = moddy.VThread(
         sim=SIMU,
         obj_name="utilThread",
-        target=utilThread,
+        target=util_prog,
         elems={"out": "to_rc_port"},
     )
-    SCHED.add_vthread(rcThread, 0)
-    SCHED.add_vthread(utilThread, 1)
+    SCHED.add_vthread(rc_thread, 0)
+    SCHED.add_vthread(util_thread, 1)
 
     STIM = moddy.VSimpleProg(
-        sim=SIMU, obj_name="Stim", target=stimProg, elems={"out": "rc_port"}
+        sim=SIMU, obj_name="Stim", target=stim_prog, elems={"out": "rc_port"}
     )
 
     SIMU.smart_bind(

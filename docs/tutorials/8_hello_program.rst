@@ -15,10 +15,10 @@ The words they are talking are the mesages.
 
 The persons send and receive the voice at their IO-port `head`.
 
-.. literalinclude:: code/8_helloProgram.py
+.. literalinclude:: code/8_hello_program.py
 
 The simulation outputs:
 
- :download:`The sequence diagram <code/output/8_helloProgram.html>`
+ :download:`The sequence diagram <code/output/8_hello_program.html>`
  
  :download:`The structure graph <code/output/8_hello_structure.svg>`

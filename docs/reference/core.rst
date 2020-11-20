@@ -16,7 +16,11 @@ Simulator Tracing
 .. autoclass:: moddy.sim_core.SimTracing
    :members: set_display_time_unit
 
-addMonitor, deleteMonitor
+Simulator Monitoring
+--------------------
+
+.. autoclass:: moddy.sim_monitor.SimMonitorManager
+   :members: add_monitor, delete_monitor
 
 SimPart
 --------------
@@ -42,7 +46,7 @@ Output Port
 
 I/O Port
 --------------
-.. autoclass:: moddy.sim_ports.SimIoPort
+.. autoclass:: moddy.sim_ports.SimIOPort
    :members: bind, loop_bind, send, set_color, 
     inject_lost_message_error_by_sequence, set_msg_started_func
 

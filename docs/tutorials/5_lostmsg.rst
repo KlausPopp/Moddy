@@ -13,5 +13,5 @@ This demo shows how you can force some messages to get lost, to see how the rece
 
 The simulation outputs:
 
- :download:`The sequence diagram <code/output/5_lostMsg.html>`
+ :download:`The sequence diagram <code/output/5_lostmsg.html>`
 

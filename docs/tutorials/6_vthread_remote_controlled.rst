@@ -8,7 +8,7 @@ Covers:
 - Thread execptions and assertions
 
 This demo demonstrates remote controlable vThreads. The *myRCThread* is instantiated with the *remoteControlled* 
-attribute, which means it will have a *threadControlPort*, through which it can be started and stopped.
+attribute, which means it will have a *_thread_control_port*, through which it can be started and stopped.
 
 The *Stim* object starts and kills the *myRCThread*.
 
@@ -30,9 +30,9 @@ This demo also shows
 	To demonstrate what happens if threads throw exceptions or model assertions
 
 
-.. literalinclude:: code/6_vthreadRemoteControlled.py
+.. literalinclude:: code/6_vthread_remote_controlled.py
 
 The simulation outputs:
 
- :download:`The sequence diagram <code/output/6_vthreadRemoteControlled.html>`
+ :download:`The sequence diagram <code/output/6_vthread_remote_controlled.html>`
 

@@ -495,7 +495,7 @@ Example:
             # create network port
             # Create an IO port, but don't install the normal receive callback
             # Instead, install a function that gets called on message transmission start  
-            self._net_port = switch.new_io_Port('netPort', None)
+            self._net_port = switch.new_io_Port('net_port', None)
             self._net_port.set_msg_started_func(self.net_port_recv_start)
 
         def net_port_recv_start(self, in_port, msg, out_port, flight_time):
@@ -646,7 +646,7 @@ For example:
                 self.net_port.send('Data1', 100*US)
                 self.busy(100*US, 'TX3', moddy.BC_WHITE_ON_GREEN)
     
-will force the 3rd, 6th and 7th message on the netPort to be lost.
+will force the 3rd, 6th and 7th message on the net_port to be lost.
  
 In the sequence diagrams, lost messages are indicated by an cross in front of the message arrow:
  
@@ -658,7 +658,7 @@ but with the additional "(LOST)" string:
 
 .. code-block:: console
 
-    TRC:    500.0us <MSG    Consumer.netPort(InPort) // (LOST) req=400.0us beg=400.0us end=500.0us dur=100.0us msg=[Data1]
+    TRC:    500.0us <MSG    Consumer.net_port(InPort) // (LOST) req=400.0us beg=400.0us end=500.0us dur=100.0us msg=[Data1]
 
 Timers
 ======
