@@ -3,13 +3,13 @@ digraph G {
    graph [fontname = "helvetica" fontsize=10 fontnodesep=0.1];
    node [fontname = "helvetica" fontsize=10 shape=ellipse color=black height=.1];
    edge [fontname = "helvetica" color=black fontsize=8 fontcolor=black];
-   INITstr [style=invisible];
-   offstr [label=offstr];
-   standbystr [label=standbystr];
-   bootingstr [label=bootingstr];
-   normal_opstr [label=normal_opstr];
-   shutdownstr [label=shutdownstr];
-   anystr [label=anystr];
+   INIT [style=invisible];
+   off [label=off];
+   standby [label=standby];
+   booting [label=booting];
+   normal_op [label=normal_op];
+   shutdown [label=shutdown];
+   any [label=any];
    INIT -> off [label="INITIAL"];
    off -> standby [label="PowerApplied"];
    standby -> booting [label="PowerButton"];
@@ -17,18 +17,18 @@ digraph G {
    booting -> normal_op [label="boot_tmr_expired"];
    subgraph cluster_Apps {  
       label="Apps";
-      Apps_radiostr [label=radiostr];
-      Apps_navistr [label=navistr];
+      Apps_radio [label=radio];
+      Apps_navi [label=navi];
       Apps_radio -> Apps_navi [label="NaviButton"];
       Apps_navi -> Apps_radio [label="RadioButton"];
    }
    normal_op -> Apps_radio [color=lightgrey];
    subgraph cluster_Vol {  
       label="Vol";
-      Vol_onstr [label=onstr];
-      Vol_incvolstr [label=incvolstr];
-      Vol_decvolstr [label=decvolstr];
-      Vol_mutestr [label=mutestr];
+      Vol_on [label=on];
+      Vol_incvol [label=incvol];
+      Vol_decvol [label=decvol];
+      Vol_mute [label=mute];
       Vol_on -> Vol_mute [label="MuteButton"];
       Vol_on -> Vol_incvol [label="VolKnobRight"];
       Vol_on -> Vol_decvol [label="VolKnobLeft"];
