@@ -1,11 +1,9 @@
-
-
 Dist Packaging
 ==============
 
 Create source distro:
 
-> cd d:\owncloud\documents\Klaus\eclipse\moddy
+> cd D:\owncloud\documents\Klaus\vscode\Moddy\Moddy
 > python setup.py sdist
 
 test installation first
@@ -20,11 +18,11 @@ Activate environment
 
 Test installation from just created 
 > pip uninstall moddy svgwrite
-> pip install d:\owncloud\documents\Klaus\eclipse\moddy\dist\moddy-1.7.0.tar.gz
+> pip install D:\owncloud\documents\Klaus\vscode\Moddy\Moddy\dist\moddy-1.7.0.tar.gz
 
 
 Updload to Pypi
 
-> cd d:\owncloud\documents\Klaus\eclipse\moddy
+> cd D:\owncloud\documents\Klaus\vscode\Moddy\Moddy
 > twine upload dist/*
 
