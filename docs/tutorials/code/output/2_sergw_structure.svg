@@ -13,21 +13,21 @@
 <polygon fill="none" stroke="black" points="215.811,-117 215.811,-216 292.622,-216 292.622,-117 215.811,-117"/>
 <text text-anchor="start" x="240.217" y="-205" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">Client</text>
 </g>
-<g id="clust2" class="cluster"><title>cluster_SerDev</title>
-<polygon fill="none" stroke="black" points="215.811,-8 215.811,-107 292.622,-107 292.622,-8 215.811,-8"/>
-<text text-anchor="start" x="236.717" y="-96" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">SerDev</text>
-</g>
 <g id="clust3" class="cluster"><title>cluster_GW</title>
 <polygon fill="none" stroke="black" points="8,-34 8,-261 187.811,-261 187.811,-34 8,-34"/>
 <text text-anchor="start" x="88.9056" y="-250" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">GW</text>
+</g>
+<g id="clust5" class="cluster"><title>cluster_GW__TxThr</title>
+<polygon fill="none" stroke="black" points="109.811,-142 109.811,-234 179.811,-234 179.811,-142 109.811,-142"/>
+<text text-anchor="start" x="130.811" y="-223" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">TxThr</text>
 </g>
 <g id="clust4" class="cluster"><title>cluster_GW__RxThr</title>
 <polygon fill="none" stroke="black" points="109.811,-42 109.811,-134 179.811,-134 179.811,-42 109.811,-42"/>
 <text text-anchor="start" x="130.311" y="-123" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">RxThr</text>
 </g>
-<g id="clust5" class="cluster"><title>cluster_GW__TxThr</title>
-<polygon fill="none" stroke="black" points="109.811,-142 109.811,-234 179.811,-234 179.811,-142 109.811,-142"/>
-<text text-anchor="start" x="130.811" y="-223" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">TxThr</text>
+<g id="clust2" class="cluster"><title>cluster_SerDev</title>
+<polygon fill="none" stroke="black" points="215.811,-8 215.811,-107 292.622,-107 292.622,-8 215.811,-8"/>
+<text text-anchor="start" x="236.717" y="-96" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00">SerDev</text>
 </g>
 <!-- Client__net_port -->
 <g id="node1" class="node"><title>Client__net_port</title>

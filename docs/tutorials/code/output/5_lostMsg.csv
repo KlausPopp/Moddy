@@ -4,17 +4,17 @@
 0,000000;STA;Producer;Producer(Part);
 100,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 100,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-100,000000;>MSG;Producer;Producer.netPort(OutPort);test;100,000000;100,000000;200,000000;100,000000
+100,000000;>MSG;Producer;Producer.net_port(OutPort);test;100,000000;100,000000;200,000000;100,000000
 100,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 100,000000;STA;Producer;Producer(Part);TX1
-200,000000;<MSG;Producer;Consumer.netPort(InPort);test;100,000000;100,000000;200,000000;100,000000
+200,000000;<MSG;Producer;Consumer.net_port(InPort);test;100,000000;100,000000;200,000000;100,000000
 200,000000;ANN;Consumer;Consumer(Part);got message test
 200,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 200,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-200,000000;>MSG;Producer;Producer.netPort(OutPort);test1;200,000000;200,000000;300,000000;100,000000
+200,000000;>MSG;Producer;Producer.net_port(OutPort);test1;200,000000;200,000000;300,000000;100,000000
 200,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 200,000000;STA;Producer;Producer(Part);TX2
-300,000000;<MSG;Producer;Consumer.netPort(InPort);test1;200,000000;200,000000;300,000000;100,000000
+300,000000;<MSG;Producer;Consumer.net_port(InPort);test1;200,000000;200,000000;300,000000;100,000000
 300,000000;ANN;Consumer;Consumer(Part);got message test1
 300,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 300,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -22,27 +22,27 @@
 300,000000;STA;Producer;Producer(Part);
 400,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 400,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-400,000000;>MSG;Producer;Producer.netPort(OutPort);(***LOST***);400,000000;400,000000;500,000000;100,000000
+400,000000;>MSG;Producer;Producer.net_port(OutPort);(***LOST***);400,000000;400,000000;500,000000;100,000000
 400,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 400,000000;STA;Producer;Producer(Part);TX3
-500,000000;<MSG;Producer;Consumer.netPort(InPort);(***LOST***);400,000000;400,000000;500,000000;100,000000
+500,000000;<MSG;Producer;Consumer.net_port(InPort);(***LOST***);400,000000;400,000000;500,000000;100,000000
 500,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 500,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
 500,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 500,000000;STA;Producer;Producer(Part);
 600,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 600,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-600,000000;>MSG;Producer;Producer.netPort(OutPort);test;600,000000;600,000000;700,000000;100,000000
+600,000000;>MSG;Producer;Producer.net_port(OutPort);test;600,000000;600,000000;700,000000;100,000000
 600,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 600,000000;STA;Producer;Producer(Part);TX1
-700,000000;<MSG;Producer;Consumer.netPort(InPort);test;600,000000;600,000000;700,000000;100,000000
+700,000000;<MSG;Producer;Consumer.net_port(InPort);test;600,000000;600,000000;700,000000;100,000000
 700,000000;ANN;Consumer;Consumer(Part);got message test
 700,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 700,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-700,000000;>MSG;Producer;Producer.netPort(OutPort);test1;700,000000;700,000000;800,000000;100,000000
+700,000000;>MSG;Producer;Producer.net_port(OutPort);test1;700,000000;700,000000;800,000000;100,000000
 700,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 700,000000;STA;Producer;Producer(Part);TX2
-800,000000;<MSG;Producer;Consumer.netPort(InPort);test1;700,000000;700,000000;800,000000;100,000000
+800,000000;<MSG;Producer;Consumer.net_port(InPort);test1;700,000000;700,000000;800,000000;100,000000
 800,000000;ANN;Consumer;Consumer(Part);got message test1
 800,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 800,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -50,26 +50,26 @@
 800,000000;STA;Producer;Producer(Part);
 900,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 900,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-900,000000;>MSG;Producer;Producer.netPort(OutPort);(***LOST***);900,000000;900,000000;1000,000000;100,000000
+900,000000;>MSG;Producer;Producer.net_port(OutPort);(***LOST***);900,000000;900,000000;1000,000000;100,000000
 900,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 900,000000;STA;Producer;Producer(Part);TX3
-1000,000000;<MSG;Producer;Consumer.netPort(InPort);(***LOST***);900,000000;900,000000;1000,000000;100,000000
+1000,000000;<MSG;Producer;Consumer.net_port(InPort);(***LOST***);900,000000;900,000000;1000,000000;100,000000
 1000,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1000,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
 1000,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1000,000000;STA;Producer;Producer(Part);
 1100,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1100,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-1100,000000;>MSG;Producer;Producer.netPort(OutPort);(***LOST***);1100,000000;1100,000000;1200,000000;100,000000
+1100,000000;>MSG;Producer;Producer.net_port(OutPort);(***LOST***);1100,000000;1100,000000;1200,000000;100,000000
 1100,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1100,000000;STA;Producer;Producer(Part);TX1
-1200,000000;<MSG;Producer;Consumer.netPort(InPort);(***LOST***);1100,000000;1100,000000;1200,000000;100,000000
+1200,000000;<MSG;Producer;Consumer.net_port(InPort);(***LOST***);1100,000000;1100,000000;1200,000000;100,000000
 1200,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1200,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-1200,000000;>MSG;Producer;Producer.netPort(OutPort);test1;1200,000000;1200,000000;1300,000000;100,000000
+1200,000000;>MSG;Producer;Producer.net_port(OutPort);test1;1200,000000;1200,000000;1300,000000;100,000000
 1200,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1200,000000;STA;Producer;Producer(Part);TX2
-1300,000000;<MSG;Producer;Consumer.netPort(InPort);test1;1200,000000;1200,000000;1300,000000;100,000000
+1300,000000;<MSG;Producer;Consumer.net_port(InPort);test1;1200,000000;1200,000000;1300,000000;100,000000
 1300,000000;ANN;Consumer;Consumer(Part);got message test1
 1300,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1300,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -77,10 +77,10 @@
 1300,000000;STA;Producer;Producer(Part);
 1400,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1400,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-1400,000000;>MSG;Producer;Producer.netPort(OutPort);Data1;1400,000000;1400,000000;1500,000000;100,000000
+1400,000000;>MSG;Producer;Producer.net_port(OutPort);Data1;1400,000000;1400,000000;1500,000000;100,000000
 1400,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1400,000000;STA;Producer;Producer(Part);TX3
-1500,000000;<MSG;Producer;Consumer.netPort(InPort);Data1;1400,000000;1400,000000;1500,000000;100,000000
+1500,000000;<MSG;Producer;Consumer.net_port(InPort);Data1;1400,000000;1400,000000;1500,000000;100,000000
 1500,000000;ANN;Consumer;Consumer(Part);got message Data1
 1500,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1500,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -88,17 +88,17 @@
 1500,000000;STA;Producer;Producer(Part);
 1600,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1600,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-1600,000000;>MSG;Producer;Producer.netPort(OutPort);test;1600,000000;1600,000000;1700,000000;100,000000
+1600,000000;>MSG;Producer;Producer.net_port(OutPort);test;1600,000000;1600,000000;1700,000000;100,000000
 1600,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1600,000000;STA;Producer;Producer(Part);TX1
-1700,000000;<MSG;Producer;Consumer.netPort(InPort);test;1600,000000;1600,000000;1700,000000;100,000000
+1700,000000;<MSG;Producer;Consumer.net_port(InPort);test;1600,000000;1600,000000;1700,000000;100,000000
 1700,000000;ANN;Consumer;Consumer(Part);got message test
 1700,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1700,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-1700,000000;>MSG;Producer;Producer.netPort(OutPort);test1;1700,000000;1700,000000;1800,000000;100,000000
+1700,000000;>MSG;Producer;Producer.net_port(OutPort);test1;1700,000000;1700,000000;1800,000000;100,000000
 1700,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1700,000000;STA;Producer;Producer(Part);TX2
-1800,000000;<MSG;Producer;Consumer.netPort(InPort);test1;1700,000000;1700,000000;1800,000000;100,000000
+1800,000000;<MSG;Producer;Consumer.net_port(InPort);test1;1700,000000;1700,000000;1800,000000;100,000000
 1800,000000;ANN;Consumer;Consumer(Part);got message test1
 1800,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1800,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -106,10 +106,10 @@
 1800,000000;STA;Producer;Producer(Part);
 1900,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 1900,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-1900,000000;>MSG;Producer;Producer.netPort(OutPort);Data1;1900,000000;1900,000000;2000,000000;100,000000
+1900,000000;>MSG;Producer;Producer.net_port(OutPort);Data1;1900,000000;1900,000000;2000,000000;100,000000
 1900,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 1900,000000;STA;Producer;Producer(Part);TX3
-2000,000000;<MSG;Producer;Consumer.netPort(InPort);Data1;1900,000000;1900,000000;2000,000000;100,000000
+2000,000000;<MSG;Producer;Consumer.net_port(InPort);Data1;1900,000000;1900,000000;2000,000000;100,000000
 2000,000000;ANN;Consumer;Consumer(Part);got message Data1
 2000,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2000,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -117,17 +117,17 @@
 2000,000000;STA;Producer;Producer(Part);
 2100,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2100,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-2100,000000;>MSG;Producer;Producer.netPort(OutPort);test;2100,000000;2100,000000;2200,000000;100,000000
+2100,000000;>MSG;Producer;Producer.net_port(OutPort);test;2100,000000;2100,000000;2200,000000;100,000000
 2100,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 2100,000000;STA;Producer;Producer(Part);TX1
-2200,000000;<MSG;Producer;Consumer.netPort(InPort);test;2100,000000;2100,000000;2200,000000;100,000000
+2200,000000;<MSG;Producer;Consumer.net_port(InPort);test;2100,000000;2100,000000;2200,000000;100,000000
 2200,000000;ANN;Consumer;Consumer(Part);got message test
 2200,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2200,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-2200,000000;>MSG;Producer;Producer.netPort(OutPort);test1;2200,000000;2200,000000;2300,000000;100,000000
+2200,000000;>MSG;Producer;Producer.net_port(OutPort);test1;2200,000000;2200,000000;2300,000000;100,000000
 2200,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 2200,000000;STA;Producer;Producer(Part);TX2
-2300,000000;<MSG;Producer;Consumer.netPort(InPort);test1;2200,000000;2200,000000;2300,000000;100,000000
+2300,000000;<MSG;Producer;Consumer.net_port(InPort);test1;2200,000000;2200,000000;2300,000000;100,000000
 2300,000000;ANN;Consumer;Consumer(Part);got message test1
 2300,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2300,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -135,10 +135,10 @@
 2300,000000;STA;Producer;Producer(Part);
 2400,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2400,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-2400,000000;>MSG;Producer;Producer.netPort(OutPort);Data1;2400,000000;2400,000000;2500,000000;100,000000
+2400,000000;>MSG;Producer;Producer.net_port(OutPort);Data1;2400,000000;2400,000000;2500,000000;100,000000
 2400,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 2400,000000;STA;Producer;Producer(Part);TX3
-2500,000000;<MSG;Producer;Consumer.netPort(InPort);Data1;2400,000000;2400,000000;2500,000000;100,000000
+2500,000000;<MSG;Producer;Consumer.net_port(InPort);Data1;2400,000000;2400,000000;2500,000000;100,000000
 2500,000000;ANN;Consumer;Consumer(Part);got message Data1
 2500,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2500,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -146,17 +146,17 @@
 2500,000000;STA;Producer;Producer(Part);
 2600,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2600,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-2600,000000;>MSG;Producer;Producer.netPort(OutPort);test;2600,000000;2600,000000;2700,000000;100,000000
+2600,000000;>MSG;Producer;Producer.net_port(OutPort);test;2600,000000;2600,000000;2700,000000;100,000000
 2600,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 2600,000000;STA;Producer;Producer(Part);TX1
-2700,000000;<MSG;Producer;Consumer.netPort(InPort);test;2600,000000;2600,000000;2700,000000;100,000000
+2700,000000;<MSG;Producer;Consumer.net_port(InPort);test;2600,000000;2600,000000;2700,000000;100,000000
 2700,000000;ANN;Consumer;Consumer(Part);got message test
 2700,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2700,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-2700,000000;>MSG;Producer;Producer.netPort(OutPort);test1;2700,000000;2700,000000;2800,000000;100,000000
+2700,000000;>MSG;Producer;Producer.net_port(OutPort);test1;2700,000000;2700,000000;2800,000000;100,000000
 2700,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 2700,000000;STA;Producer;Producer(Part);TX2
-2800,000000;<MSG;Producer;Consumer.netPort(InPort);test1;2700,000000;2700,000000;2800,000000;100,000000
+2800,000000;<MSG;Producer;Consumer.net_port(InPort);test1;2700,000000;2700,000000;2800,000000;100,000000
 2800,000000;ANN;Consumer;Consumer(Part);got message test1
 2800,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2800,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
@@ -164,10 +164,10 @@
 2800,000000;STA;Producer;Producer(Part);
 2900,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 2900,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);
-2900,000000;>MSG;Producer;Producer.netPort(OutPort);Data1;2900,000000;2900,000000;3000,000000;100,000000
+2900,000000;>MSG;Producer;Producer.net_port(OutPort);Data1;2900,000000;2900,000000;3000,000000;100,000000
 2900,000000;T-START;Producer;Producer.ProducerScTmr(Timer);100,000000
 2900,000000;STA;Producer;Producer(Part);TX3
-3000,000000;<MSG;Producer;Consumer.netPort(InPort);Data1;2900,000000;2900,000000;3000,000000;100,000000
+3000,000000;<MSG;Producer;Consumer.net_port(InPort);Data1;2900,000000;2900,000000;3000,000000;100,000000
 3000,000000;ANN;Consumer;Consumer(Part);got message Data1
 3000,000000;T-EXP;Producer;Producer.ProducerScTmr(Timer);
 3000,000000;T-STOP;Producer;Producer.ProducerScTmr(Timer);

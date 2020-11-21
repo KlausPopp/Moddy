@@ -230,7 +230,7 @@ if __name__ == "__main__":
     )
 
     moddy.gen_fsm_graph(
-        fsm=CIS.fsm, file_name="output/3_carinfo_fsm.svg", keep_gv_file=False
+        fsm=CIS.fsm, file_name="output/3_carinfo_fsm.svg", keep_gv_file=True
     )
 
     SIMU.run(30)

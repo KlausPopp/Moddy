@@ -13,7 +13,7 @@ def bob_prog(self: moddy.VSimpleProg):
 
     while True:
         msg = self.wait_for_msg(None, self.head)
-        self.anotation("got message " + msg)
+        self.annotation("got message " + msg)
 
         self.busy(1.4, "Think")
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # Output sequence diagram
     moddy.gen_interactive_sequence_diagram(
         sim=SIMU,
-        file_name="output/8_helloProgram.html",
+        file_name="output/8_hello_program.html",
         show_parts_list=["Bob", "Joe"],
         time_per_div=1.0,
         pix_per_div=30,

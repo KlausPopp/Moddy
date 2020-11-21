@@ -7,15 +7,15 @@ Covers:
 - How to use a remote controlled thread.
 - Thread execptions and assertions
 
-This demo demonstrates remote controlable vThreads. The *myRCThread* is instantiated with the *remoteControlled* 
+This demo demonstrates remote controlable vThreads. The *MyRCThread* is instantiated with the *remote_controlled* 
 attribute, which means it will have a *_thread_control_port*, through which it can be started and stopped.
 
-The *Stim* object starts and kills the *myRCThread*.
+The *Stim* object starts and kills the *MyRCThread*.
 
 This demo also shows 
 
 	* That messages on input ports get lost while a thread is dead
-	* That thread instance variables (e.g. *threadInvocationCount*) survive a thread restart
+	* That thread instance variables (e.g. *thread_invocation_count*) survive a thread restart
 	* What happens if a thread calls *assertion_failed*
 	* What happens if a thread throws an Exception
 

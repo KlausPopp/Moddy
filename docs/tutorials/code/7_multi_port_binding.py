@@ -57,8 +57,7 @@ if __name__ == "__main__":
         # create sequence diagram
         moddy.gen_interactive_sequence_diagram(
             sim=SIMU,
-            file_name="output/7_multiPortBinding.html",
-            fmt="iaViewer",
+            file_name="output/7_multi_port_binding.html",
             show_parts_list=["Producer", "Consumer"],
             excluded_element_list=["allTimers"],
             title="Multi Port Binding",
@@ -67,5 +66,5 @@ if __name__ == "__main__":
         )
         # Output model structure graph
         moddy.gen_dot_structure_graph(
-            SIMU, "output/7_multiPortBinding_structure.svg"
+            SIMU, "output/7_multi_port_binding_structure.svg"
         )
