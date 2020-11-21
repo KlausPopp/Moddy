@@ -4,6 +4,12 @@
 Introduction
 ============
 
+.. note::
+    This is the documentation for Moddy 2.x. Moddy 2.x is no more compatible
+    with models written for moddy 2.x.
+    See :ref:`migrating_from_moddy1` for migration instructions
+
+
 What is Moddy?
 ==============
 
@@ -30,6 +36,7 @@ Further result files, such as wave forms may be added in the future.
 Moddy's Simulator is a classic Discrete Event simulator. 
 
 From Wikipedia https://en.wikipedia.org/wiki/Discrete_event_simulation:
+
  *A discrete-event simulation (DES) models the operation of a system as a discrete sequence of events 
  in time. Each event occurs at a particular instant in time and marks a change of state in the system. 
  Between consecutive events, no change in the system is assumed to occur; 
