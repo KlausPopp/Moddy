@@ -18,23 +18,12 @@ To generate a sequence diagrams, your code must call |genSeqDiag|
 after the simulation has finished. 
 The parameters provided to |genSeqDiag| define the appearance of the sequence diagram. 
 
-Interactive vs. Static Diagrams
--------------------------------
-
-Moddy can output either interactive or static sequence diagrams. The 
-*fmt* parameter to |genSeqDiag| defines which type is generated:
- 
-	* "iaViewer" or "iaViewerRef" generate interactive diagrams
-	* "svg" or "svgInHtml" generate static diagrams
-
-The major differences:
-
-	* Interactive diagrams can be opened in a browser and you can dynamically adjust the time scale 
-	  to see less or more details.
+Moddy generates interactive diagrams, that can be opened in a browser and the time scale 
+can be dynamically adjusted to see less or more details.
 	   
-	* The interactive viewer tries to avoid overlapping text. 
-	* The generation of interactive diagrams is much faster
-	* Static diagrams may be useful to edit the SVG data in an SVG editor
+.. note::
+	The static diagram generator has been removed in moddy 2.x
+
 
 Elements of a sequence diagram
 ------------------------------
@@ -43,14 +32,14 @@ Elements of a sequence diagram
 .. figure:: ../_static/0400_sd_elements.PNG 
  
 
-Interactive Sequence Diagrams
+Details of a Sequence Diagram
 ------------------------------
 
 The interactive sequence diagrams are generated as HTML pages with javascript code.
 
-Format ``iaViewer`` embeds the viewer's javascript and css code in the HTML file, while format ``iaViewerRef``
-references to the javascript/css file which must be present on your filesystem. 
-So, if you want to send the HTML file to someone who has no moddy installation, use ``iaViewer``.
+Normally, the viewer embeds the viewer's javascript and css code in the HTML file, however, 
+you can specify ``refer_files=True`` to reference the javascript/css files which must be present on your filesystem. 
+So, if you want to send the HTML file to someone who has no moddy installation, use ``refer_files=False``.
 
 Current Browser support:
 
@@ -65,9 +54,9 @@ This is a simple example:
 
 .. code-block:: python
 	
-	moddyGenerateSequenceDiagram( sim=simu, 
+	moddy.gen_interactive_sequence_diagram( 
+	                  sim=simu, 
 	                  file_name="myExample.html", 
-	                  fmt="iaViewer", 
 	                  show_parts_list=["Bob", "Joe"],
 	                  time_per_div = 1.0) 
 
@@ -75,12 +64,12 @@ A more complex case:
 
 .. code-block:: python
 
-        moddyGenerateSequenceDiagram( sim=simu, 
+        moddy.gen_interactive_sequence_diagram( 
+                                      sim=simu, 
                                       file_name="2_sergw.html", 
-                                      fmt="iaViewerRef", 
                                       title="Serial Gateway Demo",
-                                      show_parts_list=[client, gateway.rxThread,
-                                       gateway.txThread, serDev],
+                                      show_parts_list=[client, gateway.rx_thread,
+                                       gateway.tx_thread, ser_dev],
                                       excluded_element_List=['allTimers'], 
                                       time_per_div = 50*US, 
                                       pix_per_div = 30)    
@@ -120,48 +109,6 @@ The major interactive functions of the viewer are:
 		* A CTRL+mouse click somewhere in the diagram activates the red time marker.
 		* If both time markers are activated, the delta time between the two time markers is displayed in the title bar.
  
-Static Sequence Diagrams
-------------------------
-
-The static sequence diagrams are generated in SVG (scalable vector graphics) format. 
-You can choose between two different flavors:
-
-	* Pure SVG (``fmt='svg'``, filename ends with ``.svg``): Use this if you want to edit the sequence diagram. 
-	  SVG files can be edited with SVG capable editors such as MS Visio or Inkskape.
-	  
- 	* SVG embedded in HTML (``fmt='svgInHtml'``, filename ends with ``.html``): 
- 	  Use this if you want to show the sequence diagram in a web browser. In this case, the SVG is embedded into a HTML page and a <div> element so that the browser can scroll through the diagram.
-
-In simple cases, you call:
-
-
-.. code-block:: python
-
-	moddyGenerateSequenceDiagram( sim=simu, 
-	                  file_name="myExample.html", 
-	                  fmt="svgInHtml", 
-	                  show_parts_list=["Bob", "Joe"],
-	                  time_per_div = 1.0) 
-   
-A more complex case:
-
-.. code-block:: python
-
-        moddyGenerateSequenceDiagram( sim=simu, 
-                                      file_name="2_sergw.html", 
-                                      fmt="svgInHtml", 
-                                      timeRange=(1.0*MS,None),
-                                      title="Serial Gateway Demo",
-                                      show_parts_list=[client, gateway.rxThread,
-                                       gateway.txThread, serDev],
-                                      excluded_element_List=['allTimers'], 
-                                      time_per_div = 50*US, 
-                                      pix_per_div = 30)    
-
-Here, the sequence diagram begins at time 1.0ms, no timer expiration events are shown, 
-the time division is set to 50|micro|s and each time division occupies 30 pixels.
-
-You can call moddyGenerateSequenceDiagram() multiple times to show different views of the simulation.
 
 Structure Graph Generation
 ==========================
@@ -201,7 +148,7 @@ To generate a structure, just call |genStruct| after running the simulation.
 
 .. code-block:: python
 
-    moddyGenerateStructureGraph(simu, '2_sergw_structure.svg')
+    moddy.gen_dot_structure_graph(simu, '2_sergw_structure.svg')
 
 .. note:: There is currently no way to influence the appearance of the structure graph.
 
@@ -217,13 +164,13 @@ Example:
 .. figure:: ../_static/0430_trace.png 
  
 
-To generate a trace table, call :func:`~.traceToCsv.moddyGenerateTraceTable()` after running the simulation:
+To generate a trace table, call :func:`~.trace_to_csv.gen_trace_table()` after running the simulation:
 
 .. code-block:: python
 
-    moddyGenerateTraceTable(simu, file_name='1_hello.csv', timeUnit=1.0)
+    moddyGenerateTraceTable(simu, file_name='1_hello.csv', time_unit=1.0)
 
-Where *timeUnit* specifies the time unit for all time stamps in table ('s', 'ms', 'us', 'ns').
+Where *time_unit* specifies the time unit for all time stamps in table ('s', 'ms', 'us', 'ns').
 
 Explanation to the events:
 	
@@ -251,12 +198,12 @@ An example state machine graph (from tutorial ``3_carinfo.py``):
 
 The "Apps" and "Vol" boxes are sub-states of the "normal_op" state.
 
-To generate a state machine graph, just call :func:`~.dotFsm.moddyGenerateFsmGraph()` after state machine instantiation.
+To generate a state machine graph, just call :func:`~.dot_fsm.gen_fsm_graph()` after state machine instantiation.
 
 
 .. code-block:: python
 
-    moddyGenerateFsmGraph( fsm=cis.fsm, file_name='3_carinfo_fsm.svg')
+    moddy.gen_fsm_graph( fsm=cis.fsm, file_name='3_carinfo_fsm.svg')
 
 .. note:: There is currently no way to influence the appearance of the graph.
 

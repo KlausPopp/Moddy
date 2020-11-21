@@ -367,9 +367,9 @@ Then you add the threads (subclasses of VThread) that shall be scheduled by the 
         t1 = MyThread1(simu)
         t2 = MyThread2(simu)
         t3 = MyThread3(simu)
-        sched.addVThread(t1, prio=0)
-        sched.addVThread(t2, prio=1)
-        sched.addVThread(t3, prio=1)
+        sched.add_vthread(t1, prio=0)
+        sched.add_vthread(t2, prio=1)
+        sched.add_vthread(t3, prio=1)
 
 Example snippet:
 
@@ -427,9 +427,9 @@ Example snippet:
         t1 = MyThread1(simu)
         t2 = MyThread2(simu)
         t3 = MyThread3(simu)
-        sched.addVThread(t1, 0)
-        sched.addVThread(t2, 1)
-        sched.addVThread(t3, 1)
+        sched.add_vthread(t1, 0)
+        sched.add_vthread(t2, 1)
+        sched.add_vthread(t3, 1)
 
 Resulting in the following sequence diagram:
  
