@@ -109,8 +109,7 @@ class Fsm:
 
     **Hierarchically Nested State Support**
 
-    https://en.wikipedia.org/wiki/UML_state_machine\
-    #Hierarchically_nested_states
+    https://en.wikipedia.org/wiki/UML_state_machine#Hierarchically_nested_states
 
     Rules:
     Nested states are defined by the user in the transition list:
@@ -137,7 +136,7 @@ class Fsm:
 
     * A nested FSM is instantiated when the upper level state is entered
     * A nested FSM cannot exit
-    * A nested FSM receives all events from the upper level FSM.
+    * A nested FSM receives all events from the upper level FSM. \
     If the event is not known in the nested FSM, \
     it is directed to the upper FSM. Events that are known in the \
     nested FSM are NOT directed to upper FSM
@@ -255,7 +254,7 @@ class Fsm:
         check if the event is known by the fsm or a currently active
         statemachine.
 
-        :return: True if event is known by the fsm or a currently active
+        :return: True if event is known by the fsm or a currently active \
         statemachine
         """
         ret_val = False
