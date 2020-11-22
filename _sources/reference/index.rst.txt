@@ -8,11 +8,13 @@ API Reference
 *******************
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    core.rst
    vthread.rst
    fsm.rst
    results.rst
+   lib/index
+
    

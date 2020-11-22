@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Core Simulator &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -101,8 +101,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#parts">Parts</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#simpart-constructor-parameters">simPart Constructor Parameters</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#simpart-methods-called-on-start-and-end-of-simulation">simPart Methods Called on Start and End of Simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simpart-constructor-parameters">SimPart Constructor Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simpart-methods-called-on-start-and-end-of-simulation">SimPart Methods Called on Start and End of Simulation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#nested-parts">Nested Parts</a></li>
 </ul>
 </li>
@@ -139,6 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -210,8 +211,8 @@
 <div class="section" id="initializing-the-simulator">
 <h2>Initializing the Simulator<a class="headerlink" href="#initializing-the-simulator" title="Permalink to this headline">¶</a></h2>
 <p>The simulator is the first class you must instantiate. The simulator constructor has no arguments:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">moddy</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">moddy</span>
+<span class="n">simu</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The <em>simu</em> variable has to be passed to the parts.</p>
@@ -227,16 +228,19 @@ This means all python statements in a callback routine are executed at the same 
 <h3>Time Unit<a class="headerlink" href="#time-unit" title="Permalink to this headline">¶</a></h3>
 <p>Moddy’s simulation time unit is seconds, i.e. the value 1.0 means one second.
 Because the simulator uses a floating point type for the simulation time, any time unit can be used by the model.</p>
-<p>The globals <em>ms</em> (=1E-3), <em>us</em> (=1E-6) and <em>ns</em> (=1E-9) can be used conveniently to specify short times. Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mypart</span><span class="o">.</span><span class="n">port1</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;down&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<p>The globals <em>MS</em> (=1E-3), <em>US</em> (=1E-6) and <em>NS</em> (=1E-9) can be used conveniently to specify short times. Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">moddy</span> <span class="kn">import</span> <span class="n">MS</span>
+
+<span class="o">...</span>
+<span class="n">mypart</span><span class="o">.</span><span class="n">port1</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;down&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">MS</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <cite>1*ms</cite> passes the value <code class="docutils literal notranslate"><span class="pre">(1*1E-3)</span> <span class="pre">=</span> <span class="pre">0.001</span></code> to the send function.</p>
+<p>The <cite>1*MS</cite> passes the value <code class="docutils literal notranslate"><span class="pre">(1*1E-3)</span> <span class="pre">=</span> <span class="pre">0.001</span></code> to the send function.</p>
 </div>
 <div class="section" id="setting-the-time-unit-for-trace-outputs-during-simulation">
 <h3>Setting the Time Unit for Trace Outputs during Simulation<a class="headerlink" href="#setting-the-time-unit-for-trace-outputs-during-simulation" title="Permalink to this headline">¶</a></h3>
 <p>To define the time unit for simulation outputs, use</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">setDisplayTimeUnit</span><span class="p">(</span> <span class="n">unit</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">set_display_time_unit</span><span class="p">(</span> <span class="n">unit</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>where unit can be “s”, “ms”, “us” or “ns”.</p>
@@ -251,7 +255,7 @@ Because the simulator uses a floating point type for the simulation time, any ti
 <h3>Current Simulation Time<a class="headerlink" href="#current-simulation-time" title="Permalink to this headline">¶</a></h3>
 <p>The simulator provides a time() method which can be used by parts to determine the current simulation time.
 The time returned is the current simulation time in seconds.</p>
-<p>Within a part you access the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.time" title="moddy.simulator.simPart.time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time()</span></code></a> function through</p>
+<p>Within a part you access the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.time" title="moddy.sim_part.SimPart.time"><code class="xref py py-meth docutils literal notranslate"><span class="pre">time()</span></code></a> function through</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -261,119 +265,128 @@ The time returned is the current simulation time in seconds.</p>
 <h2>Parts<a class="headerlink" href="#parts" title="Permalink to this headline">¶</a></h2>
 <p>Parts are the component of the system that communicate to each other.
 They are the base elements to form the structure of a model.
-You create a part by creating an instance of a class derived from <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a>.
+You create a part by creating an instance of a class derived from <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a>.
 This derived class contains the model code implementing the behavior of the part:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The parts initialization code</li>
-<li>The port receive methods</li>
-<li>The timer expired methods</li>
-<li>Optionally: Methods that are executed at the beginning and the end of the
-simulation. (<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.startSim" title="moddy.simulator.simPart.startSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startSim()</span></code></a> and <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.terminateSim" title="moddy.simulator.simPart.terminateSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminateSim()</span></code></a>)</li>
+<li><p>The parts initialization code</p></li>
+<li><p>The port receive methods</p></li>
+<li><p>The timer expired methods</p></li>
+<li><p>Optionally: Methods that are executed at the beginning and the end of the
+simulation. (<a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.start_sim" title="moddy.sim_part.SimPart.start_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_sim()</span></code></a> and <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.terminate_sim" title="moddy.sim_part.SimPart.terminate_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminate_sim()</span></code></a>)</p></li>
 </ul>
 </div></blockquote>
-<p>Here is a simple example of a part class derived from <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a>.</p>
+<p>Here is a simple example of a part class derived from <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a>.</p>
 <p>For Python beginners: The <em>self</em> variable that is used in ever method is the reference to the own part
 (comparable with <em>this</em> in C++).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">moddy</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">moddy</span>
+<span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Model of Bob &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
-                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                        <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;think_tmr&#39;</span><span class="p">})</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ears_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Callback for message reception on ears port &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
 
-
-    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Callback for think_tmr expiration &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=no-member</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">start_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Let Bob start talking</span>
+        <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="simpart-constructor-parameters">
-<h3>simPart Constructor Parameters<a class="headerlink" href="#simpart-constructor-parameters" title="Permalink to this headline">¶</a></h3>
-<p>Each part must call the simPart’s constructor in it’s <em>__init__</em> method.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">simPart</span><span class="p">(</span><span class="n">simBaseElement</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Simulator block&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
-                <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">                The parameters are:</span>
-<span class="sd">                :param sim: The simulator instance</span>
-<span class="sd">                :param objName: The name of the part (for example &quot;engine&quot;)</span>
-<span class="sd">                :param parentObj: The parent part (for example the &quot;car&quot; if the current part is &quot;engine&quot;).</span>
-<span class="sd">                 If this parameter is omitted, &quot;no parent&quot;, i.e. top level part is assumed.</span>
-<span class="sd">                :param dict elems: A dictionary with elements (ports and timers) to create,</span>
-<span class="sd">                 e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; : &#39;timer1&#39; }</span>
-<span class="sd">                &#39;&#39;&#39;</span>
+<h3>SimPart Constructor Parameters<a class="headerlink" href="#simpart-constructor-parameters" title="Permalink to this headline">¶</a></h3>
+<p>Each part must call the SimPart’s constructor in it’s <em>__init__</em> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimPart</span><span class="p">(</span><span class="n">SimBaseElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;an instance of SimPart forms a moddy object</span>
+
+<span class="sd">    :param sim: Simulator instance</span>
+<span class="sd">    :param obj_name: part&#39;s name</span>
+<span class="sd">    :param parent_obj: parent part. None if part has no parent. Defaults to None</span>
+<span class="sd">    :param dict elems: A dictionary with elements (ports and timers) to \</span>
+<span class="sd">    create, \</span>
+<span class="sd">    e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; :</span>
+<span class="sd">    &#39;timer1&#39; }``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 </div>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-        <span class="c1"># Initialize the base class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">}</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Model of Bob &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+        <span class="c1"># Initialize the parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                         <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">)}</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="simpart-methods-called-on-start-and-end-of-simulation">
-<h3>simPart Methods Called on Start and End of Simulation<a class="headerlink" href="#simpart-methods-called-on-start-and-end-of-simulation" title="Permalink to this headline">¶</a></h3>
+<h3>SimPart Methods Called on Start and End of Simulation<a class="headerlink" href="#simpart-methods-called-on-start-and-end-of-simulation" title="Permalink to this headline">¶</a></h3>
 <p>Optionally, a part may define methods that are called at the start or end of simulation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">start_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Called from simulator when simulation begins&#39;&#39;&#39;</span>
 
-<span class="k">def</span> <span class="nf">terminateSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">terminate_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Called from simulator when simulation stops. Terminate part (e.g. stop threads)&#39;&#39;&#39;</span>
 </pre></div>
 </div>
-<p>If present, the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.startSim" title="moddy.simulator.simPart.startSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startSim()</span></code></a> method is called at the start of the simulation (i.e. at simulation time 0).
-The simulator calls the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.startSim" title="moddy.simulator.simPart.startSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startSim()</span></code></a> method of all parts at the beginning of its run() method,
-in the order the parts have been created. The typical actions in the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.startSim" title="moddy.simulator.simPart.startSim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startSim()</span></code></a> routine are</p>
+<p>If present, the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.start_sim" title="moddy.sim_part.SimPart.start_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_sim()</span></code></a> method is called at the start of the simulation (i.e. at simulation time 0).
+The simulator calls the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.start_sim" title="moddy.sim_part.SimPart.start_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_sim()</span></code></a> method of all parts at the beginning of its run() method,
+in the order the parts have been created. The typical actions in the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.start_sim" title="moddy.sim_part.SimPart.start_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_sim()</span></code></a> routine are</p>
 <blockquote>
 <div><ul class="simple">
-<li>starting timers</li>
-<li>sending initial messages</li>
+<li><p>starting timers</p></li>
+<li><p>sending initial messages</p></li>
 </ul>
 </div></blockquote>
-<p>If present, the <cite>~.simPart.terminateSim()</cite> method is called by the simulator when the simulation is terminated,
-in the order the parts have been created. Typical actions of <cite>~.simPart.terminateSim()</cite> are</p>
+<p>If present, the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.terminate_sim" title="moddy.sim_part.SimPart.terminate_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminate_sim()</span></code></a> method is called by the simulator when the simulation is terminated,
+in the order the parts have been created. Typical actions of <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.terminate_sim" title="moddy.sim_part.SimPart.terminate_sim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">terminate_sim()</span></code></a> are</p>
 <blockquote>
 <div><ul class="simple">
-<li>stopping threads</li>
-<li>closing files</li>
+<li><p>stopping threads</p></li>
+<li><p>closing files</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="nested-parts">
 <h3>Nested Parts<a class="headerlink" href="#nested-parts" title="Permalink to this headline">¶</a></h3>
 <p>You can model parts that are composed of other parts. For example, the part <em>engine</em> may be part of the part <em>car</em>.
-To model this, you use the simPart constructors <em>parentObj</em> argument.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Engine</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">car</span><span class="p">):</span>
+To model this, you use the SimPart constructors <em>parent_obj</em> argument.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Engine</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">car</span><span class="p">):</span>
         <span class="c1"># Initialize the base class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="n">car</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="n">car</span><span class="p">)</span>
   <span class="o">...</span>
-<span class="k">class</span> <span class="nc">Car</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Car</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="c1"># Initialize the base class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">Engine</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="s1">&#39;engine&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The part hierarchy has no relevance for the simulator. The part hierarchy however is
+<p class="admonition-title">Note</p>
+<p>The part hierarchy has no relevance for the simulator. The part hierarchy however is
 displayed in the structure graph, trace output and in the sequence diagrams.</p>
 </div>
 </div>
@@ -396,59 +409,59 @@ Note that a port is always owned by exactly one part.</p>
 <p>Using the low level methods:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">newInPort()</span></code></li>
-<li><code class="xref py py-meth docutils literal notranslate"><span class="pre">newOutPort()</span></code></li>
-<li><a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.newIOPort" title="moddy.simulator.simPart.newIOPort"><code class="xref py py-meth docutils literal notranslate"><span class="pre">newIOPort()</span></code></a></li>
+<li><p><a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.new_input_port" title="moddy.sim_part.SimPart.new_input_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">new_input_port()</span></code></a></p></li>
+<li><p><a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.new_output_port" title="moddy.sim_part.SimPart.new_output_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">new_output_port()</span></code></a></p></li>
+<li><p><a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.new_io_port" title="moddy.sim_part.SimPart.new_io_port"><code class="xref py py-meth docutils literal notranslate"><span class="pre">new_io_port()</span></code></a></p></li>
 </ul>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-          <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ears</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newInputPort</span><span class="p">(</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">earsRecv</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+      <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ears</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_input_port</span><span class="p">(</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ears_recv</span> <span class="p">)</span>
 </pre></div>
 </div>
-<p>This creates a new input port with the name <em>ears</em> and assigns the method <em>earsRecv()</em> as the callback method.
+<p>This creates a new input port with the name <em>ears</em> and assigns the method <em>ears_recv()</em> as the callback method.
 The resulting port object is assigned to the part variable ears.</p>
 <p>The creation of an IO port is similar:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">myIOPort1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newIOPort</span><span class="p">(</span> <span class="s1">&#39;ioPort1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ioPort1Recv</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">my_io_port_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_io_Port</span><span class="p">(</span> <span class="s1">&#39;io_port_1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">io_port_1_recv</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>An output port has no receive callback method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">myOutPort1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newOutoutPort</span><span class="p">(</span> <span class="s1">&#39;outPort1&#39;</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">my_out_port_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newOutoutPort</span><span class="p">(</span> <span class="s1">&#39;out_port_1&#39;</span> <span class="p">)</span>
 </pre></div>
 </div>
-<p>To reduce the amount of typing, you can call the higher level function <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createPorts" title="moddy.simulator.simPart.createPorts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createPorts()</span></code></a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<p>To reduce the amount of typing, you can call the higher level function <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.create_ports" title="moddy.sim_part.SimPart.create_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_ports()</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>This essentially does exactly the same as the low level function above.
-It creates a new port object, creates a new part variable self.ears and assigns the callback method <em>earsRecv</em>.
-This means that your callback function MUST always be named <code class="docutils literal notranslate"><span class="pre">&lt;portName&gt;Recv</span></code>.</p>
+It creates a new port object, creates a new part variable self.ears and assigns the callback method <em>ears_recv</em>.
+This means that your callback function MUST always be named <code class="docutils literal notranslate"><span class="pre">&lt;portName&gt;_recv</span></code>.</p>
 <p>You can also create multiple ports with one call:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;inPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;inPort2&#39;</span><span class="p">,</span> <span class="s1">&#39;inPort3&#39;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;in_port_1&#39;</span><span class="p">,</span> <span class="s1">&#39;in_port_2&#39;</span><span class="p">,</span> <span class="s1">&#39;in_port_3&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Output ports and IO ports can be created with the same method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;outPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;outPort2&#39;</span><span class="p">,</span> <span class="s1">&#39;outPort3&#39;</span><span class="p">])</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;io&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ioPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;ioPort2&#39;</span><span class="p">,</span> <span class="s1">&#39;ioPort3&#39;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;out_port_1&#39;</span><span class="p">,</span> <span class="s1">&#39;out_port_2&#39;</span><span class="p">,</span> <span class="s1">&#39;out_port_3&#39;</span><span class="p">])</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;io&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;io_port_1&#39;</span><span class="p">,</span> <span class="s1">&#39;io_port_2&#39;</span><span class="p">,</span> <span class="s1">&#39;io_port_3&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Usually, you will always use the high level methods, unless you need to create several input ports that
 have the same receive method.</p>
 <p>Since Moddy 1.8, ports can be created even more simpler through the <cite>elems</cite> parameter to the
-<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a> constructor. This is essentially the same as using the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createPorts" title="moddy.simulator.simPart.createPorts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createPorts()</span></code></a>
+<a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a> constructor. This is essentially the same as using the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.create_ports" title="moddy.sim_part.SimPart.create_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_ports()</span></code></a>
 method, but requires less typing:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
                          <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
                                   <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
+                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;think_tmr&#39;</span><span class="p">})</span>
 </pre></div>
 </div>
 </div>
@@ -458,7 +471,7 @@ method, but requires less typing:</p>
 input port of another object.</p>
 <p>This binding is done normally by the main program. If you have parts that are composed of other parts,
 then the internal bindings within the top level part are done in the top level parts constructor.
-To bind an input port to an output port, you call the output ports <a class="reference internal" href="../reference/core.html#moddy.simulator.simOutputPort.bind" title="moddy.simulator.simOutputPort.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a> method:</p>
+To bind an input port to an output port, you call the output ports <code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">joe</span><span class="o">.</span><span class="n">ears</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -475,58 +488,57 @@ To bind an input port to an output port, you call the output ports <a class="ref
 </div>
 <p>You can also bind IO ports to each other. In this case the output port of the first IO port is
 bound to the input port of the second port and vice versa. It doesn’t matter on which IO port you call the bind method.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">myPart</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-          <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;io&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ioPort1&#39;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">myPart</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+      <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;io&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;io_port_1&#39;</span><span class="p">])</span>
 
 <span class="n">part1</span> <span class="o">=</span> <span class="n">myPart</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;part1&#39;</span> <span class="p">)</span>
 <span class="n">part2</span> <span class="o">=</span> <span class="n">myPart</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;part2&#39;</span> <span class="p">)</span>
-<span class="n">part1</span><span class="o">.</span><span class="n">ioPort1</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">part2</span><span class="o">.</span><span class="n">ioPort1</span> <span class="p">)</span>
+<span class="n">part1</span><span class="o">.</span><span class="n">io_port_1</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">part2</span><span class="o">.</span><span class="n">io_port_1</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>If you need to bind an IO port to a normal input and normal output port, you can do it like this:</p>
-<p>Consider part1 has an ioport called <em>ioPort1</em> and part2 has one input port <em>inPort1</em> and an output port <em>outPort1</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">part1</span><span class="o">.</span><span class="n">ioPort1</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">part2</span><span class="o">.</span><span class="n">inPort1</span> <span class="p">)</span>
-<span class="n">part2</span><span class="o">.</span><span class="n">outPort1</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">part1</span><span class="o">.</span><span class="n">ioPort1</span><span class="o">.</span><span class="n">_inPort</span> <span class="p">)</span>
+<p>Consider part1 has an ioport called <em>io_port_1</em> and part2 has one input port <em>in_port_1</em> and an output port <em>out_port_1</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">part1</span><span class="o">.</span><span class="n">io_port_1</span><span class="o">.</span><span class="n">_outPort</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">part2</span><span class="o">.</span><span class="n">in_port_1</span> <span class="p">)</span>
+<span class="n">part2</span><span class="o">.</span><span class="n">out_port_1</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span> <span class="n">part1</span><span class="o">.</span><span class="n">io_port_1</span><span class="o">.</span><span class="n">_inPort</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>You can also loop an ioport’s input and output port. This can be used to delay the processing of messages.
 What you send to the output port will be received after the flight time at the input port:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ioPort</span><span class="o">.</span><span class="n">loopBind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">io_port</span><span class="o">.</span><span class="n">loop_bind</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Since Moddy 1.8, there is a new function <a class="reference internal" href="../reference/core.html#moddy.simulator.sim.smartBind" title="moddy.simulator.sim.smartBind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">smartBind()</span></code></a> method. This method should
+<p>Since Moddy 1.8, there is a new function <a class="reference internal" href="../reference/core.html#moddy.sim_core.Sim.smart_bind" title="moddy.sim_core.Sim.smart_bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">smart_bind()</span></code></a> method. This method should
 be used at the top level to bind all ports with a single call. In contrast to the
-classic <a class="reference internal" href="../reference/core.html#moddy.simulator.simOutputPort.bind" title="moddy.simulator.simOutputPort.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a> method, you specify the hierarchy name of the ports
+classic <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimOutputPort.bind" title="moddy.sim_ports.SimOutputPort.bind"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bind()</span></code></a> method, you specify the hierarchy name of the ports
 as a string, instead of using their python references.</p>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">(</span> <span class="p">[</span>
-    <span class="p">[</span><span class="s1">&#39;App.outPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev1.inPort&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev2.inPort&#39;</span><span class="p">],</span>             <span class="c1"># binds the 3 ports together</span>
-    <span class="p">[</span><span class="s1">&#39;App.ioPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Server.netPort&#39;</span> <span class="p">]</span>  <span class="p">])</span>                              <span class="c1"># binds the 2 ports together</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smart_bind</span><span class="p">(</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s1">&#39;App.out_port_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev1.in_port&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev2.in_port&#39;</span><span class="p">],</span>             <span class="c1"># binds the 3 ports together</span>
+    <span class="p">[</span><span class="s1">&#39;App.io_port_1&#39;</span><span class="p">,</span> <span class="s1">&#39;Server.net_port&#39;</span> <span class="p">]</span>  <span class="p">])</span>                               <span class="c1"># binds the 2 ports together</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If an input and output port that shall be bound belongs to the same part, then messages sent over
+<p class="admonition-title">Note</p>
+<p>If an input and output port that shall be bound belongs to the same part, then messages sent over
 this binding are called “messages to self”.
 The interactive viewer displays these messages, while the static svg diagrams do not display them.</p>
 </div>
 </div>
 <div class="section" id="sending-messages">
 <h3>Sending Messages<a class="headerlink" href="#sending-messages" title="Permalink to this headline">¶</a></h3>
-<p>A message between two parts is sent via an output port’s <a class="reference internal" href="../reference/core.html#moddy.simulator.simOutputPort.send" title="moddy.simulator.simOutputPort.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> routine:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">send</span><span class="p">(</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flightTime</span> <span class="p">)</span>
+<p>A message between two parts is sent via an output port’s <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimOutputPort.send" title="moddy.sim_ports.SimOutputPort.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> routine:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">send</span><span class="p">(</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flight_time</span> <span class="p">)</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>Where</dt>
-<dd><ul class="first last simple">
-<li><em>msg</em> is the message you want to send (More about messages in chapter <a class="reference internal" href="#messages"><span class="std std-ref">Messages</span></a>)</li>
-<li><em>flightTime</em> is the transmission time of the message; i.e.
+<dl class="simple">
+<dt>Where</dt><dd><ul class="simple">
+<li><p><em>msg</em> is the message you want to send (More about messages in chapter <a class="reference internal" href="#messages"><span class="std std-ref">Messages</span></a>)</p></li>
+<li><p><em>flight_time</em> is the transmission time of the message; i.e.
 how long it takes until the message arrives at the input port.
-<em>flightTime</em> must be a positive value in seconds.
-<em>flightTime</em> can be 0; in this case, the message arrives without delay at the bound input ports.</li>
+<em>flight_time</em> must be a positive value in seconds.
+<em>flight_time</em> can be 0; in this case, the message arrives without delay at the bound input ports.</p></li>
 </ul>
 </dd>
 </dl>
@@ -537,43 +549,43 @@ how long it takes until the message arrives at the input port.
 When a messages flight time has elapsed, the next message from the queue is sent.
 This simulates the behavior of a serial transmission. See the following snapshot from the tutorial <a class="reference internal" href="../tutorials/2_sergw.html#sergw"><span class="std std-ref">Serial Gateway</span></a>.
 Here, multiple send() calls are issued at the same simulation time.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TXFIFO&#39;</span><span class="p">,</span> <span class="n">whiteOnRed</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span><span class="o">*</span><span class="n">US</span><span class="p">,</span> <span class="s1">&#39;TXFIFO&#39;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_RED</span><span class="p">)</span>
 
  <span class="c1"># push to serial port</span>
  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
-     <span class="bp">self</span><span class="o">.</span><span class="n">serPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="n">c</span><span class="p">,</span> <span class="n">serFlightTime</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">ser_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="n">c</span><span class="p">,</span> <span class="n">ser_flight_time</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>This results in the following sequence diagram. You see that the next character is fired when the previous character transmission ends:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0030_serial_transfer.png" src="../_images/0030_serial_transfer.png" />
 </div>
 </div>
 <div class="section" id="receiving-messages">
 <h3>Receiving Messages<a class="headerlink" href="#receiving-messages" title="Permalink to this headline">¶</a></h3>
 <p>When a message is received on an input port, the input ports callback method is called.
-This receive method must be provided by the model, usually in the class derived from <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a>.
-When you have created the port with <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createPorts" title="moddy.simulator.simPart.createPorts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createPorts()</span></code></a>, the method is called <code class="docutils literal notranslate"><span class="pre">&lt;portName&gt;Recv</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-         <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
+This receive method must be provided by the model, usually in the class derived from <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a>.
+When you have created the port with <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.create_ports" title="moddy.sim_part.SimPart.create_ports"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_ports()</span></code></a>, the method is called <code class="docutils literal notranslate"><span class="pre">&lt;portName&gt;Recv</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+     <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ears&#39;</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ears_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The receive callback method gets passed two parameters:</p>
 <blockquote>
 <div><ul class="simple">
-<li><em>port</em> is the input port on which the message was received.
-You can use this to find out which port received the message in case you have assigned the same receive method to multiple ports</li>
-<li><em>msg</em> is the message just received</li>
+<li><p><em>port</em> is the input port on which the message was received.
+You can use this to find out which port received the message in case you have assigned the same receive method to multiple ports</p></li>
+<li><p><em>msg</em> is the message just received</p></li>
 </ul>
 </div></blockquote>
 <p>The receive callback method does not return a value.</p>
@@ -587,7 +599,7 @@ this means that also objects that are referenced in the message are copied.</p>
 <p>Sometimes a message receiver needs to know when a message transmission starts. However,
 the standard input port callback is called at when the transmission is finished.</p>
 <p>If you want to get notified when a message transmission is started, you can register a function
-with <a class="reference internal" href="../reference/core.html#moddy.simulator.simInputPort.setMsgStartedFunc" title="moddy.simulator.simInputPort.setMsgStartedFunc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setMsgStartedFunc()</span></code></a> :</p>
+with <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimInputPort.set_msg_started_func" title="moddy.sim_ports.SimInputPort.set_msg_started_func"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_msg_started_func()</span></code></a> :</p>
 <p>Example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NetPort</span><span class="p">():</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -595,10 +607,10 @@ with <a class="reference internal" href="../reference/core.html#moddy.simulator.
         <span class="c1"># create network port</span>
         <span class="c1"># Create an IO port, but don&#39;t install the normal receive callback</span>
         <span class="c1"># Instead, install a function that gets called on message transmission start</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_netPort</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">newIOPort</span><span class="p">(</span><span class="s1">&#39;netPort&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_netPort</span><span class="o">.</span><span class="n">setMsgStartedFunc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">netPortRecvStart</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net_port</span> <span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="n">new_io_Port</span><span class="p">(</span><span class="s1">&#39;net_port&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net_port</span><span class="o">.</span><span class="n">set_msg_started_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">net_port_recv_start</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">netPortRecvStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inPort</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">outPort</span><span class="p">,</span> <span class="n">flightTime</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">net_port_recv_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_port</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">out_port</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">):</span>
         <span class="c1"># gets called on message start</span>
 </pre></div>
 </div>
@@ -610,10 +622,10 @@ with <a class="reference internal" href="../reference/core.html#moddy.simulator.
 Generally, any valid python object can be a Moddy message, such as:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Numbers, e.g. 1.0</li>
-<li>Strings, e.g. ‘abc’</li>
-<li>Lists, e.g. [‘abc’, 1.0, 2]</li>
-<li>User defined classes</li>
+<li><p>Numbers, e.g. 1.0</p></li>
+<li><p>Strings, e.g. ‘abc’</p></li>
+<li><p>Lists, e.g. [‘abc’, 1.0, 2]</p></li>
+<li><p>User defined classes</p></li>
 </ul>
 </div></blockquote>
 <p>Moddy does not force any specific type to be used as a message.
@@ -629,12 +641,12 @@ It simulates the behaviour of “Fail Safe over EtherCAT”
 </pre></div>
 </div>
 <p>To send such a message, you could call from a part’s method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">outPort1</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="n">FsoeMsg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fsoeAddr</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span> <span class="n">msgFlightTime</span> <span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">out_port_1</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="n">FsoeMsg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fsoe_addr</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span> <span class="n">msg_flight_time</span> <span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Do NOT include a reference to the simulator instance, parts, ports or timers into the user defined messages!
+<p class="admonition-title">Warning</p>
+<p>Do NOT include a reference to the simulator instance, parts, ports or timers into the user defined messages!
 This may cause an exception when sending such messages
 (because it causes endless recursion while trying to make a deep copy of the message).</p>
 </div>
@@ -656,15 +668,15 @@ For the built-in classes, python defines the <em>__str__()</em> method. For user
 <p>If the receiver wants to check if the received message is of the correct type, he can use the python <code class="xref py py-meth docutils literal notranslate"><span class="pre">type()</span></code>
 method, here are some examples:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="o">...</span>
+<span class="o">...</span>
 <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="o">...</span>
+<span class="o">...</span>
 <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="o">...</span>
+<span class="o">...</span>
 <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="o">...</span>
+<span class="o">...</span>
 <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="ow">is</span> <span class="n">FsoeMsg</span><span class="p">:</span>
-    <span class="o">...</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 </div>
@@ -673,62 +685,62 @@ method, here are some examples:</p>
 <p>You can influence the color in which messages are displayed in the sequence diagram.
 By default, the messages are drawn in “black”.
 You can assign a color to an output port, e.g.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">myOutPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_out_port</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In this case, all messages sent via this output ports are drawn in green.</p>
-<p>You can even assign different colors to individual messages. To do so, create a member <em>msgColor</em>
+<p>You can even assign different colors to individual messages. To do so, create a member <em>msg_color</em>
 inside a (user defined) message:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FsoeMsg</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">msgColor</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">msg_color</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span>   <span class="c1"># FSoE Address</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seq</span> <span class="o">=</span> <span class="n">seq</span>     <span class="c1"># sequence number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>   <span class="c1"># FSoE Payload</span>
-        <span class="k">if</span> <span class="n">msgColor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">msgColor</span> <span class="o">=</span> <span class="n">msgColor</span>
+        <span class="k">if</span> <span class="n">msg_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_color</span> <span class="o">=</span> <span class="n">msg_color</span>
 </pre></div>
 </div>
-<p>If the <em>msgColor</em> member exists, this message will get the define <em>msgColor</em>,
+<p>If the <em>msg_color</em> member exists, this message will get the define <em>msg_color</em>,
 overriding the color which might have been assigned to the port.</p>
 </div>
 <div class="section" id="simulating-lost-messages">
 <h4>Simulating Lost Messages<a class="headerlink" href="#simulating-lost-messages" title="Permalink to this headline">¶</a></h4>
 <p>You can force messages to be lost to simulate disturbed communication.</p>
 <p>Therefore, output port and I/O Ports provide an API to inject a “message lost error”.
-If you call the <a class="reference internal" href="../reference/core.html#moddy.simulator.simOutputPort.injectLostMessageErrorBySequence" title="moddy.simulator.simOutputPort.injectLostMessageErrorBySequence"><code class="xref py py-meth docutils literal notranslate"><span class="pre">injectLostMessageErrorBySequence()</span></code></a> method of an output port you can force one or
+If you call the <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimOutputPort.inject_lost_message_error_by_sequence" title="moddy.sim_ports.SimOutputPort.inject_lost_message_error_by_sequence"><code class="xref py py-meth docutils literal notranslate"><span class="pre">inject_lost_message_error_by_sequence()</span></code></a> method of an output port you can force one or
 more of the following messages sent on this port to be lost.</p>
-<p><code class="docutils literal notranslate"><span class="pre">injectLostMessageErrorBySequence(0)</span></code> will force the next message sent on that port to be lost,
-<code class="docutils literal notranslate"><span class="pre">injectLostMessageErrorBySequence(1)</span></code> the next but one message and so forth.
+<p><code class="docutils literal notranslate"><span class="pre">inject_lost_message_error_by_sequence(0)</span></code> will force the next message sent on that port to be lost,
+<code class="docutils literal notranslate"><span class="pre">inject_lost_message_error_by_sequence(1)</span></code> the next but one message and so forth.
 Lost messages will not arrive at the input port.</p>
 <p>For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Producer</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Producer</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Producer&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;netPort&#39;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;Producer&quot;</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;net_port&#39;</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">injectLostMessageErrorBySequence</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">run_vthread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net_port</span><span class="o">.</span><span class="n">inject_lost_message_error_by_sequence</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net_port</span><span class="o">.</span><span class="n">inject_lost_message_error_by_sequence</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net_port</span><span class="o">.</span><span class="n">inject_lost_message_error_by_sequence</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX1&#39;</span><span class="p">,</span> <span class="n">whiteOnBlue</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX2&#39;</span><span class="p">,</span> <span class="n">whiteOnRed</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">netPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">us</span><span class="p">,</span> <span class="s1">&#39;TX3&#39;</span><span class="p">,</span> <span class="n">whiteOnGreen</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">net_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">,</span> <span class="s1">&#39;TX1&#39;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_BLUE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">net_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;test1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">,</span> <span class="s1">&#39;TX2&#39;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_RED</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">net_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">US</span><span class="p">,</span> <span class="s1">&#39;TX3&#39;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_GREEN</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>will force the 3rd, 6th and 7th message on the netPort to be lost.</p>
+<p>will force the 3rd, 6th and 7th message on the net_port to be lost.</p>
 <p>In the sequence diagrams, lost messages are indicated by an cross in front of the message arrow:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0040_lost_messages.png" src="../_images/0040_lost_messages.png" />
 </div>
 <p>In the simulator trace output, a lost message is shown as a normal message reception event,
 but with the additional “(LOST)” string:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">TRC:    500.0us &lt;MSG    Consumer.netPort(InPort) // (LOST) req=400.0us beg=400.0us end=500.0us dur=100.0us msg=[Data1]</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">TRC:    500.0us &lt;MSG    Consumer.net_port(InPort) // (LOST) req=400.0us beg=400.0us end=500.0us dur=100.0us msg=[Data1]</span>
 </pre></div>
 </div>
 </div>
@@ -740,8 +752,8 @@ but with the additional “(LOST)” string:</p>
 <p>Typically, timers are used to</p>
 <blockquote>
 <div><ul class="simple">
-<li>Trigger periodic actions</li>
-<li>Provide timeout for message reception</li>
+<li><p>Trigger periodic actions</p></li>
+<li><p>Provide timeout for message reception</p></li>
 </ul>
 </div></blockquote>
 <p>A timer is started and stopped from a part’s methods. When the timer expires, an “expiration callback”
@@ -752,37 +764,37 @@ method is called within the part.</p>
 All timers of a part must be explicitly created by a part.
 This is usually done in the constructor (<em>__init__</em> method) of the part owning the timer.
 There are two ways to create timers:
-Using the low level method newTimer():</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-          <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newTimer</span><span class="p">(</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmrExpired</span> <span class="p">)</span>
+Using the low level method new_timer():</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+      <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_timer</span><span class="p">(</span> <span class="s1">&#39;think_tmr&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr_expired</span> <span class="p">)</span>
 </pre></div>
 </div>
-<p>This creates a new timer with the name <em>thinkTmr</em> and assigns the method <em>thinkTmrExpired()</em> as the callback method.
+<p>This creates a new timer with the name <em>think_tmr</em> and assigns the method <em>think_tmr_expired()</em> as the callback method.
 The resulting timer object is assigned to the part variable thinkTmr.</p>
-<p>To reduce the amount of typing, you can call the higher level function <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createTimers" title="moddy.simulator.simPart.createTimers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createTimers()</span></code></a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<p>To reduce the amount of typing, you can call the higher level function <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.create_timers" title="moddy.sim_part.SimPart.create_timers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_timers()</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_timers</span><span class="p">([</span><span class="s1">&#39;think_tmr&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>This essentially does exactly the same as the low level function above.
-It creates a new timer object, creates a new part variable <em>self.thinkTmr</em> and assigns the callback method
-<em>thinkTmrExpired</em>.</p>
-<p>This means that your callback function MUST always be named <code class="docutils literal notranslate"><span class="pre">&lt;timerName&gt;Expired</span></code>.</p>
+It creates a new timer object, creates a new part variable <em>self.think_tmr</em> and assigns the callback method
+<em>think_tmr_expired</em>.</p>
+<p>This means that your callback function MUST always be named <code class="docutils literal notranslate"><span class="pre">&lt;timerName&gt;_expired</span></code>.</p>
 <p>You can also create multiple timers with one call:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;tmr1&#39;</span><span class="p">,</span> <span class="s1">&#39;tmr2&#39;</span><span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">create_timers</span><span class="p">([</span><span class="s1">&#39;tmr1&#39;</span><span class="p">,</span> <span class="s1">&#39;tmr2&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Since Moddy 1.8, timers can be created even more simpler through the <cite>elems</cite> parameter to the
-<a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a> constructor. This is essentially the same as using the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createTimers" title="moddy.simulator.simPart.createTimers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createTimers()</span></code></a>
+<a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a> constructor. This is essentially the same as using the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.create_timers" title="moddy.sim_part.SimPart.create_timers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_timers()</span></code></a>
 method, but requires less typing:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
                          <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
                                   <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
                                   <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
@@ -792,33 +804,33 @@ method, but requires less typing:</p>
 <div class="section" id="starting-and-stopping-timers">
 <h3>Starting and Stopping Timers<a class="headerlink" href="#starting-and-stopping-timers" title="Permalink to this headline">¶</a></h3>
 <p>Each timer has two states: Started and Stopped.</p>
-<p>You start a timer with <a class="reference internal" href="../reference/core.html#moddy.simulator.simTimer.start" title="moddy.simulator.simTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> or <a class="reference internal" href="../reference/core.html#moddy.simulator.simTimer.restart" title="moddy.simulator.simTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">restart</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<p>You start a timer with <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimTimer.start" title="moddy.sim_ports.SimTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> or <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimTimer.restart" title="moddy.sim_ports.SimTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">restart</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Both expect the timer’s expiration time, relative to the current simulation time,
 in seconds (in the examples above: 2 seconds). They do not return a value.</p>
-<p>The <a class="reference internal" href="../reference/core.html#moddy.simulator.simTimer.start" title="moddy.simulator.simTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> method throws an exception if you use it on a timer which is already started.
-The <a class="reference internal" href="../reference/core.html#moddy.simulator.simTimer.restart" title="moddy.simulator.simTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a> method starts a timer with the specified time regardless of the timers state.
+<p>The <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimTimer.start" title="moddy.sim_ports.SimTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> method throws an exception if you use it on a timer which is already started.
+The <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimTimer.restart" title="moddy.sim_ports.SimTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a> method starts a timer with the specified time regardless of the timers state.
 Both methods bring the timer into the started state.</p>
-<p>You stop a timer with <a class="reference internal" href="../reference/core.html#moddy.simulator.simTimer.stop" title="moddy.simulator.simTimer.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a> method. It brings the timer into the stopped state.
+<p>You stop a timer with <a class="reference internal" href="../reference/core.html#moddy.sim_ports.SimTimer.stop" title="moddy.sim_ports.SimTimer.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a> method. It brings the timer into the stopped state.
 In other words, you cancel the timer.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="timer-expiration-callback">
 <h3>Timer Expiration Callback<a class="headerlink" href="#timer-expiration-callback" title="Permalink to this headline">¶</a></h3>
 <p>When a timer expires, the timer’s callback method is called.
-This callback method must be provided by the model, usually in the class derived from <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a>.</p>
-<p>When you have created the port with <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.createTimers" title="moddy.simulator.simPart.createTimers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">createTimers()</span></code></a>, the method is called <code class="docutils literal notranslate"><span class="pre">&lt;timerName&gt;Expired</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-         <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;thinkTmr&#39;</span><span class="p">])</span>
+This callback method must be provided by the model, usually in the class derived from <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a>.</p>
+<p>When you have created the port with <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.create_timers" title="moddy.sim_part.SimPart.create_timers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_timers()</span></code></a>, the method is called <code class="docutils literal notranslate"><span class="pre">&lt;timerName&gt;_expired</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+     <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_timers</span><span class="p">([</span><span class="s1">&#39;think_tmr&#39;</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -833,44 +845,44 @@ start other timers or to send messages to other objects.</p>
 <h2>Annotations<a class="headerlink" href="#annotations" title="Permalink to this headline">¶</a></h2>
 <p>The model can add annotations to the output (i.e. sequence diagrams and trace tables) to visualize
 special events in the model.</p>
-<p>You add an annotation by calling the simPart’s <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.addAnnotation" title="moddy.simulator.simPart.addAnnotation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">addAnnotation()</span></code></a> method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Joe</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+<p>You add an annotation by calling the SimPart’s <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.annotation" title="moddy.sim_part.SimPart.annotation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">annotation()</span></code></a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Joe</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In a sequence diagram, an annotation is displayed on the part’s life line at the current simulation time:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0050_annotation.png" src="../_images/0050_annotation.png" />
 </div>
-<p>The <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.addAnnotation" title="moddy.simulator.simPart.addAnnotation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">addAnnotation()</span></code></a> method expects a string as its argument.
+<p>The <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.annotation" title="moddy.sim_part.SimPart.annotation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">annotation()</span></code></a> method expects a string as its argument.
 It must be a single-line string. No special characters such as newline are allowed.</p>
 </div>
 <div class="section" id="state-indications">
 <h2>State Indications<a class="headerlink" href="#state-indications" title="Permalink to this headline">¶</a></h2>
 <p>To visualize a part’s state or to indicate which activity the part is currently performing,
-you can use state indications. For this, you call the part’s <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.setStateIndicator" title="moddy.simulator.simPart.setStateIndicator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setStateIndicator()</span></code></a> method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
+you can use state indications. For this, you call the part’s <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.set_state_indicator" title="moddy.sim_part.SimPart.set_state_indicator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_state_indicator()</span></code></a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
      <span class="o">...</span>
     <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The first parameter to <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.setStateIndicator" title="moddy.simulator.simPart.setStateIndicator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setStateIndicator()</span></code></a> is text:</p>
+<p>The first parameter to <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.set_state_indicator" title="moddy.sim_part.SimPart.set_state_indicator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_state_indicator()</span></code></a> is text:</p>
 <blockquote>
 <div><ul class="simple">
-<li>A non-empty string indicates the start of a new state or activity.
-The text is displayed in sequence diagrams in vertical direction.</li>
-<li>An empty string ends the state or activity</li>
+<li><p>A non-empty string indicates the start of a new state or activity.
+The text is displayed in sequence diagrams in vertical direction.</p></li>
+<li><p>An empty string ends the state or activity</p></li>
 </ul>
 </div></blockquote>
-<p>The second, optional parameter to setStateIndicator is appearance.
+<p>The second, optional parameter to set_state_indicator is appearance.
 With this parameter, you can control the colors of state indicator. If present, it must be a python dictionary like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;boxStrokeColor&#39;</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="s1">&#39;boxFillColor&#39;</span><span class="p">:</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;textColor&#39;</span><span class="p">:</span><span class="s1">&#39;white&#39;</span><span class="p">}</span>
 </pre></div>
@@ -878,9 +890,9 @@ With this parameter, you can control the colors of state indicator. If present, 
 <p>Where:</p>
 <blockquote>
 <div><ul class="simple">
-<li>boxStrokeColor: is the color of the status box’s border</li>
-<li>boxFillColor: is the color of box body</li>
-<li>textColor: is the color of the text</li>
+<li><p>boxStrokeColor: is the color of the status box’s border</p></li>
+<li><p>boxFillColor: is the color of box body</p></li>
+<li><p>textColor: is the color of the text</p></li>
 </ul>
 </div></blockquote>
 <p>Color names are according to the SVG specification, see &lt;<a class="reference external" href="http://www.december.com/html/spec/colorsvg.html">http://www.december.com/html/spec/colorsvg.html</a>&gt;_ for an overview.</p>
@@ -892,14 +904,14 @@ With this parameter, you can control the colors of state indicator. If present, 
 <div class="section" id="watching-variables">
 <h2>Watching Variables<a class="headerlink" href="#watching-variables" title="Permalink to this headline">¶</a></h2>
 <p>Sometimes it is useful to watch the value of variables and how they are changing during simulation.
-Tell Moddy which variables to watch. You do this by calling the <a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.newVarWatcher" title="moddy.simulator.simPart.newVarWatcher"><code class="xref py py-meth docutils literal notranslate"><span class="pre">newVarWatcher()</span></code></a> method of a moddy part:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">VarChanger</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
+Tell Moddy which variables to watch. You do this by calling the <a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.new_var_watcher" title="moddy.sim_part.SimPart.new_var_watcher"><code class="xref py py-meth docutils literal notranslate"><span class="pre">new_var_watcher()</span></code></a> method of a moddy part:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">VarChanger</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;VC&quot;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;VC&quot;</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># self.var2 is created during execution</span>
 
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_vthread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">var1</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -908,16 +920,16 @@ Tell Moddy which variables to watch. You do this by calling the <a class="refere
             <span class="bp">self</span><span class="o">.</span><span class="n">var2</span> <span class="o">=</span> <span class="s2">&quot;ABC&quot;</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+    <span class="n">simu</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
     <span class="n">vc</span> <span class="o">=</span> <span class="n">VarChanger</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
-    <span class="n">var1watch</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">newVarWatcher</span><span class="p">(</span><span class="s1">&#39;var1&#39;</span><span class="p">,</span> <span class="s2">&quot;0x</span><span class="si">%08x</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">var2watch</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">newVarWatcher</span><span class="p">(</span><span class="s1">&#39;var2&#39;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">var1watch</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">new_var_watcher</span><span class="p">(</span><span class="s1">&#39;var1&#39;</span><span class="p">,</span> <span class="s2">&quot;0x</span><span class="si">%08x</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">var2watch</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">new_var_watcher</span><span class="p">(</span><span class="s1">&#39;var2&#39;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="../reference/core.html#moddy.simulator.simPart.newVarWatcher" title="moddy.simulator.simPart.newVarWatcher"><code class="xref py py-meth docutils literal notranslate"><span class="pre">newVarWatcher()</span></code></a> expects as the first parameter the name of the variable to watch as a string,
+<p><a class="reference internal" href="../reference/core.html#moddy.sim_part.SimPart.new_var_watcher" title="moddy.sim_part.SimPart.new_var_watcher"><code class="xref py py-meth docutils literal notranslate"><span class="pre">new_var_watcher()</span></code></a> expects as the first parameter the name of the variable to watch as a string,
 e.g. “var1”, or “subobj.var2” etc. The variable doesn’t need to exist yet.
 As shown in the above example for var2, it can be created during runtime.</p>
-<p>The second parameter to newVarWatcher is the format string that is used to format the variables value, e.g. <code class="docutils literal notranslate"><span class="pre">0x%08x&quot;</span></code>
+<p>The second parameter to new_var_watcher is the format string that is used to format the variables value, e.g. <code class="docutils literal notranslate"><span class="pre">0x%08x&quot;</span></code>
 When you run now the simulator, you will see a “VC” event every time the value of a watched variable changes:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">0.0s VC VC.var1(WatchedVar) // 0x00000001</span>
 </pre></div>
@@ -925,43 +937,42 @@ When you run now the simulator, you will see a “VC” event every time the val
 <p>Watched variables can be included in the sequence diagram.
 In the following examples, you see the status of a Moddy part VC, and its two internal variables <em>var1</em> and <em>var2</em>.
 Variable traces will be shown always on the right side of the sequence diagram.</p>
-<p>You define with the parameter <em>showVarList</em> which variable traces are shown in the sequence diagram:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                              <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;4_varwatch.html&quot;</span><span class="p">,</span>
-                              <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span>
-                              <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;VC&#39;</span><span class="p">],</span>
-                              <span class="n">showVarList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;VC.var1&#39;</span><span class="p">,</span> <span class="s1">&#39;VC.var2&#39;</span><span class="p">],</span>
-                              <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span>
-                              <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
-                              <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
+<p>You define with the parameter <em>show_var_list</em> which variable traces are shown in the sequence diagram:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
+                                        <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;4_varwatch.html&quot;</span><span class="p">,</span>
+                                        <span class="n">show_parts_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;VC&#39;</span><span class="p">],</span>
+                                        <span class="n">show_var_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;VC.var1&#39;</span><span class="p">,</span> <span class="s1">&#39;VC.var2&#39;</span><span class="p">],</span>
+                                        <span class="n">excluded_element_List</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span>
+                                        <span class="n">time_per_div</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+                                        <span class="n">pix_per_div</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0060_showvars.png" src="../_images/0060_showvars.png" />
 </div>
 </div>
 <div class="section" id="running-the-simulation">
 <h2>Running the Simulation<a class="headerlink" href="#running-the-simulation" title="Permalink to this headline">¶</a></h2>
 <p>After the instantiation of the simulator, the creation of the parts,
-ports and the binding of the ports, you can <a class="reference internal" href="../reference/core.html#moddy.simulator.sim.run" title="moddy.simulator.sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> the simulation:</p>
+ports and the binding of the ports, you can <a class="reference internal" href="../reference/core.html#moddy.sim_core.Sim.run" title="moddy.sim_core.Sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> the simulation:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># let simulator run</span>
-<span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">,</span> <span class="n">maxEvents</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">enableTracePrinting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-         <span class="n">stopOnAssertionFailure</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stop_time</span><span class="o">=</span><span class="mf">12.0</span><span class="p">,</span> <span class="n">max_events</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">enable_trace_printing</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+         <span class="n">stop_on_assertion_failure</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will run the simulation until one of the following conditions are met:</p>
 <blockquote>
 <div><ul class="simple">
-<li>stopTime has been reached</li>
-<li>The simulator has processed a maximum number of event maxEvents.
-If this argument is omitted, it defaults to 100000. You can pass also None, to allow infinite number of events.</li>
-<li>The simulator has no more events to execute</li>
-<li>An exception was raised (either by the model or the simulator)</li>
-<li>An assertion failure occurred. Pass <code class="docutils literal notranslate"><span class="pre">stopOnAssertionFailure=False</span></code>
-to continue simulation in case of assertion failures.</li>
+<li><p>stop_time has been reached</p></li>
+<li><p>The simulator has processed a maximum number of event max_events.
+If this argument is omitted, it defaults to 100000. You can pass also None, to allow infinite number of events.</p></li>
+<li><p>The simulator has no more events to execute</p></li>
+<li><p>An exception was raised (either by the model or the simulator)</p></li>
+<li><p>An assertion failure occurred. Pass <code class="docutils literal notranslate"><span class="pre">stop_on_assertion_failure=False</span></code>
+to continue simulation in case of assertion failures.</p></li>
 </ul>
 </div></blockquote>
-<p>With <em>enableTracePrinting</em>, you can control whether the simulator prints each event while executing.</p>
+<p>With <em>enable_trace_printing</em>, you can control whether the simulator prints each event while executing.</p>
 <p>The run method does not return a value.</p>
 <div class="section" id="catching-model-exceptions">
 <h3>Catching Model Exceptions<a class="headerlink" href="#catching-model-exceptions" title="Permalink to this headline">¶</a></h3>
@@ -970,13 +981,13 @@ If you want to generate the output files even in this case (to show the events t
 you can catch the simulators exception like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># let simulator run</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mi">12</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+        <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stop_time</span><span class="o">=</span><span class="mi">12</span><span class="o">*</span><span class="n">MS</span><span class="p">)</span>
 
-    <span class="k">except</span><span class="p">:</span> <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="k">raise</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="c1"># create SVG drawing</span>
-        <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                                      <span class="o">...</span>
+        <span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
+                                                <span class="o">...</span>
 </pre></div>
 </div>
 </div>
@@ -1003,7 +1014,7 @@ you can catch the simulators exception like this:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

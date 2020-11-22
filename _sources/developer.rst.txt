@@ -12,9 +12,13 @@ Running Test Suite
 
 ``tests`` subdirectory contains a number of tests for the moddy simulator.
 
-To run all tests: In eclipse, right click on ``tests`` and execute ``Run as -> Python unit-test``.
+To run all tests: 
 
-To run a single tests: In eclipse, right click on ``tests/xyz.py`` and execute ``Run as -> Python unit-test``.
+.. code-block:: console
+
+	cd tests
+	python -m unittest
+
 
 Updating the docs
 ==================

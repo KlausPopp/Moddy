@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>moddy.fsm &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>moddy.fsm &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -157,395 +158,439 @@
            <div itemprop="articleBody">
             
   <h1>Source code for moddy.fsm</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">:mod:`fsm` -- Moddy Finite State Machine </span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:mod:`fsm` -- Moddy Finite State Machine</span>
 <span class="sd">=======================================================================</span>
 
 <span class="sd">.. module:: fsm</span>
 <span class="sd">   :synopsis: A general finite state machine with hierarchical state support</span>
 <span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="k">def</span> <span class="nf">isSubFsmSpecification</span><span class="p">(</span><span class="n">nameClsTuple</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Test if the tuple from a transition list (name, classType) is a subFsm specification &#39;&#39;&#39;</span>
-    <span class="n">name</span><span class="p">,</span> <span class="bp">cls</span> <span class="o">=</span> <span class="n">nameClsTuple</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">cls</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Fsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm">[docs]</a><span class="k">class</span> <span class="nc">Fsm</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="k">def</span> <span class="nf">is_sub_fsm_specification</span><span class="p">(</span><span class="n">name_cls_tuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test if the tuple from a transition list (name, classType)</span>
+<span class="sd">    is a subFsm specification&quot;&quot;&quot;</span>
+    <span class="n">_</span><span class="p">,</span> <span class="bp">cls</span> <span class="o">=</span> <span class="n">name_cls_tuple</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="Fsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm">[docs]</a><span class="k">class</span> <span class="nc">Fsm</span><span class="p">:</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A finite state machine.</span>
 <span class="sd">    Subclass your FSM from this class.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Example::</span>
-<span class="sd">    </span>
+
 <span class="sd">        class Computer(Fsm):</span>
-<span class="sd">        </span>
+
 <span class="sd">            def __init__(self):</span>
-<span class="sd">                </span>
-<span class="sd">                transitions = { </span>
+
+<span class="sd">                transitions = {</span>
 <span class="sd">                    &#39;&#39;:</span>
-<span class="sd">                        [(&#39;INITIAL&#39;, &#39;Off&#39;)],</span>
-<span class="sd">                    &#39;Off&#39;: </span>
-<span class="sd">                        [(&#39;PowerApplied&#39;, &#39;Standby&#39;)],</span>
-<span class="sd">                    &#39;Standby&#39;:</span>
-<span class="sd">                        [(&#39;PowerButtonPressed&#39;, &#39;NormalOp&#39;)],</span>
-<span class="sd">                    &#39;NormalOp&#39;:</span>
-<span class="sd">                        [(&#39;PowerButtonPressed&#39;, &#39;Standby&#39;),</span>
-<span class="sd">                         (&#39;OsShutdown&#39;, &#39;Standby&#39;)],</span>
-<span class="sd">                    &#39;ANY&#39;:</span>
-<span class="sd">                        [(&#39;PowerRemoved&#39;, &#39;Off&#39;)]</span>
+<span class="sd">                        [(&#39;INITIAL&#39;, &#39;off&#39;)],</span>
+<span class="sd">                    &#39;off&#39;:</span>
+<span class="sd">                        [(&#39;PowerApplied&#39;, &#39;standby&#39;)],</span>
+<span class="sd">                    &#39;standby&#39;:</span>
+<span class="sd">                        [(&#39;PowerButtonPressed&#39;, &#39;normal_op&#39;)],</span>
+<span class="sd">                    &#39;normal_op&#39;:</span>
+<span class="sd">                        [(&#39;PowerButtonPressed&#39;, &#39;standby&#39;),</span>
+<span class="sd">                         (&#39;OsShutdown&#39;, &#39;standby&#39;)],</span>
+<span class="sd">                    &#39;any&#39;:</span>
+<span class="sd">                        [(&#39;PowerRemoved&#39;, &#39;off&#39;)]</span>
 <span class="sd">                }</span>
-<span class="sd">                </span>
+
 <span class="sd">                super().__init__( dictTransitions=transitions )</span>
 
-<span class="sd">    The special *ANY* state means that the transitions can be initiated from ANY state.</span>
-<span class="sd">    The special *INITIAL* event must be in the &#39;&#39; (uninitialized) state and specifies the INITIAL transistion</span>
-<span class="sd">    which is triggered by :meth:`.startFsm`.</span>
+<span class="sd">    The special *ANY* state means that the transitions can be initiated from</span>
+<span class="sd">    ANY state.</span>
+<span class="sd">    The special *INITIAL* event must be in the &#39;&#39; (uninitialized) state and</span>
+<span class="sd">    specifies the INITIAL transistion</span>
+<span class="sd">    which is triggered by :meth:`.start_fsm`.</span>
 
-<span class="sd">                </span>
-<span class="sd">    You can define entry and exit method that are executed when a state is entered or left.</span>
-<span class="sd">    These methods must follow the naming convention ``STATE_&lt;statename&gt;_&lt;Entry/Exit&gt;``</span>
+
+<span class="sd">    You can define entry and exit method that are executed when a state is</span>
+<span class="sd">    entered or left.</span>
+<span class="sd">    These methods must follow the naming convention</span>
+<span class="sd">    ``state_&lt;statename&gt;_&lt;entry/exit&gt;``</span>
 <span class="sd">    They don&#39;t need to exist. They are called only if they are defined.</span>
-<span class="sd">    </span>
-<span class="sd">    Note that entry and exit actions are NOT called at self transitions (transitions to the current state)::</span>
-<span class="sd">    </span>
-<span class="sd">        # Off actions    </span>
-<span class="sd">        def State_Off_Entry(self):</span>
-<span class="sd">            print(&quot;State_Off_Entry&quot;)</span>
-<span class="sd">    </span>
-<span class="sd">        def State_Off_Exit(self):</span>
-<span class="sd">            print(&quot;State_Off_Exit&quot;)</span>
-<span class="sd">    </span>
+
+<span class="sd">    Note that entry and exit actions are NOT called at self transitions</span>
+<span class="sd">    (transitions to the current state)::</span>
+
+<span class="sd">        # Off actions</span>
+<span class="sd">        def state_off_entry(self):</span>
+<span class="sd">            print(&quot;state_off_entry&quot;)</span>
+
+<span class="sd">        def state_off_exit(self):</span>
+<span class="sd">            print(&quot;state_off_exit&quot;)</span>
+
 <span class="sd">    You can also define a &quot;do&quot; Method that is invoked</span>
-<span class="sd">    </span>
+
 <span class="sd">    * after the &quot;Entry&quot; methode</span>
 <span class="sd">    * at self transistions to the state</span>
-<span class="sd">    </span>
-<span class="sd">    These methods must follow the naming convention ``STATE_&lt;statename&gt;_Do`` </span>
-<span class="sd">    </span>
-<span class="sd">    </span>
-<span class="sd">    Such routines can be also defined for the special *ANY* state. If they exist they are called at</span>
+
+<span class="sd">    These methods must follow the naming convention ``state_&lt;statename&gt;_do``</span>
+
+
+<span class="sd">    Such routines can be also defined for the special *ANY* state.</span>
+<span class="sd">    If they exist they are called at</span>
 <span class="sd">    the entry or exit or self transitions to/from any state.</span>
 
 <span class="sd">    .. note: You cannot define actions for transitions!</span>
-<span class="sd">            </span>
+
 <span class="sd">    Use the fsm as follows::</span>
-<span class="sd">    </span>
+
 <span class="sd">        comp = Computer()</span>
-<span class="sd">        comp.startFsm()    # sets the state machine to its initial state </span>
-<span class="sd">        </span>
+<span class="sd">        comp.start_fsm()    # sets the state machine to its initial state</span>
+
 <span class="sd">        comp.event(&#39;PowerApplied&#39;)</span>
 <span class="sd">        print(&quot;State %s&quot; % comp.state)</span>
-<span class="sd">        </span>
+
 <span class="sd">        comp.event(&#39;PowerButtonPressed&#39;)</span>
 <span class="sd">        print(&quot;State %s&quot; % comp.state)</span>
-<span class="sd">        </span>
+
 <span class="sd">        comp.event(&#39;PowerRemoved&#39;)</span>
 <span class="sd">        print(&quot;State %s&quot; % comp.state)</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
-<span class="sd">    You can call :meth:`.execStateDependentMethod` to execute a state specific method of the fsm.</span>
-<span class="sd">    e.g. ``execStateDependentMethod(&#39;Msg&#39;, 123)`` calls ``State_&lt;currentStateName&gt;_Msg( 123 )``</span>
-<span class="sd">    </span>
-<span class="sd">    (e.g. the simFsmPart uses it to execute the _Msg and _Expiration functions)</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
+
+
+<span class="sd">    You can call :meth:`.exec_state_dependent_method` to execute a</span>
+<span class="sd">    state specific method of the fsm.</span>
+<span class="sd">    e.g. ``exec_state_dependent_method(&#39;msg&#39;, 123)`` calls</span>
+<span class="sd">    ``state_&lt;currentStateName&gt;_msg( 123 )``</span>
+
+<span class="sd">    (e.g. the simFsmPart uses it to execute the _msg and _expiration functions)</span>
+
+
 <span class="sd">    **Hierarchically Nested State Support**</span>
-<span class="sd">    </span>
+
 <span class="sd">    https://en.wikipedia.org/wiki/UML_state_machine#Hierarchically_nested_states</span>
-<span class="sd">    </span>
+
 <span class="sd">    Rules:</span>
 <span class="sd">    Nested states are defined by the user in the transition list:</span>
-<span class="sd">     </span>
-<span class="sd">    </span>
+
+
 <span class="sd">    Main FSM::</span>
-<span class="sd">    </span>
-<span class="sd">        transitions = { </span>
+
+<span class="sd">        transitions = {</span>
 <span class="sd">            &#39;&#39;:</span>
-<span class="sd">                [(&#39;INITIAL&#39;, &#39;Off&#39;)],</span>
-<span class="sd">            &#39;Off&#39;: </span>
-<span class="sd">                [(&#39;PowerApplied&#39;, &#39;Standby&#39;)],</span>
-<span class="sd">            &#39;Standby&#39;:</span>
-<span class="sd">                [(&#39;PowerButtonPressed&#39;, &#39;NormalOp&#39;)],</span>
-<span class="sd">            &#39;NormalOp&#39;:</span>
-<span class="sd">                [ </span>
+<span class="sd">                [(&#39;INITIAL&#39;, &#39;off&#39;)],</span>
+<span class="sd">            &#39;off&#39;:</span>
+<span class="sd">                [(&#39;PowerApplied&#39;, &#39;standby&#39;)],</span>
+<span class="sd">            &#39;standby&#39;:</span>
+<span class="sd">                [(&#39;PowerButtonPressed&#39;, &#39;normal_op&#39;)],</span>
+<span class="sd">            &#39;normal_op&#39;:</span>
+<span class="sd">                [</span>
 <span class="sd">                ####### NESTED FSM (&#39;fsm-Name&#39;, Class-Name)</span>
 <span class="sd">                 (&#39;fsm-name&#39; , subfsm),</span>
-<span class="sd">                 (&#39;PowerButtonPressed&#39;, &#39;Standby&#39;),</span>
-<span class="sd">                 (&#39;OsShutdown&#39;, &#39;Standby&#39;)],</span>
-<span class="sd">            &#39;ANY&#39;:</span>
-<span class="sd">                [(&#39;PowerRemoved&#39;, &#39;Off&#39;)]</span>
+<span class="sd">                 (&#39;PowerButtonPressed&#39;, &#39;standby&#39;),</span>
+<span class="sd">                 (&#39;OsShutdown&#39;, &#39;standby&#39;)],</span>
+<span class="sd">            &#39;any&#39;:</span>
+<span class="sd">                [(&#39;PowerRemoved&#39;, &#39;off&#39;)]</span>
 <span class="sd">        }</span>
 
 <span class="sd">    * A nested FSM is instantiated when the upper level state is entered</span>
 <span class="sd">    * A nested FSM cannot exit</span>
-<span class="sd">    * A nested FSM receives all events from the upper level FSM. If the event is not known in the nested FSM, \</span>
-<span class="sd">    it is directed to the upper FSM. Events that are known in the nested FSM are NOT directed to upper FSM </span>
+<span class="sd">    * A nested FSM receives all events from the upper level FSM. \</span>
+<span class="sd">    If the event is not known in the nested FSM, \</span>
+<span class="sd">    it is directed to the upper FSM. Events that are known in the \</span>
+<span class="sd">    nested FSM are NOT directed to upper FSM</span>
 
-<span class="sd">    * If the upper state exits, the exit action of the current states (first, the state in the nested fsm, \</span>
+<span class="sd">    * If the upper state exits, the exit action of the current states \</span>
+<span class="sd">    (first, the state in the nested fsm, \</span>
 <span class="sd">    then the upper fsm) are called. Then the nested fsm is terminated.</span>
-<span class="sd">    </span>
-<span class="sd">    * Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel. Just \</span>
+
+<span class="sd">    * Orthogonal nested states are also supported. Meaning, multiple \</span>
+<span class="sd">    nested fsms exist in parallel. Just \</span>
 <span class="sd">    enter multiple subFsms in the transition list of a state.</span>
-<span class="sd">    </span>
+
 <span class="sd">    * For nested statemachines, the following methods are usefull:</span>
-<span class="sd">    </span>
-<span class="sd">        - :meth:`.topFsm` gives you the reference to the top level Fsm. E.g. to fire an event to the top Fsm.</span>
-<span class="sd">        - :meth:`moddyPart` gives you the moddy part where the state machine is contained, regardless of the fsm nesting level</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
-<span class="sd">    :param dict dictTransitions: a dictionary, with the transitions: The dict key is the state, and the values are a list of transition from</span>
+
+<span class="sd">        - :meth:`.top_fsm` gives you the reference to the top level Fsm. \</span>
+<span class="sd">        E.g. to fire an event to the top Fsm.</span>
+<span class="sd">        - :meth:`moddy_part` gives you the moddy part where the state machine \</span>
+<span class="sd">        is contained, regardless of the fsm nesting level</span>
+
+
+<span class="sd">    :param dict dict_transitions: a dictionary, with the transitions:</span>
+<span class="sd">        The dict key is the state, and the values are a list of transition from</span>
 <span class="sd">        that state. Each transition consists of a tuple (event, targetState).</span>
-<span class="sd">    :param Fsm parentFsm: The parent Finite State Machine. None if no parent.  </span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictTransitions</span><span class="p">,</span> <span class="n">parentFsm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="sd">    :param Fsm parent_fsm: The parent Finite State Machine. None if no parent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_transitions</span><span class="p">,</span> <span class="n">parent_fsm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parentFsm</span> <span class="o">=</span> <span class="n">parentFsm</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_fsm</span> <span class="o">=</span> <span class="n">parent_fsm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">the_moddy_part</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># set by simFsmPart</span>
+
         <span class="c1"># set reference to top level Fsm</span>
-        <span class="k">if</span> <span class="n">parentFsm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_topFsm</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="n">parent_fsm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_top_fsm</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_topFsm</span> <span class="o">=</span> <span class="n">parentFsm</span><span class="o">.</span><span class="n">_topFsm</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># currently ACTIVE children</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span> <span class="o">=</span> <span class="n">dictTransitions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stateChangeCallback</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_listEvents</span> <span class="o">=</span> <span class="p">[]</span>
-        
+            <span class="bp">self</span><span class="o">.</span><span class="n">_top_fsm</span> <span class="o">=</span> <span class="n">parent_fsm</span><span class="o">.</span><span class="n">_top_fsm</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># currently ACTIVE children</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span> <span class="o">=</span> <span class="n">dict_transitions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_change_callback</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_events</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="c1"># Validate transitions and build list of events</span>
-        <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">listTrans</span> <span class="ow">in</span> <span class="n">dictTransitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">trans</span> <span class="ow">in</span> <span class="n">listTrans</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">isSubFsmSpecification</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">event</span><span class="p">,</span> <span class="n">toState</span> <span class="o">=</span> <span class="n">trans</span>
-                
-                    <span class="k">if</span> <span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listEvents</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_listEvents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-                        
-                    <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stateExists</span><span class="p">(</span><span class="n">toState</span><span class="p">)),</span><span class="s2">&quot;toState </span><span class="si">%s</span><span class="s2"> doesn&#39;t exist&quot;</span> <span class="o">%</span> <span class="n">toState</span>
-                    <span class="k">assert</span><span class="p">(</span><span class="n">toState</span> <span class="o">!=</span> <span class="s1">&#39;ANY&#39;</span><span class="p">),</span><span class="s2">&quot;ANY cannot be a target state&quot;</span>    
-        
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">list_trans</span> <span class="ow">in</span> <span class="n">dict_transitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">trans</span> <span class="ow">in</span> <span class="n">list_trans</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">is_sub_fsm_specification</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">event</span><span class="p">,</span> <span class="n">to_state</span> <span class="o">=</span> <span class="n">trans</span>
+
+                    <span class="k">if</span> <span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_events</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_list_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_exists</span><span class="p">(</span><span class="n">to_state</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                            <span class="s2">&quot;to_state </span><span class="si">%s</span><span class="s2"> doesn&#39;t exist&quot;</span> <span class="o">%</span> <span class="n">to_state</span>
+                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">to_state</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ANY cannot be a target state&quot;</span><span class="p">)</span>
+
         <span class="c1"># check for initial event and remove it</span>
-        <span class="k">try</span><span class="p">:</span> <span class="n">idxInitial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listEvents</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> 
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;INITIAL event missing&#39;</span><span class="p">)</span>
-        
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listEvents</span><span class="p">[</span><span class="n">idxInitial</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">idx_initial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_events</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;INITIAL&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;INITIAL event missing&quot;</span><span class="p">)</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_events</span><span class="p">[</span><span class="n">idx_initial</span><span class="p">]</span>
+
     <span class="c1">#</span>
     <span class="c1"># Public API</span>
-    <span class="c1"># </span>
-    <span class="k">def</span> <span class="nf">getDictTransitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span>        
-                
-<div class="viewcode-block" id="Fsm.execStateDependentMethod"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.execStateDependentMethod">[docs]</a>    <span class="k">def</span> <span class="nf">execStateDependentMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methodName</span><span class="p">,</span> <span class="n">deep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        Execute the state specific methods:</span>
-<span class="sd">        </span>
-<span class="sd">        The method ``self.State_ANY_&lt;methodName&gt;(*args,**kwargs)`` is called if it exists.</span>
-<span class="sd">        </span>
-<span class="sd">        The method ``self.State_&lt;stateName&gt;_&lt;methodName&gt;(*args,**kwargs)`` is called if it exists.</span>
+    <span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">get_dict_transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return the transition dictionary &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span>
 
-<span class="sd">        :param methodName: method name to call</span>
-<span class="sd">        :param deep: if True, then for each currently active subFsm, the execStateMethod called</span>
+<div class="viewcode-block" id="Fsm.exec_state_dependent_method"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.exec_state_dependent_method">[docs]</a>    <span class="k">def</span> <span class="nf">exec_state_dependent_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">deep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute the state specific methods:</span>
+
+<span class="sd">        The method ``self.state_any_&lt;method_name&gt;(*args,**kwargs)``</span>
+<span class="sd">        is called if it exists.</span>
+
+<span class="sd">        The method ``self.state_&lt;stateName&gt;_&lt;method_name&gt;(*args,**kwargs)``</span>
+<span class="sd">        is called if it exists.</span>
+
+<span class="sd">        :param method_name: method name to call</span>
+<span class="sd">        :param deep: if True, then for each currently active sub_fsm, the</span>
+<span class="sd">            _exec_state_method is called</span>
 <span class="sd">        :return: True if at least one method exists</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">handled</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">if</span> <span class="n">deep</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">subFsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">subFsm</span><span class="o">.</span><span class="n">execStateDependentMethod</span><span class="p">(</span> <span class="n">methodName</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sub_fsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sub_fsm</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span>
+                    <span class="n">method_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">):</span>
                     <span class="n">handled</span> <span class="o">+=</span> <span class="mi">1</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execStateMethod</span><span class="p">(</span><span class="s1">&#39;ANY&#39;</span><span class="p">,</span> <span class="n">methodName</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_state_method</span><span class="p">(</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">handled</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execStateMethod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">methodName</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_state_method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">handled</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">handled</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="Fsm.setStateChangeCallback"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.setStateChangeCallback">[docs]</a>    <span class="k">def</span> <span class="nf">setStateChangeCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        Register a method that is called whenever the state of the fsm changes </span>
-<span class="sd">        </span>
+<div class="viewcode-block" id="Fsm.set_state_change_callback"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.set_state_change_callback">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_change_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register a method that is called whenever the state of the fsm changes</span>
+
 <span class="sd">        :param callback: function to be called on state changes</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stateChangeCallback</span> <span class="o">=</span> <span class="n">callback</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_change_callback</span> <span class="o">=</span> <span class="n">callback</span></div>
 
-<div class="viewcode-block" id="Fsm.hasEvent"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.hasEvent">[docs]</a>    <span class="k">def</span> <span class="nf">hasEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">evName</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        check if the event is known by the fsm or a currently active statemachine</span>
-<span class="sd">        </span>
-<span class="sd">        :return: True if event is known by the fsm or a currently active statemachine</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">rv</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">evName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listEvents</span><span class="p">:</span>
-            <span class="n">rv</span> <span class="o">=</span> <span class="kc">True</span>
+<div class="viewcode-block" id="Fsm.has_event"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.has_event">[docs]</a>    <span class="k">def</span> <span class="nf">has_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        check if the event is known by the fsm or a currently active</span>
+<span class="sd">        statemachine.</span>
+
+<span class="sd">        :return: True if event is known by the fsm or a currently active \</span>
+<span class="sd">        statemachine</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">ev_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_events</span><span class="p">:</span>
+            <span class="n">ret_val</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">subFsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">subFsm</span><span class="o">.</span><span class="n">hasEvent</span><span class="p">(</span><span class="n">evName</span><span class="p">):</span>
-                    <span class="n">rv</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">sub_fsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sub_fsm</span><span class="o">.</span><span class="n">has_event</span><span class="p">(</span><span class="n">ev_name</span><span class="p">):</span>
+                    <span class="n">ret_val</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">break</span>
-        <span class="k">return</span> <span class="n">rv</span></div>
-        
-    
-<div class="viewcode-block" id="Fsm.startFsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.startFsm">[docs]</a>    <span class="k">def</span> <span class="nf">startFsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; start the FSM. Fire event ``INITIAL`` &#39;&#39;&#39;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="p">(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">)</span>     </div>
+        <span class="k">return</span> <span class="n">ret_val</span></div>
 
-<div class="viewcode-block" id="Fsm.event"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.event">[docs]</a>    <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evName</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Fsm.start_fsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.start_fsm">[docs]</a>    <span class="k">def</span> <span class="nf">start_fsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; start the FSM. Fire event ``INITIAL`` &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;start_fsm state wrong&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="p">(</span><span class="s2">&quot;INITIAL&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Fsm.event"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.event">[docs]</a>    <span class="k">def</span> <span class="nf">event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute an Event in the *ANY* and current state.</span>
-<span class="sd">        </span>
-<span class="sd">        :param evName: event to execute</span>
+
+<span class="sd">        :param ev_name: event to execute</span>
 <span class="sd">        :raise AssertionError: if the current state is None.</span>
 <span class="sd">        :return: True if the event causes a state change, False if not.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span><span class="s2">&quot;Did you call startFsm?&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="p">(</span><span class="n">evName</span><span class="p">)</span></div>
-    
-<div class="viewcode-block" id="Fsm.topFsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.topFsm">[docs]</a>    <span class="k">def</span> <span class="nf">topFsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; get a reference to the topmost Fsm in the hierarchy &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topFsm</span></div>
-    
-<div class="viewcode-block" id="Fsm.moddyPart"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.moddyPart">[docs]</a>    <span class="k">def</span> <span class="nf">moddyPart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        return a reference of the moddy part this fsm is contained in (regardless of the fsm nesting level).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Did you call start_fsm?&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event</span><span class="p">(</span><span class="n">ev_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Fsm.top_fsm"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.top_fsm">[docs]</a>    <span class="k">def</span> <span class="nf">top_fsm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; get a reference to the topmost Fsm in the hierarchy &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_fsm</span></div>
+
+<div class="viewcode-block" id="Fsm.moddy_part"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm.Fsm.moddy_part">[docs]</a>    <span class="k">def</span> <span class="nf">moddy_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return a reference of the moddy part this fsm is contained in</span>
+<span class="sd">        (regardless of the fsm nesting level).</span>
 <span class="sd">        return None if it is not included in a moddy part</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">part</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topFsm</span><span class="p">()</span><span class="o">.</span><span class="n">_moddyPart</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_fsm</span><span class="p">()</span><span class="o">.</span><span class="n">the_moddy_part</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">return</span> <span class="n">part</span></div>
-        
-        
+
     <span class="c1">#</span>
     <span class="c1"># Internal methods</span>
     <span class="c1">#</span>
-    <span class="k">def</span> <span class="nf">_execStateMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">methodName</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Execute a state specific method that might exist in the fsm subclass </span>
-<span class="sd">        </span>
-<span class="sd">        The method self.State_&lt;stateName&gt;_&lt;methodName&gt;(*args) is called if it exists, True is returned.</span>
-<span class="sd">        If it doesn&#39;t exist, nothing happens, but False is returned.   </span>
-<span class="sd">        </span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">fullMethodName</span> <span class="o">=</span> <span class="s2">&quot;State_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">methodName</span><span class="p">)</span>
-        
-        <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fullMethodName</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_exec_state_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a state specific method that might exist in the fsm subclass</span>
+
+<span class="sd">        The method self.State_&lt;stateName&gt;_&lt;method_name&gt;(*args) is called if</span>
+<span class="sd">        it exists, True is returned.</span>
+<span class="sd">        If it doesn&#39;t exist, nothing happens, but False is returned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">full_method_name</span> <span class="o">=</span> <span class="s2">&quot;state_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
+
+        <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_method_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">func</span><span class="p">(</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span> <span class="p">)</span>
+        <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">stateExists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span>
-        
-    <span class="k">def</span> <span class="nf">gotoState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">state</span> <span class="o">!=</span> <span class="s1">&#39;ANY&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateExists</span><span class="p">(</span><span class="n">state</span><span class="p">)),</span><span class="s2">&quot;gotoState invalid state </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">state</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">!=</span> <span class="n">state</span><span class="p">:</span> <span class="c1"># ignore self transitions</span>
-            <span class="n">oldState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>        
-            <span class="c1">#print(&quot;+++ %s GOTO STATE %s&quot; % (type(self).__name__,state))</span>
+    <span class="k">def</span> <span class="nf">state_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; test if state exists &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span>
+
+    <span class="k">def</span> <span class="nf">goto_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; change fsm state &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_exists</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;goto_state invalid state </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">!=</span> <span class="n">state</span><span class="p">:</span>  <span class="c1"># ignore self transitions</span>
+            <span class="n">old_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+            <span class="c1"># print(&quot;+++ %s GOTO STATE %s&quot; % (type(self).__name__,state))</span>
             <span class="c1"># exit old state</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># terminate subFsms</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">terminateSubFsms</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminate_sub_fsms</span><span class="p">()</span>
                 <span class="c1"># call current state Exit method</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">execStateDependentMethod</span><span class="p">(</span><span class="s1">&#39;Exit&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-            
+                <span class="bp">self</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span><span class="s2">&quot;exit&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
             <span class="c1"># enter new state</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">execStateDependentMethod</span><span class="p">(</span><span class="s1">&#39;Entry&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-            
+            <span class="bp">self</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span><span class="s2">&quot;entry&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
             <span class="c1"># Start any possible nested fsms</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">startSubFsms</span><span class="p">()</span>
-            
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stateChangeCallback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_stateChangeCallback</span><span class="p">(</span> <span class="n">oldState</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_sub_fsms</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_change_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_state_change_callback</span><span class="p">(</span><span class="n">old_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
         <span class="c1"># in any case, execute the &quot;Do&quot; Method of the current state</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">state</span><span class="p">:</span>
-            <span class="c1"># only execute this if the state was not again changed by the Entry methods...</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">execStateDependentMethod</span><span class="p">(</span> <span class="s1">&#39;Do&#39;</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>
-        <span class="c1">#print(&quot;+++ RETURN FROM %s GOTO STATE %s&quot; % (type(self).__name__,state)) </span>
-        
-    <span class="k">def</span> <span class="nf">_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evName</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+            <span class="c1"># only execute this if the state was not again</span>
+            <span class="c1"># changed by the Entry methods...</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span><span class="s2">&quot;do&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># print(&quot;+++ RETURN FROM %s GOTO STATE %s&quot; %</span>
+        <span class="c1"># (type(self).__name__,state))</span>
+
+    <span class="k">def</span> <span class="nf">_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute an Event in the &quot;ANY&quot; and current state.</span>
 <span class="sd">        Returns True if the event causes a state change, False if not.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Check if there is a matching transition</span>
-        <span class="n">oldState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
-        
+        <span class="n">old_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+
         <span class="c1"># first, check if the current state has subFsms which handle the event</span>
         <span class="c1"># if event handled by subFsm, ignore the event for this fsm</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">passEventToSubFsms</span><span class="p">(</span> <span class="n">evName</span> <span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            
-            <span class="c1"># Check all transitions in ANY state and current state </span>
-            <span class="n">transLists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pass_event_to_sub_fsms</span><span class="p">(</span><span class="n">ev_name</span><span class="p">):</span>
+
+            <span class="c1"># Check all transitions in ANY state and current state</span>
+            <span class="n">trans_lists</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">transLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span><span class="p">[</span><span class="s1">&#39;ANY&#39;</span><span class="p">])</span>
+                <span class="n">trans_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span><span class="p">[</span><span class="s2">&quot;any&quot;</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="c1"># ANY state may not exist</span>
                 <span class="k">pass</span>
-            
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">transLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">])</span>
+                <span class="n">trans_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">transLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])</span> <span class="c1"># events in uninitialized state</span>
-    
-            <span class="c1">#print(&quot;+++ %s EVENT %s in state %s&quot; % (type(self).__name__, evName, self.state))</span>
-            
-            <span class="k">for</span> <span class="n">transList</span> <span class="ow">in</span> <span class="n">transLists</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">trans</span> <span class="ow">in</span> <span class="n">transList</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">isSubFsmSpecification</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">event</span><span class="p">,</span><span class="n">toState</span> <span class="o">=</span> <span class="n">trans</span>
-                        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="n">evName</span><span class="p">:</span>
-                            <span class="c1">#print(&quot;+++ %s TRANS %s -&gt; %s&quot; % (type(self).__name__,self.state, toState))</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">gotoState</span><span class="p">(</span><span class="n">toState</span><span class="p">)</span>
+                <span class="c1"># events in uninitialized state</span>
+                <span class="n">trans_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
+
+            <span class="c1"># print(&quot;+++ %s EVENT %s in state %s&quot; %</span>
+            <span class="c1"># (type(self).__name__, ev_name, self.state))</span>
+
+            <span class="k">for</span> <span class="n">trans_list</span> <span class="ow">in</span> <span class="n">trans_lists</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">trans</span> <span class="ow">in</span> <span class="n">trans_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">is_sub_fsm_specification</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">event</span><span class="p">,</span> <span class="n">to_state</span> <span class="o">=</span> <span class="n">trans</span>
+                        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="n">ev_name</span><span class="p">:</span>
+                            <span class="c1"># print(&quot;+++ %s TRANS %s -&gt; %s&quot; %</span>
+                            <span class="c1"># (type(self).__name__,self.state, to_state))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">goto_state</span><span class="p">(</span><span class="n">to_state</span><span class="p">)</span>
                             <span class="k">break</span>
-        <span class="k">return</span> <span class="n">oldState</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+        <span class="k">return</span> <span class="n">old_state</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
 
-    <span class="k">def</span> <span class="nf">passEventToSubFsms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evName</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
+    <span class="k">def</span> <span class="nf">pass_event_to_sub_fsms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        check if the current state has subFsms which handle the event</span>
-<span class="sd">        if event handled by subFsm, return True</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        if event handled by sub_fsm, return True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">handled</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">subFsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">subFsm</span><span class="o">.</span><span class="n">hasEvent</span><span class="p">(</span><span class="n">evName</span><span class="p">):</span>
-                <span class="n">subFsm</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">evName</span><span class="p">)</span>
-                <span class="c1">#print(&quot;Event %s handled by subFsm %s&quot; % (evName, type(subFsm).__name__))</span>
+        <span class="k">for</span> <span class="n">sub_fsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sub_fsm</span><span class="o">.</span><span class="n">has_event</span><span class="p">(</span><span class="n">ev_name</span><span class="p">):</span>
+                <span class="n">sub_fsm</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">ev_name</span><span class="p">)</span>
+                <span class="c1"># print(&quot;Event %s handled by sub_fsm %s&quot; %</span>
+                <span class="c1"># (ev_name, type(sub_fsm).__name__))</span>
                 <span class="n">handled</span> <span class="o">=</span> <span class="kc">True</span>
-                
+
         <span class="k">return</span> <span class="n">handled</span>
-    
 
-    
-    <span class="k">def</span> <span class="nf">startSubFsms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">transList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictTransitions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">trans</span> <span class="ow">in</span> <span class="n">transList</span><span class="p">:</span>
-            <span class="n">subFsmCls</span> <span class="o">=</span> <span class="n">isSubFsmSpecification</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">subFsmCls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+    <span class="k">def</span> <span class="nf">start_sub_fsms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; start all subfsms in current master state &quot;&quot;&quot;</span>
+        <span class="n">trans_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict_transitions</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">trans</span> <span class="ow">in</span> <span class="n">trans_list</span><span class="p">:</span>
+            <span class="n">sub_fsm_cls</span> <span class="o">=</span> <span class="n">is_sub_fsm_specification</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sub_fsm_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># create new fsm</span>
-                <span class="n">subFsm</span> <span class="o">=</span> <span class="n">subFsmCls</span><span class="p">(</span><span class="n">parentFsm</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
-                <span class="c1"># add subFsm to list of active subFsms</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subFsm</span><span class="p">)</span>
+                <span class="n">sub_fsm</span> <span class="o">=</span> <span class="n">sub_fsm_cls</span><span class="p">(</span><span class="n">parentFsm</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                <span class="c1"># add sub_fsm to list of active subFsms</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_fsm</span><span class="p">)</span>
                 <span class="c1"># goto initial state</span>
-                <span class="n">subFsm</span><span class="o">.</span><span class="n">startFsm</span><span class="p">()</span>
-    
-    <span class="k">def</span> <span class="nf">terminateSubFsms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">subFsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span><span class="p">:</span>
-            <span class="n">subFsm</span><span class="o">.</span><span class="n">execStateDependentMethod</span><span class="p">(</span> <span class="s1">&#39;Exit&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_listChildFsms</span> <span class="o">=</span> <span class="p">[]</span></div>
+                <span class="n">sub_fsm</span><span class="o">.</span><span class="n">start_fsm</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">terminate_sub_fsms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; terminate all started sub fsms &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sub_fsm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span><span class="p">:</span>
+            <span class="n">sub_fsm</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span><span class="s2">&quot;exit&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_child_fsms</span> <span class="o">=</span> <span class="p">[]</span></div>
 </pre></div>
 
            </div>
@@ -558,7 +603,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

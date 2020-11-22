@@ -1,0 +1,738 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.interactive_sequence_diagram &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.interactive_sequence_diagram</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.interactive_sequence_diagram</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:mod:`interactive_sequence_diagram` -- Interactive Sequence Diagram Generator</span>
+<span class="sd">==============================================================================</span>
+
+<span class="sd">.. module:: interactive_sequence_diagram</span>
+<span class="sd">   :platform: Unix, Windows</span>
+<span class="sd">   :synopsis: Moddy Interactive Sequence Diagram Generator</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="n">seq_diag_interactive_viewer</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">create_dirs_and_open_output_file</span>
+
+
+<div class="viewcode-block" id="gen_interactive_sequence_diagram"><a class="viewcode-back" href="../../reference/results.html#moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram">[docs]</a><span class="k">def</span> <span class="nf">gen_interactive_sequence_diagram</span><span class="p">(</span>
+    <span class="n">sim</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">,</span>
+    <span class="n">show_parts_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">excluded_element_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_var_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">refer_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="c1"># pylint: disable=too-many-arguments</span>
+    <span class="c1"># pylint: disable=too-many-locals</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Moddy function to create sequence diagrams.</span>
+<span class="sd">    The function is supposed to be called after the simulator has stopped.</span>
+<span class="sd">    It takes the recorded events from the simulator instance.</span>
+
+<span class="sd">    Depending on the `fmt` parameter, either dynamic or static diagrams are</span>
+<span class="sd">    generated.</span>
+
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param str file_name: output filename (including filename extension \</span>
+<span class="sd">        ``.html``)</span>
+
+<span class="sd">    :param list show_parts_list: if given, show only the listed parts</span>
+<span class="sd">                    in that order in sequence diagram.</span>
+<span class="sd">                    Each element can be either a reference to the part or</span>
+<span class="sd">                    a string with the</span>
+<span class="sd">                    hierarchy name of the part.</span>
+<span class="sd">                    if omitted, show all parts known by simulator,</span>
+<span class="sd">                    in the order of their creation</span>
+
+<span class="sd">    :param list show_var_list: List of watched variables to include in</span>
+<span class="sd">                    the sequence diagram.</span>
+<span class="sd">                    Each element must be a string with the variable hierarchy</span>
+<span class="sd">                    name. event.g. &quot;VC.var1&quot;.</span>
+<span class="sd">                    If omitted, no variables are included.</span>
+
+<span class="sd">    :param list excluded_element_list: parts or timers that should be</span>
+<span class="sd">                    excluded from drawing</span>
+<span class="sd">                    Each list element can be the object to exclude or one</span>
+<span class="sd">                    of the following:</span>
+<span class="sd">                    - &#39;allTimers&#39; - exclude all timers</span>
+
+<span class="sd">                    NOTE: Unlike in show_parts_list, strings with hierarchy</span>
+<span class="sd">                    names are not yet supported</span>
+
+<span class="sd">    :param refer_files: Include references to .css and .js file instead</span>
+<span class="sd">                    of including them</span>
+
+<span class="sd">    :param \\**kwargs: further arguments</span>
+
+<span class="sd">         * title - Title text to be displayed above the sequence diagram</span>
+<span class="sd">         * timePerDiv - time per &quot;Time Div&quot;.</span>
+
+<span class="sd">         * pixPerDiv=25 - pixels per time grid division. Optional, default:25.</span>
+<span class="sd">           Note: The interactive viewer dynamically adjust the time scale</span>
+<span class="sd">           depending on the current time</span>
+<span class="sd">           scale factor and uses *</span>
+<span class="sd">           timePerDiv* and *pixPerDiv* only as an</span>
+<span class="sd">           hint for the initial scale factor.</span>
+
+<span class="sd">         * partSpacing=300 - horizontal spacing in pixels between parts.</span>
+<span class="sd">           (start value)</span>
+
+<span class="sd">         * partBoxSize = (100,60) - Tupel with x,y pixel size of part box.</span>
+<span class="sd">           Note: The interactive viewer dynamically adjust the part box</span>
+<span class="sd">           size according</span>
+<span class="sd">           to the length of the part names.</span>
+
+<span class="sd">         * statusBoxWidth=20 - pixel width of status box on life line</span>
+
+<span class="sd">         * variableBoxWidth=150 - pixel width of watched variable value box</span>
+<span class="sd">           on life line</span>
+
+<span class="sd">         * varSpacing = 180 - pixels between variables</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">excluded_element_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">excluded_element_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">show_var_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">show_var_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Make list of parts to show</span>
+    <span class="k">if</span> <span class="n">show_parts_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">all_parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">parts_mgr</span><span class="o">.</span><span class="n">walk_parts</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_parts</span> <span class="o">=</span> <span class="n">show_parts_list</span>
+
+    <span class="n">parts_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">all_parts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">parts_mgr</span><span class="o">.</span><span class="n">find_part_by_name</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">part</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded_element_list</span><span class="p">:</span>
+            <span class="n">parts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+    <span class="c1"># Make list of variables to show</span>
+    <span class="n">var_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">show_var_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">var_watch_mgr</span><span class="o">.</span><span class="n">find_watched_variable_by_name</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="n">var_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">viewer</span> <span class="o">=</span> <span class="n">TraceGenDynamicViewer</span><span class="p">(</span>
+        <span class="n">out_dir</span><span class="p">,</span>
+        <span class="n">parts_list</span><span class="p">,</span>
+        <span class="n">var_list</span><span class="p">,</span>
+        <span class="n">excluded_element_list</span><span class="p">,</span>
+        <span class="n">refer_files</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">gen_html_head</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">get_html_style</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">get_html_mid_1</span><span class="p">()</span>
+
+    <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">gen_header</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">gen_trace_output</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">traced_events</span><span class="p">())</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">gen_script</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">+=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">gen_html_tail</span><span class="p">()</span>
+
+    <span class="c1"># write file</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">create_dirs_and_open_output_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;saved sequence diagram in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file_name</span><span class="p">))</span></div>
+
+
+<span class="k">class</span> <span class="nc">TraceGenDynamicViewer</span><span class="p">:</span>
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to generate the different elements of the HTML file</span>
+<span class="sd">    for the dynamic viewer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">outDir</span><span class="p">,</span>
+        <span class="n">parts_list</span><span class="p">,</span>
+        <span class="n">var_list</span><span class="p">,</span>
+        <span class="n">excluded_element_list</span><span class="p">,</span>
+        <span class="n">refer_files</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># pylint: disable=too-many-arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_parts</span> <span class="o">=</span> <span class="n">parts_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_vars</span> <span class="o">=</span> <span class="n">var_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_excluded_elements</span> <span class="o">=</span> <span class="n">excluded_element_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refer_files</span> <span class="o">=</span> <span class="n">refer_files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_all_parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_parts</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_vars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_part_shadow</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">refer_files</span><span class="p">:</span>
+            <span class="c1"># files are embedded in HTML. reference from HTML output</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_out_dir</span> <span class="o">=</span> <span class="n">outDir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># files are embedded in HTML. reference from current dir</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_out_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># create object for each part to record current STA/VC values</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_all_parts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_part_shadow</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;current&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;lastChange&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;VC&quot;</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_vars</span> <span class="k">else</span> <span class="s2">&quot;STA&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">has_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Test if simPart is in Drawing &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_all_parts</span>
+
+    <span class="k">def</span> <span class="nf">part_no</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Raises ValueError if the part is not present.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_all_parts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_shall_event_be_shown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace_ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">trace_ev</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;&gt;MSG&quot;</span> <span class="ow">or</span> <span class="n">trace_ev</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;T-START&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">trace_ev</span><span class="o">.</span><span class="n">part</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># global event</span>
+        <span class="k">if</span> <span class="n">trace_ev</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;VC&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_part</span><span class="p">(</span><span class="n">trace_ev</span><span class="o">.</span><span class="n">sub_obj</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_part</span><span class="p">(</span><span class="n">trace_ev</span><span class="o">.</span><span class="n">part</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">trace_ev</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;&lt;MSG&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_part</span><span class="p">(</span><span class="n">trace_ev</span><span class="o">.</span><span class="n">sub_obj</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">gen_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate js header with moddyDiagramArgs and</span>
+<span class="sd">        moddyDiagramParts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">camel_case_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;time_per_div&quot;</span><span class="p">:</span> <span class="s2">&quot;timePerDiv&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pix_per_div&quot;</span><span class="p">:</span> <span class="s2">&quot;pixPerDiv&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;part_spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;partSpacing&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;part_box_size&quot;</span><span class="p">:</span> <span class="s2">&quot;partBoxSize&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status_box_width&quot;</span><span class="p">:</span> <span class="s2">&quot;statusBoxWidth&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;variable_box_width&quot;</span><span class="p">:</span> <span class="s2">&quot;variableBoxWidth&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;var_spacing&quot;</span><span class="p">:</span> <span class="s2">&quot;varSpacing&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;g_moddyDiagramArgs = {&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># convert to camelcase key (js program still uses camel case)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">camel_case_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &quot;</span><span class="si">%s</span><span class="s1">&quot;, &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">, &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;};</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;g_moddyDiagramParts = [</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_all_parts</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;{ name: &quot;</span><span class="si">%s</span><span class="s1">&quot;, tp: &quot;</span><span class="si">%s</span><span class="s1">&quot; },</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">(),</span>
+                <span class="s2">&quot;Part&quot;</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_parts</span> <span class="k">else</span> <span class="s2">&quot;Var&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;];</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">gen_trace_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        generate js array with traced events</span>
+<span class="sd">        events belonging to parts which are not shown are omitted</span>
+
+<span class="sd">        General format</span>
+<span class="sd">        { tp: &lt;typeofentry&gt;, t: &lt;time&gt;, p: &lt;part&gt; }</span>
+
+<span class="sd">        Types:</span>
+<span class="sd">        { tp: &quot;&lt;MSG&quot;,    t:&lt;end-time&gt;, p: &lt;srcPart#&gt;, s: &lt;dstPart#&gt;,</span>
+<span class="sd">            b: &lt;begin-time&gt;, txt: &lt;text&gt;, l:t/f c:&lt;color&gt;}</span>
+<span class="sd">        { tp: &quot;T-EXP&quot;,   t:&lt;time&gt;, p: &lt;part#&gt;, txt: &lt;timername&gt; }</span>
+<span class="sd">        { tp: &quot;ANN&quot;,     t:&lt;time&gt;, p: &lt;part#&gt;, txt: &lt;text&gt; }</span>
+<span class="sd">        { tp: &quot;ASSFAIL&quot;, t:&lt;time&gt;, p: &lt;part#&gt;, txt: &lt;text&gt; }</span>
+<span class="sd">        { tp: &quot;STA&quot;,     t:&lt;time&gt;, p: &lt;part#&gt;, b: &lt;begin-time&gt;,</span>
+<span class="sd">            txt: &lt;sta&gt;, c:&lt;color&gt;, sc:&lt;color&gt;, fc:&lt;color&gt;  }</span>
+<span class="sd">        { tp: &quot;VC&quot;,      t:&lt;time&gt;, p: &lt;part#&gt;, b: &lt;begin-time&gt;,</span>
+<span class="sd">            txt: &lt;val&gt;, c:&lt;color&gt;, sc:&lt;color&gt;, fc:&lt;color&gt; }</span>
+
+<span class="sd">        part_no: 0..n-&gt;index of parts from left to right, -1: global</span>
+<span class="sd">        c: text color (for messages also message color)</span>
+<span class="sd">        sc: box stroke color</span>
+<span class="sd">        fc: box fill color</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;g_moddyTracedEvents = [</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">last_event_ts</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">ev_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shall_event_be_shown</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+                <span class="n">last_event_ts</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">trace_time</span>
+
+                <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">+=</span> <span class="n">output</span>
+
+        <span class="c1"># generate a final status event for all parts</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_closing_sta</span><span class="p">(</span><span class="n">last_event_ts</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;];</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">_gen_output_for_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;VC&quot;</span><span class="p">:</span>
+            <span class="n">part_no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">part_no</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">sub_obj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">part_no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">part_no</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">part</span><span class="p">)</span>
+
+        <span class="n">hdr</span> <span class="o">=</span> <span class="s1">&#39;{ tp: &quot;</span><span class="si">%s</span><span class="s1">&quot;, t: </span><span class="si">%g</span><span class="s1">, p: </span><span class="si">%d</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">trace_time</span><span class="p">,</span>
+            <span class="n">part_no</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">mid</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">dispatch</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;&lt;MSG&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_msg_event</span><span class="p">,</span>
+            <span class="s2">&quot;T-EXP&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_tmr_event</span><span class="p">,</span>
+            <span class="s2">&quot;ANN&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_ann_event</span><span class="p">,</span>
+            <span class="s2">&quot;ASSFAIL&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_ann_event</span><span class="p">,</span>
+            <span class="s2">&quot;STA&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_sta_event</span><span class="p">,</span>
+            <span class="s2">&quot;VC&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_output_for_sta_event</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="n">dispatch</span><span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">action</span><span class="p">](</span><span class="n">event</span><span class="p">,</span> <span class="n">part_no</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">mid</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">hdr</span> <span class="o">+</span> <span class="n">mid</span> <span class="o">+</span> <span class="s2">&quot;}, </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">return</span> <span class="n">out</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_gen_output_for_msg_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="n">fire_event</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">trans_val</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;s: </span><span class="si">%d</span><span class="s1">, b: </span><span class="si">%g</span><span class="s1">, txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;, l:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">part_no</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">sub_obj</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">),</span>
+            <span class="n">fire_event</span><span class="o">.</span><span class="n">exec_time</span> <span class="o">-</span> <span class="n">fire_event</span><span class="o">.</span><span class="n">flight_time</span><span class="p">,</span>
+            <span class="n">fire_event</span><span class="o">.</span><span class="n">msg_text</span><span class="p">(),</span>
+            <span class="s1">&#39;&quot;t&quot;&#39;</span> <span class="k">if</span> <span class="n">fire_event</span><span class="o">.</span><span class="n">is_lost</span> <span class="k">else</span> <span class="s1">&#39;&quot;f&quot;&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># generate colored messages</span>
+        <span class="n">msg_color</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">fire_event</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_color</span> <span class="o">=</span> <span class="n">fire_event</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">color</span>
+
+        <span class="k">if</span> <span class="n">fire_event</span><span class="o">.</span><span class="n">msg_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg_color</span> <span class="o">=</span> <span class="n">fire_event</span><span class="o">.</span><span class="n">msg_color</span>
+
+        <span class="k">if</span> <span class="n">msg_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">+=</span> <span class="s1">&#39;, c:&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">msg_color</span>
+
+        <span class="k">return</span> <span class="n">mid</span>
+
+    <span class="k">def</span> <span class="nf">_gen_output_for_tmr_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">tmr</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">sub_obj</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">tmr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_excluded_elements</span>
+            <span class="ow">and</span> <span class="s2">&quot;allTimers&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_excluded_elements</span>
+        <span class="p">):</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">sub_obj</span><span class="o">.</span><span class="n">obj_name</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">mid</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_gen_output_for_ann_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">trans_val</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_gen_output_for_sta_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">part_no</span><span class="p">):</span>
+        <span class="n">vc_appearance</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;boxStrokeColor&quot;</span><span class="p">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;boxFillColor&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;textColor&quot;</span><span class="p">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">shadow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_part_shadow</span><span class="p">[</span><span class="n">part_no</span><span class="p">]</span>
+        <span class="n">current_val</span> <span class="o">=</span> <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">]</span>
+
+        <span class="n">trans_val</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">trans_val</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">trans_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">current_val</span> <span class="o">!=</span> <span class="n">trans_val</span><span class="p">:</span>
+            <span class="c1"># generate box for just ended period</span>
+            <span class="k">if</span> <span class="n">current_val</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="c1"># print(shadow[&#39;currentApp&#39;])</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sta_vc_output</span><span class="p">(</span>
+                    <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;lastChange&quot;</span><span class="p">],</span> <span class="n">current_val</span><span class="p">,</span> <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;currentApp&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="c1"># print(&quot;%f: p=%d trans_val=%s current_val=%s do_output %s&quot;</span>
+            <span class="c1"># %(event.trace_time, part_no, trans_val, current_val, do_output))</span>
+            <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trans_val</span>
+            <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;currentApp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">trans_val</span><span class="o">.</span><span class="n">appearance</span>
+                <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;STA&quot;</span>
+                <span class="k">else</span> <span class="n">vc_appearance</span>
+            <span class="p">)</span>
+            <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;lastChange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">trace_time</span>
+        <span class="k">return</span> <span class="n">mid</span>
+
+    <span class="k">def</span> <span class="nf">_gen_closing_sta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">last_event_ts</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;// close STA/VC</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">shadow</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_part_shadow</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+                <span class="ow">and</span> <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;lastChange&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_event_ts</span>
+            <span class="p">):</span>
+
+                <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;{ tp: &quot;</span><span class="si">%s</span><span class="s1">&quot;, t: </span><span class="si">%g</span><span class="s1">, p: </span><span class="si">%d</span><span class="s1">, &#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">],</span>
+                    <span class="n">last_event_ts</span><span class="p">,</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sta_vc_output</span><span class="p">(</span>
+                    <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;lastChange&quot;</span><span class="p">],</span>
+                    <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">],</span>
+                    <span class="n">shadow</span><span class="p">[</span><span class="s2">&quot;currentApp&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;}, </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">_sta_vc_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">appearance</span><span class="p">):</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;b: </span><span class="si">%g</span><span class="s1">, txt: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_box_appearance</span><span class="p">(</span><span class="n">appearance</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">+=</span> <span class="s1">&#39;, c:&quot;</span><span class="si">%s</span><span class="s1">&quot;, fc:&quot;</span><span class="si">%s</span><span class="s1">&quot;, sc:&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">app</span>
+        <span class="k">return</span> <span class="n">mid</span>
+
+    <span class="k">def</span> <span class="nf">seq_diag_interactive_viewer_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get path relative to output directory to the</span>
+<span class="sd">        seq_diag_interactive_viewer directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span>
+                <span class="n">seq_diag_interactive_viewer</span><span class="o">.</span><span class="vm">__file__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_dir</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span>
+
+    <span class="k">def</span> <span class="nf">readseq_diag_interactive_viewer_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        read file_name from seq_diag_interactive_viewer directory and</span>
+<span class="sd">        return its content</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_diag_interactive_viewer_path</span><span class="p">(),</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">text</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">gen_html_head</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; return HTML fixed header &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="s2">&quot;&lt;html&gt;</span><span class="se">\n</span><span class="s2">&lt;head&gt;</span><span class="se">\n</span><span class="s2">&lt;script src=&quot;</span>
+            <span class="o">+</span> <span class="s1">&#39;&quot;https://d3js.org/d3.v5.min.js&quot;&gt;&#39;</span>
+            <span class="o">+</span> <span class="s2">&quot;&lt;/script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_html_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return HTML code for CSS &quot;&quot;&quot;</span>
+        <span class="n">css_file</span> <span class="o">=</span> <span class="s2">&quot;seq_diag_interactive_viewer.css&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refer_files</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seq_diag_interactive_viewer_path</span><span class="p">(),</span> <span class="n">css_file</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;style&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readseq_diag_interactive_viewer_file</span><span class="p">(</span><span class="n">css_file</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/style&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_html_mid_1</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; return HTML code for fixed elements &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;/head&gt;</span>
+<span class="s2">            &lt;body&gt;</span>
+<span class="s2">            &lt;div id=&quot;controls&quot;&gt;</span>
+<span class="s2">                &lt;div class=&quot;slider-wrapper&quot;&gt;</span>
+<span class="s2">                  &lt;input id=&quot;ScaleSlider&quot; type=&quot;range&quot; min=&quot;-2&quot;</span>
+<span class="s2">                   max=&quot;2&quot; value=&quot;0&quot; step=&quot;any&quot;&gt;</span>
+<span class="s2">                &lt;/div&gt;</span>
+<span class="s2">                &lt;div&gt;</span>
+<span class="s2">                 &lt;output id=&quot;T-Scale&quot;&gt;1.00&lt;/output&gt;</span>
+<span class="s2">                &lt;/div&gt;</span>
+<span class="s2">            &lt;/div&gt;</span>
+<span class="s2">            &lt;div id=&quot;scrollDummy&quot;&gt;&lt;/div&gt;</span>
+<span class="s2">            &lt;div id=&quot;title&quot;&gt;&lt;/div&gt;</span>
+<span class="s2">            &lt;div id=&quot;parts&quot;&gt;&lt;/div&gt;</span>
+<span class="s2">            &lt;div id=&#39;diagram&#39;&gt;&lt;/div&gt;</span><span class="se">\n</span><span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">gen_script</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return HTML code for JS code &quot;&quot;&quot;</span>
+        <span class="n">script_file</span> <span class="o">=</span> <span class="s2">&quot;seq_diag_interactive_viewer.js&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refer_files</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s1">&#39;&lt;script src=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;&lt;/script&gt;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">seq_diag_interactive_viewer_path</span><span class="p">(),</span> <span class="n">script_file</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readseq_diag_interactive_viewer_file</span><span class="p">(</span><span class="n">script_file</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&lt;/script&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># generate code to check alert if browser is not compatible with ECMA6</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;&lt;script&gt;</span>
+<span class="s2">                if (typeof getDiagramArgs !== &quot;function&quot;) {</span>
+<span class="s2">                    alert(&quot;Sorry, your browser does not support ecmascript 6.</span>
+<span class="s2">                     Please use Chrome, Firefox, Edge...&quot;);</span>
+<span class="s2">                }</span>
+<span class="s2">                &lt;/script&gt;</span><span class="se">\n</span><span class="s2">&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">gen_html_tail</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; return HTML fixed tail &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;/body&gt;&lt;/html&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_box_appearance</span><span class="p">(</span><span class="n">appearance</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">box_stroke_color</span> <span class="o">=</span> <span class="n">appearance</span><span class="p">[</span><span class="s2">&quot;boxStrokeColor&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">box_stroke_color</span> <span class="o">=</span> <span class="s2">&quot;orange&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">box_fill_color</span> <span class="o">=</span> <span class="n">appearance</span><span class="p">[</span><span class="s2">&quot;boxFillColor&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">box_fill_color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">text_color</span> <span class="o">=</span> <span class="n">appearance</span><span class="p">[</span><span class="s2">&quot;textColor&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">text_color</span> <span class="o">=</span> <span class="s2">&quot;orange&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">text_color</span><span class="p">,</span> <span class="n">box_fill_color</span><span class="p">,</span> <span class="n">box_stroke_color</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

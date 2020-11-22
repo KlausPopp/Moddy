@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Car Infotainment &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Car Infotainment &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -97,15 +97,16 @@
 <li class="toctree-l2"><a class="reference internal" href="2_sergw.html">Serial Gateway</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Car Infotainment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_helloProgram.html">Hello Demo as a Sequential Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_lostmsg.html">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_vthread_remote_controlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multi_port_binding.html">Multiple Output Ports bound to one Input Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_hello_program.html">Hello Demo as a Sequential Program</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -176,246 +177,268 @@
 <h1>Car Infotainment<a class="headerlink" href="#car-infotainment" title="Permalink to this headline">¶</a></h1>
 <p>Covers:</p>
 <ul class="simple">
-<li>Finite State Machines</li>
-<li>Nested State Machines</li>
+<li><p>Finite State Machines</p></li>
+<li><p>Nested State Machines</p></li>
 </ul>
 <p>This demo simulates the behavior of a (extremely simplified) car infotainment system.</p>
-<p>The main state is simulated with a Moddy Finite state machine. (Off, Booting, NormalOp etc).</p>
+<p>The main state is simulated with a Moddy Finite state machine. (off, booting, normal_op etc).</p>
 <p>The normal state has several nested sub-state machines, such as:</p>
 <ul class="simple">
-<li>‘Apps’ (Radio, Navi) - jumps between the different applications (in this simulation, the apps have no function)</li>
-<li>‘Volume’ - manages the audio volume</li>
+<li><p>‘Apps’ (Radio, Navi) - jumps between the different applications (in this simulation, the apps have no function)</p></li>
+<li><p>‘Volume’ - manages the audio volume</p></li>
 </ul>
 <p>The Stim part simulates user events.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Simulate the behavior of a (extremely simplified) car infotainment system.</span>
 
-<span class="sd">The main state is simulated with a Moddy Finite state machine. (Off, Booting, NormalOp etc).</span>
-<span class="sd">The normal state has several nested sub-state machines, such as </span>
-<span class="sd"> &#39;Apps&#39; (Radio, Navi) - jumps between the different applications (in this simulation, the apps have no function)</span>
+<span class="sd">The main state is simulated with a Moddy Finite state machine.</span>
+<span class="sd">(off, booting, normal   op etc).</span>
+<span class="sd">The normal state has several nested sub-state machines, such as</span>
+
+<span class="sd"> &#39;Apps&#39; (Radio, Navi) - jumps between the different applications</span>
+<span class="sd">   (in this simulation, the apps have no function)</span>
+
 <span class="sd"> &#39;Volume&#39; - manages the audio volume</span>
 
 <span class="sd">The Stim part simulates user events.</span>
 
 <span class="sd">@author: klauspopp@gmx.de</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">moddy</span>
 
-<span class="k">class</span> <span class="nc">CarInfoSystem</span><span class="p">(</span><span class="n">simFsmPart</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-        <span class="n">statusBoxReprMap</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;Off&#39;</span><span class="p">:</span>      <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">bcBlackOnWhite</span><span class="p">),</span>
-            <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;SBY&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">),</span>
-            <span class="s1">&#39;Booting&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;BOOT&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnBlue</span><span class="p">),</span>
-            <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;NORM&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnGreen</span><span class="p">),</span>
-            <span class="s1">&#39;Shutdown&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="s1">&#39;SD&#39;</span><span class="p">,</span> <span class="n">bcWhiteOnRed</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">CarInfoSystem</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimFsmPart</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simulation of Car infotainment &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+        <span class="n">status_box_repr_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;off&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_BLACK_ON_WHITE</span><span class="p">),</span>
+            <span class="s2">&quot;standby&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;SBY&quot;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_RED</span><span class="p">),</span>
+            <span class="s2">&quot;booting&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;BOOT&quot;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_BLUE</span><span class="p">),</span>
+            <span class="s2">&quot;normal_op&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;NORM&quot;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_GREEN</span><span class="p">),</span>
+            <span class="s2">&quot;shutdown&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;SD&quot;</span><span class="p">,</span> <span class="n">moddy</span><span class="o">.</span><span class="n">BC_WHITE_ON_RED</span><span class="p">),</span>
         <span class="p">}</span>
-        
-        
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> <span class="n">fsm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">FSM</span><span class="p">(),</span> <span class="n">statusBoxReprMap</span><span class="o">=</span><span class="n">statusBoxReprMap</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span>
+            <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+            <span class="n">fsm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">FSM</span><span class="p">(),</span>
+            <span class="n">status_box_repr_map</span><span class="o">=</span><span class="n">status_box_repr_map</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Ports &amp; Timers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;buttonPort&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createPorts</span><span class="p">(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;visualPort&#39;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createTimers</span><span class="p">([</span><span class="s1">&#39;bootTmr&#39;</span><span class="p">,</span> <span class="s1">&#39;shutdownTmr&#39;</span><span class="p">,</span> <span class="s1">&#39;clockTmr&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s2">&quot;in&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;power_port&quot;</span><span class="p">,</span> <span class="s2">&quot;ignition_port&quot;</span><span class="p">,</span> <span class="s2">&quot;button_port&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;audio_port&quot;</span><span class="p">,</span> <span class="s2">&quot;visual_port&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_timers</span><span class="p">([</span><span class="s2">&quot;boot_tmr&quot;</span><span class="p">,</span> <span class="s2">&quot;shutdown_tmr&quot;</span><span class="p">,</span> <span class="s2">&quot;clock_tmr&quot;</span><span class="p">])</span>
 
-        
-    <span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">FSM</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">Fsm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; State machine of car infotainment &quot;&quot;&quot;</span>
+
         <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            
-            <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span> 
-                <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="c1"># FSM uninitialized</span>
-                    <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)],</span>                
-                <span class="s1">&#39;Off&#39;</span><span class="p">:</span> 
-                    <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
-                <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>
-                    <span class="c1"># This transition is triggered whenever ANY message arrives on the powerButtonPort</span>
-                    <span class="p">[(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Booting&#39;</span><span class="p">),</span>
-                     <span class="p">(</span><span class="s1">&#39;IgnitionOn&#39;</span><span class="p">,</span> <span class="s1">&#39;Booting&#39;</span><span class="p">)],</span>
-                <span class="s1">&#39;Booting&#39;</span><span class="p">:</span>
-                    <span class="p">[(</span><span class="s1">&#39;bootTmr_Expired&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span>
-                <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span>
-                     <span class="c1"># The following two lines specify nested state machines, executing in parallel</span>
-                    <span class="p">[(</span><span class="s1">&#39;Apps&#39;</span> <span class="p">,</span> <span class="n">CarInfoSystem</span><span class="o">.</span><span class="n">FSM</span><span class="o">.</span><span class="n">ApplicationsFsm</span> <span class="p">),</span>  
-                     <span class="p">(</span><span class="s1">&#39;Vol&#39;</span> <span class="p">,</span> <span class="n">CarInfoSystem</span><span class="o">.</span><span class="n">FSM</span><span class="o">.</span><span class="n">VolumeFsm</span> <span class="p">),</span>         
-                     <span class="c1"># This transition is triggered whenever ANY message arrives on the powerButtonPort</span>
-                     <span class="p">(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Shutdown&#39;</span><span class="p">),</span>
-                     <span class="p">(</span><span class="s1">&#39;IgnitionOff&#39;</span><span class="p">,</span> <span class="s1">&#39;Shutdown&#39;</span><span class="p">),</span>
-                     <span class="c1"># This transition is triggered whenever clockTmr expires, transition to self, </span>
-                     <span class="c1"># executes the &#39;Do&#39; methode</span>
-                     <span class="p">(</span><span class="s1">&#39;clockTmr_Expired&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span> 
-                <span class="s1">&#39;Shutdown&#39;</span><span class="p">:</span>
-                    <span class="p">[(</span><span class="s1">&#39;shutdownTmr_Expired&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
-                <span class="s1">&#39;ANY&#39;</span><span class="p">:</span>
-                    <span class="p">[(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)]</span>
-            <span class="p">}</span>
-            
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span> <span class="p">)</span>
-                
-        
-        <span class="c1"># Off actions    </span>
-        <span class="k">def</span> <span class="nf">State_Off_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State_Off_Entry&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">bootTmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">shutdownTmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">clockTmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-        <span class="c1"># Booting actions</span>
-        <span class="k">def</span> <span class="nf">State_Booting_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Booting_Entry&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">bootTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-    
-        <span class="c1"># Shutdown actions</span>
-        <span class="k">def</span> <span class="nf">State_Shutdown_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">shutdownTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        
-        <span class="c1"># Cursor Blink in NormalOp state</span>
-        <span class="k">def</span> <span class="nf">State_NormalOp_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_clockTime</span> <span class="o">=</span> <span class="mi">100</span>
-            
-        <span class="k">def</span> <span class="nf">State_NormalOp_Do</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">clockTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>                
-            <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">visualPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;time </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clockTime</span><span class="p">,</span> <span class="mf">0.1</span> <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_clockTime</span> <span class="o">+=</span> <span class="mi">5</span>
-            
-        <span class="c1"># Message handlers</span>
-        <span class="k">def</span> <span class="nf">State_ANY_powerPort_Msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;on&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;off&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">)</span>
-                            
-        <span class="k">def</span> <span class="nf">State_ANY_ignitionPort_Msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;on&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;IgnitionOn&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;off&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;IgnitionOff&#39;</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">State_ANY_buttonPort_Msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>            
-            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="c1"># Message are directly the event names</span>
-        
+            <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;INITIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">)],</span>  <span class="c1"># FSM uninitialized</span>
+                <span class="s2">&quot;off&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;PowerApplied&quot;</span><span class="p">,</span> <span class="s2">&quot;standby&quot;</span><span class="p">)],</span>
+                <span class="c1"># This transition is triggered whenever ANY message arrives</span>
+                <span class="c1"># on the powerButtonPort</span>
+                <span class="s2">&quot;standby&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="s2">&quot;PowerButton&quot;</span><span class="p">,</span> <span class="s2">&quot;booting&quot;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;IgnitionOn&quot;</span><span class="p">,</span> <span class="s2">&quot;booting&quot;</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;booting&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;boot_tmr_expired&quot;</span><span class="p">,</span> <span class="s2">&quot;normal_op&quot;</span><span class="p">)],</span>
+                <span class="s2">&quot;normal_op&quot;</span><span class="p">:</span>
+                <span class="c1"># The following two lines specify nested state machines,</span>
+                <span class="c1"># executing in parallel</span>
+                <span class="p">[</span>
+                    <span class="p">(</span><span class="s2">&quot;Apps&quot;</span><span class="p">,</span> <span class="n">CarInfoSystem</span><span class="o">.</span><span class="n">FSM</span><span class="o">.</span><span class="n">ApplicationsFsm</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;Vol&quot;</span><span class="p">,</span> <span class="n">CarInfoSystem</span><span class="o">.</span><span class="n">FSM</span><span class="o">.</span><span class="n">VolumeFsm</span><span class="p">),</span>
+                    <span class="c1"># This transition is triggered whenever ANY message</span>
+                    <span class="c1"># arrives on the powerButtonPort</span>
+                    <span class="p">(</span><span class="s2">&quot;PowerButton&quot;</span><span class="p">,</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;IgnitionOff&quot;</span><span class="p">,</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">),</span>
+                    <span class="c1"># This transition is triggered whenever clockTmr expires,</span>
+                    <span class="c1"># transition to self,</span>
+                    <span class="c1"># executes the &#39;Do&#39; methode</span>
+                    <span class="p">(</span><span class="s2">&quot;clock_tmr_expired&quot;</span><span class="p">,</span> <span class="s2">&quot;normal_op&quot;</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="s2">&quot;shutdown&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;shutdown_tmr_expired&quot;</span><span class="p">,</span> <span class="s2">&quot;standby&quot;</span><span class="p">)],</span>
+                <span class="s2">&quot;any&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;PowerRemoved&quot;</span><span class="p">,</span> <span class="s2">&quot;off&quot;</span><span class="p">)],</span>
+            <span class="p">}</span>
+
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dict_transitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">)</span>
+
+        <span class="c1"># off actions</span>
+        <span class="k">def</span> <span class="nf">state_off_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;state_off_entry&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">boot_tmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">shutdown_tmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">clock_tmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># booting actions</span>
+        <span class="k">def</span> <span class="nf">state_booting_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;booting_entry&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">boot_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="c1"># shutdown actions</span>
+        <span class="k">def</span> <span class="nf">state_shutdown_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">shutdown_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">clock_tmr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># Cursor Blink in normal_op state</span>
+        <span class="k">def</span> <span class="nf">state_normal_op_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clockTime</span> <span class="o">=</span> <span class="mi">100</span>
+
+        <span class="k">def</span> <span class="nf">state_normal_op_do</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">clock_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">visual_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                <span class="s2">&quot;time </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clockTime</span><span class="p">,</span> <span class="mf">0.1</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_clockTime</span> <span class="o">+=</span> <span class="mi">5</span>
+
+        <span class="c1"># Message handlers</span>
+        <span class="k">def</span> <span class="nf">state_any_power_port_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;on&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;PowerApplied&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;off&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;PowerRemoved&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">state_any_ignition_port_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;on&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;IgnitionOn&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;off&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;IgnitionOff&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">state_any_button_port_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  <span class="c1"># Message are directly the event names</span>
+
         <span class="c1"># Nested state machine CarInfo System Applications</span>
-        <span class="k">class</span> <span class="nc">ApplicationsFsm</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
-        
+        <span class="k">class</span> <span class="nc">ApplicationsFsm</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">Fsm</span><span class="p">):</span>
             <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentFsm</span><span class="p">):</span>
-                
-                <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span> 
-                    <span class="s1">&#39;&#39;</span><span class="p">:</span>
-                        <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Radio&#39;</span><span class="p">)],</span>
-                    <span class="s1">&#39;Radio&#39;</span><span class="p">:</span> 
-                        <span class="p">[(</span><span class="s1">&#39;NaviButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Navi&#39;</span><span class="p">)],</span>
-                    <span class="s1">&#39;Navi&#39;</span><span class="p">:</span>
-                        <span class="p">[(</span><span class="s1">&#39;RadioButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Radio&#39;</span><span class="p">)]</span>
+
+                <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;INITIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;radio&quot;</span><span class="p">)],</span>
+                    <span class="s2">&quot;radio&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;NaviButton&quot;</span><span class="p">,</span> <span class="s2">&quot;navi&quot;</span><span class="p">)],</span>
+                    <span class="s2">&quot;navi&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;RadioButton&quot;</span><span class="p">,</span> <span class="s2">&quot;radio&quot;</span><span class="p">)],</span>
                 <span class="p">}</span>
-                
-                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">,</span> <span class="n">parentFsm</span><span class="o">=</span><span class="n">parentFsm</span> <span class="p">)</span>
-                
-            <span class="k">def</span> <span class="nf">State_Radio_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;Radio activated&#39;</span><span class="p">)</span>
-        
-            <span class="k">def</span> <span class="nf">State_Navi_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;Navi activated&#39;</span><span class="p">)</span>
-                
-        <span class="k">class</span> <span class="nc">VolumeFsm</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
-        
+
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                    <span class="n">dict_transitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">,</span> <span class="n">parent_fsm</span><span class="o">=</span><span class="n">parentFsm</span>
+                <span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">state_radio_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s2">&quot;Radio activated&quot;</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">state_navi_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s2">&quot;Navi activated&quot;</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">VolumeFsm</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">Fsm</span><span class="p">):</span>
             <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentFsm</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">=</span> <span class="mi">50</span>
-                
-                <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span> 
-                    <span class="s1">&#39;&#39;</span><span class="p">:</span>
-                        <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;On&#39;</span><span class="p">)],</span>
-                    <span class="s1">&#39;On&#39;</span><span class="p">:</span> 
-                        <span class="p">[(</span><span class="s1">&#39;MuteButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Mute&#39;</span><span class="p">),</span>
-                         <span class="p">(</span><span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="s1">&#39;IncVol&#39;</span><span class="p">),</span>
-                         <span class="p">(</span><span class="s1">&#39;VolKnobLeft&#39;</span><span class="p">,</span> <span class="s1">&#39;DecVol&#39;</span><span class="p">)],</span>
-                    <span class="s1">&#39;IncVol&#39;</span><span class="p">:</span>
-                        <span class="p">[(</span><span class="s1">&#39;VolChangeDone&#39;</span><span class="p">,</span> <span class="s1">&#39;On&#39;</span><span class="p">)],</span>
-                    <span class="s1">&#39;DecVol&#39;</span><span class="p">:</span>
-                        <span class="p">[(</span><span class="s1">&#39;VolChangeDone&#39;</span><span class="p">,</span> <span class="s1">&#39;On&#39;</span><span class="p">)],</span>
-                    <span class="s1">&#39;Mute&#39;</span><span class="p">:</span>
-                        <span class="p">[(</span><span class="s1">&#39;MuteButton&#39;</span><span class="p">,</span> <span class="s1">&#39;On&#39;</span><span class="p">),</span>
-                         <span class="p">(</span><span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="s1">&#39;On&#39;</span><span class="p">)]</span>
+
+                <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;INITIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">)],</span>
+                    <span class="s2">&quot;on&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">(</span><span class="s2">&quot;MuteButton&quot;</span><span class="p">,</span> <span class="s2">&quot;mute&quot;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">&quot;VolKnobRight&quot;</span><span class="p">,</span> <span class="s2">&quot;incvol&quot;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">&quot;VolKnobLeft&quot;</span><span class="p">,</span> <span class="s2">&quot;decvol&quot;</span><span class="p">),</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;incvol&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;VolChangeDone&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">)],</span>
+                    <span class="s2">&quot;decvol&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;VolChangeDone&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">)],</span>
+                    <span class="s2">&quot;mute&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;MuteButton&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;VolKnobRight&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="p">)],</span>
                 <span class="p">}</span>
-                
-                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">,</span> <span class="n">parentFsm</span><span class="o">=</span><span class="n">parentFsm</span> <span class="p">)</span>
-                
-            <span class="k">def</span> <span class="nf">State_On_Do</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">audioPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;volume=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
-                
-            <span class="k">def</span> <span class="nf">State_Mute_Do</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">moddyPart</span><span class="p">()</span><span class="o">.</span><span class="n">audioPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;volume=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
 
-            <span class="k">def</span> <span class="nf">State_IncVol_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                    <span class="n">dict_transitions</span><span class="o">=</span><span class="n">transitions</span><span class="p">,</span> <span class="n">parent_fsm</span><span class="o">=</span><span class="n">parentFsm</span>
+                <span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">state_on_do</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">audio_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                    <span class="s2">&quot;volume=</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span><span class="p">,</span> <span class="mf">0.1</span>
+                <span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">state_mute_do</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moddy_part</span><span class="p">()</span><span class="o">.</span><span class="n">audio_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;volume=</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">state_incvol_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">topFsm</span><span class="p">()</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;VolChangeDone&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">top_fsm</span><span class="p">()</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;VolChangeDone&quot;</span><span class="p">)</span>
 
-            <span class="k">def</span> <span class="nf">State_DecVol_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">state_decvol_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">-=</span> <span class="mi">1</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">topFsm</span><span class="p">()</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;VolChangeDone&#39;</span><span class="p">)</span>
- 
+                <span class="bp">self</span><span class="o">.</span><span class="n">top_fsm</span><span class="p">()</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s2">&quot;VolChangeDone&quot;</span><span class="p">)</span>
+
+
 <span class="k">def</span> <span class="nf">stimProg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ignition_port</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;blue&quot;</span><span class="p">)</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;on&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;PowerButton&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;PowerButton&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;NaviButton&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;NaviButton&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;VolKnobRight&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;VolKnobRight&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobLeft&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;VolKnobLeft&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;MuteButton&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;MuteButton&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="s1">&#39;VolKnobRight&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">button_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;VolKnobRight&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ignitionPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">powerPort</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignition_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-    
-         
-        
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>         
-    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
-    <span class="n">cis</span> <span class="o">=</span> <span class="n">CarInfoSystem</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys&quot;</span><span class="p">)</span>
-    <span class="n">stim</span> <span class="o">=</span> <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Stim&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">stimProg</span><span class="p">,</span> 
-                        <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;buttonPort&#39;</span><span class="p">],</span>
-                                <span class="s1">&#39;SamplingIn&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;visualPort&#39;</span><span class="p">]}</span> <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">SIMU</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
+    <span class="n">CIS</span> <span class="o">=</span> <span class="n">CarInfoSystem</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys&quot;</span><span class="p">)</span>
+    <span class="n">STIM</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">(</span>
+        <span class="n">sim</span><span class="o">=</span><span class="n">SIMU</span><span class="p">,</span>
+        <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;Stim&quot;</span><span class="p">,</span>
+        <span class="n">target</span><span class="o">=</span><span class="n">stimProg</span><span class="p">,</span>
+        <span class="n">elems</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;out&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;power_port&quot;</span><span class="p">,</span> <span class="s2">&quot;ignition_port&quot;</span><span class="p">,</span> <span class="s2">&quot;button_port&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;SamplingIn&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;audio_port&quot;</span><span class="p">,</span> <span class="s2">&quot;visual_port&quot;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
 
     <span class="c1"># bind ports</span>
-    <span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">(</span> <span class="p">[</span> 
-        <span class="p">[</span><span class="s1">&#39;Stim.powerPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.powerPort&#39;</span><span class="p">],</span>
-        <span class="p">[</span><span class="s1">&#39;Stim.ignitionPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.ignitionPort&#39;</span><span class="p">],</span>
-        <span class="p">[</span><span class="s1">&#39;Stim.buttonPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.buttonPort&#39;</span><span class="p">],</span>
-        <span class="p">[</span><span class="s1">&#39;Stim.visualPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.visualPort&#39;</span><span class="p">],</span>
-        <span class="p">[</span><span class="s1">&#39;Stim.audioPort&#39;</span><span class="p">,</span> <span class="s1">&#39;CarInfoSys.audioPort&#39;</span><span class="p">],</span>
-    <span class="p">])</span>
-        
-    <span class="n">moddyGenerateFsmGraph</span><span class="p">(</span> <span class="n">fsm</span><span class="o">=</span><span class="n">cis</span><span class="o">.</span><span class="n">fsm</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;output/3_carinfo_fsm.svg&#39;</span><span class="p">,</span> <span class="n">keepGvFile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
-    
-    
-    <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-    
-    <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> 
-                              <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;output/3_carinfo.html&quot;</span><span class="p">,</span> 
-                              <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span> 
-                              <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="n">stim</span><span class="p">,</span> <span class="n">cis</span><span class="p">],</span> 
-                              <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> 
-                              <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
-                              <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Car Info FSM Demo&quot;</span><span class="p">)</span> 
-    
+    <span class="n">SIMU</span><span class="o">.</span><span class="n">smart_bind</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span><span class="s2">&quot;Stim.power_port&quot;</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys.power_port&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;Stim.ignition_port&quot;</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys.ignition_port&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;Stim.button_port&quot;</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys.button_port&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;Stim.visual_port&quot;</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys.visual_port&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;Stim.audio_port&quot;</span><span class="p">,</span> <span class="s2">&quot;CarInfoSys.audio_port&quot;</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_fsm_graph</span><span class="p">(</span>
+        <span class="n">fsm</span><span class="o">=</span><span class="n">CIS</span><span class="o">.</span><span class="n">fsm</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;output/3_carinfo_fsm.svg&quot;</span><span class="p">,</span> <span class="n">keep_gv_file</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="n">SIMU</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span>
+        <span class="n">sim</span><span class="o">=</span><span class="n">SIMU</span><span class="p">,</span>
+        <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;output/3_carinfo.html&quot;</span><span class="p">,</span>
+        <span class="n">show_parts_list</span><span class="o">=</span><span class="p">[</span><span class="n">STIM</span><span class="p">,</span> <span class="n">CIS</span><span class="p">],</span>
+        <span class="n">time_per_div</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">pix_per_div</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Car Info FSM Demo&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 <p>The simulation outputs:</p>
 <blockquote>
-<div><p><a class="reference download internal" download="" href="../_downloads/2b9c6d201ec7c15f096dae580e183402/3_carinfo.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
-<p><a class="reference download internal" download="" href="../_downloads/7a18dfb2a82f467f7b64e658dfcfda2e/3_carinfo_fsm.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">FSM</span> <span class="pre">graph</span></code></a></p>
+<div><p><a class="reference download internal" download="" href="../_downloads/afd835b84d4ea3782cead71e4dc9fa98/3_carinfo.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/1295b06113d3602400848eef495ba1c8/3_carinfo_fsm.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">FSM</span> <span class="pre">graph</span></code></a></p>
 </div></blockquote>
 </div>
 
@@ -439,7 +462,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

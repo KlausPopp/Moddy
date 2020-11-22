@@ -58,7 +58,7 @@ The console log should end with
 
 	TRC:      11.8s STA     Bob(Part) // 
 	TRC:      11.8s >MSG    Bob.mouth(OutPort) //  req=11.8s beg=11.8s end=12.8s dur=1.0s msg=[Hm?]
-	SIM: Stops because stopTime reached
+	SIM: Stops because stop_time reached
 	SIM: Simulator stopped at 12.0s. Executed 9 events in 0.000 seconds
 	saved sequence diagram in output/1_hello.html as iaViewer
 	Saved structure graph to output/1_hello_structure.svg

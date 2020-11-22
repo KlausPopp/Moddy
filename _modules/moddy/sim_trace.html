@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.sim_trace &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.sim_trace</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.sim_trace</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:mod:`sim_trace` -- Simulator Tracing</span>
+<span class="sd">========================================</span>
+
+<span class="sd">.. module:: sim_trace</span>
+<span class="sd">   :synopsis: Moddy Simulator Tracing Support</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+
+<span class="kn">from</span> <span class="nn">.sim_base</span> <span class="k">import</span> <span class="n">time_unit_to_factor</span>
+
+
+<span class="k">class</span> <span class="nc">SimTraceEvent</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    simTraceEvents are the objects that are added to the simulators trace</span>
+<span class="sd">    buffer</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># pylint: disable=too-few-public-methods</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">sub_obj</span><span class="p">,</span> <span class="n">tv</span><span class="p">,</span> <span class="n">act</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace_time</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># when the event occurred</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">part</span> <span class="o">=</span> <span class="n">part</span>  <span class="c1"># generating part</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_obj</span> <span class="o">=</span> <span class="n">sub_obj</span>  <span class="c1"># timer or port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trans_val</span> <span class="o">=</span> <span class="n">tv</span>  <span class="c1"># Transport value (e.g. message)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">act</span>  <span class="c1"># action string</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">trace_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%-8s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">trace_str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_obj</span><span class="o">.</span><span class="n">hierarchy_name_with_type</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">trace_str</span> <span class="o">+=</span> <span class="s2">&quot; // </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_val</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">trace_str</span>
+
+
+<div class="viewcode-block" id="SimTracing"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_core.SimTracing">[docs]</a><span class="k">class</span> <span class="nc">SimTracing</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Simulator Tracing and logging</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_func</span><span class="p">):</span>
+        <span class="c1"># list of all traced events during execution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_traced_events</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dis_time_scale</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># time scale factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dis_time_scale_str</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>  <span class="c1"># time scale string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enable_trace_prints</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_func</span> <span class="o">=</span> <span class="n">time_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_assertion_failures</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">enable_trace_prints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable_prints</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; enable/disable trace prints &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enable_trace_prints</span> <span class="o">=</span> <span class="n">enable_prints</span>
+
+    <span class="k">def</span> <span class="nf">add_trace_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace_ev</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Add new event to Trace list, timestamp it, print it&#39;&#39;&#39;</span>
+        <span class="n">trace_ev</span><span class="o">.</span><span class="n">trace_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_func</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_traced_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_ev</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enable_trace_prints</span><span class="p">:</span>
+            <span class="n">trace_str</span> <span class="o">=</span> <span class="s2">&quot;TRC: </span><span class="si">%10s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span><span class="n">trace_ev</span><span class="o">.</span><span class="n">trace_time</span><span class="p">),</span>
+                                          <span class="n">trace_ev</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">trace_str</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">traced_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; return list of traced events&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_traced_events</span>
+
+    <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        User routine to add an annotation to a life line at the</span>
+<span class="sd">        current simulation time</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">trace_ev</span> <span class="o">=</span> <span class="n">SimTraceEvent</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="s1">&#39;ANN&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span><span class="n">trace_ev</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">StateIndTransVal</span><span class="p">:</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        class to hold the text and appearance of a state indicator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># pylint: disable=too-few-public-methods</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">appearance</span> <span class="o">=</span> <span class="n">appearance</span>
+
+        <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="k">def</span> <span class="nf">set_state_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        User routine to indicate the current state of a part.</span>
+<span class="sd">        Can be also used to indicate</span>
+<span class="sd">        UML execution specification to a life line</span>
+<span class="sd">        at the current simulation time.</span>
+<span class="sd">        An empty text flags &#39;no state&#39; which removes the indication from the</span>
+<span class="sd">        life line</span>
+
+<span class="sd">        :param SimPart part: affected part</span>
+<span class="sd">        :param str text: text to display (Empty string to clear indicator)</span>
+<span class="sd">        :param dict appearance: (default: {}) colors for indicator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">trace_ev</span> <span class="o">=</span> <span class="n">SimTraceEvent</span><span class="p">(</span>
+            <span class="n">part</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">StateIndTransVal</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="p">),</span> <span class="s1">&#39;STA&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span><span class="n">trace_ev</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimTracing.set_display_time_unit"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_core.SimTracing.set_display_time_unit">[docs]</a>    <span class="k">def</span> <span class="nf">set_display_time_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Define how the simulator prints/displays time units</span>
+
+<span class="sd">        :param str unit: can be &quot;s&quot;, &quot;ms&quot;, &quot;us&quot;, &quot;ns&quot;</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dis_time_scale_str</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dis_time_scale</span> <span class="o">=</span> <span class="n">time_unit_to_factor</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">time_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        return a formatted time string of *time* based on the display scale</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">tmfmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dis_time_scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tmfmt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dis_time_scale_str</span>
+
+    <span class="c1">#</span>
+    <span class="c1"># Model Assertions</span>
+    <span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">assertion_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">assertion_str</span><span class="p">,</span> <span class="n">frame_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add an assertion failure trace event.</span>
+<span class="sd">        Increment global assertion failure counter.</span>
+<span class="sd">        Stop simulator if configured so.</span>
+
+<span class="sd">        :param simPart part: the related simPart. None if global assertion</span>
+<span class="sd">        :param string assertion_str: error message to display</span>
+<span class="sd">        :param int frame_idx: traceback frame index \</span>
+<span class="sd">            (1 if caller&#39;s frame, 2 if caller-caller&#39;s frame...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> \
+            <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="n">frame_idx</span><span class="p">]</span>
+
+        <span class="n">te_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: in </span><span class="si">%s</span><span class="s2">, (</span><span class="si">%s</span><span class="s2">::</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">assertion_str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span>
+                                          <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">),</span>
+                                          <span class="n">line_number</span><span class="p">)</span>
+        <span class="n">trace_ev</span> <span class="o">=</span> <span class="n">SimTraceEvent</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">te_str</span><span class="p">,</span> <span class="s1">&#39;ASSFAIL&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span><span class="n">trace_ev</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_assertion_failures</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">assertion_failures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Return number of assertion failures &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_assertion_failures</span>
+
+    <span class="k">def</span> <span class="nf">print_assertion_failures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Print all traced assertion failures to stderr&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_assertion_failures</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> Assertion failures during simulation&quot;</span> <span class="o">%</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">_num_assertion_failures</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">trace_ev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traced_events</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">trace_ev</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;ASSFAIL&quot;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%10s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span>
+                        <span class="n">trace_ev</span><span class="o">.</span><span class="n">trace_time</span><span class="p">),</span>
+                        <span class="n">trace_ev</span><span class="o">.</span><span class="n">part</span><span class="p">,</span>
+                        <span class="n">trace_ev</span><span class="o">.</span><span class="n">trans_val</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()),</span>
+                        <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

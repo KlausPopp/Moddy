@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.fsm_part &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.fsm_part</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.fsm_part</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:mod:`fsm_part` -- A moddy part with a state machine</span>
+<span class="sd">=======================================================================</span>
+
+<span class="sd">.. module:: fsm_part</span>
+<span class="sd">   :synopsis: A moddy part with a state machine</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">.sim_part</span> <span class="k">import</span> <span class="n">SimPart</span>
+
+
+<div class="viewcode-block" id="SimFsmPart"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm_part.SimFsmPart">[docs]</a><span class="k">class</span> <span class="nc">SimFsmPart</span><span class="p">(</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A moddy part with a state machine</span>
+<span class="sd">    All simulator events are directed to the fsm.</span>
+
+<span class="sd">    :param sim: Simulator instance</span>
+<span class="sd">    :param obj_name: part name</span>
+<span class="sd">    :param Fsm fsm: the state machine (Fsm class) object created by caller</span>
+<span class="sd">    :param parent_obj: parent part. None if part has no parent. Defaults to None</span>
+<span class="sd">    :param dict statusBoxReprMap: defines how each state is shown in</span>
+<span class="sd">            sequence diagrams&#39; status boxes</span>
+<span class="sd">            Must be a dictionary with the state names as keys.</span>
+<span class="sd">            The values must be a tuple of</span>
+
+<span class="sd">            * text to display (None if org. state name shall be used)</span>
+<span class="sd">            * appearance: The colors of the status box, see setStatIndication()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">fsm</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">status_box_repr_map</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="c1"># pylint: disable=too-many-arguments</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="n">parent_obj</span><span class="p">)</span>
+
+        <span class="c1"># reference the fsm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span> <span class="o">=</span> <span class="n">fsm</span>
+        <span class="n">fsm</span><span class="o">.</span><span class="n">the_moddy_part</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="c1"># register state change callback</span>
+        <span class="n">fsm</span><span class="o">.</span><span class="n">set_state_change_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fsm_state_change</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_box_repr_map</span> <span class="o">=</span> <span class="n">status_box_repr_map</span>
+
+    <span class="k">def</span> <span class="nf">start_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">SimPart</span><span class="o">.</span><span class="n">start_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Bring state machine into initial state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">start_fsm</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SimFsmPart.create_ports"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm_part.SimFsmPart.create_ports">[docs]</a>    <span class="k">def</span> <span class="nf">create_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">list_port_names</span><span class="p">):</span>
+        <span class="c1"># Override simPart method to route all events to central handlers</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convinience functions to create multiple ports at once.</span>
+
+<span class="sd">        :param ptype: Type of ports, must be one of &#39;in&#39;, &#39;out&#39; or &#39;io&#39;</span>
+<span class="sd">        :param list list_port_names: list of port names to create</span>
+
+<span class="sd">        The function creates for each port a member variable with this name</span>
+<span class="sd">        in the part.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">list_port_names</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">port_name</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">new_input_port</span><span class="p">(</span><span class="n">port_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_recv</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;io&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">list_port_names</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span> <span class="n">port_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_io_port</span><span class="p">(</span><span class="n">port_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_recv</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="n">ptype</span><span class="p">,</span> <span class="n">list_port_names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimFsmPart.create_timers"><a class="viewcode-back" href="../../reference/fsm.html#moddy.fsm_part.SimFsmPart.create_timers">[docs]</a>    <span class="k">def</span> <span class="nf">create_timers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_timer_names</span><span class="p">):</span>
+        <span class="c1"># Override simPart method to route all events to central handlers</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convinience functions to create multiple timers at once.</span>
+
+<span class="sd">        :param list list_timer_names: list of timer names to create</span>
+
+<span class="sd">        The function creates for each port a member variable with this name</span>
+<span class="sd">        in the part.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tmr_name</span> <span class="ow">in</span> <span class="n">list_timer_names</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmr_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_timer</span><span class="p">(</span><span class="n">tmr_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmr_expired</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">msg_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        receive function for messages</span>
+
+<span class="sd">        If an event name &lt;portname&gt;_Msg exists in the fsm, trigger that event,</span>
+<span class="sd">        otherwise call the state_&lt;portName&gt;_Msg(msg) in the fsm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fsm_event_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_msg&quot;</span> <span class="o">%</span> <span class="n">port</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">has_event</span><span class="p">(</span><span class="n">fsm_event_name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">fsm_event_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span>
+                <span class="n">fsm_event_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">msg</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> not handled&quot;</span> <span class="o">%</span> <span class="n">fsm_event_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Timer expired handler</span>
+
+<span class="sd">        If an event name &lt;timerName&gt;_expired exists in the fsm, trigger that</span>
+<span class="sd">        event, otherwise call the state_&lt;timerName&gt;_expired() in the fsm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fsm_event_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_expired&quot;</span> <span class="o">%</span> <span class="n">timer</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">has_event</span><span class="p">(</span><span class="n">fsm_event_name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="n">fsm_event_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fsm</span><span class="o">.</span><span class="n">exec_state_dependent_method</span><span class="p">(</span><span class="n">fsm_event_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> not handled&quot;</span> <span class="o">%</span> <span class="n">fsm_event_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fsm_state_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called by the fsm whenever the state changes.</span>
+<span class="sd">        Set the part status indicator to new state using the representation map</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">new_state</span>
+        <span class="n">appearance</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_box_repr_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_box_repr_map</span><span class="p">[</span><span class="n">new_state</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">new_state</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

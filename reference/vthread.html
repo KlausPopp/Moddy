@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Virtual Thread Reference &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Virtual Thread Reference &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -106,10 +106,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="fsm.html">Moddy Finite State Machines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="results.html">Moddy Result Generator APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib/index.html">Library Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -182,318 +184,306 @@
 <div class="section" id="virtual-thread-class">
 <h2>Virtual Thread Class<a class="headerlink" href="#virtual-thread-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.vthread.vThread">
-<em class="property">class </em><code class="descclassname">moddy.vthread.</code><code class="descname">vThread</code><span class="sig-paren">(</span><em>sim</em>, <em>objName</em>, <em>parentObj=None</em>, <em>remoteControlled=False</em>, <em>target=None</em>, <em>elems=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VThread">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vthread.</code><code class="sig-name descname">VThread</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">obj_name</em>, <em class="sig-param">parent_obj=None</em>, <em class="sig-param">remote_controlled=False</em>, <em class="sig-param">target=None</em>, <em class="sig-param">elems=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread" title="Permalink to this definition">¶</a></dt>
 <dd><p>A virtual thread simulating a software running on an operating system.
-The scheduler of the operating system schedules the vthreads.</p>
-<p>The simulated software must be written in python and must only call the functions from the scheduler for timing functions:</p>
+The scheduler of the operating system schedules the Vthreads.</p>
+<p>The simulated software must be written in python and must only
+call the functions from the scheduler for timing functions:</p>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference internal" href="#moddy.vthread.vThread.busy" title="moddy.vthread.vThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a> - tell the scheduler how much time the current operation takes</li>
-<li><a class="reference internal" href="#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> - wait for an event: Event can be a timeout, a simulation timer expiration, or a message arriving on an input port</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#moddy.vthread.VThread.busy" title="moddy.vthread.VThread.busy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">busy()</span></code></a> - tell the scheduler how much time the current</dt><dd><p>operation takes</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#moddy.vthread.VThread.wait" title="moddy.vthread.VThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> - wait for an event: Event can be a timeout,</dt><dd><p>a simulation timer expiration, or a message arriving on an
+input port</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
-<p>A vthread is a <a class="reference internal" href="core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a> part, which can exchange messages with other simulation parts, 
-but unlike pure simPart parts,</p>
+<p>A Vthread is a <code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code> part, which can exchange
+messages with other simulation parts, but unlike pure simPart parts,</p>
 <ul>
-<li><p class="first">the input ports are <a class="reference internal" href="#moddy.vthread.vtInPort" title="moddy.vthread.vtInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtInPort</span></code></a> that buffer incoming messages</p>
+<li><p>the input ports are <a class="reference internal" href="#moddy.vthread.VtInPort" title="moddy.vthread.VtInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtInPort</span></code></a> that buffer incoming messages</p>
 <blockquote>
 <div><ul class="simple">
-<li>a sampling input port (<a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>) buffers always the latest message</li>
-<li>a queuing input port (<a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a>) buffers all messages</li>
+<li><dl class="simple">
+<dt>a sampling input port (<a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a>) buffers</dt><dd><p>always the latest message</p>
+</dd>
+</dl>
+</li>
+<li><p>a queuing input port (<a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a>) buffers all messages</p></li>
 </ul>
-<p>vThreads can <a class="reference internal" href="#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-func docutils literal notranslate"><span class="pre">wait()</span></code></a> for messages. They can read messages from the input ports via</p>
+<p>vThreads can <a class="reference internal" href="#moddy.vthread.VThread.wait" title="moddy.vthread.VThread.wait"><code class="xref py py-func docutils literal notranslate"><span class="pre">wait()</span></code></a> for messages.
+They can read messages from the input ports via</p>
 <ul class="simple">
-<li><a class="reference internal" href="#moddy.vthread.vtInPort.readMsg" title="moddy.vthread.vtInPort.readMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readMsg()</span></code></a> - read one message from port</li>
-<li><a class="reference internal" href="#moddy.vthread.vtInPort.nMsg" title="moddy.vthread.vtInPort.nMsg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nMsg()</span></code></a> - determine how many messages are pending</li>
+<li><p><a class="reference internal" href="#moddy.vthread.VtInPort.read_msg" title="moddy.vthread.VtInPort.read_msg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_msg()</span></code></a> - read one message from port</p></li>
+<li><p><a class="reference internal" href="#moddy.vthread.VtInPort.n_msg" title="moddy.vthread.VtInPort.n_msg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">n_msg()</span></code></a> - determine how many messages are pending</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">the simPart timers are indirectly available to vThreads via vtTimers (set a flag on timeout)</p>
+<li><dl class="simple">
+<dt>the simPart timers are indirectly available to vThreads via vtTimers</dt><dd><p>(set a flag on timeout)</p>
+</dd>
+</dl>
 </li>
 </ul>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>objName</strong> – part’s name</li>
-<li><strong>parentObj</strong> – parent part. None if part has no parent.</li>
-<li><strong>remoteControl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – if True, allow thread state to be controlled through a moddy port “threadControlPort”.    Those threads are not started automatically, but only via explicit “start” message to the “threadControlPort”.    Those threads can be killed via “kill” and restarted via “start”.</li>
-<li><strong>target</strong> – Instead of sublcassing vThread and implementing the model code in the subclasses <code class="docutils literal notranslate"><span class="pre">runVThread</span></code> method,     specify the method with your model code in <cite>target</cite>. I gets called without parameters.</li>
-<li><strong>elems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dictionary with elements (ports and timers) to create,     e.g. <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">'QueuingIn':</span> <span class="pre">'inPort1',</span> <span class="pre">'out':</span> <span class="pre">['outPort1',</span> <span class="pre">'outPort2'],</span> <span class="pre">'vtTmr'</span> <span class="pre">:</span> <span class="pre">'timer1'</span> <span class="pre">}</span></code></li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>obj_name</strong> – part’s name</p></li>
+<li><p><strong>parent_obj</strong> – parent part. None if part has no parent.</p></li>
+<li><p><strong>remote_controlled</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – if True, allow thread state to be     controlled through a moddy port “_thread_control_port”.    Those threads are not started automatically, but only via explicit     “start” message to the “_thread_control_port”.    Those threads can be killed via “kill” and restarted via “start”.</p></li>
+<li><p><strong>_target</strong> – Instead of sublcassing vThread and implementing the model     code in the subclasses <code class="docutils literal notranslate"><span class="pre">run_vthread</span></code> method,     specify the method with your model code in <cite>_target</cite>.     I gets called without parameters.</p></li>
+<li><p><strong>elems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – A dictionary with elements (ports and timers)     to create,     e.g. <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">'QueuingIn':</span> <span class="pre">'inPort1',</span> <span class="pre">'out':</span> <span class="pre">['outPort1',</span> <span class="pre">'outPort2'],</span>&#160;&#160;&#160;&#160; <span class="pre">'vtTmr'</span> <span class="pre">:</span> <span class="pre">'timer1'</span> <span class="pre">}</span></code></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="exception">
-<dt id="moddy.vthread.vThread.TerminateException">
-<em class="property">exception </em><code class="descname">TerminateException</code><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.TerminateException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.TerminateException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exception that is raised to tell the thread that it shall be terminated</p>
+<dt id="moddy.vthread.VThread.TerminateException">
+<em class="property">exception </em><code class="sig-name descname">TerminateException</code><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.TerminateException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.TerminateException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception that is raised to tell the thread that it shall be terminated
+because simulator terminates</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.busy">
-<code class="descname">busy</code><span class="sig-paren">(</span><em>time</em>, <em>status</em>, <em>statusAppearance={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.busy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.busy" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VThread.busy">
+<code class="sig-name descname">busy</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">status</em>, <em class="sig-param">status_appearance={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.busy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.busy" title="Permalink to this definition">¶</a></dt>
 <dd><p>tell the scheduler how much time the current operation takes</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>time</strong> – the busy time. May be 0</li>
-<li><strong>status</strong> – the status text shown on the sequence diagram life line</li>
-<li><strong>statusAppearance</strong> – defines the decoration of the status box in the sequence diagram.
-See svgSeqD.statusBox</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> – the busy time. May be 0</p></li>
+<li><p><strong>status</strong> – the status text shown on the sequence diagram life line</p></li>
+<li><p><strong>status_appearance</strong> – defines the decoration of the status             box in the sequence diagram.
+See svgSeqD.statusBox</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">always ‘ok’</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>always ‘ok’</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#moddy.vthread.VThread.TerminateException" title="moddy.vthread.VThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.createPorts">
-<code class="descname">createPorts</code><span class="sig-paren">(</span><em>ptype</em>, <em>listPortNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.createPorts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.createPorts" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VThread.create_ports">
+<code class="sig-name descname">create_ports</code><span class="sig-paren">(</span><em class="sig-param">ptype</em>, <em class="sig-param">list_port_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.create_ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.create_ports" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convinience functions to create multiple vtPorts at once.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ptype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – <p>must be one of</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ptype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – <p>must be one of</p>
 <ul>
-<li>’SamplingIn’,</li>
-<li>’QueuingIn’,</li>
-<li>’SamplingIO’</li>
-<li>’QueuingIO’</li>
-<li>’in’</li>
-<li>’out’</li>
-<li>’io’</li>
+<li><p>’SamplingIn’,</p></li>
+<li><p>’QueuingIn’,</p></li>
+<li><p>’SamplingIO’</p></li>
+<li><p>’QueuingIO’</p></li>
+<li><p>’in’</p></li>
+<li><p>’out’</p></li>
+<li><p>’io’</p></li>
 </ul>
-</li>
-<li><strong>listPortNames</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of port names to create</li>
+</p></li>
+<li><p><strong>list_port_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of port names to create</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>The function creates for each port a member variable with this name in the part.</p>
+</dd>
+</dl>
+<p>The function creates for each port a member variable with this
+name in the part.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.createVtTimers">
-<code class="descname">createVtTimers</code><span class="sig-paren">(</span><em>listTimerNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.createVtTimers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.createVtTimers" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VThread.create_vt_timers">
+<code class="sig-name descname">create_vt_timers</code><span class="sig-paren">(</span><em class="sig-param">list_timer_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.create_vt_timers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.create_vt_timers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convinience functions to create multiple vtTimers at once.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>listTimerNames</strong> – list of timers to create</td>
-</tr>
-</tbody>
-</table>
-<p>The function creates for each port a member variable with this name in the part.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_timer_names</strong> – list of timers to create</p>
+</dd>
+</dl>
+<p>The function creates for each port a member variable with this name
+in the part.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.newVtQueuingIOPort">
-<code class="descname">newVtQueuingIOPort</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.newVtQueuingIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.newVtQueuingIOPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new queueing I/O port(via <a class="reference internal" href="#moddy.vthread.vtIOPort" title="moddy.vthread.vtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtIOPort</span></code></a>)  to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – name of port</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VThread.new_vt_queuing_in_port">
+<code class="sig-name descname">new_vt_queuing_in_port</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.new_vt_queuing_in_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.new_vt_queuing_in_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new queueing input port (<a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a>) to the part</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of port</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.newVtQueuingInPort">
-<code class="descname">newVtQueuingInPort</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.newVtQueuingInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.newVtQueuingInPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new queueing input port (<a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a>) to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – name of port</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VThread.new_vt_queuing_io_port">
+<code class="sig-name descname">new_vt_queuing_io_port</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.new_vt_queuing_io_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.new_vt_queuing_io_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new queueing I/O port(via <a class="reference internal" href="#moddy.vthread.VtIOPort" title="moddy.vthread.VtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtIOPort</span></code></a>)  to the part</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of port</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.newVtSamplingIOPort">
-<code class="descname">newVtSamplingIOPort</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.newVtSamplingIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.newVtSamplingIOPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new sampling I/O port (via <a class="reference internal" href="#moddy.vthread.vtIOPort" title="moddy.vthread.vtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtIOPort</span></code></a>) to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – name of port</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VThread.new_vt_sampling_in_port">
+<code class="sig-name descname">new_vt_sampling_in_port</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.new_vt_sampling_in_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.new_vt_sampling_in_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new sampling input port (<a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a>) to the part</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of port</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.newVtSamplingInPort">
-<code class="descname">newVtSamplingInPort</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.newVtSamplingInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.newVtSamplingInPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new sampling input port (<a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>) to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – name of port</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VThread.new_vt_sampling_io_port">
+<code class="sig-name descname">new_vt_sampling_io_port</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.new_vt_sampling_io_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.new_vt_sampling_io_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new sampling I/O port (via <a class="reference internal" href="#moddy.vthread.VtIOPort" title="moddy.vthread.VtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtIOPort</span></code></a>) to the part</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of port</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.newVtTimer">
-<code class="descname">newVtTimer</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.newVtTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.newVtTimer" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VThread.new_vt_timer">
+<code class="sig-name descname">new_vt_timer</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.new_vt_timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.new_vt_timer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new virtual timer to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – name of timer</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of timer</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.runVThread">
-<code class="descname">runVThread</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.runVThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.runVThread" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VThread.run_vthread">
+<code class="sig-name descname">run_vthread</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.run_vthread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.run_vthread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model code of the VThread. can be overridden by subclass</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.wait">
-<code class="descname">wait</code><span class="sig-paren">(</span><em>timeout</em>, <em>evList=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.wait" title="Permalink to this definition">¶</a></dt>
-<dd><p>Suspend vThread until one of the events in <cite>evList</cite> occurs or timeout</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timeout</strong> – time to wait for events. If None, wait forever. A timeout value of 0 is invalid.</li>
-<li><strong>evList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of events to wait for. Events can be <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>,          <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a>, <a class="reference internal" href="#moddy.vthread.vtIOPort" title="moddy.vthread.vtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtIOPort</span></code></a>, or <a class="reference internal" href="#moddy.vthread.vtTimer" title="moddy.vthread.vtTimer"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtTimer</span></code></a> object.          If evList is empty (or omitted), wait for timeout unconditionally.</li>
+<dt id="moddy.vthread.VThread.wait">
+<code class="sig-name descname">wait</code><span class="sig-paren">(</span><em class="sig-param">timeout</em>, <em class="sig-param">ev_list=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suspend vThread until one of the events in <cite>ev_list</cite> occurs or timeout</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> – time to wait for events. If None, wait forever.             A timeout value of 0 is invalid.</p></li>
+<li><p><strong>ev_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of events to wait for.             Events can be <a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a>,              <a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a>, <a class="reference internal" href="#moddy.vthread.VtIOPort" title="moddy.vthread.VtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtIOPort</span></code></a>,              or <a class="reference internal" href="#moddy.vthread.VtTimer" title="moddy.vthread.VtTimer"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtTimer</span></code></a> object.              If ev_list is empty (or omitted),              wait for timeout unconditionally.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ if one of the events has been triggered (it does not tell you which one), ‘timeout’ if timeout</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>‘ok’ if one of the events has been triggered         (it does not tell you which one), ‘timeout’ if timeout</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#moddy.vthread.VThread.TerminateException" title="moddy.vthread.VThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.waitForMonitor">
-<code class="descname">waitForMonitor</code><span class="sig-paren">(</span><em>timeout</em>, <em>monitorFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.waitForMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.waitForMonitor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Suspend vThread until the ‘monitorFunc’ detects a match.</p>
-<p>Usefull for stimulation threads to wait until the model has reached some state.
-The ‘monitorFunc’ is called from the simulator at each simulation step. 
-If the ‘monitorFunc’ returns True, this function returns to caller.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timeout</strong> – time to wait for monitor. If None, wait forever. A timeout value of 0 is invalid.</li>
-<li><strong>monitorFunc</strong> – the monitor function to be triggered at each simulation step. called without parameters</li>
+<dt id="moddy.vthread.VThread.wait_for_monitor">
+<code class="sig-name descname">wait_for_monitor</code><span class="sig-paren">(</span><em class="sig-param">timeout</em>, <em class="sig-param">monitor_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.wait_for_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.wait_for_monitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suspend vThread until the ‘monitor_func’ detects a match.</p>
+<p>Usefull for stimulation threads to wait until the model has reached
+some state.
+The ‘monitor_func’ is called from the simulator at each simulation
+step.
+If the ‘monitor_func’ returns True, this function returns to caller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> – time to wait for monitor. If None, wait forever.             A timeout value of 0 is invalid.</p></li>
+<li><p><strong>monitor_func</strong> – the monitor function to be triggered at each             simulation step. called without parameters</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ the monitor has returned True, ‘timeout’ if timeout</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>‘ok’ the monitor has returned True, ‘timeout’ if timeout</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#moddy.vthread.VThread.TerminateException" title="moddy.vthread.VThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.waitForMsg">
-<code class="descname">waitForMsg</code><span class="sig-paren">(</span><em>timeout</em>, <em>ports</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.waitForMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.waitForMsg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Suspend vThread until a message is available on at least at one of the <cite>ports</cite>.</p>
-<p>In contrast to <a class="reference internal" href="#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a>, you don’t need to check that all ports are empty before calling this
-method.</p>
+<dt id="moddy.vthread.VThread.wait_for_msg">
+<code class="sig-name descname">wait_for_msg</code><span class="sig-paren">(</span><em class="sig-param">timeout</em>, <em class="sig-param">ports</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.wait_for_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.wait_for_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suspend vThread until a message is available on at least at one
+of the <cite>ports</cite>.</p>
+<p>In contrast to <a class="reference internal" href="#moddy.vthread.VThread.wait" title="moddy.vthread.VThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a>, you don’t need to check that all
+ports are empty before calling this method.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">It makes not a lot of sense to call this method on <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>, because once such a port 
-has received at least once a message, this method returns immediately.</p>
+<p class="admonition-title">Note</p>
+<p>It makes not a lot of sense to call this method on
+<a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a>, because once such a port
+has received at least once a message,
+this method returns immediately.</p>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timeout</strong> – time to wait for messsages. If None, wait forever. If <cite>0</cite> is specified, don’t wait, just 
-return what is available.</li>
-<li><strong>ports</strong> – a port or a list of ports to wait for. Each port can be <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a> or <a class="reference internal" href="#moddy.vthread.vtIOPort" title="moddy.vthread.vtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtIOPort</span></code></a>.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> – time to wait for messsages. If None, wait forever.             If <cite>0</cite> is specified, don’t wait, just             return what is available.</p></li>
+<li><p><strong>ports</strong> – a port or a list of ports to wait for.             Each port can be <a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a> or <a class="reference internal" href="#moddy.vthread.VtIOPort" title="moddy.vthread.VtIOPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtIOPort</span></code></a>.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>One of the following:</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>One of the following:</p>
 <ul class="simple">
-<li>if multiple ports were specified: tuple <cite>(msg, port)</cite> for the first message that is available one of the ports,</li>
-<li>if a single port was specified: <cite>msg</cite> for the first message that is available on the ports,</li>
-<li>None if no message available</li>
+<li><dl class="simple">
+<dt>if multiple ports were specified: tuple <cite>(msg, port)</cite></dt><dd><p>for the first message that is available one of the ports,</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>if a single port was specified: <cite>msg</cite> for the first message</dt><dd><p>that is available on the ports,</p>
+</dd>
+</dl>
+</li>
+<li><p>None if no message available</p></li>
 </ul>
 </p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#moddy.vthread.VThread.TerminateException" title="moddy.vthread.VThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vThread.waitUntil">
-<code class="descname">waitUntil</code><span class="sig-paren">(</span><em>time</em>, <em>evList=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vThread.waitUntil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vThread.waitUntil" title="Permalink to this definition">¶</a></dt>
-<dd><p>Suspend vThread until one of the events in <cite>evList</cite> occurs or until specified time</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>time</strong> – target time. Must be &gt;= current simulation time, otherwise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a> is thrown</li>
-<li><strong>evList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of events to wait for. Events can be <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a>,          <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a>, or <a class="reference internal" href="#moddy.vthread.vtTimer" title="moddy.vthread.vtTimer"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtTimer</span></code></a> object</li>
+<dt id="moddy.vthread.VThread.wait_until">
+<code class="sig-name descname">wait_until</code><span class="sig-paren">(</span><em class="sig-param">time</em>, <em class="sig-param">ev_list=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VThread.wait_until"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VThread.wait_until" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suspend vThread until one of the events in <cite>ev_list</cite> occurs or until
+specified time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> – _target time. Must be &gt;= current simulation time,             otherwise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a> is thrown</p></li>
+<li><p><strong>ev_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of events to wait for. Events can be             <a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a>,             <a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a>, or <a class="reference internal" href="#moddy.vthread.VtTimer" title="moddy.vthread.VtTimer"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtTimer</span></code></a> object</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">‘ok’ if one of the events has been triggered, ‘timeout’ if timeout</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="#moddy.vthread.vThread.TerminateException" title="moddy.vthread.vThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</li>
-<li><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – if target time already gone</li>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>‘ok’ if one of the events has been triggered,             ‘timeout’ if timeout</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#moddy.vthread.VThread.TerminateException" title="moddy.vthread.VThread.TerminateException"><strong>TerminateException</strong></a> – if simulator stopped</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – if _target time already gone</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -501,227 +491,202 @@ return what is available.</li>
 <div class="section" id="ports-for-virtual-threads">
 <h3>Ports for Virtual Threads<a class="headerlink" href="#ports-for-virtual-threads" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="moddy.vthread.vtInPort">
-<em class="property">class </em><code class="descclassname">moddy.vthread.</code><code class="descname">vtInPort</code><span class="sig-paren">(</span><em>sim</em>, <em>name</em>, <em>vThread</em>, <em>qDepth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtInPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for input ports of vThreads which extends the standard input port:</p>
+<dt id="moddy.vthread.VtInPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vthread.</code><code class="sig-name descname">VtInPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">name</em>, <em class="sig-param">v_thread</em>, <em class="sig-param">q_depth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtInPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for input ports of vThreads which extends the standard
+input port:</p>
 <ul>
-<li><p class="first">buffers the incoming message: vtInport can be a sampling or queuing port</p>
+<li><p>buffers the incoming message: VtInport can be a sampling or queuing port</p>
 <blockquote>
 <div><ul class="simple">
-<li>a <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a> buffers only the last received message</li>
-<li>a <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a> buffers all messages</li>
+<li><p>a <a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a> buffers only the last received message</p></li>
+<li><p>a <a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a> buffers all messages</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">wakes up the vThread from <a class="reference internal" href="#moddy.vthread.vThread.wait" title="moddy.vthread.vThread.wait"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code></a> if the vThread is waiting for input on that port</p>
-</li>
-<li><p class="first">provides an API to read the messages from the buffer</p>
-</li>
+<li><p>wakes up the vThread from <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait()</span></code> if the vThread is
+waiting for input on that port</p></li>
+<li><p>provides an API to read the messages from the buffer</p></li>
 </ul>
 <dl class="method">
-<dt id="moddy.vthread.vtInPort.nMsg">
-<code class="descname">nMsg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtInPort.nMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtInPort.nMsg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check how many messages are in the port’s buffer. Overwritten by subclass</p>
+<dt id="moddy.vthread.VtInPort.n_msg">
+<code class="sig-name descname">n_msg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtInPort.n_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtInPort.n_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check how many messages are in the port’s buffer. Overwritten
+by subclass</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vtInPort.readMsg">
-<code class="descname">readMsg</code><span class="sig-paren">(</span><em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtInPort.readMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtInPort.readMsg" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtInPort.read_msg">
+<code class="sig-name descname">read_msg</code><span class="sig-paren">(</span><em class="sig-param">default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtInPort.read_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtInPort.read_msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a message from the port’s buffer. Overwritten by subclass</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="moddy.vthread.vtSamplingInPort">
-<em class="property">class </em><code class="descclassname">moddy.vthread.</code><code class="descname">vtSamplingInPort</code><span class="sig-paren">(</span><em>sim</em>, <em>name</em>, <em>vThread</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtSamplingInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtSamplingInPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtSamplingInPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vthread.</code><code class="sig-name descname">VtSamplingInPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">name</em>, <em class="sig-param">v_thread</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtSamplingInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtSamplingInPort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sampling input port for vThreads
 A sampling port buffers only the last received message
 A read from the sampling buffer does not consume the buffered message</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>vThread</strong> (<a class="reference internal" href="#moddy.vthread.vThread" title="moddy.vthread.vThread"><em>vThread</em></a>) – vThread to which the port shall be added to</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>vThread</strong> (<em>vThread</em>) – vThread to which the port shall be added to</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.vthread.vtSamplingInPort.nMsg">
-<code class="descname">nMsg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtSamplingInPort.nMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtSamplingInPort.nMsg" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">1 if message is available, or 0 if not</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VtSamplingInPort.n_msg">
+<code class="sig-name descname">n_msg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtSamplingInPort.n_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtSamplingInPort.n_msg" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>1 if message is available, or 0 if not</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vtSamplingInPort.readMsg">
-<code class="descname">readMsg</code><span class="sig-paren">(</span><em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtSamplingInPort.readMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtSamplingInPort.readMsg" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtSamplingInPort.read_msg">
+<code class="sig-name descname">read_msg</code><span class="sig-paren">(</span><em class="sig-param">default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtSamplingInPort.read_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtSamplingInPort.read_msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get current message from sampling buffer.
-The message is not consumed, i.e. if <cite>readMsg</cite> is called again before a new message comes in, the 
-same message is returned.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> – value to return if no message was received at all</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BufferError" title="(in Python v3.7)"><strong>BufferError</strong></a> – if no message was received at all AND <cite>default</cite> is None</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">message in buffer</td>
-</tr>
-</tbody>
-</table>
+The message is not consumed, i.e. if <cite>read_msg</cite> is called again before
+a new message comes in, the same message is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>default</strong> – value to return if no message was received at all</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BufferError" title="(in Python v3.9)"><strong>BufferError</strong></a> – if no message was received at all AND <cite>default</cite>         is None</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>message in buffer</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="moddy.vthread.vtQueuingInPort">
-<em class="property">class </em><code class="descclassname">moddy.vthread.</code><code class="descname">vtQueuingInPort</code><span class="sig-paren">(</span><em>sim</em>, <em>name</em>, <em>vThread</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtQueuingInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtQueuingInPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtQueuingInPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vthread.</code><code class="sig-name descname">VtQueuingInPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">name</em>, <em class="sig-param">v_thread</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtQueuingInPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtQueuingInPort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Queuing input port for vThreads.
-A queuing port buffers all messages in a fifo queue. The queue depth is infinite.
+A queuing port buffers all messages in a fifo queue. The queue depth is
+infinite.
 A read from the buffer consumes the oldest message.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>vThread</strong> (<a class="reference internal" href="#moddy.vthread.vThread" title="moddy.vthread.vThread"><em>vThread</em></a>) – vThread to which the port shall be added to</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>vThread</strong> (<em>vThread</em>) – vThread to which the port shall be added to</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.vthread.vtQueuingInPort.nMsg">
-<code class="descname">nMsg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtQueuingInPort.nMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtQueuingInPort.nMsg" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of messages in queue</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VtQueuingInPort.n_msg">
+<code class="sig-name descname">n_msg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtQueuingInPort.n_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtQueuingInPort.n_msg" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of messages in queue</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vtQueuingInPort.readMsg">
-<code class="descname">readMsg</code><span class="sig-paren">(</span><em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtQueuingInPort.readMsg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtQueuingInPort.readMsg" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtQueuingInPort.read_msg">
+<code class="sig-name descname">read_msg</code><span class="sig-paren">(</span><em class="sig-param">default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtQueuingInPort.read_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtQueuingInPort.read_msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get first message from queue.
 The message is consumed.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> – ignored</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BufferError" title="(in Python v3.7)"><strong>BufferError</strong></a> – if no message in buffer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">message in buffer</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>default</strong> – ignored</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#BufferError" title="(in Python v3.9)"><strong>BufferError</strong></a> – if no message in buffer</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>message in buffer</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="moddy.vthread.vtIOPort">
-<em class="property">class </em><code class="descclassname">moddy.vthread.</code><code class="descname">vtIOPort</code><span class="sig-paren">(</span><em>sim</em>, <em>name</em>, <em>vThread</em>, <em>inPort</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtIOPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>An IOPort that combines a Sampling/Queuing input port and a standard output port</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>vThread</strong> (<a class="reference internal" href="#moddy.vthread.vThread" title="moddy.vthread.vThread"><em>vThread</em></a>) – vThread to which the port shall be added to</li>
-<li><strong>inPort</strong> – The input port for the IO-Port. Either <a class="reference internal" href="#moddy.vthread.vtSamplingInPort" title="moddy.vthread.vtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtSamplingInPort</span></code></a> or <a class="reference internal" href="#moddy.vthread.vtQueuingInPort" title="moddy.vthread.vtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">vtQueuingInPort</span></code></a></li>
+<dt id="moddy.vthread.VtIOPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vthread.</code><code class="sig-name descname">VtIOPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">name</em>, <em class="sig-param">v_thread</em>, <em class="sig-param">in_port</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtIOPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>An IOPort that combines a Sampling/Queuing input port and a
+standard output port</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>vThread</strong> (<em>vThread</em>) – vThread to which the port shall be added to</p></li>
+<li><p><strong>inPort</strong> – The input port for the IO-Port. Either          <a class="reference internal" href="#moddy.vthread.VtSamplingInPort" title="moddy.vthread.VtSamplingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtSamplingInPort</span></code></a> or <a class="reference internal" href="#moddy.vthread.VtQueuingInPort" title="moddy.vthread.VtQueuingInPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">VtQueuingInPort</span></code></a></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="timer-for-virtual-threads">
 <h3>Timer for Virtual Threads<a class="headerlink" href="#timer-for-virtual-threads" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
-<dt id="moddy.vthread.vtTimer">
-<em class="property">class </em><code class="descclassname">moddy.vthread.</code><code class="descname">vtTimer</code><span class="sig-paren">(</span><em>sim</em>, <em>name</em>, <em>vThread</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtTimer" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtTimer">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vthread.</code><code class="sig-name descname">VtTimer</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">name</em>, <em class="sig-param">v_thread</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtTimer" title="Permalink to this definition">¶</a></dt>
 <dd><p>A timer for vThreads which extends the standard simulation timer</p>
-<p>When the timer expires, it sets a flag, that the user can test with <a class="reference internal" href="#moddy.vthread.vtTimer.hasFired" title="moddy.vthread.vtTimer.hasFired"><code class="xref py py-meth docutils literal notranslate"><span class="pre">hasFired()</span></code></a>
-The flag is reset with <a class="reference internal" href="#moddy.vthread.vtTimer.start" title="moddy.vthread.vtTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> and <a class="reference internal" href="#moddy.vthread.vtTimer.restart" title="moddy.vthread.vtTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>name</strong> – timer name</li>
-<li><strong>vThread</strong> (<a class="reference internal" href="#moddy.vthread.vThread" title="moddy.vthread.vThread"><em>vThread</em></a>) – vThread to which the timer shall be added to</li>
+<p>When the timer expires, it sets a flag, that the user can test
+with <a class="reference internal" href="#moddy.vthread.VtTimer.has_fired" title="moddy.vthread.VtTimer.has_fired"><code class="xref py py-meth docutils literal notranslate"><span class="pre">has_fired()</span></code></a>.
+The flag is reset with <a class="reference internal" href="#moddy.vthread.VtTimer.start" title="moddy.vthread.VtTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a> and <a class="reference internal" href="#moddy.vthread.VtTimer.restart" title="moddy.vthread.VtTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>name</strong> – timer name</p></li>
+<li><p><strong>vThread</strong> (<em>vThread</em>) – vThread to which the timer shall be added to</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.vthread.vtTimer.hasFired">
-<code class="descname">hasFired</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtTimer.hasFired"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtTimer.hasFired" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if timer expired</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.vthread.VtTimer.has_fired">
+<code class="sig-name descname">has_fired</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtTimer.has_fired"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtTimer.has_fired" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if timer expired</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vtTimer.restart">
-<code class="descname">restart</code><span class="sig-paren">(</span><em>timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtTimer.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtTimer.restart" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtTimer.restart">
+<code class="sig-name descname">restart</code><span class="sig-paren">(</span><em class="sig-param">timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtTimer.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtTimer.restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restart timer, works whether timer is running or not.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> – Timer will fire after <em>timeout</em></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – Timer will fire after <em>timeout</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.vthread.vtTimer.start">
-<code class="descname">start</code><span class="sig-paren">(</span><em>timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#vtTimer.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.vtTimer.start" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.vthread.VtTimer.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param">timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vthread.html#VtTimer.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vthread.VtTimer.start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start the timer.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> – Timer will fire after <em>timeout</em></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if timer already started</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – Timer will fire after <em>timeout</em></p>
+</dd>
+<dt class="field-even">Raise</dt>
+<dd class="field-even"><p>RuntimeError if timer already started</p>
+</dd>
+<dt class="field-odd">Raise</dt>
+<dd class="field-odd"><p>AttributeError if timeout &lt;= 0</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -731,66 +696,59 @@ The flag is reset with <a class="reference internal" href="#moddy.vthread.vtTime
 <div class="section" id="rtos-scheduler-simulation-for-virtual-threads">
 <h2>RTOS Scheduler Simulation for Virtual Threads<a class="headerlink" href="#rtos-scheduler-simulation-for-virtual-threads" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.vtSchedRtos.vtSchedRtos">
-<em class="property">class </em><code class="descclassname">moddy.vtSchedRtos.</code><code class="descname">vtSchedRtos</code><span class="sig-paren">(</span><em>sim</em>, <em>objName</em>, <em>parentObj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vtSchedRtos.html#vtSchedRtos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vtSchedRtos.vtSchedRtos" title="Permalink to this definition">¶</a></dt>
-<dd><p>RTOS scheduler for vThreads, an instance of a <a class="reference internal" href="core.html#moddy.simulator.simPart" title="moddy.simulator.simPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">simPart</span></code></a></p>
+<dt id="moddy.vt_sched_rtos.VtSchedRtos">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vt_sched_rtos.</code><code class="sig-name descname">VtSchedRtos</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">obj_name</em>, <em class="sig-param">parent_obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vt_sched_rtos.html#VtSchedRtos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vt_sched_rtos.VtSchedRtos" title="Permalink to this definition">¶</a></dt>
+<dd><p>RTOS scheduler for vThreads, an instance of a <a class="reference internal" href="core.html#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimPart</span></code></a></p>
 <p>Behaves as a typical, simple RTOS.</p>
 <ul class="simple">
-<li>16 thread priorities - 0 is highest priority.</li>
-<li>priority based scheduling. Low prio threads run only if no higher thread ready.</li>
-<li>Threads with same priority will be scheduled round robin (when one of the same prio threads     releases the processor, the next same prio thread which is ready is selected)</li>
+<li><p>16 thread priorities - 0 is highest priority.</p></li>
+<li><p>priority based scheduling. Low prio threads run only if no higher
+thread ready.</p></li>
+<li><p>Threads with same priority will be scheduled round robin         (when one of the same prio threads         releases the processor, the next same prio         thread which is ready is selected)</p></li>
 </ul>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>objName</strong> – scheduler name</li>
-<li><strong>parentObj</strong> – parent part. None if scheduler has no parent.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>obj_name</strong> – scheduler name</p></li>
+<li><p><strong>parent_obj</strong> – parent part. None if scheduler has no parent.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.vtSchedRtos.vtSchedRtos.addVThread">
-<code class="descname">addVThread</code><span class="sig-paren">(</span><em>vThread</em>, <em>prio</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vtSchedRtos.html#vtSchedRtos.addVThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vtSchedRtos.vtSchedRtos.addVThread" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>vThread</strong> – thread to be added</li>
-<li><strong>prio</strong> – priority of the thread 0..15 (0=highest)</li>
+<dt id="moddy.vt_sched_rtos.VtSchedRtos.add_vthread">
+<code class="sig-name descname">add_vthread</code><span class="sig-paren">(</span><em class="sig-param">v_thread</em>, <em class="sig-param">prio</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vt_sched_rtos.html#VtSchedRtos.add_vthread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vt_sched_rtos.VtSchedRtos.add_vthread" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v_thread</strong> – thread to be added</p></li>
+<li><p><strong>prio</strong> – priority of the thread 0..15 (0=highest)</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Checks <code class="xref py py-attr docutils literal notranslate"><span class="pre">vThread.remoteControl</span></code>: if True, allow thread state to be controlled through a moddy port <cite>threadControlPort</cite>.
-Those threads are not started automatically, but only via explicit “start” message to the <cite>threadControlPort</cite>.
-Those threads can be killed via “kill” and restarted via “start” message.</p>
+</dd>
+</dl>
+<p>Checks <code class="xref py py-attr docutils literal notranslate"><span class="pre">v_thread.remoteControl</span></code>: if True, allow thread state
+to be controlled through a moddy port <cite>threadControlPort</cite>.
+Those threads are not started automatically, but only via explicit
+“start” message to the <cite>threadControlPort</cite>.
+Those threads can be killed via “kill” and restarted via “start”
+message.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="moddy.vtSchedRtos.vSimpleProg">
-<em class="property">class </em><code class="descclassname">moddy.vtSchedRtos.</code><code class="descname">vSimpleProg</code><span class="sig-paren">(</span><em>sim</em>, <em>**vThreadArgs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vtSchedRtos.html#vSimpleProg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vtSchedRtos.vSimpleProg" title="Permalink to this definition">¶</a></dt>
-<dd><p>A special version of a vThread that has its own scheduler and no concurrency</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>vThreadArgs</strong> – see <a class="reference internal" href="#moddy.vthread.vThread" title="moddy.vthread.vThread"><code class="xref py py-class docutils literal notranslate"><span class="pre">vThread</span></code></a> for parameters</li>
+<dt id="moddy.vt_sched_rtos.VSimpleProg">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.vt_sched_rtos.</code><code class="sig-name descname">VSimpleProg</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">**v_thread_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/vt_sched_rtos.html#VSimpleProg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.vt_sched_rtos.VSimpleProg" title="Permalink to this definition">¶</a></dt>
+<dd><p>A special version of a VThread that has its own scheduler and no
+concurrency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>v_thread_args</strong> – see <a class="reference internal" href="#moddy.vthread.VThread" title="moddy.vthread.VThread"><code class="xref py py-class docutils literal notranslate"><span class="pre">VThread</span></code></a> for parameters</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -816,7 +774,7 @@ Those threads can be killed via “kill” and restarted via “start” message
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

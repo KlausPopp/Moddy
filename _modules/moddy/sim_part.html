@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.sim_part &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.sim_part</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.sim_part</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:mod:`sim_part` -- Moddy Simulator Parts</span>
+<span class="sd">========================================</span>
+
+<span class="sd">.. module:: sim_part</span>
+<span class="sd">   :platform: Unix, Windows</span>
+<span class="sd">   :synopsis: Moddy Simulator Part Class</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">.sim_base</span> <span class="k">import</span> <span class="n">SimBaseElement</span><span class="p">,</span> <span class="n">add_elem_to_list</span>
+<span class="kn">from</span> <span class="nn">.sim_var_watch</span> <span class="k">import</span> <span class="n">SimVariableWatcher</span>
+<span class="kn">from</span> <span class="nn">.sim_ports</span> <span class="k">import</span> <span class="n">SimInputPort</span><span class="p">,</span> <span class="n">SimOutputPort</span><span class="p">,</span> <span class="n">SimIOPort</span><span class="p">,</span> <span class="n">SimTimer</span>
+
+
+<div class="viewcode-block" id="SimPart"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart">[docs]</a><span class="k">class</span> <span class="nc">SimPart</span><span class="p">(</span><span class="n">SimBaseElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;an instance of SimPart forms a moddy object</span>
+
+<span class="sd">    :param sim: Simulator instance</span>
+<span class="sd">    :param obj_name: part&#39;s name</span>
+<span class="sd">    :param parent_obj: parent part. None if part has no parent. Defaults to None</span>
+<span class="sd">    :param dict elems: A dictionary with elements (ports and timers) to \</span>
+<span class="sd">     create, \</span>
+<span class="sd">    e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; :</span>
+<span class="sd">      &#39;timer1&#39; }``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">parent_obj</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">,</span> <span class="s2">&quot;Part&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_ports</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_timers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_subparts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># child parts list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_var_watchers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_ind</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">parent_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent_obj</span><span class="o">.</span><span class="n">add_sub_part</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sim</span><span class="o">.</span><span class="n">parts_mgr</span><span class="o">.</span><span class="n">add_top_level_part</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">elems</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_elements</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_sub_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub_part</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        add subPart to list of subParts</span>
+<span class="sd">        :param sub_part: part to add</span>
+<span class="sd">        :raise: RuntimeError If subPart already in this part</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">add_elem_to_list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_list_subparts</span><span class="p">,</span> <span class="n">sub_part</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;:subparts&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sub_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return list of child parts &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_subparts</span>
+
+    <span class="k">def</span> <span class="nf">ports</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return all ports of that part &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_ports</span>
+
+<div class="viewcode-block" id="SimPart.annotation"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.annotation">[docs]</a>    <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add annotation from model at current simulation time&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimPart.assertion_failed"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.assertion_failed">[docs]</a>    <span class="k">def</span> <span class="nf">assertion_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assertion_str</span><span class="p">,</span> <span class="n">frame_idx</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an assertion failure trace event</span>
+<span class="sd">        Increment simulator global assertion failure counter</span>
+<span class="sd">        Stop simulator if configured so</span>
+
+<span class="sd">        :param assertion_str: error message to display</span>
+<span class="sd">        :param frame_idx: traceback frame index \</span>
+<span class="sd">            (1 if caller&#39;s frame, 2 if caller-caller&#39;s frame...)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">assertion_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assertion_str</span><span class="p">,</span> <span class="n">frame_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimPart.set_state_indicator"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.set_state_indicator">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set part&#39;s state from model at simulation time</span>
+
+<span class="sd">        :param text: text to show in life line</span>
+<span class="sd">        :param dict appearance: appearance of state indicator. \</span>
+<span class="sd">        Dictionary with color values, e.g. \</span>
+<span class="sd">        ``{&#39;boxStrokeColor&#39;:&#39;black&#39;, &#39;boxFillColor&#39;:&#39;green&#39;, \</span>
+<span class="sd">            &#39;textColor&#39;:&#39;white&#39;}``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">appearance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">appearance</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_ind</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appearance</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimPart.new_input_port"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.new_input_port">[docs]</a>    <span class="k">def</span> <span class="nf">new_input_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new input port to the part</span>
+
+<span class="sd">        :param name: name of port</span>
+<span class="sd">        :param msg_received_func: callback function to call for message \</span>
+<span class="sd">            receiption. Signature ``func(port, msg)``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">SimInputPort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">port</span></div>
+
+<div class="viewcode-block" id="SimPart.new_output_port"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.new_output_port">[docs]</a>    <span class="k">def</span> <span class="nf">new_output_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new output port to the part</span>
+
+<span class="sd">        :param name: name of port</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">SimOutputPort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">port</span></div>
+
+<div class="viewcode-block" id="SimPart.new_io_port"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.new_io_port">[docs]</a>    <span class="k">def</span> <span class="nf">new_io_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new &quot;I/O&quot; port to the part</span>
+
+<span class="sd">        :param name: name of port</span>
+<span class="sd">        :param msg_received_func: callback function to call for message \</span>
+<span class="sd">            receiption. Signature ``func(port, msg)``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">SimIOPort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">port</span></div>
+
+<div class="viewcode-block" id="SimPart.new_timer"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.new_timer">[docs]</a>    <span class="k">def</span> <span class="nf">new_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">elapsed_func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a new timer to the part</span>
+
+<span class="sd">        :param name: name of timer</span>
+<span class="sd">        :param elapsed_func: callback function to call for timer expiry. \</span>
+<span class="sd">            Signature ``func(timer)``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">timer</span> <span class="o">=</span> <span class="n">SimTimer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">elapsed_func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_timer</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">timer</span></div>
+
+<div class="viewcode-block" id="SimPart.new_var_watcher"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.new_var_watcher">[docs]</a>    <span class="k">def</span> <span class="nf">new_var_watcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">format_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a variable to the watched variables.</span>
+<span class="sd">        A watched variables value will be checked for changes during</span>
+<span class="sd">        simulation.</span>
+<span class="sd">        If a value change is detected, a simulator trace event is generated.</span>
+
+<span class="sd">        :param string var_name: Variable name as seen from part&#39;s scope</span>
+<span class="sd">        :param string format_string: print() like format to format \</span>
+<span class="sd">            the value when traced</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">watcher</span> <span class="o">=</span> <span class="n">SimVariableWatcher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">format_string</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_var_watcher</span><span class="p">(</span><span class="n">watcher</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">watcher</span></div>
+
+    <span class="k">def</span> <span class="nf">add_port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a port to this part</span>
+<span class="sd">        :param port: port to add</span>
+<span class="sd">        :raise: RuntimeError If port already in this part</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">add_elem_to_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_ports</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;:ports&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a timer port to this part</span>
+
+<span class="sd">        :param timer: timer to add</span>
+<span class="sd">        :raise: RuntimeError If timer already in this part</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">add_elem_to_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_timers</span><span class="p">,</span> <span class="n">timer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;:timers&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_var_watcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_watcher</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a variable watcher to this part and to simulator</span>
+
+<span class="sd">        :param var_watcher: watcher to add</span>
+<span class="sd">        :raise: RuntimeError If watcher already in this part</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">add_elem_to_list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_list_var_watchers</span><span class="p">,</span>
+            <span class="n">var_watcher</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;:var_watchers&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">var_watch_mgr</span><span class="o">.</span><span class="n">add_var_watcher</span><span class="p">(</span><span class="n">var_watcher</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimPart.create_ports"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.create_ports">[docs]</a>    <span class="k">def</span> <span class="nf">create_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptype</span><span class="p">,</span> <span class="n">list_port_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convinience functions to create multiple ports at once.</span>
+
+<span class="sd">        :param ptype: Type of ports, must be one of &#39;in&#39;, &#39;out&#39; or &#39;io&#39;</span>
+<span class="sd">        :param list list_port_names: list of port names to create</span>
+<span class="sd">        :raise: ValueError if unknown port type</span>
+
+<span class="sd">        The function creates for each port a member variable with this</span>
+<span class="sd">        name in the part.</span>
+<span class="sd">        For &quot;in&quot; and &quot;io&quot; ports, a receive function *&lt;portName&gt;_recv*</span>
+<span class="sd">        must be provided by caller</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">list_port_names</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">port_name</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">new_input_port</span><span class="p">(</span>
+                        <span class="n">port_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_recv&quot;</span> <span class="o">%</span> <span class="n">port_name</span><span class="p">)</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;out&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">list_port_names</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_output_port</span><span class="p">(</span><span class="n">port_name</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s2">&quot;io&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">list_port_names</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span>
+                    <span class="n">port_name</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">new_io_port</span><span class="p">(</span>
+                        <span class="n">port_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_recv&quot;</span> <span class="o">%</span> <span class="n">port_name</span><span class="p">)</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown port type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ptype</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimPart.create_timers"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.create_timers">[docs]</a>    <span class="k">def</span> <span class="nf">create_timers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_timer_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convinience functions to create multiple timers at once.</span>
+
+<span class="sd">        :param list list_timer_names: list of timer names to create</span>
+
+<span class="sd">        The function creates for each port a member variable with this name</span>
+<span class="sd">        in the part.</span>
+<span class="sd">        A timer callback function *&lt;tmrName&gt;_expired* must be provided</span>
+<span class="sd">        by caller</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tmr_name</span> <span class="ow">in</span> <span class="n">list_timer_names</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">tmr_name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_timer</span><span class="p">(</span>
+                    <span class="n">tmr_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_expired&quot;</span> <span class="o">%</span> <span class="n">tmr_name</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">create_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elems</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create ports and timers based on a dictionary.</span>
+
+<span class="sd">        :param dict elems: A dictionary with elements (ports and timers) \</span>
+<span class="sd">            to create, \</span>
+<span class="sd">        e.g. ``{ &#39;in&#39;: &#39;inPort1&#39;, &#39;out&#39;: [&#39;outPort1&#39;, &#39;outPort2&#39;], &#39;tmr&#39; : \</span>
+<span class="sd">            &#39;timer1&#39; }``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">el_type</span><span class="p">,</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">elems</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">names</span><span class="p">]</span>  <span class="c1"># make a list if only a string is given</span>
+
+            <span class="k">if</span> <span class="n">el_type</span> <span class="o">==</span> <span class="s2">&quot;tmr&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_timers</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_ports</span><span class="p">(</span><span class="n">el_type</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimPart.start_sim"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.start_sim">[docs]</a>    <span class="k">def</span> <span class="nf">start_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called from simulator when simulation begins&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="SimPart.terminate_sim"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.terminate_sim">[docs]</a>    <span class="k">def</span> <span class="nf">terminate_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called from simulator when simulation stops. Terminate block</span>
+<span class="sd">        (e.g. stop threads)</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="SimPart.time"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_part.SimPart.time">[docs]</a>    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get current simulation time&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Hello &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Hello &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -97,15 +97,16 @@
 <li class="toctree-l2"><a class="reference internal" href="2_sergw.html">Serial Gateway</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_carinfo.html">Car Infotainment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_helloProgram.html">Hello Demo as a Sequential Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_lostmsg.html">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_vthread_remote_controlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multi_port_binding.html">Multiple Output Ports bound to one Input Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_hello_program.html">Hello Demo as a Sequential Program</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -176,115 +177,128 @@
 <span id="id1"></span><h1>Hello<a class="headerlink" href="#hello" title="Permalink to this headline">¶</a></h1>
 <p>Covers:</p>
 <ul class="simple">
-<li>Event driven modelling</li>
-<li>Ports &amp; Timers</li>
+<li><p>Event driven modelling</p></li>
+<li><p>Ports &amp; Timers</p></li>
 </ul>
 <p>This demo models how two persons, Bob and Joe, talk to eachother.</p>
 <p>The words they are talking are the mesages.</p>
 <p>The persons send the words at their mouth and receive it through their ears.
 A timer is used to model their “think” time.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">See also <a class="reference internal" href="8_helloProgram.html#hello-program"><span class="std std-ref">Hello Demo as a Sequential Program</span></a>, which models the same behavior with sequential programs.</p>
+<p class="admonition-title">Note</p>
+<p>See also <a class="reference internal" href="8_hello_program.html#hello-program"><span class="std std-ref">Hello Demo as a Sequential Program</span></a>, which models the same behavior with sequential programs.</p>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Basic Moddy demo </span>
+<span class="sd">Basic Moddy demo</span>
 
 <span class="sd">@author: klauspopp@gmx.de</span>
+
+<span class="sd">Note: the &quot;pylint: disable=no-member&quot; are necessary because moddy creates</span>
+<span class="sd">port/timer members automatically, so they are not visible to pylint</span>
 <span class="sd">&#39;&#39;&#39;</span>
+<span class="c1"># because the filename doesn&#39;t conform to snake case style ...</span>
+<span class="c1"># pylint: disable=C0103</span>
 
-<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">moddy</span>
 
-<span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Model of Bob &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span> 
-                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span> 
-                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                         <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;think_tmr&#39;</span><span class="p">})</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ears_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Callback for message reception on ears port &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
-        
 
-    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Callback for think_tmr expiration &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=no-member</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        
-    <span class="k">def</span> <span class="nf">startSim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">start_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Let Bob start talking</span>
+        <span class="c1"># pylint: disable=no-member</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">Joe</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Joe</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Model of Joe &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
         <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
-                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span> 
-                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                         <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;think_tmr&#39;</span><span class="p">})</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ears_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Callback for message reception on ears port &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi Joe&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hi, How are you?&quot;</span>
         <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;How are you?&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Fine&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
-        
 
-    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=no-member</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Callback for think_tmr expiration &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># pylint: disable=no-member</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
 
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
-    
-    <span class="n">bob</span>    <span class="o">=</span> <span class="n">Bob</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span> <span class="p">)</span>
-    <span class="n">joe</span>    <span class="o">=</span> <span class="n">Joe</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span> <span class="p">)</span>
-    
+    <span class="n">SIMU</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
+
+    <span class="n">Bob</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+    <span class="n">Joe</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">)</span>
+
     <span class="c1"># bind ports</span>
-    <span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">([</span> <span class="p">[</span><span class="s1">&#39;Bob.mouth&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.ears&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;Bob.ears&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.mouth&#39;</span><span class="p">]</span> <span class="p">])</span>
+    <span class="n">SIMU</span><span class="o">.</span><span class="n">smart_bind</span><span class="p">([[</span><span class="s1">&#39;Bob.mouth&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.ears&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;Bob.ears&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.mouth&#39;</span><span class="p">]])</span>
 
     <span class="c1"># let simulator run</span>
-    <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
-    
+    <span class="n">SIMU</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stop_time</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
+
     <span class="c1"># Output sequence diagram</span>
-    <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> 
-                                  <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;output/1_hello.html&quot;</span><span class="p">,</span> 
-                                  <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span> 
-                                  <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[],</span> 
-                                  <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> 
-                                  <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
-                                  <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Hello Demo&quot;</span><span class="p">)</span>    
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span>
+                                           <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;output/1_hello.html&quot;</span><span class="p">,</span>
+                                           <span class="n">time_per_div</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                                           <span class="n">pix_per_div</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                                           <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello Demo&quot;</span><span class="p">)</span>
 
     <span class="c1"># Output model structure graph</span>
-    <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/1_hello_structure.svg&#39;</span><span class="p">)</span>
-    
-    <span class="c1"># Output trace table</span>
-    <span class="n">moddyGenerateTraceTable</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/1_hello.csv&#39;</span> <span class="p">)</span>
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_dot_structure_graph</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s1">&#39;output/1_hello_structure.svg&#39;</span><span class="p">)</span>
 
+    <span class="c1"># Output trace table</span>
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_trace_table</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s1">&#39;output/1_hello.csv&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The simulation outputs:</p>
 <blockquote>
-<div><p><a class="reference download internal" download="" href="../_downloads/9d005f7f9aebdfe3faaa1692a7c60b9e/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
-<p><a class="reference download internal" download="" href="../_downloads/153432d138cbc9f7a4b22cdb0998e72b/1_hello.csv"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">trace</span> <span class="pre">table</span></code></a></p>
-<p><a class="reference download internal" download="" href="../_downloads/efc5e88b86cc549ec26a3db4c372bdb8/1_hello_structure.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">structure</span> <span class="pre">graph</span></code></a></p>
+<div><p><a class="reference download internal" download="" href="../_downloads/a491148a3622d07051cb818e03714d75/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/043ac6853f4e5c58fb2cc299e71d19e4/1_hello.csv"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">trace</span> <span class="pre">table</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/ee3184fa5de298785f808b705c0b4b0c/1_hello_structure.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">structure</span> <span class="pre">graph</span></code></a></p>
 </div></blockquote>
 </div>
 
@@ -308,7 +322,7 @@ A timer is used to model their “think” time.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

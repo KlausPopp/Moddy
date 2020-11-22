@@ -1,0 +1,725 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.sim_ports &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.sim_ports</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.sim_ports</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:mod:`sim_ports` -- Moddy Simulator Ports and Timers</span>
+<span class="sd">====================================================</span>
+
+<span class="sd">.. module:: sim_ports</span>
+<span class="sd">   :platform: Unix, Windows</span>
+<span class="sd">   :synopsis: Moddy Simulator Ports</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">heapq</span> <span class="k">import</span> <span class="n">heappush</span><span class="p">,</span> <span class="n">heappop</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+
+<span class="kn">from</span> <span class="nn">.sim_base</span> <span class="k">import</span> <span class="n">SimBaseElement</span><span class="p">,</span> <span class="n">SimEvent</span>
+<span class="kn">from</span> <span class="nn">.sim_base</span> <span class="k">import</span> <span class="n">add_elem_to_list</span>
+<span class="kn">from</span> <span class="nn">.sim_trace</span> <span class="k">import</span> <span class="n">SimTraceEvent</span>
+
+
+<div class="viewcode-block" id="SimInputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimInputPort">[docs]</a><span class="k">class</span> <span class="nc">SimInputPort</span><span class="p">(</span><span class="n">SimBaseElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simulator input port</span>
+
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param SimPart part: simPart that contains this port</span>
+<span class="sd">    :param name: port name</span>
+<span class="sd">    :param msg_received_func: callback function to call for message \</span>
+<span class="sd">        receiption. Signature ``func(port, msg)``. May be None</span>
+<span class="sd">    :param io_port: reference to the IOPort which contains this inPort \</span>
+<span class="sd">        (None if not part of IOPort).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=too-many-arguments</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">,</span> <span class="n">io_port</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;InPort&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_ports</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># connected output ports</span>
+        <span class="c1"># function that gets called when message arrives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msg_received_func</span> <span class="o">=</span> <span class="n">msg_received_func</span>
+        <span class="c1"># function that gets called when message transmission has started on</span>
+        <span class="c1"># outPort</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msg_started_func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># reference to the IOPort which contains this inPort</span>
+        <span class="c1"># (None if not part of IOPort)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_io_port</span> <span class="o">=</span> <span class="n">io_port</span>
+
+    <span class="c1"># pylint: enable=too-many-arguments</span>
+
+    <span class="k">def</span> <span class="nf">msg_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;called from bound outport when a new message is received&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_received_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msg_received_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">uses_msg_start_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return true if msg_started_func is not None&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_started_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">msg_start_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">out_port</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        called from bound outport when a new message transmission just started</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_started_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_msg_started_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">out_port</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimInputPort.set_msg_started_func"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimInputPort.set_msg_started_func">[docs]</a>    <span class="k">def</span> <span class="nf">set_msg_started_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg_started_func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        register a function that gets called when the bound output port</span>
+<span class="sd">        begins a message transmission</span>
+
+<span class="sd">        :param msg_started_func: callback function to call on \</span>
+<span class="sd">            message transmission start.\</span>
+<span class="sd">            Signature ``func(in_port, msg, out_port, flight_time)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msg_started_func</span> <span class="o">=</span> <span class="n">msg_started_func</span></div>
+
+    <span class="k">def</span> <span class="nf">is_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Report True if port is bound to an output port&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out_ports</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">out_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return list of connected output ports&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_ports</span>
+
+    <span class="k">def</span> <span class="nf">io_port</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return IOPort to which this input port belongs</span>
+<span class="sd">        (None if not in an IO Port)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_io_port</span></div>
+
+
+<div class="viewcode-block" id="SimOutputPort"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimOutputPort">[docs]</a><span class="k">class</span> <span class="nc">SimOutputPort</span><span class="p">(</span><span class="n">SimBaseElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simulator output port</span>
+
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param simPart part: simPart that contains this port</span>
+<span class="sd">    :param name: port name</span>
+<span class="sd">    :param color: message color to use in sequence diagram. \</span>
+<span class="sd">        Use default color if *None*</span>
+<span class="sd">    :param ioPort: reference to the IOPort which contains this outPort \</span>
+<span class="sd">        (None if not part of IOPort).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">class</span> <span class="nc">FireEvent</span><span class="p">(</span><span class="n">SimEvent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Event that is passed to scheduler to send a message &quot;&quot;&quot;</span>
+
+        <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span> <span class="o">=</span> <span class="n">sim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_serialized_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">msg_serialize</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg_color</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">msgColor</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="s2">&quot;msgColor&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flight_time</span> <span class="o">=</span> <span class="n">flight_time</span>  <span class="c1"># message transmit time</span>
+            <span class="c1"># time when application called send()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">request_time</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exec_time</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># when message arrives at input port</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_lost</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Flags that message is a lost message</span>
+
+        <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Create a user readable form of the event. Used by tracer&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> req=</span><span class="si">%s</span><span class="s2"> beg=</span><span class="si">%s</span><span class="s2"> end=</span><span class="si">%s</span><span class="s2"> dur=</span><span class="si">%s</span><span class="s2"> msg=[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="s2">&quot;(LOST)&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_lost</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request_time</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exec_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">flight_time</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exec_time</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flight_time</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">msg_text</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;#fireEvent&quot;</span>
+
+        <span class="k">def</span> <span class="nf">msg_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot; return message&#39;s __str__ &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">msg_unserialize</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_serialized_msg</span>
+            <span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+            <span class="c1"># pass the message to all bound input ports</span>
+            <span class="k">for</span> <span class="n">inport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">in_ports</span><span class="p">():</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+                    <span class="n">SimTraceEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span> <span class="n">inport</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;&lt;MSG&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_lost</span><span class="p">:</span>
+                    <span class="c1"># make a deep copy (by using pickle) of the message,</span>
+                    <span class="c1"># so that application can modify the message</span>
+                    <span class="n">msg_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">msg_unserialize</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_serialized_msg</span>
+                    <span class="p">)</span>
+                    <span class="n">inport</span><span class="o">.</span><span class="n">msg_event</span><span class="p">(</span><span class="n">msg_copy</span><span class="p">)</span>
+
+            <span class="c1"># remove me from pending queue</span>
+            <span class="c1"># print(self, &quot;exec&quot;, len(self.port._list_pending_msg))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">pending_msg</span><span class="p">()</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="c1"># and send next message in queue</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">pending_msg</span><span class="p">():</span>
+                <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">pending_msg</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">send_schedule</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+                    <span class="n">SimTraceEvent</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="s2">&quot;&gt;MSG(Q)&quot;</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">_seq_no</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">def</span> <span class="nf">notify_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            tell all bound input ports that message transmission has begun</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">inport</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">in_ports</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">inport</span><span class="o">.</span><span class="n">uses_msg_start_event</span><span class="p">():</span>
+                    <span class="n">inport</span><span class="o">.</span><span class="n">msg_start_event</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">msg_unserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_serialized_msg</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">flight_time</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">msg_serialize</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Serialize message using pickle&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
+
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">msg_unserialize</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Un-Serialize message using pickle&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">io_port</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># pylint: disable=too-many-arguments</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;OutPort&quot;</span><span class="p">)</span>
+        <span class="c1"># list of all input ports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_in_ports</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># list of pending messages (not yet fired)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_pending_msg</span> <span class="o">=</span> <span class="n">deque</span><span class="p">()</span>
+        <span class="c1"># color for messages leaving that port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="c1"># reference to the IOPort which contains this outPort</span>
+        <span class="c1"># (None if not part of IOPort)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_io_port</span> <span class="o">=</span> <span class="n">io_port</span>
+        <span class="c1"># learned message types that left this port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_msg_types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># next message sequence number (for lost messages)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seq_no</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># heap with message sequence numbers that will be lost</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lost_seq_heap</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="SimOutputPort.bind"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimOutputPort.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;bind an output port to an input port</span>
+
+<span class="sd">        :param input_port: input port to which this output port shall be bound</span>
+<span class="sd">        :raise RuntimeError: if input port is already bound to that output port</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">add_elem_to_list</span><span class="p">(</span>
+            <span class="n">input_port</span><span class="o">.</span><span class="n">out_ports</span><span class="p">(),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">input_port</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;:outPorts&quot;</span>
+        <span class="p">)</span>
+        <span class="n">add_elem_to_list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">in_ports</span><span class="p">(),</span> <span class="n">input_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;:inPorts&quot;</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">is_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Report True if port is bound to at least one input port&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_in_ports</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_learn_msg_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Learn which types of messages are leaving the port.</span>
+<span class="sd">        Will be displayed in Structure Graphs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="n">msg_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_msg_types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_list_msg_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">learned_msg_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return list of learned message types that left the port until now.</span>
+<span class="sd">        (Strings with types)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_msg_types</span>
+
+    <span class="k">def</span> <span class="nf">pending_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return list of pending messages &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_pending_msg</span>
+
+    <span class="k">def</span> <span class="nf">send_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; schedule a send event &quot;&quot;&quot;</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">exec_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">flight_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">schedule_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="c1"># check if the message is marked as lost</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">is_lost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_lost_message</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">is_lost</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">notify_start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SimOutputPort.send"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimOutputPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;User interface to send a message</span>
+
+<span class="sd">        :param msg: message to send</span>
+<span class="sd">        :param flight_time: flight time of message</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learn_msg_types</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FireEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_pending_msg</span><span class="p">:</span>
+            <span class="c1"># no pending messages, send now</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_schedule</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+                <span class="n">SimTraceEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="s2">&quot;&gt;MSG&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_pending_msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+        <span class="c1"># print(self, &quot;sendlp&quot;, len(self._list_pending_msg))</span>
+
+<div class="viewcode-block" id="SimOutputPort.set_color"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimOutputPort.set_color">[docs]</a>    <span class="k">def</span> <span class="nf">set_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set color for messages leaving that port &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span></div>
+
+<div class="viewcode-block" id="SimOutputPort.inject_lost_message_error_by_sequence"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimOutputPort.inject_lost_message_error_by_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">inject_lost_message_error_by_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">next_seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inject error. Force one of the next messages sent via this port to</span>
+<span class="sd">        be lost.</span>
+<span class="sd">        If nextSeq is 0, the next message sent via this port will be lost,</span>
+<span class="sd">        if it is 1 the next but one message is lost etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lost_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seq_no</span> <span class="o">+</span> <span class="n">next_seq</span>
+
+        <span class="c1"># add the sequence number to be lost to the _lostSeqHeap,</span>
+        <span class="c1"># if this sequence is not already there</span>
+        <span class="c1"># this maintains the heap sequence.</span>
+        <span class="k">if</span> <span class="n">lost_seq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lost_seq_heap</span><span class="p">:</span>
+            <span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lost_seq_heap</span><span class="p">,</span> <span class="n">lost_seq</span><span class="p">)</span></div>
+        <span class="c1"># print(&quot;lostSeqHeap=&quot;, self._lostSeqHeap)</span>
+
+    <span class="k">def</span> <span class="nf">is_lost_message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if the current message is marked to be lost.</span>
+<span class="sd">        Return True if so and remove the current sequence from the lost</span>
+<span class="sd">        sequence heap</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lost_seq_heap</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seq_no</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lost_seq_heap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">):</span>
+
+            <span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lost_seq_heap</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">io_port</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return IOPort to which this output port belongs</span>
+<span class="sd">        (None if not in an IO Port)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_io_port</span>
+
+    <span class="k">def</span> <span class="nf">in_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return list of connected input ports&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_in_ports</span></div>
+
+
+<div class="viewcode-block" id="SimIOPort"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort">[docs]</a><span class="k">class</span> <span class="nc">SimIOPort</span><span class="p">(</span><span class="n">SimBaseElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An element that contains one input and one output port</span>
+
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param simPart part: simPart that contains this port</span>
+<span class="sd">    :param name: port name</span>
+<span class="sd">    :param msg_received_func: callback function to call for message \</span>
+<span class="sd">        receiption. Signature ``func(port, msg)``</span>
+<span class="sd">    :param special_in_port: if None, create a standard :class:`simInputPort`, \</span>
+<span class="sd">        otherwise use the supplied specialInPort</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">,</span> <span class="n">special_in_port</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="c1"># pylint: disable=too-many-arguments</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;IOPort&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span> <span class="o">=</span> <span class="n">SimOutputPort</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_out&quot;</span><span class="p">,</span> <span class="n">io_port</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">special_in_port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span> <span class="o">=</span> <span class="n">SimInputPort</span><span class="p">(</span>
+                <span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_in&quot;</span><span class="p">,</span> <span class="n">msg_received_func</span><span class="p">,</span> <span class="n">io_port</span><span class="o">=</span><span class="bp">self</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span> <span class="o">=</span> <span class="n">special_in_port</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span><span class="o">.</span><span class="n">_io_port</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">in_port</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the input port &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span>
+
+    <span class="k">def</span> <span class="nf">out_port</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the output port &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span>
+
+<div class="viewcode-block" id="SimIOPort.bind"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_io_port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Bind IOPort to another IOPort, in/out will be crossed &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">other_io_port</span><span class="o">.</span><span class="n">in_port</span><span class="p">())</span>
+        <span class="n">other_io_port</span><span class="o">.</span><span class="n">out_port</span><span class="p">()</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_port</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="SimIOPort.loop_bind"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort.loop_bind">[docs]</a>    <span class="k">def</span> <span class="nf">loop_bind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Loop in/out ports of an IO port together &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span><span class="p">)</span></div>
+
+    <span class="c1"># delegation methods to output port</span>
+
+<div class="viewcode-block" id="SimIOPort.send"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;send message to IoPorts output port</span>
+
+<span class="sd">        Refer to :func:`simOutputPort.send` for parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">flight_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimIOPort.inject_lost_message_error_by_sequence"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort.inject_lost_message_error_by_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">inject_lost_message_error_by_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">next_seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        inject error on IoPorts output port</span>
+<span class="sd">        Refer to :func:`simOutputPort.inject_lost_message_error_by_sequence`</span>
+<span class="sd">        for details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span><span class="o">.</span><span class="n">inject_lost_message_error_by_sequence</span><span class="p">(</span><span class="n">next_seq</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimIOPort.set_color"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort.set_color">[docs]</a>    <span class="k">def</span> <span class="nf">set_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set color for messages leaving that IOport &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_port</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span></div>
+
+    <span class="k">def</span> <span class="nf">peer_ports</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return all peer IOPorts to which this port is bound to.</span>
+<span class="sd">        return list of peer ports (empty list if none)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_peers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span><span class="o">.</span><span class="n">is_bound</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_port</span><span class="p">()</span><span class="o">.</span><span class="n">out_ports</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">port</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span><span class="o">.</span><span class="n">in_port</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_port</span><span class="p">()</span><span class="o">.</span><span class="n">in_ports</span><span class="p">():</span>
+                        <span class="n">list_peers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">list_peers</span>
+
+    <span class="c1"># delegation methods to input port</span>
+<div class="viewcode-block" id="SimIOPort.set_msg_started_func"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimIOPort.set_msg_started_func">[docs]</a>    <span class="k">def</span> <span class="nf">set_msg_started_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg_started_func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        register a function that gets called when the bound output port</span>
+<span class="sd">        begins a message transmission</span>
+
+<span class="sd">        Refer to :func:`simInputPort.setMsgStartedFunc` for details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_port</span><span class="o">.</span><span class="n">set_msg_started_func</span><span class="p">(</span><span class="n">msg_started_func</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SimTimer"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimTimer">[docs]</a><span class="k">class</span> <span class="nc">SimTimer</span><span class="p">(</span><span class="n">SimBaseElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simulator Timer</span>
+<span class="sd">    timer is either running or stopped</span>
+<span class="sd">    timer can be canceled, and restarted</span>
+
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param simPart part: simPart that contains this port</span>
+<span class="sd">    :param name: port name</span>
+<span class="sd">    :param elapsed_func: callback function to call for timer expiry.\</span>
+<span class="sd">         Signature ``func(timer)``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">class</span> <span class="nc">TimerEvent</span><span class="p">(</span><span class="n">SimEvent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Event that is passed to scheduler for timer &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">timer</span><span class="p">,</span> <span class="n">exec_time</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span> <span class="o">=</span> <span class="n">sim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">timer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exec_time</span> <span class="o">=</span> <span class="n">exec_time</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;#timerEvent&quot;</span>
+
+        <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">_pending_event</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+                <span class="n">SimTraceEvent</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;T-EXP&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">elapsed_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">TimeoutFmt</span><span class="p">:</span>
+        <span class="c1"># pylint: disable=too-few-public-methods</span>
+        <span class="sd">&quot;&quot;&quot;Helper class to get a formatted print of the timeout&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span> <span class="o">=</span> <span class="n">sim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+
+        <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">elapsed_func</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Timer&quot;</span><span class="p">)</span>
+        <span class="c1"># current scheduled event (None if timer stopped)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending_event</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># function that gets called when time elapsed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_func</span> <span class="o">=</span> <span class="n">elapsed_func</span>
+
+    <span class="k">def</span> <span class="nf">_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;already running&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">timeout</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;timeout must be greate than 0&quot;</span>
+            <span class="p">)</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TimerEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">schedule_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending_event</span> <span class="o">=</span> <span class="n">event</span>
+
+<div class="viewcode-block" id="SimTimer.start"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimTimer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the timer.</span>
+
+<span class="sd">        :param timeout: Timer will fire after *timeout*</span>
+<span class="sd">        :raise: RuntimeError if timer already started</span>
+<span class="sd">        :raise: AttributeError if timeout &lt;= 0</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+            <span class="n">SimTraceEvent</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">TimeoutFmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="n">timeout</span><span class="p">),</span>
+                <span class="s2">&quot;T-START&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pending_event</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pending_event</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SimTimer.stop"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimTimer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop timer. Does nothing if timer not running&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+            <span class="n">SimTraceEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;T-STOP&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SimTimer.restart"><a class="viewcode-back" href="../../reference/core.html#moddy.sim_ports.SimTimer.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restart timer, works whether timer is running or not.</span>
+
+<span class="sd">        :param timeout: Timer will fire after *timeout*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="o">.</span><span class="n">tracing</span><span class="o">.</span><span class="n">add_trace_event</span><span class="p">(</span>
+            <span class="n">SimTraceEvent</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">,</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">TimeoutFmt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sim</span><span class="p">,</span> <span class="n">timeout</span><span class="p">),</span>
+                <span class="s2">&quot;T-RESTA&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

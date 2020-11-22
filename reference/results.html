@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Moddy Result Generator APIs &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Moddy Result Generator APIs &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Installation" href="../install.html" />
+    <link rel="next" title="Library Reference" href="lib/index.html" />
     <link rel="prev" title="Moddy Finite State Machines" href="fsm.html" /> 
 </head>
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -104,10 +104,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#fsm-graph">FSM Graph</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="lib/index.html">Library Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -179,144 +181,124 @@
 <div class="section" id="sequence-diagrams">
 <span id="seqdiagreference"></span><h2>Sequence Diagrams<a class="headerlink" href="#sequence-diagrams" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram">
-<code class="descclassname">moddy.seqDiagInteractiveGen.</code><code class="descname">moddyGenerateSequenceDiagram</code><span class="sig-paren">(</span><em>sim</em>, <em>fileName</em>, <em>fmt='iaViewer'</em>, <em>showPartsList=None</em>, <em>excludedElementList=[]</em>, <em>showVarList=[]</em>, <em>timeRange=(0</em>, <em>None)</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/seqDiagInteractiveGen.html#moddyGenerateSequenceDiagram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram">
+<code class="sig-prename descclassname">moddy.interactive_sequence_diagram.</code><code class="sig-name descname">gen_interactive_sequence_diagram</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">file_name</em>, <em class="sig-param">show_parts_list=None</em>, <em class="sig-param">excluded_element_list=None</em>, <em class="sig-param">show_var_list=None</em>, <em class="sig-param">refer_files=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/interactive_sequence_diagram.html#gen_interactive_sequence_diagram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moddy function to create sequence diagrams.
-The function is supposed to be called after the simulator has stopped. It takes the recorded
-events from the simulator instance.</p>
-<p>Depending on the <cite>fmt</cite> parameter, either dynamic or static diagrams are generated.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="core.html#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>fileName</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – output filename (including filename extension e.g. <code class="docutils literal notranslate"><span class="pre">.html</span></code>)</li>
-<li><strong>fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – <p>Output format. One of</p>
-<ul>
-<li>dynamic diagram<blockquote>
-<div><ul>
-<li>iaViewer - moddy interactive viewer: HTML with javascript/css embedded</li>
-<li>iaViewerRef - moddy interactive viewer: HTML with javascript/css referenced</li>
-</ul>
-</div></blockquote>
-</li>
-<li>static diagram<blockquote>
-<div><ul>
-<li>svg - static SVG (using code in svgSeqD)</li>
-<li>svgInHtml - static SVG embedded in HTML (using code in svgSeqD)</li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
-</li>
-<li><strong>showPartsList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – if given, show only the listed parts in that order in sequence diagram.
-Each element can be either a reference to the part or a string with the
-hierarchy name of the part.  
-if omitted, show all parts known by simulator, in the order of their creation</li>
-<li><strong>showVarList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – List of watched variables to include in the sequence diagram. 
-Each element must be a string with the variable hierarchy name. e.g. “VC.var1”. 
-If omitted, no variables are included.</li>
-<li><strong>excludedElementList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – <p>parts or timers that should be excluded from drawing
-Each list element can be the object to exclude or one of the following:
+The function is supposed to be called after the simulator has stopped.
+It takes the recorded events from the simulator instance.</p>
+<p>Depending on the <cite>fmt</cite> parameter, either dynamic or static diagrams are
+generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – output filename (including filename extension         <code class="docutils literal notranslate"><span class="pre">.html</span></code>)</p></li>
+<li><p><strong>show_parts_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – if given, show only the listed parts
+in that order in sequence diagram.
+Each element can be either a reference to the part or
+a string with the
+hierarchy name of the part.
+if omitted, show all parts known by simulator,
+in the order of their creation</p></li>
+<li><p><strong>show_var_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – List of watched variables to include in
+the sequence diagram.
+Each element must be a string with the variable hierarchy
+name. event.g. “VC.var1”.
+If omitted, no variables are included.</p></li>
+<li><p><strong>excluded_element_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – <p>parts or timers that should be
+excluded from drawing
+Each list element can be the object to exclude or one
+of the following:
 - ‘allTimers’ - exclude all timers</p>
-<p>NOTE: Unlike in showPartsList, strings with hierarchy names are not yet supported</p>
-</li>
-<li><strong>timeRange</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – tuple with start and end time. Everything before start and after end is not drawn
-You can specify None for end time, in this case end time is the end of the simulation. 
-This parameter is currently supported only for static diagrams and ignored in the interactive viewer.</li>
-<li><strong>**kwargs</strong> – <p>further arguments</p>
+<p>NOTE: Unlike in show_parts_list, strings with hierarchy
+names are not yet supported</p>
+</p></li>
+<li><p><strong>refer_files</strong> – Include references to .css and .js file instead
+of including them</p></li>
+<li><p><strong>**kwargs</strong> – <p>further arguments</p>
 <ul>
-<li>title - Title text to be displayed above the sequence diagram</li>
-<li>timePerDiv - time per “Time Div”.</li>
-<li>pixPerDiv=25 - pixels per time grid division. Optional, default:25. 
-Note: The interactive viewer dynamically adjust the time scale depending on the current time 
-scale factor and uses <em>timePerDiv</em> and <em>pixPerDiv</em> only as an hint for the initial scale factor.</li>
-<li>partSpacing=300 - horizontal spacing in pixels between parts. (start value)</li>
-<li>partBoxSize = (100,60) - Tupel with x,y pixel size of part box. 
-Note: The interactive viewer dynamically adjust the part box size according 
-to the length of the part names.</li>
-<li>statusBoxWidth=20 - pixel width of status box on life line</li>
-<li>variableBoxWidth=150 - pixel width of watched variable value box on life line</li>
-<li>varSpacing = 180 - pixels between variables</li>
+<li><p>title - Title text to be displayed above the sequence diagram</p></li>
+<li><p>timePerDiv - time per “Time Div”.</p></li>
+<li><p>pixPerDiv=25 - pixels per time grid division. Optional, default:25.
+Note: The interactive viewer dynamically adjust the time scale
+depending on the current time
+scale factor and uses *
+timePerDiv* and <em>pixPerDiv</em> only as an
+hint for the initial scale factor.</p></li>
+<li><p>partSpacing=300 - horizontal spacing in pixels between parts.
+(start value)</p></li>
+<li><p>partBoxSize = (100,60) - Tupel with x,y pixel size of part box.
+Note: The interactive viewer dynamically adjust the part box
+size according
+to the length of the part names.</p></li>
+<li><p>statusBoxWidth=20 - pixel width of status box on life line</p></li>
+<li><p>variableBoxWidth=150 - pixel width of watched variable value box
+on life line</p></li>
+<li><p>varSpacing = 180 - pixels between variables</p></li>
 </ul>
-</li>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="trace-tables">
 <span id="tracetocsvreference"></span><h2>Trace Tables<a class="headerlink" href="#trace-tables" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="moddy.traceToCsv.moddyGenerateTraceTable">
-<code class="descclassname">moddy.traceToCsv.</code><code class="descname">moddyGenerateTraceTable</code><span class="sig-paren">(</span><em>sim</em>, <em>fileName</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/traceToCsv.html#moddyGenerateTraceTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.traceToCsv.moddyGenerateTraceTable" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.trace_to_csv.gen_trace_table">
+<code class="sig-prename descclassname">moddy.trace_to_csv.</code><code class="sig-name descname">gen_trace_table</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">file_name</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/trace_to_csv.html#gen_trace_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.trace_to_csv.gen_trace_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moddy high level function to create trace tables as .csv.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="core.html#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>fileName</strong> – output filename (including .csv)</li>
-<li><strong>**kwargs</strong> – <p>further arguments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>file_name</strong> – output filename (including .csv)</p></li>
+<li><p><strong>kwargs</strong> – <p>further arguments</p>
 <ul>
-<li>timeUnit=”s” - time unit for all time stamps in table (‘s’, ‘ms’, ‘us’, ‘ns’)</li>
-<li>floatComma=’,’ - Comma character for float numbers</li>
+<li><p>time_unit=”s” - time unit for all time stamps in table          (‘s’, ‘ms’, ‘us’, ‘ns’)</p></li>
+<li><p>float_comma=’,’ - Comma character for float numbers</p></li>
 </ul>
-</li>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="structure-graph">
 <span id="dotstructurereference"></span><h2>Structure Graph<a class="headerlink" href="#structure-graph" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="moddy.dotStructure.moddyGenerateStructureGraph">
-<code class="descclassname">moddy.dotStructure.</code><code class="descname">moddyGenerateStructureGraph</code><span class="sig-paren">(</span><em>sim</em>, <em>fileName</em>, <em>keepGvFile=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/dotStructure.html#moddyGenerateStructureGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.dotStructure.moddyGenerateStructureGraph" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.dot_structure.gen_dot_structure_graph">
+<code class="sig-prename descclassname">moddy.dot_structure.</code><code class="sig-name descname">gen_dot_structure_graph</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">file_name</em>, <em class="sig-param">keep_gv_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/dot_structure.html#gen_dot_structure_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.dot_structure.gen_dot_structure_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a graph of the model structure using the GraphViz dot tool</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="core.html#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>fileName</strong> – the relative filename including ‘.svg’</li>
-<li><strong>keepGvFile</strong> – if True, don’t delete graphviz input file</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>file_name</strong> – the relative filename including ‘.svg’</p></li>
+<li><p><strong>keep_gv_file</strong> – if True, don’t delete graphviz input file</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="fsm-graph">
 <span id="dotfsmreference"></span><h2>FSM Graph<a class="headerlink" href="#fsm-graph" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="moddy.dotFsm.moddyGenerateFsmGraph">
-<code class="descclassname">moddy.dotFsm.</code><code class="descname">moddyGenerateFsmGraph</code><span class="sig-paren">(</span><em>fsm</em>, <em>fileName</em>, <em>keepGvFile=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/dotFsm.html#moddyGenerateFsmGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.dotFsm.moddyGenerateFsmGraph" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.dot_fsm.gen_fsm_graph">
+<code class="sig-prename descclassname">moddy.dot_fsm.</code><code class="sig-name descname">gen_fsm_graph</code><span class="sig-paren">(</span><em class="sig-param">fsm</em>, <em class="sig-param">file_name</em>, <em class="sig-param">keep_gv_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/dot_fsm.html#gen_fsm_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.dot_fsm.gen_fsm_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a Fsm Graph of an fsm using the GraphViz dot tool</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>fsm</strong> – an instance of the fsm</li>
-<li><strong>fileName</strong> – the relative filename including ‘.svg’</li>
-<li><strong>keepGvFile</strong> – if True, don’t delete graphviz input file</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fsm</strong> – an instance of the fsm</p></li>
+<li><p><strong>file_name</strong> – the relative filename including ‘.svg’</p></li>
+<li><p><strong>keep_gv_file</strong> – if True, don’t delete graphviz input file</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -330,7 +312,7 @@ to the length of the part names.</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="lib/index.html" class="btn btn-neutral float-right" title="Library Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="fsm.html" class="btn btn-neutral float-left" title="Moddy Finite State Machines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -342,7 +324,7 @@ to the length of the part names.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Hello Demo as a Sequential Program &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Hello Demo as a Sequential Program &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="API Reference" href="../reference/index.html" />
-    <link rel="prev" title="Multiple Output Ports bound to one Input Port" href="7_multiPortBinding.html" /> 
+    <link rel="prev" title="Multiple Output Ports bound to one Input Port" href="7_multi_port_binding.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -97,15 +97,16 @@
 <li class="toctree-l2"><a class="reference internal" href="2_sergw.html">Serial Gateway</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_carinfo.html">Car Infotainment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_varwatch.html">Variable Watching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_lostMsg.html">Lost Messages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_lostmsg.html">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_vthread_remote_controlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_multi_port_binding.html">Multiple Output Ports bound to one Input Port</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Hello Demo as a Sequential Program</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -159,7 +160,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/tutorials/8_helloProgram.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/tutorials/8_hello_program.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -176,45 +177,46 @@
 <span id="hello-program"></span><h1>Hello Demo as a Sequential Program<a class="headerlink" href="#hello-demo-as-a-sequential-program" title="Permalink to this headline">¶</a></h1>
 <p>Covers:</p>
 <ul class="simple">
-<li>Sequential Program Modelling</li>
+<li><p>Sequential Program Modelling</p></li>
 </ul>
 <p>This demo shows the same behavior as <a class="reference internal" href="1_hello.html#hello"><span class="std std-ref">Hello</span></a>, but uses the Moddy sequential program model.
 I models how two persons, Bob and Joe, talk to eachother.</p>
 <p>The words they are talking are the mesages.</p>
 <p>The persons send and receive the voice at their IO-port <cite>head</cite>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">@author: klauspopp@gmx.de</span>
 
 <span class="sd">The Moddy 1_hello demo modelled using Moddy sequential programs</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">moddy</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">moddy</span>
 
-<span class="k">def</span> <span class="nf">bobProg</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">vSimpleProg</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">bob_prog</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">):</span>
     <span class="c1"># bob starts talking</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;Hi Joe&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    
+
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForMsg</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="mf">1.4</span><span class="p">,</span> <span class="s1">&#39;Think&#39;</span><span class="p">)</span>
-        
+        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_msg</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s2">&quot;got message &quot;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mf">1.4</span><span class="p">,</span> <span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        
-        
-<span class="k">def</span> <span class="nf">joeProg</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">vSimpleProg</span><span class="p">):</span>
+
+
+<span class="k">def</span> <span class="nf">joe_prog</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">):</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForMsg</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got message &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Think&#39;</span><span class="p">)</span>
-        
+        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_msg</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s2">&quot;got message &quot;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi Joe&quot;</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hi, How are you?&quot;</span>
         <span class="k">elif</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;How are you?&quot;</span><span class="p">:</span>
@@ -222,39 +224,42 @@ I models how two persons, Bob and Joe, talk to eachother.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
 
-
         <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
-    
-    <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">bobProg</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;QueuingIO&#39;</span><span class="p">:</span> <span class="s1">&#39;head&#39;</span> <span class="p">}</span> <span class="p">)</span>
-    <span class="n">vSimpleProg</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">joeProg</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;QueuingIO&#39;</span><span class="p">:</span> <span class="s1">&#39;head&#39;</span> <span class="p">}</span> <span class="p">)</span>
-    
-    <span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">([</span> <span class="p">[</span><span class="s1">&#39;Bob.head&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.head&#39;</span><span class="p">]</span> <span class="p">])</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">SIMU</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
+
+    <span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">(</span>
+        <span class="n">sim</span><span class="o">=</span><span class="n">SIMU</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">bob_prog</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;QueuingIO&quot;</span><span class="p">:</span> <span class="s2">&quot;head&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">(</span>
+        <span class="n">sim</span><span class="o">=</span><span class="n">SIMU</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">joe_prog</span><span class="p">,</span> <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;QueuingIO&quot;</span><span class="p">:</span> <span class="s2">&quot;head&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">SIMU</span><span class="o">.</span><span class="n">smart_bind</span><span class="p">([[</span><span class="s2">&quot;Bob.head&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe.head&quot;</span><span class="p">]])</span>
 
     <span class="c1"># let simulator run</span>
-    <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
-    
+    <span class="n">SIMU</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stop_time</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
+
     <span class="c1"># Output sequence diagram</span>
-    <span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span> 
-                                  <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;output/8_helloProgram.html&quot;</span><span class="p">,</span> 
-                                  <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span> 
-                                  <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Bob&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe&#39;</span><span class="p">],</span> 
-                                  <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> 
-                                  <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
-                                  <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Hello Program Demo&quot;</span><span class="p">)</span>    
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span>
+        <span class="n">sim</span><span class="o">=</span><span class="n">SIMU</span><span class="p">,</span>
+        <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;output/8_hello_program.html&quot;</span><span class="p">,</span>
+        <span class="n">show_parts_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">],</span>
+        <span class="n">time_per_div</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">pix_per_div</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello Program Demo&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># Output model structure graph</span>
-    <span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;output/8_hello_structure.svg&#39;</span><span class="p">)</span>
-
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_dot_structure_graph</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s2">&quot;output/8_hello_structure.svg&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The simulation outputs:</p>
 <blockquote>
-<div><p><a class="reference download internal" download="" href="../_downloads/7904983ca57e9e1d45876a51bfdcaa1d/8_helloProgram.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
-<p><a class="reference download internal" download="" href="../_downloads/9d64b6d9d822d1ad9e6876724e49ac71/8_hello_structure.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">structure</span> <span class="pre">graph</span></code></a></p>
+<div><p><a class="reference download internal" download="" href="../_downloads/b49eba9acd391056f3a18331a08db8a1/8_hello_program.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/6a7b00272a8b77c55666d8961f0136ff/8_hello_structure.svg"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">structure</span> <span class="pre">graph</span></code></a></p>
 </div></blockquote>
 </div>
 
@@ -269,7 +274,7 @@ I models how two persons, Bob and Joe, talk to eachother.</p>
         <a href="../reference/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="7_multiPortBinding.html" class="btn btn-neutral float-left" title="Multiple Output Ports bound to one Input Port" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="7_multi_port_binding.html" class="btn btn-neutral float-left" title="Multiple Output Ports bound to one Input Port" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -278,7 +283,7 @@ I models how two persons, Bob and Joe, talk to eachother.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

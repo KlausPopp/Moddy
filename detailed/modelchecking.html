@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Model Checking &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Model Checking &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -110,6 +110,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -183,20 +184,20 @@
 <p>Moddy 1.5 added a possibility for checkers in the model to tell the simulator that it detected
 some abnormal situation, e.g. encountered an invalid state, a result is out of range or some timeout has occurred.</p>
 <p>A moddy part can call the following method to signal a problem
-(An example can be found in <code class="docutils literal notranslate"><span class="pre">6_vthreadRemoteControlled.py</span></code>):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertionFailed</span><span class="p">(</span><span class="s1">&#39;3rd invocation assertion&#39;</span><span class="p">)</span>
+(An example can be found in <code class="docutils literal notranslate"><span class="pre">6_vthread_remote_controlled.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">assertion_failed</span><span class="p">(</span><span class="s1">&#39;3rd invocation assertion&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>By default, such an assertion failure causes the simulation to stop,
-unless you pass <code class="docutils literal notranslate"><span class="pre">stopOnAssertionFailure=False</span></code> to the simulators <a class="reference internal" href="../reference/core.html#moddy.simulator.sim.run" title="moddy.simulator.sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> method.
+unless you pass <code class="docutils literal notranslate"><span class="pre">stop_on_assertion_failure=False</span></code> to the simulators <a class="reference internal" href="../reference/core.html#moddy.sim_core.Sim.run" title="moddy.sim_core.Sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> method.
 In this case, the simulator gathers all assertions during the simulation
 and prints a summary at the end of the simulation:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">1 Assertion failures during simulation</span>
-<span class="go">    260.0s 3rd invocation assertion: in runVThread, (6_vthreadRemoteControlled.py::37)</span>
+<span class="go">    260.0s 3rd invocation assertion: in run_vthread, (6_vthread_remote_controlled.py::37)</span>
 </pre></div>
 </div>
 <p>Assertion failures are also displayed in the sequence diagram in purple color:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0300_checking.png" src="../_images/0300_checking.png" />
 </div>
 </div>
@@ -210,49 +211,50 @@ range.</p>
 <p>Monitor functions can be dynamically added and deleted.</p>
 <p>Monitor functions are executed in the context of the simulator and get called without
 arguments.</p>
-<p>See <a class="reference internal" href="../reference/core.html#moddy.simulator.sim.addMonitor" title="moddy.simulator.sim.addMonitor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">addMonitor()</span></code></a> and <a class="reference internal" href="../reference/core.html#moddy.simulator.sim.deleteMonitor" title="moddy.simulator.sim.deleteMonitor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deleteMonitor()</span></code></a>.</p>
+<p>See <a class="reference internal" href="../reference/core.html#moddy.sim_monitor.SimMonitorManager.add_monitor" title="moddy.sim_monitor.SimMonitorManager.add_monitor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_monitor()</span></code></a> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">delete_monitor()</span></code>.</p>
 <div class="section" id="using-a-model-monitor-in-a-stimulation-program">
 <h3>Using a model monitor in a Stimulation Program<a class="headerlink" href="#using-a-model-monitor-in-a-stimulation-program" title="Permalink to this headline">¶</a></h3>
-<p>Moddy 1.10 introduced the <a class="reference internal" href="../reference/vthread.html#moddy.vthread.vThread.waitForMonitor" title="moddy.vthread.vThread.waitForMonitor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">waitForMonitor()</span></code></a> method to suspend the
+<p>Moddy 1.10 introduced the <a class="reference internal" href="../reference/vthread.html#moddy.vthread.VThread.wait_for_monitor" title="moddy.vthread.VThread.wait_for_monitor"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wait_for_monitor()</span></code></a> method to suspend the
 thread until the monitor returns <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">myThread1</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyThread1</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span> <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s1">&#39;Thread&#39;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s1">&#39;Thread&#39;</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_vthread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">cycle</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">busy</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="s1">&#39;DEL#</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cycle</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
             <span class="n">cycle</span> <span class="o">+=</span> <span class="mi">1</span>
 
-<span class="k">class</span> <span class="nc">stimThread</span><span class="p">(</span><span class="n">vSimpleProg</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">supervisedThread</span> <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="s1">&#39;Stim&#39;</span><span class="p">,</span> <span class="n">parentObj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">supervisedThread</span> <span class="o">=</span> <span class="n">supervisedThread</span>
-    <span class="k">def</span> <span class="nf">runVThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">waitForMonitor</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitorFunc1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got mon1&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">waitForMonitor</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitorFunc3</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;got mon3&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">waitForMonitor</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitorFunc1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addAnnotation</span><span class="p">(</span><span class="s1">&#39;tout waiting for mon1&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">StimThread</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">VSimpleProg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">supervised_thread</span> <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="s1">&#39;Stim&#39;</span><span class="p">,</span> <span class="n">parent_obj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supervised_thread</span> <span class="o">=</span> <span class="n">supervised_thread</span>
 
-    <span class="k">def</span> <span class="nf">monitorFunc1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_vthread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_monitor</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_func1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s1">&#39;got mon1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_monitor</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_func3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s1">&#39;got mon3&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_monitor</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor_func1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">annotation</span><span class="p">(</span><span class="s1">&#39;tout waiting for mon1&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">monitor_func1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># called in the context of the simulator!</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">supervisedThread</span><span class="o">.</span><span class="n">_stateInd</span> <span class="o">==</span> <span class="s2">&quot;DEL#1&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">supervised_thread</span><span class="o">.</span><span class="n">_state_ind</span> <span class="o">==</span> <span class="s2">&quot;DEL#1&quot;</span>
 
-    <span class="k">def</span> <span class="nf">monitorFunc3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">monitor_func3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># called in the context of the simulator!</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">supervisedThread</span><span class="o">.</span><span class="n">_stateInd</span> <span class="o">==</span> <span class="s2">&quot;DEL#3&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">supervised_thread</span><span class="o">.</span><span class="n">_state_ind</span> <span class="o">==</span> <span class="s2">&quot;DEL#3&quot;</span>
 
-<span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+<span class="n">simu</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
 
-<span class="n">t1</span> <span class="o">=</span> <span class="n">myThread1</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">MyThread1</span><span class="p">(</span><span class="n">simu</span><span class="p">)</span>
 
-<span class="n">stim</span> <span class="o">=</span> <span class="n">stimThread</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+<span class="n">stim</span> <span class="o">=</span> <span class="n">StimThread</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
 
 <span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
@@ -281,7 +283,7 @@ thread until the monitor returns <code class="docutils literal notranslate"><spa
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

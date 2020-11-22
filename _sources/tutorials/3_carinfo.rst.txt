@@ -9,7 +9,7 @@ Covers:
 
 This demo simulates the behavior of a (extremely simplified) car infotainment system.
 
-The main state is simulated with a Moddy Finite state machine. (Off, Booting, NormalOp etc).
+The main state is simulated with a Moddy Finite state machine. (off, booting, normal_op etc).
 
 The normal state has several nested sub-state machines, such as: 
 

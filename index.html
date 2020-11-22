@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to Moddy Discrete Event Simulator’s documentation! &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Welcome to Moddy Discrete Event Simulator’s documentation! &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -95,6 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -162,11 +163,11 @@
   <div class="section" id="welcome-to-moddy-discrete-event-simulator-s-documentation">
 <h1>Welcome to Moddy Discrete Event Simulator’s documentation!<a class="headerlink" href="#welcome-to-moddy-discrete-event-simulator-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Please find installation instructions under <a class="reference internal" href="install.html#install"><span class="std std-ref">Installation</span></a>!</p>
+<p class="admonition-title">Note</p>
+<p>Please find installation instructions under <a class="reference internal" href="install.html#install"><span class="std std-ref">Installation</span></a>!</p>
 </div>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 </ul>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
@@ -198,10 +199,10 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorials/2_sergw.html">Serial Gateway</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/3_carinfo.html">Car Infotainment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/4_varwatch.html">Variable Watching</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/5_lostMsg.html">Lost Messages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/6_vthreadRemoteControlled.html">Remote Controlled Threads</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/7_multiPortBinding.html">Multiple Output Ports bound to one Input Port</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/8_helloProgram.html">Hello Demo as a Sequential Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/5_lostmsg.html">Lost Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/6_vthread_remote_controlled.html">Remote Controlled Threads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_multi_port_binding.html">Multiple Output Ports bound to one Input Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_hello_program.html">Hello Demo as a Sequential Program</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a><ul>
@@ -209,6 +210,7 @@
 <li class="toctree-l2"><a class="reference internal" href="reference/vthread.html">Virtual Thread Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/fsm.html">Moddy Finite State Machines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reference/results.html">Moddy Result Generator APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference/lib/index.html">Library Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
@@ -222,6 +224,20 @@
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="developer.html#running-test-suite">Running Test Suite</a></li>
 <li class="toctree-l2"><a class="reference internal" href="developer.html#updating-the-docs">Updating the docs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="migrating_to_moddy2.html">Porting from Moddy 1 to 2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#no-wildcard-import">No wildcard import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-all-parameters-to-moddy-apis-to-snake-case">Rename all parameters to moddy APIs to snake_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-all-moddy-methods-to-names-to-snake-case">Rename all moddy methods to names to snake_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-changed-moved-moddy-methods">Rename changed/moved moddy methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-constants">Rename constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-your-message-and-timer-callbacks">Rename your message and timer callbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-to-new-class-names">Rename to new class names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-your-ports-optional">Rename your ports (optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-your-state-callbacks-in-fsms">Rename your state callbacks in FSMs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-message-and-timer-callbacks-in-simfsmparts">Rename message and timer callbacks in SimFsmParts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_moddy2.html#rename-your-states-in-fsms-optional">Rename your states in FSMs (optional)</a></li>
 </ul>
 </li>
 </ul>
@@ -246,7 +262,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

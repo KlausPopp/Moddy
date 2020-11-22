@@ -1,0 +1,458 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>moddy.dot_structure &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>moddy.dot_structure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for moddy.dot_structure</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">:mod:`dot_structure` -- Generate a graph of the model structure</span>
+<span class="sd">=======================================================================</span>
+
+<span class="sd">.. module:: dot_structure</span>
+<span class="sd">   :synopsis: Generate a graph of the model structure</span>
+<span class="sd">.. moduleauthor:: Klaus Popp &lt;klauspopp@gmx.de&gt;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">create_dirs_and_open_output_file</span>
+
+
+<div class="viewcode-block" id="gen_dot_structure_graph"><a class="viewcode-back" href="../../reference/results.html#moddy.dot_structure.gen_dot_structure_graph">[docs]</a><span class="k">def</span> <span class="nf">gen_dot_structure_graph</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">keep_gv_file</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Generate a graph of the model structure using the GraphViz dot tool</span>
+
+<span class="sd">    :param sim sim: Simulator instance</span>
+<span class="sd">    :param file_name: the relative filename including &#39;.svg&#39;</span>
+<span class="sd">    :param keep_gv_file: if True, don&#39;t delete graphviz input file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">dot</span> <span class="o">=</span> <span class="n">DotStructure</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">parts_mgr</span><span class="o">.</span><span class="n">top_level_parts</span><span class="p">(),</span>
+                       <span class="n">sim</span><span class="o">.</span><span class="n">parts_mgr</span><span class="o">.</span><span class="n">all_output_ports</span><span class="p">())</span>
+    <span class="n">dot</span><span class="o">.</span><span class="n">dot_gen</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">keep_gv_file</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_space</span><span class="p">(</span><span class="n">indent</span><span class="p">):</span>
+    <span class="n">istr</span> <span class="o">=</span> <span class="s2">&quot;%&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">indent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;s&quot;</span>
+    <span class="k">return</span> <span class="n">istr</span> <span class="o">%</span> <span class="s2">&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_moddy_name_to_dot_name</span><span class="p">(</span><span class="n">hierarchy_name</span><span class="p">):</span>
+    <span class="n">ret_val</span> <span class="o">=</span> <span class="n">hierarchy_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;__&quot;</span><span class="p">)</span>
+    <span class="n">ret_val</span> <span class="o">=</span> <span class="n">ret_val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret_val</span>
+
+
+<span class="k">def</span> <span class="nf">_subgraph_name</span><span class="p">(</span><span class="n">part_hierarchy_name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;cluster_&quot;</span> <span class="o">+</span> <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span><span class="n">part_hierarchy_name</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_port_or_io_port_hierarchy_name</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; return port name or if port is part of IOPort, the IOPorts Name&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_port_or_io_port_obj_name</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; return port name or if port is part of IOPort, the IOPorts Name&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">port</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_p2p_port_msg_types</span><span class="p">(</span><span class="n">port1</span><span class="p">,</span> <span class="n">port2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; join the message types of the two ports &#39;&#39;&#39;</span>
+    <span class="n">msg_types</span> <span class="o">=</span> <span class="n">port1</span><span class="o">.</span><span class="n">learned_msg_types</span><span class="p">()</span> <span class="o">+</span> <span class="n">port2</span><span class="o">.</span><span class="n">learned_msg_types</span><span class="p">()</span>
+    <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="n">msg_types</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">msg_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+            <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg_type</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_port_msg_types_to_label</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_port_msg_types_to_label</span><span class="p">(</span><span class="n">msg_types</span><span class="p">):</span>
+    <span class="n">ret_val</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="n">msg_types</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ret_val</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">ret_val</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
+        <span class="n">ret_val</span> <span class="o">+=</span> <span class="n">msg_type</span>
+    <span class="k">return</span> <span class="n">ret_val</span>
+
+
+<span class="k">class</span> <span class="nc">DotStructure</span><span class="p">:</span>
+    <span class="c1"># pylint: disable=too-few-public-methods</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Display the model structure via the DOT language (Graphviz)</span>
+<span class="sd">    Parts are vizualized as subgraphs</span>
+<span class="sd">    Ports are vizualized as nodes</span>
+<span class="sd">    Parts that have no ports will be invisible</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_level_parts</span><span class="p">,</span> <span class="n">output_ports</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        &lt;top_level_parts&gt; must be the list of top level parts in the model</span>
+<span class="sd">        &lt;output_ports&gt; must a list of all output ports in the model</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_top_level_parts</span> <span class="o">=</span> <span class="n">top_level_parts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_ports</span> <span class="o">=</span> <span class="n">output_ports</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_schedulers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_part_structure_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="s1">&#39;add_vthread&#39;</span><span class="p">):</span>
+            <span class="c1"># show schedulers as an ellipse-node, and without subparts</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> [label=</span><span class="si">%s</span><span class="s1"> shape=ellipse];&#39;</span> <span class="o">%</span>
+                         <span class="p">(</span><span class="n">_moddy_name_to_dot_name</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()),</span>
+                          <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()))])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_list_schedulers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># normal part is shown as a subgraph</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;subgraph </span><span class="si">%s</span><span class="s1"> {&#39;</span> <span class="o">%</span>
+                          <span class="n">_subgraph_name</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">())])</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;label=&lt;&lt;B&gt;</span><span class="si">%s</span><span class="s1">&lt;/B&gt;&gt;&#39;</span> <span class="o">%</span> <span class="n">part</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()])</span>
+
+            <span class="c1"># now the ports</span>
+            <span class="n">list_ports</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">ports</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_ports</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="n">list_ports</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> [label=</span><span class="si">%s</span><span class="s1">];&#39;</span> <span class="o">%</span>
+                         <span class="p">(</span><span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                             <span class="n">port</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()),</span>
+                          <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                              <span class="n">port</span><span class="o">.</span><span class="n">obj_name</span><span class="p">()))])</span>
+
+            <span class="c1"># now the subparts</span>
+            <span class="k">for</span> <span class="n">sub_part</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">sub_parts</span><span class="p">():</span>
+                <span class="n">lines</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_part_structure_gen</span><span class="p">(</span><span class="n">sub_part</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;}&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">lines</span>
+
+    <span class="k">def</span> <span class="nf">_bindings_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">known_bindings</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_ports</span><span class="p">:</span>
+            <span class="n">io_port</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># test if IOPort</span>
+            <span class="k">if</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">io_port</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span>
+                <span class="n">peers</span> <span class="o">=</span> <span class="n">io_port</span><span class="o">.</span><span class="n">peer_ports</span><span class="p">()</span>
+
+                <span class="k">for</span> <span class="n">peer</span> <span class="ow">in</span> <span class="n">peers</span><span class="p">:</span>
+                    <span class="c1"># print( &quot;port %s peer %s&quot; % (io_port, peer))</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">io_port</span><span class="o">.</span><span class="n">out_port</span><span class="p">(),</span> <span class="n">peer</span><span class="o">.</span><span class="n">in_port</span><span class="p">())</span> <span class="ow">not</span> <span class="ow">in</span> \
+                        <span class="n">known_bindings</span> <span class="ow">and</span> \
+                        <span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">out_port</span><span class="p">(),</span> <span class="n">io_port</span><span class="o">.</span><span class="n">in_port</span><span class="p">())</span> <span class="ow">not</span> <span class="ow">in</span> \
+                            <span class="n">known_bindings</span><span class="p">:</span>
+
+                        <span class="c1"># Has a peer port, make bidirectional connection</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">[</span><span class="n">level</span><span class="p">,</span>
+                             <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1">  [dir=none penwidth=3 label=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span>
+                             <span class="p">(</span>
+                                 <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                                     <span class="n">_port_or_io_port_hierarchy_name</span><span class="p">(</span><span class="n">port</span><span class="p">)),</span>
+                                 <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                                     <span class="n">peer</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()),</span>
+                                 <span class="n">_p2p_port_msg_types</span><span class="p">(</span>
+                                     <span class="n">port</span><span class="o">.</span><span class="n">io_port</span><span class="p">()</span><span class="o">.</span><span class="n">out_port</span><span class="p">(),</span>
+                                     <span class="n">peer</span><span class="o">.</span><span class="n">out_port</span><span class="p">())</span>
+                             <span class="p">)])</span>
+
+                        <span class="c1"># These ports are already connected,</span>
+                        <span class="c1"># ignore them in the rest of the scan</span>
+                        <span class="n">known_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">io_port</span><span class="o">.</span><span class="n">out_port</span><span class="p">(),</span> <span class="n">peer</span><span class="o">.</span><span class="n">in_port</span><span class="p">()))</span>
+                        <span class="n">known_bindings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">peer</span><span class="o">.</span><span class="n">out_port</span><span class="p">(),</span> <span class="n">io_port</span><span class="o">.</span><span class="n">in_port</span><span class="p">()))</span>
+
+            <span class="k">for</span> <span class="n">in_port</span> <span class="ow">in</span> <span class="n">port</span><span class="o">.</span><span class="n">in_ports</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">io_port</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="n">io_port</span><span class="o">.</span><span class="n">out_port</span><span class="p">(),</span> <span class="n">in_port</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_bindings</span><span class="p">:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">level</span><span class="p">,</span>
+                         <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1"> [label=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                             <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                                 <span class="n">_port_or_io_port_hierarchy_name</span><span class="p">(</span><span class="n">port</span><span class="p">)),</span>
+                             <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                                 <span class="n">_port_or_io_port_hierarchy_name</span><span class="p">(</span><span class="n">in_port</span><span class="p">)),</span>
+                             <span class="n">_port_msg_types_to_label</span><span class="p">(</span>
+                                 <span class="n">port</span><span class="o">.</span><span class="n">learned_msg_types</span><span class="p">())</span>
+                             <span class="p">)])</span>
+
+        <span class="k">return</span> <span class="n">lines</span>
+
+    <span class="k">def</span> <span class="nf">_scheduler_relations_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sched</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_schedulers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">sched</span><span class="o">.</span><span class="n">threads</span><span class="p">():</span>
+                <span class="c1"># Dot allows only edges between nodes,</span>
+                <span class="c1"># so take the first port of that part</span>
+                <span class="c1"># if the part has no port, issue warning</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">thread</span><span class="o">.</span><span class="n">ports</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">thread</span> <span class="o">!=</span> <span class="n">sched</span><span class="o">.</span><span class="n">parent_obj</span><span class="p">:</span>
+                        <span class="n">first_port</span> <span class="o">=</span> <span class="n">thread</span><span class="o">.</span><span class="n">ports</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+                        <span class="n">prio</span> <span class="o">=</span> <span class="n">thread</span><span class="o">.</span><span class="n">sched_data</span><span class="o">.</span><span class="n">prio</span>
+                        <span class="n">dest_node</span> <span class="o">=</span> <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                            <span class="n">first_port</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">())</span>
+
+                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">[</span><span class="n">level</span><span class="p">,</span>
+                             <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1"> [lhead=</span><span class="si">%s</span><span class="s1"> label=&quot;</span><span class="si">%s</span><span class="s1">&quot; &#39;</span>
+                             <span class="s1">&#39;color=lightblue fontsize=8 &#39;</span>
+                             <span class="s1">&#39;fontcolor=lightblue ]&#39;</span> <span class="o">%</span>
+                                <span class="p">(</span><span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                                    <span class="n">sched</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()),</span>
+                                 <span class="n">dest_node</span><span class="p">,</span>
+                                 <span class="s2">&quot;cluster_&quot;</span> <span class="o">+</span> <span class="n">_moddy_name_to_dot_name</span><span class="p">(</span>
+                                     <span class="n">thread</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">()),</span>
+                                 <span class="n">prio</span><span class="p">)])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Thread </span><span class="si">%s</span><span class="s2"> has no ports. Scheduler &quot;</span>
+                          <span class="s2">&quot;connection cannot be shown in structure&quot;</span> <span class="o">%</span>
+                          <span class="n">thread</span><span class="o">.</span><span class="n">hierarchy_name</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">lines</span>
+
+    <span class="k">def</span> <span class="nf">dot_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">keep_gv_file</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; generate the dot file &#39;&#39;&#39;</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;digraph G {&#39;</span><span class="p">])</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;rankdir=LR;&#39;</span><span class="p">])</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;compound=true;&#39;</span><span class="p">])</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                      <span class="s1">&#39;graph [fontname = &quot;helvetica&quot; fontsize=10 &#39;</span>
+                      <span class="s1">&#39;fontnodesep=0.1];&#39;</span><span class="p">])</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;node [fontname = &quot;helvetica&quot; fontsize=10 &#39;</span>
+                      <span class="s1">&#39;shape=box color=lightblue height=.1];&#39;</span><span class="p">])</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;edge [fontname = &quot;helvetica&quot; color=red &#39;</span>
+                      <span class="s1">&#39;fontsize=8 fontcolor=red];&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Structure</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_level_parts</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_part_structure_gen</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Bindings</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bindings_gen</span><span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Scheduler relations</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_relations_gen</span><span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># finish</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;}&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Output the DOT file as filename.dot e.g. test.svg.gv</span>
+        <span class="n">dot_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.gv&quot;</span> <span class="o">%</span> <span class="n">file_name</span>
+        <span class="c1"># print(&quot;file_name=%s&quot; % dot_file )</span>
+        <span class="n">file_desc</span> <span class="o">=</span> <span class="n">create_dirs_and_open_output_file</span><span class="p">(</span><span class="n">dot_file</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">file_desc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">_space</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">file_desc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="s1">&#39;-Tsvg&#39;</span><span class="p">,</span> <span class="n">dot_file</span><span class="p">,</span> <span class="s1">&#39;-o</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file_name</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved structure graph to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_gv_file</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">dot_file</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

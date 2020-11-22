@@ -1,0 +1,369 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Protocol Data Units &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Network Library Reference" href="net/index.html" />
+    <link rel="prev" title="Library Reference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core.html">Simulator Core API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vthread.html">Virtual Thread Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../fsm.html">Moddy Finite State Machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../results.html">Moddy Result Generator APIs</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Library Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Protocol Data Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="net/index.html">Network Library Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="index.html">Library Reference</a> &raquo;</li>
+        
+      <li>Protocol Data Units</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/lib/pdu.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-moddy.lib.pdu">
+<span id="protocol-data-units"></span><span id="lib-pdu-reference"></span><h1>Protocol Data Units<a class="headerlink" href="#module-moddy.lib.pdu" title="Permalink to this headline">¶</a></h1>
+<p>Created on 27.04.2018</p>
+<p>&#64;author: <a class="reference external" href="mailto:klauspopp&#37;&#52;&#48;gmx&#46;de">klauspopp<span>&#64;</span>gmx<span>&#46;</span>de</a></p>
+<dl class="class">
+<dt id="moddy.lib.pdu.Pdu">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.lib.pdu.</code><code class="sig-name descname">Pdu</code><span class="sig-paren">(</span><em class="sig-param">pdu_type</em>, <em class="sig-param">mapping</em>, <em class="sig-param">byte_len</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of a protocol data unit</p>
+<p>The Pdu is represented as a dictionary, containing the modelled protocol
+pdu fields.
+The additional member ‘_byte_len’ represents the real byte length of
+all pdu fields</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">dict</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;m1&#39;</span><span class="p">:</span> <span class="n">m1value</span><span class="p">,</span> <span class="s1">&#39;m2&#39;</span><span class="p">:</span> <span class="n">m2value</span> <span class="p">},</span> <span class="n">_byte_len</span><span class="o">=</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p>Pdus can be nested.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdu_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A string describing the type of the Pdu       (without ‘Pdu’), e.g. ‘Eth’</p></li>
+<li><p><strong>mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary with member:value pairs, value can be          a sub-Pdu</p></li>
+<li><p><strong>byte_len</strong> – top level byte Len - subPdus len will be added</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="moddy.lib.pdu.Pdu.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">pdu_type</em>, <em class="sig-param">mapping</em>, <em class="sig-param">byte_len</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.Pdu.byte_len">
+<code class="sig-name descname">byte_len</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu.byte_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu.byte_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the length of the Pdu in bytes, including
+all its nested PDUs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.Pdu.dump">
+<code class="sig-name descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string as __repr()__, but also dump sub-pdus in separated,
+intended lines, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">IpPdu</span><span class="p">(</span><span class="mi">1220</span><span class="p">)</span> <span class="n">ihl</span><span class="o">=</span><span class="mi">14</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span> <span class="n">src</span><span class="o">=</span><span class="mf">192.1</span><span class="o">.</span><span class="mf">1.2</span> <span class="n">dst</span><span class="o">=</span><span class="mf">192.1</span><span class="o">.</span><span class="mf">1.8</span>
+<span class="n">payld</span><span class="o">=</span><span class="n">RawPdu</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="n">payld2</span><span class="o">=</span><span class="n">RawPdu</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">payld</span><span class="p">:</span><span class="n">RawPdu</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="n">raw</span><span class="o">=</span><span class="n">IPPAYLOAD</span>
+    <span class="n">payld2</span><span class="p">:</span><span class="n">RawPdu</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="n">raw</span><span class="o">=</span><span class="n">AnotherPayld</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.Pdu.fill_up">
+<code class="sig-name descname">fill_up</code><span class="sig-paren">(</span><em class="sig-param">n_bytes</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu.fill_up"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu.fill_up" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill top level PDU up, so it has a byte_len of n_bytes
+if PDU already larger, raise Attribute error</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.Pdu.is_pdu">
+<em class="property">classmethod </em><code class="sig-name descname">is_pdu</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu.is_pdu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu.is_pdu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if obj is a Pdu or a subclass of Pdu</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.Pdu.split_to_fragments">
+<code class="sig-name descname">split_to_fragments</code><span class="sig-paren">(</span><em class="sig-param">pdu_type</em>, <em class="sig-param">max_frag_byte_len</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#Pdu.split_to_fragments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.Pdu.split_to_fragments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split the Pdu into fragments and return list of fragments
+Each fragment is represented as a Pdu</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Pdu</span><span class="p">(</span> <span class="s2">&quot;&lt;orgtype&gt;Frag&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;fr&#39;</span><span class="p">:</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">offset</span> <span class="n">of</span> <span class="n">fragment</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="o">&lt;</span><span class="nb">len</span> <span class="n">of</span> <span class="n">fragment</span><span class="o">&gt;</span><span class="p">),</span> <span class="s1">&#39;org&#39;</span><span class="o">=</span><span class="p">[</span><span class="o">&lt;</span><span class="n">original</span> <span class="n">Pdu</span><span class="o">&gt;</span><span class="p">],</span> <span class="n">fraglen</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Note: the ‘org’ member is transferred with every fragment.
+It is enclosed in a list, so that it
+is not included in the fragment’s byte length.</p>
+<p>The PduDefragmenter class can be used to defragment the fragments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdu_type</strong> (<em>string</em>) – pdu_type to set for fragments</p></li>
+<li><p><strong>max_frag_byte_len</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – maximum bytes per fragment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return list</dt>
+<dd class="field-even"><p>list of fragments</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="moddy.lib.pdu.PduDefragmenter">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.lib.pdu.</code><code class="sig-name descname">PduDefragmenter</code><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#PduDefragmenter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.PduDefragmenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to defragment a PDU that has been fragmented with
+split_to_fragments().</p>
+<p>Create an instance of this class and add all received fragments
+with add_fragment(). Fragments may be received in any order.</p>
+<p>Whether the defragmentation is complete, can be checked by
+calling the_pdu() or defrag_complete_info().</p>
+<dl class="method">
+<dt id="moddy.lib.pdu.PduDefragmenter.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#PduDefragmenter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.PduDefragmenter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.PduDefragmenter.add_fragment">
+<code class="sig-name descname">add_fragment</code><span class="sig-paren">(</span><em class="sig-param">frag</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#PduDefragmenter.add_fragment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.PduDefragmenter.add_fragment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a received fragment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.PduDefragmenter.defrag_complete_info">
+<code class="sig-name descname">defrag_complete_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#PduDefragmenter.defrag_complete_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.PduDefragmenter.defrag_complete_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if defragmentation complete.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return string</dt>
+<dd class="field-odd"><p>None if complete or string with info with         first missing frag</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.lib.pdu.PduDefragmenter.the_pdu">
+<code class="sig-name descname">the_pdu</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#PduDefragmenter.the_pdu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.PduDefragmenter.the_pdu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the complete defragmented PDU. If fragments are missing,
+return None.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="moddy.lib.pdu.empty_pdu">
+<code class="sig-prename descclassname">moddy.lib.pdu.</code><code class="sig-name descname">empty_pdu</code><span class="sig-paren">(</span><em class="sig-param">pdu_type</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/moddy/lib/pdu.html#empty_pdu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.pdu.empty_pdu" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a empty PDU</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="net/index.html" class="btn btn-neutral float-right" title="Network Library Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Library Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

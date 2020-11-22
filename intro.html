@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Introduction &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -100,6 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -166,6 +167,12 @@
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is the documentation for Moddy 2.x. Moddy 2.x is no more compatible
+with models written for moddy 2.x.
+See <a class="reference internal" href="migrating_to_moddy2.html#migrating-from-moddy1"><span class="std std-ref">Porting from Moddy 1 to 2</span></a> for migration instructions</p>
+</div>
 <div class="section" id="what-is-moddy">
 <h2>What is Moddy?<a class="headerlink" href="#what-is-moddy" title="Permalink to this headline">¶</a></h2>
 <p>Moddy is a simulator to model and analyze the timing behavior of systems consisting
@@ -174,37 +181,37 @@ to be consistent with the term SysML uses in internal block diagrams.</p>
 <p>Moddy was written to analyze complex systems in the concept phase to validate the
 suitability of the concept. Typical applications are</p>
 <ul class="simple">
-<li>Modelling communication protocols</li>
-<li>Modelling highly distributed computer systems</li>
+<li><p>Modelling communication protocols</p></li>
+<li><p>Modelling highly distributed computer systems</p></li>
 </ul>
 <p>You describe the structure and the behavior of your model via a program written in “python” language.
 After the simulation run, Moddy can produce a number of result files that you will analyze to
 evaluate whether the model behaves as expected. These result files are</p>
 <ul class="simple">
-<li>A sequence diagram</li>
-<li>An event trace</li>
-<li>A static structure graph of your model (block diagram)</li>
-<li>A static graph of your finite state machines in the model</li>
+<li><p>A sequence diagram</p></li>
+<li><p>An event trace</p></li>
+<li><p>A static structure graph of your model (block diagram)</p></li>
+<li><p>A static graph of your finite state machines in the model</p></li>
 </ul>
 <p>Further result files, such as wave forms may be added in the future.
 Moddy’s Simulator is a classic Discrete Event simulator.</p>
-<dl class="docutils">
-<dt>From Wikipedia <a class="reference external" href="https://en.wikipedia.org/wiki/Discrete_event_simulation">https://en.wikipedia.org/wiki/Discrete_event_simulation</a>:</dt>
-<dd><em>A discrete-event simulation (DES) models the operation of a system as a discrete sequence of events
+<p>From Wikipedia <a class="reference external" href="https://en.wikipedia.org/wiki/Discrete_event_simulation">https://en.wikipedia.org/wiki/Discrete_event_simulation</a>:</p>
+<blockquote>
+<div><p><em>A discrete-event simulation (DES) models the operation of a system as a discrete sequence of events
 in time. Each event occurs at a particular instant in time and marks a change of state in the system.
 Between consecutive events, no change in the system is assumed to occur;
-thus the simulation can directly jump in time from one event to the next.</em></dd>
-</dl>
+thus the simulation can directly jump in time from one event to the next.</em></p>
+</div></blockquote>
 </div>
 <div class="section" id="why-another-simulator">
 <h2>Why another Simulator?<a class="headerlink" href="#why-another-simulator" title="Permalink to this headline">¶</a></h2>
 <p>I was looking for a simulator that</p>
 <ul class="simple">
-<li>Supports Quick Model generation: Meaning: Modelling shall be doable by non-programmers in an intuitive and easy-to-remember way</li>
-<li>Is suitable to model communication between objects</li>
-<li>Can visualize those communication at least in form of sequence diagrams</li>
-<li>Is open source or at least affordable</li>
-<li>I could not find commercial or open source tools that provided those features.</li>
+<li><p>Supports Quick Model generation: Meaning: Modelling shall be doable by non-programmers in an intuitive and easy-to-remember way</p></li>
+<li><p>Is suitable to model communication between objects</p></li>
+<li><p>Can visualize those communication at least in form of sequence diagrams</p></li>
+<li><p>Is open source or at least affordable</p></li>
+<li><p>I could not find commercial or open source tools that provided those features.</p></li>
 </ul>
 </div>
 </div>
@@ -229,7 +236,7 @@ thus the simulation can directly jump in time from one event to the next.</em></
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

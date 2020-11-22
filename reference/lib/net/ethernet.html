@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Ethernet Methods &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Unmanaged Ethernet Switch" href="eth_unmanaged_switch.html" />
+    <link rel="prev" title="Network Library Reference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Moddy Discrete Event Simulator
+          
+
+          
+            
+            <img src="../../../_static/moddy-logo-200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../detailed/index.html">Detailed User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../core.html">Simulator Core API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vthread.html">Virtual Thread Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../fsm.html">Moddy Finite State Machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../results.html">Moddy Result Generator APIs</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Library Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../pdu.html">Protocol Data Units</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Network Library Reference</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Ethernet Methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eth_unmanaged_switch.html">Unmanaged Ethernet Switch</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Moddy Discrete Event Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="../index.html">Library Reference</a> &raquo;</li>
+        
+          <li><a href="index.html">Network Library Reference</a> &raquo;</li>
+        
+      <li>Ethernet Methods</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../_sources/reference/lib/net/ethernet.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-moddy.lib.net.ethernet">
+<span id="ethernet-methods"></span><span id="lib-net-ethernet-reference"></span><h1>Ethernet Methods<a class="headerlink" href="#module-moddy.lib.net.ethernet" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ethernet">
+<span id="ethernet-ethernet-helper-functions"></span><h2><a class="reference internal" href="#module-ethernet" title="ethernet: Ethernet Helper Functions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ethernet</span></code></a> – Ethernet Helper Functions<a class="headerlink" href="#module-ethernet" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="moddy.lib.net.ethernet.eth_bcast_addr">
+<code class="sig-prename descclassname">moddy.lib.net.ethernet.</code><code class="sig-name descname">eth_bcast_addr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/moddy/lib/net/ethernet.html#eth_bcast_addr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.net.ethernet.eth_bcast_addr" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Ethernet Broadcast MAC Address “FF:FF:FF:FF:FF:FF”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="moddy.lib.net.ethernet.eth_flight_time">
+<code class="sig-prename descclassname">moddy.lib.net.ethernet.</code><code class="sig-name descname">eth_flight_time</code><span class="sig-paren">(</span><em class="sig-param">net_speed</em>, <em class="sig-param">n_bytes</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/moddy/lib/net/ethernet.html#eth_flight_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.net.ethernet.eth_flight_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute flight time of an Ethernet frame
+If nBytes are below the minimum Ethernet frame length,
+the flight time of the minimum frame length is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>netSpeed</strong> – physical link speed in bits/second</p></li>
+<li><p><strong>nBytes</strong> – number of bytes to transmit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transmission time on wire in seconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="moddy.lib.net.ethernet.eth_hdr_len">
+<code class="sig-prename descclassname">moddy.lib.net.ethernet.</code><code class="sig-name descname">eth_hdr_len</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/moddy/lib/net/ethernet.html#eth_hdr_len"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.net.ethernet.eth_hdr_len" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Ethernet header byte length</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="moddy.lib.net.ethernet.eth_pdu">
+<code class="sig-prename descclassname">moddy.lib.net.ethernet.</code><code class="sig-name descname">eth_pdu</code><span class="sig-paren">(</span><em class="sig-param">src</em>, <em class="sig-param">dst</em>, <em class="sig-param">eth_type</em>, <em class="sig-param">payload</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/moddy/lib/net/ethernet.html#eth_pdu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.lib.net.ethernet.eth_pdu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an Ethernet Pdu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Source MAC address</p></li>
+<li><p><strong>dst</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Destination MAC address</p></li>
+<li><p><strong>eht_type</strong> – Ethernet type</p></li>
+<li><p><strong>payload</strong> (<a class="reference internal" href="../pdu.html#moddy.lib.pdu.Pdu" title="moddy.lib.pdu.Pdu"><em>Pdu</em></a>) – Ethernet payload</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>filled Pdu</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="eth_unmanaged_switch.html" class="btn btn-neutral float-right" title="Unmanaged Ethernet Switch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Network Library Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Klaus Popp
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

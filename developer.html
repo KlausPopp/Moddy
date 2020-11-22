@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Developer Guide &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Developer Guide &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Porting from Moddy 1 to 2" href="migrating_to_moddy2.html" />
     <link rel="prev" title="Installation" href="install.html" /> 
 </head>
 
@@ -62,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -102,6 +103,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -171,8 +173,11 @@
 <div class="section" id="running-test-suite">
 <h2>Running Test Suite<a class="headerlink" href="#running-test-suite" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">tests</span></code> subdirectory contains a number of tests for the moddy simulator.</p>
-<p>To run all tests: In eclipse, right click on <code class="docutils literal notranslate"><span class="pre">tests</span></code> and execute <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">as</span> <span class="pre">-&gt;</span> <span class="pre">Python</span> <span class="pre">unit-test</span></code>.</p>
-<p>To run a single tests: In eclipse, right click on <code class="docutils literal notranslate"><span class="pre">tests/xyz.py</span></code> and execute <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">as</span> <span class="pre">-&gt;</span> <span class="pre">Python</span> <span class="pre">unit-test</span></code>.</p>
+<p>To run all tests:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd tests</span>
+<span class="go">python -m unittest</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="updating-the-docs">
 <h2>Updating the docs<a class="headerlink" href="#updating-the-docs" title="Permalink to this headline">¶</a></h2>
@@ -228,6 +233,8 @@ where you checked out moddy master branch.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="migrating_to_moddy2.html" class="btn btn-neutral float-right" title="Porting from Moddy 1 to 2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
       
         <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
@@ -238,7 +245,7 @@ where you checked out moddy master branch.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

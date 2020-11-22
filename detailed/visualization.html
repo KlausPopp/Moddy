@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Visualisation &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Visualisation &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -98,11 +98,9 @@
 <li class="toctree-l2"><a class="reference internal" href="modelchecking.html">Model Checking</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Visualisation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sequence-diagram-generation">Sequence Diagram Generation</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#interactive-vs-static-diagrams">Interactive vs. Static Diagrams</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#elements-of-a-sequence-diagram">Elements of a sequence diagram</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#interactive-sequence-diagrams">Interactive Sequence Diagrams</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#details-of-a-sequence-diagram">Details of a Sequence Diagram</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#using-the-interactive-viewer">Using the Interactive Viewer</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#static-sequence-diagrams">Static Sequence Diagrams</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#structure-graph-generation">Structure Graph Generation</a><ul>
@@ -118,6 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -189,71 +188,56 @@
 <div class="section" id="sequence-diagram-generation">
 <h2>Sequence Diagram Generation<a class="headerlink" href="#sequence-diagram-generation" title="Permalink to this headline">¶</a></h2>
 <p>Moddy can generate sequence diagrams to show the communication between Moddy parts, including their timing information.</p>
-<p>To generate a sequence diagrams, your code must call <a class="reference internal" href="../reference/results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a>
+<p>To generate a sequence diagrams, your code must call <a class="reference internal" href="../reference/results.html#moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram" title="moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_interactive_sequence_diagram()</span></code></a>
 after the simulation has finished.
-The parameters provided to <a class="reference internal" href="../reference/results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a> define the appearance of the sequence diagram.</p>
-<div class="section" id="interactive-vs-static-diagrams">
-<h3>Interactive vs. Static Diagrams<a class="headerlink" href="#interactive-vs-static-diagrams" title="Permalink to this headline">¶</a></h3>
-<p>Moddy can output either interactive or static sequence diagrams. The
-<em>fmt</em> parameter to <a class="reference internal" href="../reference/results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a> defines which type is generated:</p>
-<blockquote>
-<div><ul class="simple">
-<li>“iaViewer” or “iaViewerRef” generate interactive diagrams</li>
-<li>“svg” or “svgInHtml” generate static diagrams</li>
-</ul>
-</div></blockquote>
-<p>The major differences:</p>
-<blockquote>
-<div><ul class="simple">
-<li>Interactive diagrams can be opened in a browser and you can dynamically adjust the time scale
-to see less or more details.</li>
-<li>The interactive viewer tries to avoid overlapping text.</li>
-<li>The generation of interactive diagrams is much faster</li>
-<li>Static diagrams may be useful to edit the SVG data in an SVG editor</li>
-</ul>
-</div></blockquote>
+The parameters provided to <a class="reference internal" href="../reference/results.html#moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram" title="moddy.interactive_sequence_diagram.gen_interactive_sequence_diagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_interactive_sequence_diagram()</span></code></a> define the appearance of the sequence diagram.</p>
+<p>Moddy generates interactive diagrams, that can be opened in a browser and the time scale
+can be dynamically adjusted to see less or more details.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The static diagram generator has been removed in moddy 2.x</p>
 </div>
 <div class="section" id="elements-of-a-sequence-diagram">
 <h3>Elements of a sequence diagram<a class="headerlink" href="#elements-of-a-sequence-diagram" title="Permalink to this headline">¶</a></h3>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0400_sd_elements.PNG" src="../_images/0400_sd_elements.PNG" />
 </div>
 </div>
-<div class="section" id="interactive-sequence-diagrams">
-<h3>Interactive Sequence Diagrams<a class="headerlink" href="#interactive-sequence-diagrams" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="details-of-a-sequence-diagram">
+<h3>Details of a Sequence Diagram<a class="headerlink" href="#details-of-a-sequence-diagram" title="Permalink to this headline">¶</a></h3>
 <p>The interactive sequence diagrams are generated as HTML pages with javascript code.</p>
-<p>Format <code class="docutils literal notranslate"><span class="pre">iaViewer</span></code> embeds the viewer’s javascript and css code in the HTML file, while format <code class="docutils literal notranslate"><span class="pre">iaViewerRef</span></code>
-references to the javascript/css file which must be present on your filesystem.
-So, if you want to send the HTML file to someone who has no moddy installation, use <code class="docutils literal notranslate"><span class="pre">iaViewer</span></code>.</p>
+<p>Normally, the viewer embeds the viewer’s javascript and css code in the HTML file, however,
+you can specify <code class="docutils literal notranslate"><span class="pre">refer_files=True</span></code> to reference the javascript/css files which must be present on your filesystem.
+So, if you want to send the HTML file to someone who has no moddy installation, use <code class="docutils literal notranslate"><span class="pre">refer_files=False</span></code>.</p>
 <p>Current Browser support:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Chrome: OK</li>
-<li>Firefox: OK</li>
-<li>Microsoft Edge: OK</li>
-<li>Safari IOS: OK</li>
-<li>Internet Explorer (up to IE 11): Does not work</li>
-<li>Other browsers not tested</li>
+<li><p>Chrome: OK</p></li>
+<li><p>Firefox: OK</p></li>
+<li><p>Microsoft Edge: OK</p></li>
+<li><p>Safari IOS: OK</p></li>
+<li><p>Internet Explorer (up to IE 11): Does not work</p></li>
+<li><p>Other browsers not tested</p></li>
 </ul>
 </div></blockquote>
 <p>This is a simple example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                  <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;myExample.html&quot;</span><span class="p">,</span>
-                  <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span>
-                  <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">],</span>
-                  <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span>
+                  <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
+                  <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;myExample.html&quot;</span><span class="p">,</span>
+                  <span class="n">show_parts_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">],</span>
+                  <span class="n">time_per_div</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>A more complex case:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                              <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;2_sergw.html&quot;</span><span class="p">,</span>
-                              <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewerRef&quot;</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span>
+                              <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
+                              <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;2_sergw.html&quot;</span><span class="p">,</span>
                               <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Serial Gateway Demo&quot;</span><span class="p">,</span>
-                              <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="n">client</span><span class="p">,</span> <span class="n">gateway</span><span class="o">.</span><span class="n">rxThread</span><span class="p">,</span>
-                               <span class="n">gateway</span><span class="o">.</span><span class="n">txThread</span><span class="p">,</span> <span class="n">serDev</span><span class="p">],</span>
-                              <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span>
-                              <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">us</span><span class="p">,</span>
-                              <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
+                              <span class="n">show_parts_list</span><span class="o">=</span><span class="p">[</span><span class="n">client</span><span class="p">,</span> <span class="n">gateway</span><span class="o">.</span><span class="n">rx_thread</span><span class="p">,</span>
+                               <span class="n">gateway</span><span class="o">.</span><span class="n">tx_thread</span><span class="p">,</span> <span class="n">ser_dev</span><span class="p">],</span>
+                              <span class="n">excluded_element_List</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span>
+                              <span class="n">time_per_div</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">US</span><span class="p">,</span>
+                              <span class="n">pix_per_div</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here, no timer expiration events are shown, the time division is set to 50|micro|s and each
@@ -261,86 +245,49 @@ time division occupies 30 pixels.</p>
 </div>
 <div class="section" id="using-the-interactive-viewer">
 <h3>Using the Interactive Viewer<a class="headerlink" href="#using-the-interactive-viewer" title="Permalink to this headline">¶</a></h3>
-<p>Please try the following demo: <a class="reference download internal" download="" href="../_downloads/69f8abc04404fb0aa5b81d1252921bca/2_sergw.html"><code class="xref download docutils literal notranslate"><span class="pre">2_sergw</span></code></a></p>
+<p>Please try the following demo: <a class="reference download internal" download="" href="../_downloads/29c5e37c9192fc74d8b6d39b0876ae80/2_sergw.html"><code class="xref download docutils literal notranslate"><span class="pre">2_sergw</span></code></a></p>
 <p>The major interactive functions of the viewer are:</p>
 <blockquote>
 <div><ul>
-<li><p class="first">Time Scaling</p>
+<li><p>Time Scaling</p>
 <blockquote>
 <div><ul>
-<li><p class="first">A time scale factor of 0.01 … 100, relative to the initial time resolution is supported.
+<li><p>A time scale factor of 0.01 … 100, relative to the initial time resolution is supported.
 To change the current time scale</p>
 <blockquote>
 <div><ul class="simple">
-<li>Use +/- keys on keyboard</li>
-<li>Use the Time Scale Slider</li>
-<li>Hold the shift key and move mouse up and down</li>
+<li><p>Use +/- keys on keyboard</p></li>
+<li><p>Use the Time Scale Slider</p></li>
+<li><p>Hold the shift key and move mouse up and down</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Adaption of part spacing</p>
+<li><p>Adaption of part spacing</p>
 <blockquote>
 <div><ul class="simple">
-<li>Drag one of the part boxes (“CarInfoSys” in the example above) and move it horizontally.
-The parts on the right automatically follow.</li>
-<li>SHIFT+Drag one of the part boxes (but not the first one) and move it horizontally.
-The distances between all parts are changed accordingly.</li>
+<li><p>Drag one of the part boxes (“CarInfoSys” in the example above) and move it horizontally.
+The parts on the right automatically follow.</p></li>
+<li><p>SHIFT+Drag one of the part boxes (but not the first one) and move it horizontally.
+The distances between all parts are changed accordingly.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Time Markers</p>
+<li><p>Time Markers</p>
 <blockquote>
 <div><ul class="simple">
-<li>Can be used as a ruler or to measure a time delta.</li>
-<li>Two time markers are supported: A green and a red one.</li>
-<li>A mouse click somewhere in the diagram activates the green time marker.</li>
-<li>A CTRL+mouse click somewhere in the diagram activates the red time marker.</li>
-<li>If both time markers are activated, the delta time between the two time markers is displayed in the title bar.</li>
+<li><p>Can be used as a ruler or to measure a time delta.</p></li>
+<li><p>Two time markers are supported: A green and a red one.</p></li>
+<li><p>A mouse click somewhere in the diagram activates the green time marker.</p></li>
+<li><p>A CTRL+mouse click somewhere in the diagram activates the red time marker.</p></li>
+<li><p>If both time markers are activated, the delta time between the two time markers is displayed in the title bar.</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 </div></blockquote>
-</div>
-<div class="section" id="static-sequence-diagrams">
-<h3>Static Sequence Diagrams<a class="headerlink" href="#static-sequence-diagrams" title="Permalink to this headline">¶</a></h3>
-<p>The static sequence diagrams are generated in SVG (scalable vector graphics) format.
-You can choose between two different flavors:</p>
-<blockquote>
-<div><ul class="simple">
-<li>Pure SVG (<code class="docutils literal notranslate"><span class="pre">fmt='svg'</span></code>, filename ends with <code class="docutils literal notranslate"><span class="pre">.svg</span></code>): Use this if you want to edit the sequence diagram.
-SVG files can be edited with SVG capable editors such as MS Visio or Inkskape.</li>
-<li>SVG embedded in HTML (<code class="docutils literal notranslate"><span class="pre">fmt='svgInHtml'</span></code>, filename ends with <code class="docutils literal notranslate"><span class="pre">.html</span></code>):
-Use this if you want to show the sequence diagram in a web browser. In this case, the SVG is embedded into a HTML page and a &lt;div&gt; element so that the browser can scroll through the diagram.</li>
-</ul>
-</div></blockquote>
-<p>In simple cases, you call:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                  <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;myExample.html&quot;</span><span class="p">,</span>
-                  <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;svgInHtml&quot;</span><span class="p">,</span>
-                  <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">],</span>
-                  <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>A more complex case:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                              <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;2_sergw.html&quot;</span><span class="p">,</span>
-                              <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;svgInHtml&quot;</span><span class="p">,</span>
-                              <span class="n">timeRange</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span>
-                              <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Serial Gateway Demo&quot;</span><span class="p">,</span>
-                              <span class="n">showPartsList</span><span class="o">=</span><span class="p">[</span><span class="n">client</span><span class="p">,</span> <span class="n">gateway</span><span class="o">.</span><span class="n">rxThread</span><span class="p">,</span>
-                               <span class="n">gateway</span><span class="o">.</span><span class="n">txThread</span><span class="p">,</span> <span class="n">serDev</span><span class="p">],</span>
-                              <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;allTimers&#39;</span><span class="p">],</span>
-                              <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">us</span><span class="p">,</span>
-                              <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Here, the sequence diagram begins at time 1.0ms, no timer expiration events are shown,
-the time division is set to 50|micro|s and each time division occupies 30 pixels.</p>
-<p>You can call moddyGenerateSequenceDiagram() multiple times to show different views of the simulation.</p>
 </div>
 </div>
 <div class="section" id="structure-graph-generation">
@@ -348,71 +295,67 @@ the time division is set to 50|micro|s and each time division occupies 30 pixels
 <p>Moddy can also generate files to show the static structure of the model.
 Very useful to document the model and to explain the model to others.</p>
 <p>An example structure graph:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0410_structuregraph.png" src="../_images/0410_structuregraph.png" />
 </div>
 <ul>
-<li><p class="first">The parts hierarchy is shown: For example, EcDev1 contains two sub-parts: “uC” and “FPGA”.</p>
-</li>
-<li><p class="first">The ports of a part are shown: For example, EcDev1 has a “ucPort” and an “ecPort”.</p>
-</li>
-<li><p class="first">The port bindings are shown:</p>
+<li><p>The parts hierarchy is shown: For example, EcDev1 contains two sub-parts: “uC” and “FPGA”.</p></li>
+<li><p>The ports of a part are shown: For example, EcDev1 has a “ucPort” and an “ecPort”.</p></li>
+<li><p>The port bindings are shown:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The thin, directed arrows show unidirectional bindings, from an output port to an input port.</li>
-<li>The thick, undirected arrows show bidirectional bindings between IO-Ports.</li>
+<li><p>The thin, directed arrows show unidirectional bindings, from an output port to an input port.</p></li>
+<li><p>The thick, undirected arrows show bidirectional bindings between IO-Ports.</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">The message type transferred between ports are shown (e.g. EcMsg):
-Moddy learns during the simulation which message types (python classes) are transferred.</p>
-</li>
-<li><p class="first">The relation between schedulers and parts are shown. In the example above, “schedCp” controls “App”.
+<li><p>The message type transferred between ports are shown (e.g. EcMsg):
+Moddy learns during the simulation which message types (python classes) are transferred.</p></li>
+<li><p>The relation between schedulers and parts are shown. In the example above, “schedCp” controls “App”.
 In the example below, if the scheduler “sched” controls multiple threads, the relation is shown,
-including the thread priorities. (WARNING: This feature does not work under all circumstances)</p>
-</li>
+including the thread priorities. (WARNING: This feature does not work under all circumstances)</p></li>
 </ul>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0420_structuregraph2.png" src="../_images/0420_structuregraph2.png" />
 </div>
 <p>Moddy uses the <em>GraphViz</em> command line tool <code class="docutils literal notranslate"><span class="pre">dot</span></code> to generate the structure graphs, so <em>GraphViz</em> has to be installed.</p>
 <p>The output format is fixed to SVG.</p>
-<p>To generate a structure, just call <a class="reference internal" href="../reference/results.html#moddy.dotStructure.moddyGenerateStructureGraph" title="moddy.dotStructure.moddyGenerateStructureGraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateStructureGraph()</span></code></a> after running the simulation.
+<p>To generate a structure, just call <a class="reference internal" href="../reference/results.html#moddy.dot_structure.gen_dot_structure_graph" title="moddy.dot_structure.gen_dot_structure_graph"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_dot_structure_graph()</span></code></a> after running the simulation.
 (You can also run it before the simulation, but then no message types will be shown)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;2_sergw_structure.svg&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddy</span><span class="o">.</span><span class="n">gen_dot_structure_graph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;2_sergw_structure.svg&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">There is currently no way to influence the appearance of the structure graph.</p>
+<p class="admonition-title">Note</p>
+<p>There is currently no way to influence the appearance of the structure graph.</p>
 </div>
 <div class="section" id="trace-table-generation">
 <h3>Trace Table Generation<a class="headerlink" href="#trace-table-generation" title="Permalink to this headline">¶</a></h3>
 <p>Moddy can generate a <code class="docutils literal notranslate"><span class="pre">CSV</span></code> (comma separated value) file containing all simulator events.
 This file can be viewed with a table calculation program such as MS Excel.</p>
 <p>Example:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0430_trace.png" src="../_images/0430_trace.png" />
 </div>
-<p>To generate a trace table, call <a class="reference internal" href="../reference/results.html#moddy.traceToCsv.moddyGenerateTraceTable" title="moddy.traceToCsv.moddyGenerateTraceTable"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateTraceTable()</span></code></a> after running the simulation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateTraceTable</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;1_hello.csv&#39;</span><span class="p">,</span> <span class="n">timeUnit</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<p>To generate a trace table, call <a class="reference internal" href="../reference/results.html#moddy.trace_to_csv.gen_trace_table" title="moddy.trace_to_csv.gen_trace_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_trace_table()</span></code></a> after running the simulation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateTraceTable</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;1_hello.csv&#39;</span><span class="p">,</span> <span class="n">time_unit</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Where <em>timeUnit</em> specifies the time unit for all time stamps in table (‘s’, ‘ms’, ‘us’, ‘ns’).</p>
+<p>Where <em>time_unit</em> specifies the time unit for all time stamps in table (‘s’, ‘ms’, ‘us’, ‘ns’).</p>
 <p>Explanation to the events:</p>
 <blockquote>
 <div><ul class="simple">
-<li><strong>&gt;MSG</strong>: A message transfer starts.</li>
-<li><strong>&gt;MSG(Q)</strong>: A message transfer starts. The message was delayed because another
-message was blocking the output port. The requestTime tells you when the model requested the message send</li>
-<li><strong>&lt;MSG</strong>: Message arrived at input port: Note that “Object” specifies the part that contains the output port</li>
-<li><strong>T-START</strong>: A timer has been started</li>
-<li><strong>T-STOP</strong>: A timer has been stopped</li>
-<li><strong>T-RESTA</strong>: A timer was restarted</li>
-<li><strong>T-EXP</strong>: A timer was expired</li>
-<li><strong>ANN</strong>: Model added an annotation</li>
-<li><strong>ASSFAIL:</strong> Assertion failure</li>
-<li><strong>STA</strong>: Part changed its status (via setStatusIndicator)</li>
+<li><p><strong>&gt;MSG</strong>: A message transfer starts.</p></li>
+<li><p><strong>&gt;MSG(Q)</strong>: A message transfer starts. The message was delayed because another
+message was blocking the output port. The requestTime tells you when the model requested the message send</p></li>
+<li><p><strong>&lt;MSG</strong>: Message arrived at input port: Note that “Object” specifies the part that contains the output port</p></li>
+<li><p><strong>T-START</strong>: A timer has been started</p></li>
+<li><p><strong>T-STOP</strong>: A timer has been stopped</p></li>
+<li><p><strong>T-RESTA</strong>: A timer was restarted</p></li>
+<li><p><strong>T-EXP</strong>: A timer was expired</p></li>
+<li><p><strong>ANN</strong>: Model added an annotation</p></li>
+<li><p><strong>ASSFAIL:</strong> Assertion failure</p></li>
+<li><p><strong>STA</strong>: Part changed its status (via setStatusIndicator)</p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -421,17 +364,17 @@ message was blocking the output port. The requestTime tells you when the model r
 <h2>State Machine Graph Generation<a class="headerlink" href="#state-machine-graph-generation" title="Permalink to this headline">¶</a></h2>
 <p>Moddy can also generate graphs to show the finite state machines of the model.
 An example state machine graph (from tutorial <code class="docutils literal notranslate"><span class="pre">3_carinfo.py</span></code>):</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="../_images/0440_fsm.png" src="../_images/0440_fsm.png" />
 </div>
-<p>The “Apps” and “Vol” boxes are sub-states of the “NormalOp” state.</p>
-<p>To generate a state machine graph, just call <a class="reference internal" href="../reference/results.html#moddy.dotFsm.moddyGenerateFsmGraph" title="moddy.dotFsm.moddyGenerateFsmGraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateFsmGraph()</span></code></a> after state machine instantiation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateFsmGraph</span><span class="p">(</span> <span class="n">fsm</span><span class="o">=</span><span class="n">cis</span><span class="o">.</span><span class="n">fsm</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;3_carinfo_fsm.svg&#39;</span><span class="p">)</span>
+<p>The “Apps” and “Vol” boxes are sub-states of the “normal_op” state.</p>
+<p>To generate a state machine graph, just call <a class="reference internal" href="../reference/results.html#moddy.dot_fsm.gen_fsm_graph" title="moddy.dot_fsm.gen_fsm_graph"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_fsm_graph()</span></code></a> after state machine instantiation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddy</span><span class="o">.</span><span class="n">gen_fsm_graph</span><span class="p">(</span> <span class="n">fsm</span><span class="o">=</span><span class="n">cis</span><span class="o">.</span><span class="n">fsm</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;3_carinfo_fsm.svg&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">There is currently no way to influence the appearance of the graph.</p>
+<p class="admonition-title">Note</p>
+<p>There is currently no way to influence the appearance of the graph.</p>
 </div>
 </div>
 </div>
@@ -456,7 +399,7 @@ An example state machine graph (from tutorial <code class="docutils literal notr
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

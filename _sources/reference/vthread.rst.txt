@@ -7,34 +7,37 @@ Virtual Threads allow Moddy users to model sequential programs.
 
 Virtual Thread Class
 =============================================
-.. autoclass:: moddy.vthread.vThread
-   :members: runVThread, wait, waitUntil, waitForMsg, busy, newVtSamplingInPort, newVtQueuingInPort, newVtSamplingIOPort, newVtQueuingIOPort, newVtTimer, createPorts, 
-             createVtTimers, TerminateException, waitForMonitor
+.. autoclass:: moddy.vthread.VThread
+   :members: run_vthread, wait, wait_until, wait_for_msg, busy, 
+             new_vt_sampling_in_port, new_vt_queuing_in_port, 
+             new_vt_sampling_io_port, new_vt_queuing_io_port, 
+             new_vt_timer, create_ports, 
+             create_vt_timers, TerminateException, wait_for_monitor
 	
 Ports for Virtual Threads
 --------------------------
-.. autoclass:: moddy.vthread.vtInPort
-   :members: readMsg, nMsg
+.. autoclass:: moddy.vthread.VtInPort
+   :members: read_msg, n_msg
 
-.. autoclass:: moddy.vthread.vtSamplingInPort
-   :members: readMsg, nMsg
+.. autoclass:: moddy.vthread.VtSamplingInPort
+   :members: read_msg, n_msg
 
-.. autoclass:: moddy.vthread.vtQueuingInPort
-   :members: readMsg, nMsg
+.. autoclass:: moddy.vthread.VtQueuingInPort
+   :members: read_msg, n_msg
    
-.. autoclass:: moddy.vthread.vtIOPort
+.. autoclass:: moddy.vthread.VtIOPort
 
 
 Timer for Virtual Threads
 --------------------------
-.. autoclass:: moddy.vthread.vtTimer
-   :members: start, restart, hasFired
+.. autoclass:: moddy.vthread.VtTimer
+   :members: start, restart, has_fired
 
 
 RTOS Scheduler Simulation for Virtual Threads 
 =============================================
-.. autoclass:: moddy.vtSchedRtos.vtSchedRtos
-   :members: addVThread
+.. autoclass:: moddy.vt_sched_rtos.VtSchedRtos
+   :members: add_vthread
 
-.. autoclass:: moddy.vtSchedRtos.vSimpleProg
+.. autoclass:: moddy.vt_sched_rtos.VSimpleProg
 

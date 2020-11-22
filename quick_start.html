@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Quick Start &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Quick Start &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="reference/index.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -176,11 +177,11 @@
 In the <a class="reference internal" href="tutorials/1_hello.html#hello"><span class="std std-ref">Hello</span></a> tutorial, we simulate a conversation between two people, “Bob” and “Joe”,
 therefore “Bob” and “Joe” are the two parts used in the model.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
+<p class="admonition-title">Note</p>
 <p>This example uses only only of two modelling flavours, the “event based” method.
 Using this method, the model reacts to events using callback routines.</p>
-<p class="last">Another modelling technique is the “program based” method.
-See <a class="reference internal" href="tutorials/8_helloProgram.html#hello-program"><span class="std std-ref">Hello Demo as a Sequential Program</span></a> as an example and <a class="reference internal" href="detailed/seqprog.html#detailed-seqprog"><span class="std std-ref">Sequential Program Simulation</span></a> for more information.</p>
+<p>Another modelling technique is the “program based” method.
+See <a class="reference internal" href="tutorials/8_hello_program.html#hello-program"><span class="std std-ref">Hello Demo as a Sequential Program</span></a> as an example and <a class="reference internal" href="detailed/seqprog.html#detailed-seqprog"><span class="std std-ref">Sequential Program Simulation</span></a> for more information.</p>
 </div>
 <div class="section" id="model-structure">
 <h2>Model Structure<a class="headerlink" href="#model-structure" title="Permalink to this headline">¶</a></h2>
@@ -189,34 +190,38 @@ In the <a class="reference internal" href="tutorials/1_hello.html#hello"><span c
 Each part has an output port (mouth) and an input port (ears).</p>
 <p>To simulate the time that Bob and Joe need for thinking, we create also a timer for both.
 To model the behavior of Bob, we define a class “Bob”, which creates the ports and timers:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
-        <span class="c1"># Initialize the parent class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="n">objName</span><span class="p">,</span>
-                         <span class="n">elems</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;thinkTmr&#39;</span><span class="p">})</span>
-        <span class="o">...</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="kn">import</span> <span class="nn">moddy</span>
+
+
+    <span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">moddy</span><span class="o">.</span><span class="n">SimPart</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39; Model of Bob &#39;&#39;&#39;</span>
+            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+                    <span class="c1"># Initialize the parent class</span>
+                    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sim</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">obj_name</span><span class="o">=</span><span class="n">obj_name</span><span class="p">,</span>
+                                                     <span class="n">elems</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;in&#39;</span><span class="p">:</span> <span class="s1">&#39;ears&#39;</span><span class="p">,</span>
+                                                                    <span class="s1">&#39;out&#39;</span><span class="p">:</span> <span class="s1">&#39;mouth&#39;</span><span class="p">,</span>
+                                                                    <span class="s1">&#39;tmr&#39;</span><span class="p">:</span> <span class="s1">&#39;think_tmr&#39;</span><span class="p">})</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>The main program creates an instance of Bob and Joe like this</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span> <span class="o">=</span> <span class="n">sim</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SIMU</span> <span class="o">=</span> <span class="n">moddy</span><span class="o">.</span><span class="n">Sim</span><span class="p">()</span>
 
-<span class="n">bob</span>    <span class="o">=</span> <span class="n">Bob</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span> <span class="p">)</span>
-<span class="n">joe</span>    <span class="o">=</span> <span class="n">Joe</span><span class="p">(</span> <span class="n">simu</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span> <span class="p">)</span>
+<span class="n">Bob</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">)</span>
+<span class="n">Joe</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To allow Joe to hear what Bob says, we “bind” the ears of Joe to the mouth of Bob and vice versa.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">([</span> <span class="p">[</span><span class="s1">&#39;Bob.mouth&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.ears&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;Bob.ears&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.mouth&#39;</span><span class="p">]</span> <span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SIMU</span><span class="o">.</span><span class="n">smart_bind</span><span class="p">([[</span><span class="s1">&#39;Bob.mouth&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.ears&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;Bob.ears&#39;</span><span class="p">,</span> <span class="s1">&#39;Joe.mouth&#39;</span><span class="p">]])</span>
 </pre></div>
 </div>
-<p>Moddy can also output the structure of the model. After you created the structure, call <a class="reference internal" href="reference/results.html#moddy.dotStructure.moddyGenerateStructureGraph" title="moddy.dotStructure.moddyGenerateStructureGraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateStructureGraph()</span></code></a>:</p>
+<p>Moddy can also output the structure of the model. After you created the structure, call <a class="reference internal" href="reference/results.html#moddy.dot_structure.gen_dot_structure_graph" title="moddy.dot_structure.gen_dot_structure_graph"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_dot_structure_graph()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Output model structure graph</span>
-<span class="n">moddyGenerateStructureGraph</span><span class="p">(</span><span class="n">simu</span><span class="p">,</span> <span class="s1">&#39;1_hello_structure.svg&#39;</span><span class="p">)</span>
+    <span class="n">moddy</span><span class="o">.</span><span class="n">gen_dot_structure_graph</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span> <span class="s1">&#39;output/1_hello_structure.svg&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This is the resulting structure graph:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/0010_BobJoe.png" src="_images/0010_BobJoe.png" />
 </div>
 </div>
@@ -225,29 +230,29 @@ To model the behavior of Bob, we define a class “Bob”, which creates the por
 <p>To model the behavior of parts, an event based model:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Sends messages to other parts</li>
-<li>Reacts on received messages from other parts</li>
-<li>Reacts on timer events</li>
+<li><p>Sends messages to other parts</p></li>
+<li><p>Reacts on received messages from other parts</p></li>
+<li><p>Reacts on timer events</p></li>
 </ul>
 </div></blockquote>
 <p>This means, the simulator calls the model code only whenever such an event occurs.
 For example, Bob’s behavior will be modelled as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bob</span><span class="p">(</span><span class="n">simPart</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="k">def</span> <span class="nf">ears_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Callback for message reception on ears port &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
 
-    <span class="o">...</span>
-    <span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
-
-
-    <span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Callback for think_tmr expiration &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="c1"># pylint: disable=no-member</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -255,7 +260,7 @@ For example, Bob’s behavior will be modelled as follows:</p>
 <h2>Ports and Messages<a class="headerlink" href="#ports-and-messages" title="Permalink to this headline">¶</a></h2>
 <p>A message is send always from an “Output Port” to an “Input Port”.</p>
 <p>A part can have many Ports to communicate with other parts.</p>
-<p>A message is send via the sending port’s <a class="reference internal" href="reference/core.html#moddy.simulator.simOutputPort.send" title="moddy.simulator.simOutputPort.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> method:</p>
+<p>A message is send via the sending port’s <a class="reference internal" href="reference/core.html#moddy.sim_ports.SimOutputPort.send" title="moddy.sim_ports.SimOutputPort.send"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send()</span></code></a> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -264,19 +269,20 @@ The second parameter defines the flight time, i.e. how long it takes until the m
 arrives at the input port.
 On the receiver side, the part that owns the input port must define a “receive function”,
 which gets passed the message just received:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">earsRecv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ears_recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Callback for message reception on ears port &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;Hi, How are you?&quot;</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;How are you?&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reply</span> <span class="o">=</span> <span class="s2">&quot;Hm?&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">thinkTmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">think_tmr</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mf">1.4</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;Think&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This receive routine must be called always <em>&lt;portName&gt;Recv</em>.</p>
+<p class="admonition-title">Note</p>
+<p>This receive routine must be called always <em>&lt;portName&gt;_recv</em>.</p>
 </div>
 </div>
 <div class="section" id="timers">
@@ -285,26 +291,27 @@ which gets passed the message just received:</p>
 A timer is stopped by default.</p>
 <blockquote>
 <div><ul class="simple">
-<li>You start the timer via <a class="reference internal" href="reference/core.html#moddy.simulator.simTimer.start" title="moddy.simulator.simTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a>.</li>
-<li>You stop (cancel) the timer via <a class="reference internal" href="reference/core.html#moddy.simulator.simTimer.stop" title="moddy.simulator.simTimer.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a></li>
-<li>You can restart an already running timer via <a class="reference internal" href="reference/core.html#moddy.simulator.simTimer.restart" title="moddy.simulator.simTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a>.</li>
+<li><p>You start the timer via <a class="reference internal" href="reference/core.html#moddy.sim_ports.SimTimer.start" title="moddy.sim_ports.SimTimer.start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start()</span></code></a>.</p></li>
+<li><p>You stop (cancel) the timer via <a class="reference internal" href="reference/core.html#moddy.sim_ports.SimTimer.stop" title="moddy.sim_ports.SimTimer.stop"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stop()</span></code></a></p></li>
+<li><p>You can restart an already running timer via <a class="reference internal" href="reference/core.html#moddy.sim_ports.SimTimer.restart" title="moddy.sim_ports.SimTimer.restart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restart()</span></code></a>.</p></li>
 </ul>
 </div></blockquote>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">thinkTmrExpired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setStateIndicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">think_tmr_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Callback for think_tmr expiration &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_state_indicator</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouth</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reply</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The expiration routine must be called always <em>&lt;timerName&gt;Expired</em>.</p>
+<p class="admonition-title">Note</p>
+<p>The expiration routine must be called always <em>&lt;timerName&gt;_expired</em>.</p>
 </div>
 </div>
 <div class="section" id="running-simulator">
 <h2>Running Simulator<a class="headerlink" href="#running-simulator" title="Permalink to this headline">¶</a></h2>
-<p>After the parts and bindings were created, the simulator can <a class="reference internal" href="reference/core.html#moddy.simulator.sim.run" title="moddy.simulator.sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+<p>After the parts and bindings were created, the simulator can <a class="reference internal" href="reference/core.html#moddy.sim_core.Sim.run" title="moddy.sim_core.Sim.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># let simulator run</span>
-<span class="n">simu</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stopTime</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
+<span class="n">SIMU</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">stop_time</span><span class="o">=</span><span class="mf">12.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here we stop the simulator after 12 seconds. If no limit is given,
@@ -338,7 +345,7 @@ On the python console, the simulator outputs the simulation trace:</p>
 <span class="go">TRC:      11.8s T-EXP   Bob.thinkTmr(Timer)</span>
 <span class="go">TRC:      11.8s STA     Bob(Part) //</span>
 <span class="go">TRC:      11.8s &gt;MSG    Bob.mouth(OutPort) //  req=11.8s beg=11.8s end=12.8s dur=1.0s msg=[Hm?]</span>
-<span class="go">SIM: Stops because stopTime reached</span>
+<span class="go">SIM: Stops because stop_time reached</span>
 <span class="go">SIM: Simulator stopped at 12.0s. Executed 9 events in 0.001 seconds</span>
 <span class="go">saved sequence diagram in output/1_hello.html as iaViewer</span>
 <span class="go">Saved structure graph to output/1_hello_structure.svg</span>
@@ -351,27 +358,26 @@ On the python console, the simulator outputs the simulation trace:</p>
 <p>Moddy can generate a sequence diagram from the simulation results.
 The sequence diagram is generated as a as HTML.
 After simulation run, the following code generates the sequence diagram.
-For details, see <a class="reference internal" href="reference/results.html#moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram" title="moddy.seqDiagInteractiveGen.moddyGenerateSequenceDiagram"><code class="xref py py-func docutils literal notranslate"><span class="pre">moddyGenerateSequenceDiagram()</span></code></a>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddyGenerateSequenceDiagram</span><span class="p">(</span> <span class="n">sim</span><span class="o">=</span><span class="n">simu</span><span class="p">,</span>
-                              <span class="n">fileName</span><span class="o">=</span><span class="s2">&quot;1_hello.html&quot;</span><span class="p">,</span>
-                              <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;iaViewer&quot;</span><span class="p">,</span>
-                              <span class="n">excludedElementList</span><span class="o">=</span><span class="p">[],</span>
-                              <span class="n">timePerDiv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-                              <span class="n">pixPerDiv</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
+For details, see <code class="xref py py-func docutils literal notranslate"><span class="pre">gen_interactive_seq_diagram()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">moddy</span><span class="o">.</span><span class="n">gen_interactive_sequence_diagram</span><span class="p">(</span><span class="n">SIMU</span><span class="p">,</span>
+                                       <span class="n">file_name</span><span class="o">=</span><span class="s2">&quot;output/1_hello.html&quot;</span><span class="p">,</span>
+                                       <span class="n">time_per_div</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                                       <span class="n">pix_per_div</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                                       <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello Demo&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This is the result:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/0020_1_hello.png" src="_images/0020_1_hello.png" />
 </div>
-<p>View as HTML: <a class="reference download internal" download="" href="_downloads/9d005f7f9aebdfe3faaa1692a7c60b9e/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">1_hello</span></code></a></p>
+<p>View as HTML: <a class="reference download internal" download="" href="_downloads/f550fb9c6f630fa09408aa2548d066fa/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">1_hello</span></code></a></p>
 <p>Notes:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The black arrows are messages</li>
-<li>The blue arrows are timer expiration events</li>
-<li>The orange boxes are visualized “states” or “activities” that were generated by the model via <a class="reference internal" href="reference/core.html#moddy.simulator.simPart.setStateIndicator" title="moddy.simulator.simPart.setStateIndicator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setStateIndicator()</span></code></a>.</li>
-<li>The red messages are annotations that were generated by the model via <a class="reference internal" href="reference/core.html#moddy.simulator.simPart.addAnnotation" title="moddy.simulator.simPart.addAnnotation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">addAnnotation()</span></code></a></li>
+<li><p>The black arrows are messages</p></li>
+<li><p>The blue arrows are timer expiration events</p></li>
+<li><p>The orange boxes are visualized “states” or “activities” that were generated by the model via <a class="reference internal" href="reference/core.html#moddy.sim_part.SimPart.set_state_indicator" title="moddy.sim_part.SimPart.set_state_indicator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_state_indicator()</span></code></a>.</p></li>
+<li><p>The red messages are annotations that were generated by the model via <a class="reference internal" href="reference/core.html#moddy.sim_part.SimPart.annotation" title="moddy.sim_part.SimPart.annotation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">annotation()</span></code></a></p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -397,7 +403,7 @@ For details, see <a class="reference internal" href="reference/results.html#modd
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Moddy Finite State Machines &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Moddy Finite State Machines &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -102,10 +102,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="results.html">Moddy Result Generator APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib/index.html">Library Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -178,57 +180,63 @@
 <span id="fsmreference"></span><h2>Finite State Machine<a class="headerlink" href="#finite-state-machine" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="moddy.fsm.Fsm">
-<em class="property">class </em><code class="descclassname">moddy.fsm.</code><code class="descname">Fsm</code><span class="sig-paren">(</span><em>dictTransitions</em>, <em>parentFsm=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">moddy.fsm.</code><code class="sig-name descname">Fsm</code><span class="sig-paren">(</span><em class="sig-param">dict_transitions</em>, <em class="sig-param">parent_fsm=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm" title="Permalink to this definition">¶</a></dt>
 <dd><p>A finite state machine.
 Subclass your FSM from this class.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Computer</span><span class="p">(</span><span class="n">Fsm</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        
-        <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span> 
+
+        <span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;&#39;</span><span class="p">:</span>
-                <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)],</span>
-            <span class="s1">&#39;Off&#39;</span><span class="p">:</span> 
-                <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
-            <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>
-                <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span>
-            <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span>
-                <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">),</span>
-                 <span class="p">(</span><span class="s1">&#39;OsShutdown&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
-            <span class="s1">&#39;ANY&#39;</span><span class="p">:</span>
-                <span class="p">[(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)]</span>
+                <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;off&#39;</span><span class="p">)],</span>
+            <span class="s1">&#39;off&#39;</span><span class="p">:</span>
+                <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;standby&#39;</span><span class="p">)],</span>
+            <span class="s1">&#39;standby&#39;</span><span class="p">:</span>
+                <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;normal_op&#39;</span><span class="p">)],</span>
+            <span class="s1">&#39;normal_op&#39;</span><span class="p">:</span>
+                <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;standby&#39;</span><span class="p">),</span>
+                 <span class="p">(</span><span class="s1">&#39;OsShutdown&#39;</span><span class="p">,</span> <span class="s1">&#39;standby&#39;</span><span class="p">)],</span>
+            <span class="s1">&#39;any&#39;</span><span class="p">:</span>
+                <span class="p">[(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">,</span> <span class="s1">&#39;off&#39;</span><span class="p">)]</span>
         <span class="p">}</span>
-        
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">dictTransitions</span><span class="o">=</span><span class="n">transitions</span> <span class="p">)</span>
 </pre></div>
 </div>
-<p>The special <em>ANY</em> state means that the transitions can be initiated from ANY state.
-The special <em>INITIAL</em> event must be in the ‘’ (uninitialized) state and specifies the INITIAL transistion
-which is triggered by <a class="reference internal" href="#moddy.fsm.Fsm.startFsm" title="moddy.fsm.Fsm.startFsm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">startFsm()</span></code></a>.</p>
-<p>You can define entry and exit method that are executed when a state is entered or left.
-These methods must follow the naming convention <code class="docutils literal notranslate"><span class="pre">STATE_&lt;statename&gt;_&lt;Entry/Exit&gt;</span></code>
+<p>The special <em>ANY</em> state means that the transitions can be initiated from
+ANY state.
+The special <em>INITIAL</em> event must be in the ‘’ (uninitialized) state and
+specifies the INITIAL transistion
+which is triggered by <a class="reference internal" href="#moddy.fsm.Fsm.start_fsm" title="moddy.fsm.Fsm.start_fsm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_fsm()</span></code></a>.</p>
+<p>You can define entry and exit method that are executed when a state is
+entered or left.
+These methods must follow the naming convention
+<code class="docutils literal notranslate"><span class="pre">state_&lt;statename&gt;_&lt;entry/exit&gt;</span></code>
 They don’t need to exist. They are called only if they are defined.</p>
-<p>Note that entry and exit actions are NOT called at self transitions (transitions to the current state):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Off actions    </span>
-<span class="k">def</span> <span class="nf">State_Off_Entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State_Off_Entry&quot;</span><span class="p">)</span>
+<p>Note that entry and exit actions are NOT called at self transitions
+(transitions to the current state):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Off actions</span>
+<span class="k">def</span> <span class="nf">state_off_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;state_off_entry&quot;</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">State_Off_Exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State_Off_Exit&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">state_off_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;state_off_exit&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You can also define a “do” Method that is invoked</p>
 <ul class="simple">
-<li>after the “Entry” methode</li>
-<li>at self transistions to the state</li>
+<li><p>after the “Entry” methode</p></li>
+<li><p>at self transistions to the state</p></li>
 </ul>
-<p>These methods must follow the naming convention <code class="docutils literal notranslate"><span class="pre">STATE_&lt;statename&gt;_Do</span></code></p>
-<p>Such routines can be also defined for the special <em>ANY</em> state. If they exist they are called at
+<p>These methods must follow the naming convention <code class="docutils literal notranslate"><span class="pre">state_&lt;statename&gt;_do</span></code></p>
+<p>Such routines can be also defined for the special <em>ANY</em> state.
+If they exist they are called at
 the entry or exit or self transitions to/from any state.</p>
 <p>Use the fsm as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">comp</span> <span class="o">=</span> <span class="n">Computer</span><span class="p">()</span>
-<span class="n">comp</span><span class="o">.</span><span class="n">startFsm</span><span class="p">()</span>    <span class="c1"># sets the state machine to its initial state </span>
+<span class="n">comp</span><span class="o">.</span><span class="n">start_fsm</span><span class="p">()</span>    <span class="c1"># sets the state machine to its initial state</span>
 
 <span class="n">comp</span><span class="o">.</span><span class="n">event</span><span class="p">(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">comp</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
@@ -240,150 +248,138 @@ the entry or exit or self transitions to/from any state.</p>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">comp</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>You can call <a class="reference internal" href="#moddy.fsm.Fsm.execStateDependentMethod" title="moddy.fsm.Fsm.execStateDependentMethod"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execStateDependentMethod()</span></code></a> to execute a state specific method of the fsm.
-e.g. <code class="docutils literal notranslate"><span class="pre">execStateDependentMethod('Msg',</span> <span class="pre">123)</span></code> calls <code class="docutils literal notranslate"><span class="pre">State_&lt;currentStateName&gt;_Msg(</span> <span class="pre">123</span> <span class="pre">)</span></code></p>
-<p>(e.g. the simFsmPart uses it to execute the _Msg and _Expiration functions)</p>
+<p>You can call <a class="reference internal" href="#moddy.fsm.Fsm.exec_state_dependent_method" title="moddy.fsm.Fsm.exec_state_dependent_method"><code class="xref py py-meth docutils literal notranslate"><span class="pre">exec_state_dependent_method()</span></code></a> to execute a
+state specific method of the fsm.
+e.g. <code class="docutils literal notranslate"><span class="pre">exec_state_dependent_method('msg',</span> <span class="pre">123)</span></code> calls
+<code class="docutils literal notranslate"><span class="pre">state_&lt;currentStateName&gt;_msg(</span> <span class="pre">123</span> <span class="pre">)</span></code></p>
+<p>(e.g. the simFsmPart uses it to execute the _msg and _expiration functions)</p>
 <p><strong>Hierarchically Nested State Support</strong></p>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/UML_state_machine#Hierarchically_nested_states">https://en.wikipedia.org/wiki/UML_state_machine#Hierarchically_nested_states</a></p>
 <p>Rules:
 Nested states are defined by the user in the transition list:</p>
 <p>Main FSM:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span> 
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transitions</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)],</span>
-    <span class="s1">&#39;Off&#39;</span><span class="p">:</span> 
-        <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
-    <span class="s1">&#39;Standby&#39;</span><span class="p">:</span>
-        <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;NormalOp&#39;</span><span class="p">)],</span>
-    <span class="s1">&#39;NormalOp&#39;</span><span class="p">:</span>
-        <span class="p">[</span> 
+        <span class="p">[(</span><span class="s1">&#39;INITIAL&#39;</span><span class="p">,</span> <span class="s1">&#39;off&#39;</span><span class="p">)],</span>
+    <span class="s1">&#39;off&#39;</span><span class="p">:</span>
+        <span class="p">[(</span><span class="s1">&#39;PowerApplied&#39;</span><span class="p">,</span> <span class="s1">&#39;standby&#39;</span><span class="p">)],</span>
+    <span class="s1">&#39;standby&#39;</span><span class="p">:</span>
+        <span class="p">[(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;normal_op&#39;</span><span class="p">)],</span>
+    <span class="s1">&#39;normal_op&#39;</span><span class="p">:</span>
+        <span class="p">[</span>
         <span class="c1">####### NESTED FSM (&#39;fsm-Name&#39;, Class-Name)</span>
          <span class="p">(</span><span class="s1">&#39;fsm-name&#39;</span> <span class="p">,</span> <span class="n">subfsm</span><span class="p">),</span>
-         <span class="p">(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">),</span>
-         <span class="p">(</span><span class="s1">&#39;OsShutdown&#39;</span><span class="p">,</span> <span class="s1">&#39;Standby&#39;</span><span class="p">)],</span>
-    <span class="s1">&#39;ANY&#39;</span><span class="p">:</span>
-        <span class="p">[(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">,</span> <span class="s1">&#39;Off&#39;</span><span class="p">)]</span>
+         <span class="p">(</span><span class="s1">&#39;PowerButtonPressed&#39;</span><span class="p">,</span> <span class="s1">&#39;standby&#39;</span><span class="p">),</span>
+         <span class="p">(</span><span class="s1">&#39;OsShutdown&#39;</span><span class="p">,</span> <span class="s1">&#39;standby&#39;</span><span class="p">)],</span>
+    <span class="s1">&#39;any&#39;</span><span class="p">:</span>
+        <span class="p">[(</span><span class="s1">&#39;PowerRemoved&#39;</span><span class="p">,</span> <span class="s1">&#39;off&#39;</span><span class="p">)]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <ul>
-<li><p class="first">A nested FSM is instantiated when the upper level state is entered</p>
-</li>
-<li><p class="first">A nested FSM cannot exit</p>
-</li>
-<li><p class="first">A nested FSM receives all events from the upper level FSM. If the event is not known in the nested FSM,     it is directed to the upper FSM. Events that are known in the nested FSM are NOT directed to upper FSM</p>
-</li>
-<li><p class="first">If the upper state exits, the exit action of the current states (first, the state in the nested fsm,     then the upper fsm) are called. Then the nested fsm is terminated.</p>
-</li>
-<li><p class="first">Orthogonal nested states are also supported. Meaning, multiple nested fsms exist in parallel. Just     enter multiple subFsms in the transition list of a state.</p>
-</li>
-<li><p class="first">For nested statemachines, the following methods are usefull:</p>
+<li><p>A nested FSM is instantiated when the upper level state is entered</p></li>
+<li><p>A nested FSM cannot exit</p></li>
+<li><p>A nested FSM receives all events from the upper level FSM.     If the event is not known in the nested FSM,     it is directed to the upper FSM. Events that are known in the     nested FSM are NOT directed to upper FSM</p></li>
+<li><p>If the upper state exits, the exit action of the current states     (first, the state in the nested fsm,     then the upper fsm) are called. Then the nested fsm is terminated.</p></li>
+<li><p>Orthogonal nested states are also supported. Meaning, multiple     nested fsms exist in parallel. Just     enter multiple subFsms in the transition list of a state.</p></li>
+<li><p>For nested statemachines, the following methods are usefull:</p>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference internal" href="#moddy.fsm.Fsm.topFsm" title="moddy.fsm.Fsm.topFsm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">topFsm()</span></code></a> gives you the reference to the top level Fsm. E.g. to fire an event to the top Fsm.</li>
-<li><a class="reference internal" href="#moddy.fsm.Fsm.moddyPart" title="moddy.fsm.Fsm.moddyPart"><code class="xref py py-meth docutils literal notranslate"><span class="pre">moddyPart()</span></code></a> gives you the moddy part where the state machine is contained, regardless of the fsm nesting level</li>
+<li><p><a class="reference internal" href="#moddy.fsm.Fsm.top_fsm" title="moddy.fsm.Fsm.top_fsm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">top_fsm()</span></code></a> gives you the reference to the top level Fsm.         E.g. to fire an event to the top Fsm.</p></li>
+<li><p><a class="reference internal" href="#moddy.fsm.Fsm.moddy_part" title="moddy.fsm.Fsm.moddy_part"><code class="xref py py-meth docutils literal notranslate"><span class="pre">moddy_part()</span></code></a> gives you the moddy part where the state machine         is contained, regardless of the fsm nesting level</p></li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dictTransitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – a dictionary, with the transitions: The dict key is the state, and the values are a list of transition from
-that state. Each transition consists of a tuple (event, targetState).</li>
-<li><strong>parentFsm</strong> (<a class="reference internal" href="#moddy.fsm.Fsm" title="moddy.fsm.Fsm"><em>Fsm</em></a>) – The parent Finite State Machine. None if no parent.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict_transitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – a dictionary, with the transitions:
+The dict key is the state, and the values are a list of transition from
+that state. Each transition consists of a tuple (event, targetState).</p></li>
+<li><p><strong>parent_fsm</strong> (<a class="reference internal" href="#moddy.fsm.Fsm" title="moddy.fsm.Fsm"><em>Fsm</em></a>) – The parent Finite State Machine. None if no parent.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
 <dt id="moddy.fsm.Fsm.event">
-<code class="descname">event</code><span class="sig-paren">(</span><em>evName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.event" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">event</code><span class="sig-paren">(</span><em class="sig-param">ev_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute an Event in the <em>ANY</em> and current state.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>evName</strong> – event to execute</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if the current state is None.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the event causes a state change, False if not.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ev_name</strong> – event to execute</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.9)"><strong>AssertionError</strong></a> – if the current state is None.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the event causes a state change, False if not.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsm.Fsm.execStateDependentMethod">
-<code class="descname">execStateDependentMethod</code><span class="sig-paren">(</span><em>methodName</em>, <em>deep</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.execStateDependentMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.execStateDependentMethod" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm.Fsm.exec_state_dependent_method">
+<code class="sig-name descname">exec_state_dependent_method</code><span class="sig-paren">(</span><em class="sig-param">method_name</em>, <em class="sig-param">deep</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.exec_state_dependent_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.exec_state_dependent_method" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the state specific methods:</p>
-<p>The method <code class="docutils literal notranslate"><span class="pre">self.State_ANY_&lt;methodName&gt;(*args,**kwargs)</span></code> is called if it exists.</p>
-<p>The method <code class="docutils literal notranslate"><span class="pre">self.State_&lt;stateName&gt;_&lt;methodName&gt;(*args,**kwargs)</span></code> is called if it exists.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>methodName</strong> – method name to call</li>
-<li><strong>deep</strong> – if True, then for each currently active subFsm, the execStateMethod called</li>
+<p>The method <code class="docutils literal notranslate"><span class="pre">self.state_any_&lt;method_name&gt;(*args,**kwargs)</span></code>
+is called if it exists.</p>
+<p>The method <code class="docutils literal notranslate"><span class="pre">self.state_&lt;stateName&gt;_&lt;method_name&gt;(*args,**kwargs)</span></code>
+is called if it exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method_name</strong> – method name to call</p></li>
+<li><p><strong>deep</strong> – if True, then for each currently active sub_fsm, the
+_exec_state_method is called</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if at least one method exists</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if at least one method exists</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsm.Fsm.hasEvent">
-<code class="descname">hasEvent</code><span class="sig-paren">(</span><em>evName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.hasEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.hasEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if the event is known by the fsm or a currently active statemachine</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if event is known by the fsm or a currently active statemachine</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.fsm.Fsm.has_event">
+<code class="sig-name descname">has_event</code><span class="sig-paren">(</span><em class="sig-param">ev_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.has_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.has_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if the event is known by the fsm or a currently active
+statemachine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if event is known by the fsm or a currently active         statemachine</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsm.Fsm.moddyPart">
-<code class="descname">moddyPart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.moddyPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.moddyPart" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a reference of the moddy part this fsm is contained in (regardless of the fsm nesting level).
+<dt id="moddy.fsm.Fsm.moddy_part">
+<code class="sig-name descname">moddy_part</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.moddy_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.moddy_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a reference of the moddy part this fsm is contained in
+(regardless of the fsm nesting level).
 return None if it is not included in a moddy part</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsm.Fsm.setStateChangeCallback">
-<code class="descname">setStateChangeCallback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.setStateChangeCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.setStateChangeCallback" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm.Fsm.set_state_change_callback">
+<code class="sig-name descname">set_state_change_callback</code><span class="sig-paren">(</span><em class="sig-param">callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.set_state_change_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.set_state_change_callback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a method that is called whenever the state of the fsm changes</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> – function to be called on state changes</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>callback</strong> – function to be called on state changes</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsm.Fsm.startFsm">
-<code class="descname">startFsm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.startFsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.startFsm" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm.Fsm.start_fsm">
+<code class="sig-name descname">start_fsm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.start_fsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.start_fsm" title="Permalink to this definition">¶</a></dt>
 <dd><p>start the FSM. Fire event <code class="docutils literal notranslate"><span class="pre">INITIAL</span></code></p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsm.Fsm.topFsm">
-<code class="descname">topFsm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.topFsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.topFsm" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm.Fsm.top_fsm">
+<code class="sig-name descname">top_fsm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm.html#Fsm.top_fsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm.Fsm.top_fsm" title="Permalink to this definition">¶</a></dt>
 <dd><p>get a reference to the topmost Fsm in the hierarchy</p>
 </dd></dl>
 
@@ -393,62 +389,56 @@ return None if it is not included in a moddy part</p>
 <div class="section" id="moddy-part-using-a-finite-state-machine">
 <span id="simfsmpartreference"></span><h2>Moddy Part using a Finite State Machine<a class="headerlink" href="#moddy-part-using-a-finite-state-machine" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.fsmPart.simFsmPart">
-<em class="property">class </em><code class="descclassname">moddy.fsmPart.</code><code class="descname">simFsmPart</code><span class="sig-paren">(</span><em>sim</em>, <em>objName</em>, <em>fsm</em>, <em>parentObj=None</em>, <em>statusBoxReprMap=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsmPart.html#simFsmPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsmPart.simFsmPart" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm_part.SimFsmPart">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.fsm_part.</code><code class="sig-name descname">SimFsmPart</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">obj_name</em>, <em class="sig-param">fsm</em>, <em class="sig-param">parent_obj=None</em>, <em class="sig-param">status_box_repr_map=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm_part.html#SimFsmPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm_part.SimFsmPart" title="Permalink to this definition">¶</a></dt>
 <dd><p>A moddy part with a state machine
 All simulator events are directed to the fsm.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>objName</strong> – part name</li>
-<li><strong>fsm</strong> (<a class="reference internal" href="#moddy.fsm.Fsm" title="moddy.fsm.Fsm"><em>Fsm</em></a>) – the state machine (Fsm class) object created by caller</li>
-<li><strong>parentObj</strong> – parent part. None if part has no parent. Defaults to None</li>
-<li><strong>statusBoxReprMap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – <p>defines how each state is shown in sequence diagrams’ status boxes             Must be a dictionary with the state names as keys. The values must be a tuple of</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>obj_name</strong> – part name</p></li>
+<li><p><strong>fsm</strong> (<a class="reference internal" href="#moddy.fsm.Fsm" title="moddy.fsm.Fsm"><em>Fsm</em></a>) – the state machine (Fsm class) object created by caller</p></li>
+<li><p><strong>parent_obj</strong> – parent part. None if part has no parent. Defaults to None</p></li>
+<li><p><strong>statusBoxReprMap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – <p>defines how each state is shown in
+sequence diagrams’ status boxes
+Must be a dictionary with the state names as keys.
+The values must be a tuple of</p>
 <ul>
-<li>text to display (None if org. state name shall be used)</li>
-<li>appearance: The colors of the status box, see setStatIndication()</li>
+<li><p>text to display (None if org. state name shall be used)</p></li>
+<li><p>appearance: The colors of the status box, see setStatIndication()</p></li>
 </ul>
-</li>
+</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.fsmPart.simFsmPart.createPorts">
-<code class="descname">createPorts</code><span class="sig-paren">(</span><em>ptype</em>, <em>listPortNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsmPart.html#simFsmPart.createPorts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsmPart.simFsmPart.createPorts" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm_part.SimFsmPart.create_ports">
+<code class="sig-name descname">create_ports</code><span class="sig-paren">(</span><em class="sig-param">ptype</em>, <em class="sig-param">list_port_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm_part.html#SimFsmPart.create_ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm_part.SimFsmPart.create_ports" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convinience functions to create multiple ports at once.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ptype</strong> – Type of ports, must be one of ‘in’, ‘out’ or ‘io’</li>
-<li><strong>listPortNames</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of port names to create</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ptype</strong> – Type of ports, must be one of ‘in’, ‘out’ or ‘io’</p></li>
+<li><p><strong>list_port_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of port names to create</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>The function creates for each port a member variable with this name in the part.</p>
+</dd>
+</dl>
+<p>The function creates for each port a member variable with this name
+in the part.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.fsmPart.simFsmPart.createTimers">
-<code class="descname">createTimers</code><span class="sig-paren">(</span><em>listTimerNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsmPart.html#simFsmPart.createTimers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsmPart.simFsmPart.createTimers" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.fsm_part.SimFsmPart.create_timers">
+<code class="sig-name descname">create_timers</code><span class="sig-paren">(</span><em class="sig-param">list_timer_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/fsm_part.html#SimFsmPart.create_timers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.fsm_part.SimFsmPart.create_timers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convinience functions to create multiple timers at once.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>listTimerNames</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of timer names to create</td>
-</tr>
-</tbody>
-</table>
-<p>The function creates for each port a member variable with this name in the part.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_timer_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of timer names to create</p>
+</dd>
+</dl>
+<p>The function creates for each port a member variable with this name
+in the part.</p>
 </dd></dl>
 
 </dd></dl>
@@ -476,7 +466,7 @@ All simulator events are directed to the fsm.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

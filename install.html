@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Installation &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Developer Guide" href="developer.html" />
-    <link rel="prev" title="Moddy Result Generator APIs" href="reference/results.html" /> 
+    <link rel="prev" title="Unmanaged Ethernet Switch" href="reference/lib/net/eth_unmanaged_switch.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -111,6 +111,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -182,8 +183,8 @@
 <p>Download &amp; Install Python from <a class="reference external" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a></p>
 <p>Please install python Version &gt;=3.5.</p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Moddy does not support Python 2.x.</p>
+<p class="admonition-title">Warning</p>
+<p>Moddy does not support Python 2.x.</p>
 </div>
 <p>During install, click checkbox <code class="docutils literal notranslate"><span class="pre">add</span> <span class="pre">python</span> <span class="pre">to</span> <span class="pre">PATH</span></code></p>
 <p>Tested with python 3.5, 3.6 and 3.7 under Windows 10.</p>
@@ -201,7 +202,7 @@
 </div>
 <div class="section" id="test-moddy">
 <h2>Test Moddy<a class="headerlink" href="#test-moddy" title="Permalink to this headline">¶</a></h2>
-<p>Copy the text from <a class="reference download internal" download="" href="_downloads/544aaf052c2e4cb54cc66e872c5adf06/1_hello.py"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">Basic</span> <span class="pre">Demo</span></code></a> and save it to <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>
+<p>Copy the text from <a class="reference download internal" download="" href="_downloads/79480d23bbf5d602bc9a57672563b040/1_hello.py"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">Basic</span> <span class="pre">Demo</span></code></a> and save it to <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>
 into an arbitrary directory on your machine.</p>
 <p>Then try to run the demo:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python 1_hello.py
@@ -212,7 +213,7 @@ into an arbitrary directory on your machine.</p>
 <p>The console log should end with</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">TRC:      11.8s STA     Bob(Part) //</span>
 <span class="go">TRC:      11.8s &gt;MSG    Bob.mouth(OutPort) //  req=11.8s beg=11.8s end=12.8s dur=1.0s msg=[Hm?]</span>
-<span class="go">SIM: Stops because stopTime reached</span>
+<span class="go">SIM: Stops because stop_time reached</span>
 <span class="go">SIM: Simulator stopped at 12.0s. Executed 9 events in 0.000 seconds</span>
 <span class="go">saved sequence diagram in output/1_hello.html as iaViewer</span>
 <span class="go">Saved structure graph to output/1_hello_structure.svg</span>
@@ -229,14 +230,14 @@ into an arbitrary directory on your machine.</p>
 </pre></div>
 </div>
 <p>Open <code class="docutils literal notranslate"><span class="pre">1_hello.html</span></code> into a web browser and it should look like this
-<a class="reference download internal" download="" href="_downloads/9d005f7f9aebdfe3faaa1692a7c60b9e/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
+<a class="reference download internal" download="" href="_downloads/f550fb9c6f630fa09408aa2548d066fa/1_hello.html"><code class="xref download docutils literal notranslate"><span class="pre">The</span> <span class="pre">sequence</span> <span class="pre">diagram</span></code></a></p>
 </div>
 </div>
 <div class="section" id="using-moddy-with-eclipse">
 <h2>Using Moddy with Eclipse<a class="headerlink" href="#using-moddy-with-eclipse" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This step is optional, you can use Moddy also without Eclipse. I just put it here because
+<p class="admonition-title">Note</p>
+<p>This step is optional, you can use Moddy also without Eclipse. I just put it here because
 I personally use Eclipse.</p>
 </div>
 <div class="section" id="installing-eclipse">
@@ -246,25 +247,25 @@ I personally use Eclipse.</p>
 <div class="section" id="installing-pydev">
 <h3>Installing PyDev<a class="headerlink" href="#installing-pydev" title="Permalink to this headline">¶</a></h3>
 <p>In Eclipse, select <code class="docutils literal notranslate"><span class="pre">Help-&gt;Install</span> <span class="pre">new</span> <span class="pre">Software</span></code> and enter <a class="reference external" href="http://www.pydev.org/updates">http://www.pydev.org/updates</a> for both Name and location</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/0500_pydev.png" src="_images/0500_pydev.png" />
 </div>
 </div>
 <div class="section" id="create-a-moddy-project">
 <h3>Create a Moddy Project<a class="headerlink" href="#create-a-moddy-project" title="Permalink to this headline">¶</a></h3>
 <p>In Eclipse Select <code class="docutils literal notranslate"><span class="pre">New</span> <span class="pre">--&gt;</span> <span class="pre">Project</span> <span class="pre">--&gt;</span> <span class="pre">PyDev</span> <span class="pre">Project</span></code>:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/0510_eclipse_new.png" src="_images/0510_eclipse_new.png" />
 </div>
 <p>Name the project <code class="docutils literal notranslate"><span class="pre">myFirstModdyProject</span></code>:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/0520_pydev.png" src="_images/0520_pydev.png" />
 </div>
 <p>Create a module named <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>:</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/0530_createmod.png" src="_images/0530_createmod.png" />
 </div>
-<p>Copy the text from <a class="reference download internal" download="" href="_downloads/544aaf052c2e4cb54cc66e872c5adf06/1_hello.py"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">Basic</span> <span class="pre">Demo</span></code></a> and paste it into <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>.</p>
+<p>Copy the text from <a class="reference download internal" download="" href="_downloads/79480d23bbf5d602bc9a57672563b040/1_hello.py"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">Basic</span> <span class="pre">Demo</span></code></a> and paste it into <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>.</p>
 <p>Now you can <code class="docutils literal notranslate"><span class="pre">Run</span></code> the <code class="docutils literal notranslate"><span class="pre">1_hello.py</span></code>. You should get an output as described in <a class="reference internal" href="#hello-output"><span class="std std-ref">Demo output</span></a>.</p>
 </div>
 </div>
@@ -281,7 +282,7 @@ I personally use Eclipse.</p>
         <a href="developer.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="reference/results.html" class="btn btn-neutral float-left" title="Moddy Result Generator APIs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="reference/lib/net/eth_unmanaged_switch.html" class="btn btn-neutral float-left" title="Unmanaged Ethernet Switch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -290,7 +291,7 @@ I personally use Eclipse.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>

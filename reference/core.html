@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Simulator Core API Reference &mdash; Moddy Discrete Event Simulator 1.10.0 documentation</title>
+  <title>Simulator Core API Reference &mdash; Moddy Discrete Event Simulator 2.0.0 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                1.10
+                2.0
               </div>
             
           
@@ -96,6 +96,8 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Simulator Core API Reference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#simulator-core">Simulator Core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-tracing">Simulator Tracing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulator-monitoring">Simulator Monitoring</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simpart">SimPart</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#input-port">Input Port</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#output-port">Output Port</a></li>
@@ -110,10 +112,12 @@
 <li class="toctree-l2"><a class="reference internal" href="vthread.html">Virtual Thread Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fsm.html">Moddy Finite State Machines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="results.html">Moddy Result Generator APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib/index.html">Library Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../migrating_to_moddy2.html">Porting from Moddy 1 to 2</a></li>
 </ul>
 
             
@@ -186,111 +190,135 @@
 <h2>Simulator Core<a class="headerlink" href="#simulator-core" title="Permalink to this headline">¶</a></h2>
 <p>These are the user relevant methods of the simulator core:</p>
 <dl class="class">
-<dt id="moddy.simulator.sim">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">sim</code><a class="reference internal" href="../_modules/moddy/simulator.html#sim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_core.Sim">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_core.</code><code class="sig-name descname">Sim</code><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulator main class</p>
 <dl class="method">
-<dt id="moddy.simulator.sim.addMonitor">
-<code class="descname">addMonitor</code><span class="sig-paren">(</span><em>monitorFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.addMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.addMonitor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Register a function to be called at each simulator step.
-Usually used by monitors or stimulation routines</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>monitorFunc</strong> – function to call. Gets called with no arguments</td>
-</tr>
-</tbody>
-</table>
+<dt id="moddy.sim_core.Sim.is_running">
+<code class="sig-name descname">is_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim.is_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim.is_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return if simulator is running</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.sim.deleteMonitor">
-<code class="descname">deleteMonitor</code><span class="sig-paren">(</span><em>monitorFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.deleteMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.deleteMonitor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete a monitor function that has been registered with ‘addMonitor’ before</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>monitorFunc</strong> – function to delete</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – if monitorFunc is not registered</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="moddy.simulator.sim.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>stopTime</em>, <em>maxEvents=100000</em>, <em>enableTracePrinting=True</em>, <em>stopOnAssertionFailure=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.run" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_core.Sim.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">stop_time</em>, <em class="sig-param">max_events=100000</em>, <em class="sig-param">enable_trace_printing=True</em>, <em class="sig-param">stop_on_assertion_failure=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>run the simulator until</p>
 <blockquote>
 <div><ul class="simple">
-<li>stopTime reached</li>
-<li>no more events to execute</li>
-<li>maxEvents reached</li>
-<li>model called assertionFailed() and stopOnAssertionFailure==True</li>
-<li>a model exception (including exceptions from vThreads) has been caught</li>
+<li><p>stop_time reached</p></li>
+<li><p>no more events to execute</p></li>
+<li><p>max_events reached</p></li>
+<li><p>model called assertionFailed() and stop_on_assertion_failure
+==True</p></li>
+<li><p>a model exception (including exceptions from vThreads)
+has been caught</p></li>
 </ul>
 </div></blockquote>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>stopTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – simulation time at which the simulator shall stop latest</li>
-<li><strong>maxEvents</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – (default: 100000) maximum number of simulator events to process. Can be set to None for infinite events</li>
-<li><strong>enableTracePrinting</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – (default: True) if set to False, simulator will not display events as they are executing</li>
-<li><strong>stopOnAssertionFailure</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – (default: True) if set to False, don’t stop when model calls assertionFailed(). 
-Just print info at end of simulation</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stop_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – simulation time at which the simulator             shall stop latest</p></li>
+<li><p><strong>maxEvents</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – (default: 100000) maximum number of simulator             events to process. Can be set to None for infinite events</p></li>
+<li><p><strong>enable_trace_printing</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – (default: True) if set to False,             simulator will not display events as they are executing</p></li>
+<li><p><strong>stop_on_assertion_failure</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – (default: True) if set to             False, don’t stop when model calls assertionFailed().
+Just print info at end of simulation</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raise:</th><td class="field-body"><p class="first last">exceptions coming from model or simulator</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Raise</dt>
+<dd class="field-even"><p>exceptions coming from model or simulator</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.sim.setDisplayTimeUnit">
-<code class="descname">setDisplayTimeUnit</code><span class="sig-paren">(</span><em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.setDisplayTimeUnit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.setDisplayTimeUnit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define how the simulator prints/displays time units</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>unit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – can be “s”, “ms”, “us”, “ns”</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="moddy.simulator.sim.smartBind">
-<code class="descname">smartBind</code><span class="sig-paren">(</span><em>bindings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.smartBind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.smartBind" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_core.Sim.smart_bind">
+<code class="sig-name descname">smart_bind</code><span class="sig-paren">(</span><em class="sig-param">bindings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim.smart_bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim.smart_bind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create many port bindings at once using simple lists.</p>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smartBind</span><span class="p">(</span> <span class="p">[</span> 
-    <span class="p">[</span><span class="s1">&#39;App.outPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev1.inPort&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev2.inPort&#39;</span><span class="p">],</span>
-    <span class="p">[</span><span class="s1">&#39;App.ioPort1&#39;</span><span class="p">,</span> <span class="s1">&#39;Server.netPort&#39;</span> <span class="p">]</span>  <span class="p">])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simu</span><span class="o">.</span><span class="n">smart_bind</span><span class="p">(</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s1">&#39;App.out_port1&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev1.in_port&#39;</span><span class="p">,</span> <span class="s1">&#39;Dev2.in_port&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;App.io_port1&#39;</span><span class="p">,</span> <span class="s1">&#39;Server.net_port&#39;</span> <span class="p">]</span>  <span class="p">])</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bindings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Each list element must be a list of strings, which specifies ports that shall be         connected to each other. The strings must specify the hierarchy names of the ports.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bindings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – Each list element must be a list of strings,             which specifies ports that shall be             connected to each other.             The strings must specify the hierarchy names of the ports.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.sim.timeStr">
-<code class="descname">timeStr</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#sim.timeStr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.sim.timeStr" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_core.Sim.stop">
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>stop simulator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.sim_core.Sim.time">
+<code class="sig-name descname">time</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim.time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return current simulation time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.sim_core.Sim.time_str">
+<code class="sig-name descname">time_str</code><span class="sig-paren">(</span><em class="sig-param">time</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_core.html#Sim.time_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.Sim.time_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a formatted time string of <em>time</em> based on the display scale</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="simulator-tracing">
+<h2>Simulator Tracing<a class="headerlink" href="#simulator-tracing" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="moddy.sim_core.SimTracing">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_core.</code><code class="sig-name descname">SimTracing</code><span class="sig-paren">(</span><em class="sig-param">time_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_trace.html#SimTracing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.SimTracing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulator Tracing and logging</p>
+<dl class="method">
+<dt id="moddy.sim_core.SimTracing.set_display_time_unit">
+<code class="sig-name descname">set_display_time_unit</code><span class="sig-paren">(</span><em class="sig-param">unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_trace.html#SimTracing.set_display_time_unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_core.SimTracing.set_display_time_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define how the simulator prints/displays time units</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – can be “s”, “ms”, “us”, “ns”</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="simulator-monitoring">
+<h2>Simulator Monitoring<a class="headerlink" href="#simulator-monitoring" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="moddy.sim_monitor.SimMonitorManager">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_monitor.</code><code class="sig-name descname">SimMonitorManager</code><a class="reference internal" href="../_modules/moddy/sim_monitor.html#SimMonitorManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_monitor.SimMonitorManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manage functions to be called at each simulation step</p>
+<dl class="method">
+<dt id="moddy.sim_monitor.SimMonitorManager.add_monitor">
+<code class="sig-name descname">add_monitor</code><span class="sig-paren">(</span><em class="sig-param">monitor_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_monitor.html#SimMonitorManager.add_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_monitor.SimMonitorManager.add_monitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a function to be called at each simulator step.
+Usually used by monitors or stimulation routines</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>monitor_func</strong> – function to call. Gets called with no arguments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.sim_monitor.SimMonitorManager.delete_monitor">
+<code class="sig-name descname">delete_monitor</code><span class="sig-paren">(</span><em class="sig-param">monitor_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_monitor.html#SimMonitorManager.delete_monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_monitor.SimMonitorManager.delete_monitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a monitor function that has been registered with ‘addMonitor’
+before</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>monitor_func</strong> – function to delete</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – if monitorFunc is not registered</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -298,208 +326,180 @@ Just print info at end of simulation</li>
 </div>
 <div class="section" id="simpart">
 <h2>SimPart<a class="headerlink" href="#simpart" title="Permalink to this headline">¶</a></h2>
-<p>These are the user relevant methods of the simPart class:</p>
+<p>These are the user relevant methods of the SimPart class:</p>
 <dl class="class">
-<dt id="moddy.simulator.simPart">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simPart</code><span class="sig-paren">(</span><em>sim</em>, <em>objName</em>, <em>parentObj=None</em>, <em>elems=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart" title="Permalink to this definition">¶</a></dt>
-<dd><p>an instance of simPart forms a moddy object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> – Simulator instance</li>
-<li><strong>objName</strong> – part’s name</li>
-<li><strong>parentObj</strong> – parent part. None if part has no parent. Defaults to None</li>
-<li><strong>elems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dictionary with elements (ports and timers) to create,     e.g. <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">'in':</span> <span class="pre">'inPort1',</span> <span class="pre">'out':</span> <span class="pre">['outPort1',</span> <span class="pre">'outPort2'],</span> <span class="pre">'tmr'</span> <span class="pre">:</span> <span class="pre">'timer1'</span> <span class="pre">}</span></code></li>
+<dt id="moddy.sim_part.SimPart">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_part.</code><code class="sig-name descname">SimPart</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">obj_name</em>, <em class="sig-param">parent_obj=None</em>, <em class="sig-param">elems=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart" title="Permalink to this definition">¶</a></dt>
+<dd><p>an instance of SimPart forms a moddy object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> – Simulator instance</p></li>
+<li><p><strong>obj_name</strong> – part’s name</p></li>
+<li><p><strong>parent_obj</strong> – parent part. None if part has no parent. Defaults to None</p></li>
+<li><p><strong>elems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – A dictionary with elements (ports and timers) to      create,     e.g. <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">'in':</span> <span class="pre">'inPort1',</span> <span class="pre">'out':</span> <span class="pre">['outPort1',</span> <span class="pre">'outPort2'],</span> <span class="pre">'tmr'</span> <span class="pre">:</span>
+<span class="pre">'timer1'</span> <span class="pre">}</span></code></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.simulator.simPart.addAnnotation">
-<code class="descname">addAnnotation</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.addAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.addAnnotation" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.annotation">
+<code class="sig-name descname">annotation</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.annotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.annotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add annotation from model at current simulation time</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.assertionFailed">
-<code class="descname">assertionFailed</code><span class="sig-paren">(</span><em>assertionStr</em>, <em>frameIdx=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.assertionFailed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.assertionFailed" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.assertion_failed">
+<code class="sig-name descname">assertion_failed</code><span class="sig-paren">(</span><em class="sig-param">assertion_str</em>, <em class="sig-param">frame_idx=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.assertion_failed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.assertion_failed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an assertion failure trace event
 Increment simulator global assertion failure counter
 Stop simulator if configured so</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>assertionStr</strong> – error message to display</li>
-<li><strong>frameIdx</strong> – traceback frame index (1 if caller’s frame, 2 if caller-caller’s frame…)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>assertion_str</strong> – error message to display</p></li>
+<li><p><strong>frame_idx</strong> – traceback frame index             (1 if caller’s frame, 2 if caller-caller’s frame…)</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.createPorts">
-<code class="descname">createPorts</code><span class="sig-paren">(</span><em>ptype</em>, <em>listPortNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.createPorts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.createPorts" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.create_ports">
+<code class="sig-name descname">create_ports</code><span class="sig-paren">(</span><em class="sig-param">ptype</em>, <em class="sig-param">list_port_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.create_ports"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.create_ports" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convinience functions to create multiple ports at once.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ptype</strong> – Type of ports, must be one of ‘in’, ‘out’ or ‘io’</li>
-<li><strong>listPortNames</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of port names to create</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ptype</strong> – Type of ports, must be one of ‘in’, ‘out’ or ‘io’</p></li>
+<li><p><strong>list_port_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of port names to create</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>The function creates for each port a member variable with this name in the part.
-For “in” and “io” ports, a receive function <em>&lt;portName&gt;Recv</em> must be provided by caller</p>
+</dd>
+<dt class="field-even">Raise</dt>
+<dd class="field-even"><p>ValueError if unknown port type</p>
+</dd>
+</dl>
+<p>The function creates for each port a member variable with this
+name in the part.
+For “in” and “io” ports, a receive function <em>&lt;portName&gt;_recv</em>
+must be provided by caller</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.createTimers">
-<code class="descname">createTimers</code><span class="sig-paren">(</span><em>listTimerNames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.createTimers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.createTimers" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.create_timers">
+<code class="sig-name descname">create_timers</code><span class="sig-paren">(</span><em class="sig-param">list_timer_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.create_timers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.create_timers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convinience functions to create multiple timers at once.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>listTimerNames</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – list of timer names to create</td>
-</tr>
-</tbody>
-</table>
-<p>The function creates for each port a member variable with this name in the part.
-A timer callback function &lt;tmrName&gt;Expired must be provided by caller</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_timer_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of timer names to create</p>
+</dd>
+</dl>
+<p>The function creates for each port a member variable with this name
+in the part.
+A timer callback function <em>&lt;tmrName&gt;_expired</em> must be provided
+by caller</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.newIOPort">
-<code class="descname">newIOPort</code><span class="sig-paren">(</span><em>name</em>, <em>msgReceivedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.newIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.newIOPort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a new “I/O” port to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> – name of port</li>
-<li><strong>msgReceivedFunc</strong> – callback function to call for message receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="moddy.simulator.simPart.newInputPort">
-<code class="descname">newInputPort</code><span class="sig-paren">(</span><em>name</em>, <em>msgReceivedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.newInputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.newInputPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.new_input_port">
+<code class="sig-name descname">new_input_port</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">msg_received_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.new_input_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.new_input_port" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new input port to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> – name of port</li>
-<li><strong>msgReceivedFunc</strong> – callback function to call for message receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of port</p></li>
+<li><p><strong>msg_received_func</strong> – callback function to call for message             receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.newOutputPort">
-<code class="descname">newOutputPort</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.newOutputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.newOutputPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.new_io_port">
+<code class="sig-name descname">new_io_port</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">msg_received_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.new_io_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.new_io_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new “I/O” port to the part</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of port</p></li>
+<li><p><strong>msg_received_func</strong> – callback function to call for message             receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="moddy.sim_part.SimPart.new_output_port">
+<code class="sig-name descname">new_output_port</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.new_output_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.new_output_port" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new output port to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – name of port</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – name of port</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.newTimer">
-<code class="descname">newTimer</code><span class="sig-paren">(</span><em>name</em>, <em>elapsedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.newTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.newTimer" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.new_timer">
+<code class="sig-name descname">new_timer</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">elapsed_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.new_timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.new_timer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a new timer to the part</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> – name of timer</li>
-<li><strong>elapsedFunc</strong> – callback function to call for timer expiry. Signature <code class="docutils literal notranslate"><span class="pre">func(timer)</span></code></li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – name of timer</p></li>
+<li><p><strong>elapsed_func</strong> – callback function to call for timer expiry.             Signature <code class="docutils literal notranslate"><span class="pre">func(timer)</span></code></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.newVarWatcher">
-<code class="descname">newVarWatcher</code><span class="sig-paren">(</span><em>varName</em>, <em>formatString</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.newVarWatcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.newVarWatcher" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.new_var_watcher">
+<code class="sig-name descname">new_var_watcher</code><span class="sig-paren">(</span><em class="sig-param">var_name</em>, <em class="sig-param">format_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.new_var_watcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.new_var_watcher" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a variable to the watched variables.
-A watched variables value will be checked for changes during simulation.
-If a value change is detected, a simulator trace event is generated</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>varName</strong> (<em>string</em>) – Variable name as seen from part’s scope</li>
-<li><strong>formatString</strong> (<em>string</em>) – print() like format to format the value when traced</li>
+A watched variables value will be checked for changes during
+simulation.
+If a value change is detected, a simulator trace event is generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var_name</strong> (<em>string</em>) – Variable name as seen from part’s scope</p></li>
+<li><p><strong>format_string</strong> (<em>string</em>) – print() like format to format             the value when traced</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.setStateIndicator">
-<code class="descname">setStateIndicator</code><span class="sig-paren">(</span><em>text</em>, <em>appearance={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.setStateIndicator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.setStateIndicator" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.set_state_indicator">
+<code class="sig-name descname">set_state_indicator</code><span class="sig-paren">(</span><em class="sig-param">text</em>, <em class="sig-param">appearance=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.set_state_indicator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.set_state_indicator" title="Permalink to this definition">¶</a></dt>
 <dd><p>set part’s state from model at simulation time</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>text</strong> – text to show in life line</li>
-<li><strong>appearance</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – appearance of state indicator. Dictionary with color values, e.g. <code class="docutils literal notranslate"><span class="pre">{'boxStrokeColor':'black',</span> <span class="pre">'boxFillColor':'green',</span> <span class="pre">'textColor':'white'}</span></code></li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – text to show in life line</p></li>
+<li><p><strong>appearance</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – appearance of state indicator.         Dictionary with color values, e.g.         <code class="docutils literal notranslate"><span class="pre">{'boxStrokeColor':'black',</span> <span class="pre">'boxFillColor':'green',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'textColor':'white'}</span></code></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.startSim">
-<code class="descname">startSim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.startSim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.startSim" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.start_sim">
+<code class="sig-name descname">start_sim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.start_sim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.start_sim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called from simulator when simulation begins</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.terminateSim">
-<code class="descname">terminateSim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.terminateSim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.terminateSim" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called from simulator when simulation stops. Terminate block (e.g. stop threads)</p>
+<dt id="moddy.sim_part.SimPart.terminate_sim">
+<code class="sig-name descname">terminate_sim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.terminate_sim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.terminate_sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called from simulator when simulation stops. Terminate block
+(e.g. stop threads)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simPart.time">
-<code class="descname">time</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simPart.time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simPart.time" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_part.SimPart.time">
+<code class="sig-name descname">time</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_part.html#SimPart.time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_part.SimPart.time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get current simulation time</p>
 </dd></dl>
 
@@ -509,38 +509,30 @@ If a value change is detected, a simulator trace event is generated</p>
 <div class="section" id="input-port">
 <h2>Input Port<a class="headerlink" href="#input-port" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.simulator.simInputPort">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simInputPort</code><span class="sig-paren">(</span><em>sim</em>, <em>part</em>, <em>name</em>, <em>msgReceivedFunc</em>, <em>ioPort=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simInputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simInputPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimInputPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_ports.</code><code class="sig-name descname">SimInputPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">part</em>, <em class="sig-param">name</em>, <em class="sig-param">msg_received_func</em>, <em class="sig-param">io_port=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimInputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimInputPort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulator input port</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>part</strong> (<a class="reference internal" href="#moddy.simulator.simPart" title="moddy.simulator.simPart"><em>simPart</em></a>) – simPart that contains this port</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>msgReceivedFunc</strong> – callback function to call for message receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code>. May be None</li>
-<li><strong>ioPort</strong> – reference to the IOPort which contains this inPort (None if not part of IOPort).</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>part</strong> (<a class="reference internal" href="#moddy.sim_part.SimPart" title="moddy.sim_part.SimPart"><em>SimPart</em></a>) – simPart that contains this port</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>msg_received_func</strong> – callback function to call for message         receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code>. May be None</p></li>
+<li><p><strong>io_port</strong> – reference to the IOPort which contains this inPort         (None if not part of IOPort).</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.simulator.simInputPort.setMsgStartedFunc">
-<code class="descname">setMsgStartedFunc</code><span class="sig-paren">(</span><em>msgStartedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simInputPort.setMsgStartedFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simInputPort.setMsgStartedFunc" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimInputPort.set_msg_started_func">
+<code class="sig-name descname">set_msg_started_func</code><span class="sig-paren">(</span><em class="sig-param">msg_started_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimInputPort.set_msg_started_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimInputPort.set_msg_started_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>register a function that gets called when the bound output port
 begins a message transmission</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msgStartedFunc</strong> – callback function to call on message transmission start.
-Signature <code class="docutils literal notranslate"><span class="pre">func(inPort,</span> <span class="pre">msg,</span> <span class="pre">outPort,</span> <span class="pre">flightTime)</span></code></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>msg_started_func</strong> – callback function to call on             message transmission start.            Signature <code class="docutils literal notranslate"><span class="pre">func(in_port,</span> <span class="pre">msg,</span> <span class="pre">out_port,</span> <span class="pre">flight_time)</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -549,69 +541,60 @@ Signature <code class="docutils literal notranslate"><span class="pre">func(inPo
 <div class="section" id="output-port">
 <h2>Output Port<a class="headerlink" href="#output-port" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.simulator.simOutputPort">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simOutputPort</code><span class="sig-paren">(</span><em>sim</em>, <em>part</em>, <em>name</em>, <em>color=None</em>, <em>ioPort=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simOutputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simOutputPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimOutputPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_ports.</code><code class="sig-name descname">SimOutputPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">part</em>, <em class="sig-param">name</em>, <em class="sig-param">color=None</em>, <em class="sig-param">io_port=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimOutputPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimOutputPort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulator output port</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>part</strong> (<a class="reference internal" href="#moddy.simulator.simPart" title="moddy.simulator.simPart"><em>simPart</em></a>) – simPart that contains this port</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>color</strong> – message color to use in sequence diagram. Use default color if <em>None</em></li>
-<li><strong>ioPort</strong> – reference to the IOPort which contains this outPort (None if not part of IOPort).</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>part</strong> (<em>simPart</em>) – simPart that contains this port</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>color</strong> – message color to use in sequence diagram.         Use default color if <em>None</em></p></li>
+<li><p><strong>ioPort</strong> – reference to the IOPort which contains this outPort         (None if not part of IOPort).</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.simulator.simOutputPort.bind">
-<code class="descname">bind</code><span class="sig-paren">(</span><em>inputPort</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simOutputPort.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simOutputPort.bind" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimOutputPort.bind">
+<code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param">input_port</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimOutputPort.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimOutputPort.bind" title="Permalink to this definition">¶</a></dt>
 <dd><p>bind an output port to an input port</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputPort</strong> – input port to which this output port shall be bound</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if input port is already bound to that output port</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input_port</strong> – input port to which this output port shall be bound</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.9)"><strong>RuntimeError</strong></a> – if input port is already bound to that output port</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simOutputPort.injectLostMessageErrorBySequence">
-<code class="descname">injectLostMessageErrorBySequence</code><span class="sig-paren">(</span><em>nextSeq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simOutputPort.injectLostMessageErrorBySequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simOutputPort.injectLostMessageErrorBySequence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inject error. Force one of the next messages sent via this port to be lost
-If nextSeq is 0, the next message sent via this port will be lost, if it is 1 the next but one
-message is lost etc.</p>
+<dt id="moddy.sim_ports.SimOutputPort.inject_lost_message_error_by_sequence">
+<code class="sig-name descname">inject_lost_message_error_by_sequence</code><span class="sig-paren">(</span><em class="sig-param">next_seq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimOutputPort.inject_lost_message_error_by_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimOutputPort.inject_lost_message_error_by_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inject error. Force one of the next messages sent via this port to
+be lost.
+If nextSeq is 0, the next message sent via this port will be lost,
+if it is 1 the next but one message is lost etc.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simOutputPort.send">
-<code class="descname">send</code><span class="sig-paren">(</span><em>msg</em>, <em>flightTime</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simOutputPort.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simOutputPort.send" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimOutputPort.send">
+<code class="sig-name descname">send</code><span class="sig-paren">(</span><em class="sig-param">msg</em>, <em class="sig-param">flight_time</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimOutputPort.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimOutputPort.send" title="Permalink to this definition">¶</a></dt>
 <dd><p>User interface to send a message</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>msg</strong> – message to send</li>
-<li><strong>flightTime</strong> – flight time of message</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg</strong> – message to send</p></li>
+<li><p><strong>flight_time</strong> – flight time of message</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simOutputPort.setColor">
-<code class="descname">setColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simOutputPort.setColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simOutputPort.setColor" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimOutputPort.set_color">
+<code class="sig-name descname">set_color</code><span class="sig-paren">(</span><em class="sig-param">color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimOutputPort.set_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimOutputPort.set_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set color for messages leaving that port</p>
 </dd></dl>
 
@@ -621,62 +604,59 @@ message is lost etc.</p>
 <div class="section" id="i-o-port">
 <h2>I/O Port<a class="headerlink" href="#i-o-port" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.simulator.simIOPort">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simIOPort</code><span class="sig-paren">(</span><em>sim</em>, <em>part</em>, <em>name</em>, <em>msgReceivedFunc</em>, <em>specialInPort=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimIOPort">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_ports.</code><code class="sig-name descname">SimIOPort</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">part</em>, <em class="sig-param">name</em>, <em class="sig-param">msg_received_func</em>, <em class="sig-param">special_in_port=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort" title="Permalink to this definition">¶</a></dt>
 <dd><p>An element that contains one input and one output port</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>part</strong> (<a class="reference internal" href="#moddy.simulator.simPart" title="moddy.simulator.simPart"><em>simPart</em></a>) – simPart that contains this port</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>msgReceivedFunc</strong> – callback function to call for message receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></li>
-<li><strong>specialInPort</strong> – if None, create a standard <a class="reference internal" href="#moddy.simulator.simInputPort" title="moddy.simulator.simInputPort"><code class="xref py py-class docutils literal notranslate"><span class="pre">simInputPort</span></code></a>, otherwise use the supplied specialInPort</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>part</strong> (<em>simPart</em>) – simPart that contains this port</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>msg_received_func</strong> – callback function to call for message         receiption. Signature <code class="docutils literal notranslate"><span class="pre">func(port,</span> <span class="pre">msg)</span></code></p></li>
+<li><p><strong>special_in_port</strong> – if None, create a standard <code class="xref py py-class docutils literal notranslate"><span class="pre">simInputPort</span></code>,         otherwise use the supplied specialInPort</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.simulator.simIOPort.bind">
-<code class="descname">bind</code><span class="sig-paren">(</span><em>otherIoPort</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.bind" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimIOPort.bind">
+<code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param">other_io_port</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort.bind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bind IOPort to another IOPort, in/out will be crossed</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simIOPort.injectLostMessageErrorBySequence">
-<code class="descname">injectLostMessageErrorBySequence</code><span class="sig-paren">(</span><em>nextSeq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.injectLostMessageErrorBySequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.injectLostMessageErrorBySequence" title="Permalink to this definition">¶</a></dt>
-<dd><p>inject error on IoPorts output port 
-Refer to <a class="reference internal" href="#moddy.simulator.simOutputPort.injectLostMessageErrorBySequence" title="moddy.simulator.simOutputPort.injectLostMessageErrorBySequence"><code class="xref py py-func docutils literal notranslate"><span class="pre">simOutputPort.injectLostMessageErrorBySequence()</span></code></a> for details.</p>
+<dt id="moddy.sim_ports.SimIOPort.inject_lost_message_error_by_sequence">
+<code class="sig-name descname">inject_lost_message_error_by_sequence</code><span class="sig-paren">(</span><em class="sig-param">next_seq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort.inject_lost_message_error_by_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort.inject_lost_message_error_by_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>inject error on IoPorts output port
+Refer to <code class="xref py py-func docutils literal notranslate"><span class="pre">simOutputPort.inject_lost_message_error_by_sequence()</span></code>
+for details.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simIOPort.loopBind">
-<code class="descname">loopBind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.loopBind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.loopBind" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimIOPort.loop_bind">
+<code class="sig-name descname">loop_bind</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort.loop_bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort.loop_bind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loop in/out ports of an IO port together</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simIOPort.send">
-<code class="descname">send</code><span class="sig-paren">(</span><em>msg</em>, <em>flightTime</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.send" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimIOPort.send">
+<code class="sig-name descname">send</code><span class="sig-paren">(</span><em class="sig-param">msg</em>, <em class="sig-param">flight_time</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort.send" title="Permalink to this definition">¶</a></dt>
 <dd><p>send message to IoPorts output port</p>
-<p>Refer to <a class="reference internal" href="#moddy.simulator.simOutputPort.send" title="moddy.simulator.simOutputPort.send"><code class="xref py py-func docutils literal notranslate"><span class="pre">simOutputPort.send()</span></code></a> for parameters.</p>
+<p>Refer to <code class="xref py py-func docutils literal notranslate"><span class="pre">simOutputPort.send()</span></code> for parameters.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simIOPort.setColor">
-<code class="descname">setColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.setColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.setColor" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimIOPort.set_color">
+<code class="sig-name descname">set_color</code><span class="sig-paren">(</span><em class="sig-param">color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort.set_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort.set_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set color for messages leaving that IOport</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simIOPort.setMsgStartedFunc">
-<code class="descname">setMsgStartedFunc</code><span class="sig-paren">(</span><em>msgStartedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simIOPort.setMsgStartedFunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simIOPort.setMsgStartedFunc" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimIOPort.set_msg_started_func">
+<code class="sig-name descname">set_msg_started_func</code><span class="sig-paren">(</span><em class="sig-param">msg_started_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimIOPort.set_msg_started_func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimIOPort.set_msg_started_func" title="Permalink to this definition">¶</a></dt>
 <dd><p>register a function that gets called when the bound output port
 begins a message transmission</p>
-<p>Refer to <a class="reference internal" href="#moddy.simulator.simInputPort.setMsgStartedFunc" title="moddy.simulator.simInputPort.setMsgStartedFunc"><code class="xref py py-func docutils literal notranslate"><span class="pre">simInputPort.setMsgStartedFunc()</span></code></a> for details.</p>
+<p>Refer to <code class="xref py py-func docutils literal notranslate"><span class="pre">simInputPort.setMsgStartedFunc()</span></code> for details.</p>
 </dd></dl>
 
 </dd></dl>
@@ -685,58 +665,52 @@ begins a message transmission</p>
 <div class="section" id="timer">
 <h2>Timer<a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="moddy.simulator.simTimer">
-<em class="property">class </em><code class="descclassname">moddy.simulator.</code><code class="descname">simTimer</code><span class="sig-paren">(</span><em>sim</em>, <em>part</em>, <em>name</em>, <em>elapsedFunc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simTimer" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimTimer">
+<em class="property">class </em><code class="sig-prename descclassname">moddy.sim_ports.</code><code class="sig-name descname">SimTimer</code><span class="sig-paren">(</span><em class="sig-param">sim</em>, <em class="sig-param">part</em>, <em class="sig-param">name</em>, <em class="sig-param">elapsed_func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimTimer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulator Timer
 timer is either running or stopped
 timer can be canceled, and restarted</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sim</strong> (<a class="reference internal" href="#moddy.simulator.sim" title="moddy.simulator.sim"><em>sim</em></a>) – Simulator instance</li>
-<li><strong>part</strong> (<a class="reference internal" href="#moddy.simulator.simPart" title="moddy.simulator.simPart"><em>simPart</em></a>) – simPart that contains this port</li>
-<li><strong>name</strong> – port name</li>
-<li><strong>elapsedFunc</strong> – callback function to call for timer expiry. Signature <code class="docutils literal notranslate"><span class="pre">func(timer)</span></code></li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>sim</em>) – Simulator instance</p></li>
+<li><p><strong>part</strong> (<em>simPart</em>) – simPart that contains this port</p></li>
+<li><p><strong>name</strong> – port name</p></li>
+<li><p><strong>elapsed_func</strong> – callback function to call for timer expiry.         Signature <code class="docutils literal notranslate"><span class="pre">func(timer)</span></code></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <dl class="method">
-<dt id="moddy.simulator.simTimer.restart">
-<code class="descname">restart</code><span class="sig-paren">(</span><em>timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simTimer.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simTimer.restart" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimTimer.restart">
+<code class="sig-name descname">restart</code><span class="sig-paren">(</span><em class="sig-param">timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimTimer.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimTimer.restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restart timer, works whether timer is running or not.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> – Timer will fire after <em>timeout</em></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – Timer will fire after <em>timeout</em></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simTimer.start">
-<code class="descname">start</code><span class="sig-paren">(</span><em>timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simTimer.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simTimer.start" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimTimer.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param">timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimTimer.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimTimer.start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start the timer.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> – Timer will fire after <em>timeout</em></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.7)"><strong>AssertionError</strong></a> – if timer already started</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> – Timer will fire after <em>timeout</em></p>
+</dd>
+<dt class="field-even">Raise</dt>
+<dd class="field-even"><p>RuntimeError if timer already started</p>
+</dd>
+<dt class="field-odd">Raise</dt>
+<dd class="field-odd"><p>AttributeError if timeout &lt;= 0</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="moddy.simulator.simTimer.stop">
-<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/simulator.html#simTimer.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.simulator.simTimer.stop" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.sim_ports.SimTimer.stop">
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/moddy/sim_ports.html#SimTimer.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#moddy.sim_ports.SimTimer.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stop timer. Does nothing if timer not running</p>
 </dd></dl>
 
@@ -748,56 +722,56 @@ timer can be canceled, and restarted</p>
 <div class="section" id="predefined-color-names-for-status-boxes">
 <span id="predef-bc-colors"></span><h3>Predefined color names for status boxes<a class="headerlink" href="#predefined-color-names-for-status-boxes" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
-<dt id="moddy.__init__.bcWhiteOnGreen">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcWhiteOnGreen</code><em class="property"> = {'boxFillColor': 'green', 'boxStrokeColor': 'black', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.__init__.bcWhiteOnGreen" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_WHITE_ON_GREEN">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_WHITE_ON_GREEN</code><em class="property"> = {'boxFillColor': 'green', 'boxStrokeColor': 'black', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.constants.BC_WHITE_ON_GREEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for white on green status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcWhiteOnRed">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcWhiteOnRed</code><em class="property"> = {'boxFillColor': 'red', 'boxStrokeColor': 'black', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.__init__.bcWhiteOnRed" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_WHITE_ON_RED">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_WHITE_ON_RED</code><em class="property"> = {'boxFillColor': 'red', 'boxStrokeColor': 'black', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.constants.BC_WHITE_ON_RED" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for white on red status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcWhiteOnBlue">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcWhiteOnBlue</code><em class="property"> = {'boxFillColor': 'blue', 'boxStrokeColor': 'blue', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.__init__.bcWhiteOnBlue" title="Permalink to this definition">¶</a></dt>
-<dd><p>constant for white on blue status box</p>
+<dt>
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_WHITE_ON_RED</code><em class="property"> = {'boxFillColor': 'red', 'boxStrokeColor': 'black', 'textColor': 'white'}</em></dt>
+<dd><p>constant for white on red status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcWhiteOnBrown">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcWhiteOnBrown</code><em class="property"> = {'boxFillColor': 'brown', 'boxStrokeColor': 'brown', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.__init__.bcWhiteOnBrown" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_WHITE_ON_BROWN">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_WHITE_ON_BROWN</code><em class="property"> = {'boxFillColor': 'brown', 'boxStrokeColor': 'brown', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.constants.BC_WHITE_ON_BROWN" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for white on brown status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcWhiteOnBlack">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcWhiteOnBlack</code><em class="property"> = {'boxFillColor': 'black', 'boxStrokeColor': 'black', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.__init__.bcWhiteOnBlack" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_WHITE_ON_BLACK">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_WHITE_ON_BLACK</code><em class="property"> = {'boxFillColor': 'black', 'boxStrokeColor': 'black', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.constants.BC_WHITE_ON_BLACK" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for white on black status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcBlackOnPink">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcBlackOnPink</code><em class="property"> = {'boxFillColor': 'pink', 'boxStrokeColor': 'pink', 'textColor': 'black'}</em><a class="headerlink" href="#moddy.__init__.bcBlackOnPink" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_BLACK_ON_PINK">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_BLACK_ON_PINK</code><em class="property"> = {'boxFillColor': 'pink', 'boxStrokeColor': 'pink', 'textColor': 'black'}</em><a class="headerlink" href="#moddy.constants.BC_BLACK_ON_PINK" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for black on pink status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcBlackOnGrey">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcBlackOnGrey</code><em class="property"> = {'boxFillColor': 'grey', 'boxStrokeColor': 'grey', 'textColor': 'black'}</em><a class="headerlink" href="#moddy.__init__.bcBlackOnGrey" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_BLACK_ON_GREY">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_BLACK_ON_GREY</code><em class="property"> = {'boxFillColor': 'grey', 'boxStrokeColor': 'grey', 'textColor': 'black'}</em><a class="headerlink" href="#moddy.constants.BC_BLACK_ON_GREY" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for black on grey status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcWhiteOnGrey">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcWhiteOnGrey</code><em class="property"> = {'boxFillColor': 'grey', 'boxStrokeColor': 'grey', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.__init__.bcWhiteOnGrey" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_WHITE_ON_GREY">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_WHITE_ON_GREY</code><em class="property"> = {'boxFillColor': 'grey', 'boxStrokeColor': 'grey', 'textColor': 'white'}</em><a class="headerlink" href="#moddy.constants.BC_WHITE_ON_GREY" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for white on grey status box</p>
 </dd></dl>
 
 <dl class="data">
-<dt id="moddy.__init__.bcBlackOnWhite">
-<code class="descclassname">moddy.__init__.</code><code class="descname">bcBlackOnWhite</code><em class="property"> = {'boxFillColor': 'white', 'boxStrokeColor': 'black', 'textColor': 'black'}</em><a class="headerlink" href="#moddy.__init__.bcBlackOnWhite" title="Permalink to this definition">¶</a></dt>
+<dt id="moddy.constants.BC_BLACK_ON_WHITE">
+<code class="sig-prename descclassname">moddy.constants.</code><code class="sig-name descname">BC_BLACK_ON_WHITE</code><em class="property"> = {'boxFillColor': 'white', 'boxStrokeColor': 'black', 'textColor': 'black'}</em><a class="headerlink" href="#moddy.constants.BC_BLACK_ON_WHITE" title="Permalink to this definition">¶</a></dt>
 <dd><p>constant for black on white status box</p>
 </dd></dl>
 
@@ -825,7 +799,7 @@ timer can be canceled, and restarted</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Klaus Popp
+        &copy; Copyright 2020, Klaus Popp
 
     </p>
   </div>
