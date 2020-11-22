@@ -23,4 +23,5 @@ Welcome to Moddy Discrete Event Simulator's documentation!
    reference/index
    install.rst
    developer.rst
+   migrating_to_moddy2.rst
 

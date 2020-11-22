@@ -4,6 +4,18 @@ All notable changes to moddy will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2020-11-22
+
+### Changed
+- Complete refactoring of moddy source code to be pep8 compliant.
+  Files, methods, parameters and classes have been renamed! API is no longer
+  compatible with moddy 1.x. Models created for moddy 1.x have to be adapted! 
+  See "Porting from Moddy 1 to 2" in the online documenation for details!
+
+### Removed
+- Static svg diagram generator
+
+
 ## [1.10.0] - 2019-09-21
 
 ### Added

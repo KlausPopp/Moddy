@@ -1,91 +1,104 @@
 '''
-Basic Moddy demo 
+Basic Moddy demo
 
 @author: klauspopp@gmx.de
+
+Note: the "pylint: disable=no-member" are necessary because moddy creates
+port/timer members automatically, so they are not visible to pylint
 '''
+# because the filename doesn't conform to snake case style ...
+# pylint: disable=C0103
 
-from moddy import *
+import moddy
 
-class Bob(simPart):
-    def __init__(self, sim, objName):
+
+class Bob(moddy.SimPart):
+    ''' Model of Bob '''
+    def __init__(self, sim, obj_name):
         # Initialize the parent class
-        super().__init__(sim=sim, objName=objName, 
-                         elems = {'in': 'ears', 
-                                  'out': 'mouth',
-                                  'tmr': 'thinkTmr'})
+        super().__init__(sim=sim, obj_name=obj_name,
+                         elems={'in': 'ears',
+                                'out': 'mouth',
+                                'tmr': 'think_tmr'})
 
         self.reply = ""
 
-    def earsRecv(self, port, msg):
+    def ears_recv(self, _, msg):
+        ''' Callback for message reception on ears port '''
         if msg == "Hi, How are you?":
             self.reply = "How are you?"
         else:
             self.reply = "Hm?"
-        
-        self.thinkTmr.start(1.4)
-        self.setStateIndicator("Think")
-        
 
-    def thinkTmrExpired(self, timer):
-        self.setStateIndicator("")
+        # pylint: disable=no-member
+        self.think_tmr.start(1.4)
+        self.set_state_indicator("Think")
+
+    def think_tmr_expired(self, _):
+        ''' Callback for think_tmr expiration '''
+        self.set_state_indicator("")
+        # pylint: disable=no-member
         self.mouth.send(self.reply, 1)
-        
-    def startSim(self):
+
+    def start_sim(self):
         # Let Bob start talking
+        # pylint: disable=no-member
         self.mouth.send("Hi Joe", 1)
 
 
-class Joe(simPart):
-    def __init__(self, sim, objName):
+class Joe(moddy.SimPart):
+    ''' Model of Joe '''
+    def __init__(self, sim, obj_name):
         # Initialize the parent class
-        super().__init__(sim=sim, objName=objName,
-                         elems = {'in': 'ears', 
-                                  'out': 'mouth',
-                                  'tmr': 'thinkTmr'})
+        super().__init__(sim=sim, obj_name=obj_name,
+                         elems={'in': 'ears',
+                                'out': 'mouth',
+                                'tmr': 'think_tmr'})
 
         self.reply = ""
 
-    def earsRecv(self, port, msg):
-        self.addAnnotation('got message ' + msg)
+    def ears_recv(self, _, msg):
+        ''' Callback for message reception on ears port '''
+        self.annotation('got message ' + msg)
         if msg == "Hi Joe":
             self.reply = "Hi, How are you?"
         elif msg == "How are you?":
             self.reply = "Fine"
         else:
             self.reply = "Hm?"
-        
-        self.thinkTmr.start(2)
-        self.setStateIndicator("Think")
-        
 
-    def thinkTmrExpired(self, timer):
-        self.setStateIndicator("")
+        # pylint: disable=no-member
+        self.think_tmr.start(2)
+        self.set_state_indicator("Think")
+
+    def think_tmr_expired(self, _):
+        ''' Callback for think_tmr expiration '''
+        self.set_state_indicator("")
+        # pylint: disable=no-member
         self.mouth.send(self.reply, 1.5)
 
+
 if __name__ == '__main__':
-    simu = sim()
-    
-    bob    = Bob( simu, "Bob" )
-    joe    = Joe( simu, "Joe" )
-    
+    SIMU = moddy.Sim()
+
+    Bob(SIMU, "Bob")
+    Joe(SIMU, "Joe")
+
     # bind ports
-    simu.smartBind([ ['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth'] ])
+    SIMU.smart_bind([['Bob.mouth', 'Joe.ears'], ['Bob.ears', 'Joe.mouth']])
 
     # let simulator run
-    simu.run(stopTime=12.0)
-    
+    SIMU.run(stop_time=12.0)
+
     # Output sequence diagram
-    moddyGenerateSequenceDiagram( sim=simu, 
-                                  fileName="output/1_hello.html", 
-                                  fmt="iaViewer", 
-                                  excludedElementList=[], 
-                                  timePerDiv = 1.0, 
-                                  pixPerDiv = 30,
-                                  title = "Hello Demo")    
+    moddy.gen_interactive_sequence_diagram(SIMU,
+                                           file_name="output/1_hello.html",
+                                           time_per_div=1.0,
+                                           pix_per_div=30,
+                                           title="Hello Demo")
 
     # Output model structure graph
-    moddyGenerateStructureGraph(simu, 'output/1_hello_structure.svg')
-    
-    # Output trace table
-    moddyGenerateTraceTable(simu, 'output/1_hello.csv' )
+    moddy.gen_dot_structure_graph(SIMU, 'output/1_hello_structure.svg')
 
+    # Output trace table
+    moddy.gen_trace_table(SIMU, 'output/1_hello.csv')
