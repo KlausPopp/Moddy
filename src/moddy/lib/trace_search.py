@@ -52,7 +52,7 @@ class TraceSearch(object):
 
     def find_rcv_msg(self, part, textPat, start_idx=None):
         """
-        find next received message by text pattern on message 
+        find next received message by text pattern on message
         string representation
         "part" is the part receiving the message
         :param string textPat: message text with wildcards. \
@@ -120,7 +120,7 @@ class TraceSearch(object):
         """
         find next traced event
         :param part: part hierarchy name or instance. If None, match any part
-            This is passed to partMatcher. So, depending on partMatcher, 
+            This is passed to partMatcher. So, depending on partMatcher,
             it can be a part, a part hierarchy name, or a subpart
         :param startIdx: index in tracedEvents to start with \
             (use curIdx if None)

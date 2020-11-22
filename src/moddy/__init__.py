@@ -14,23 +14,25 @@ via messages.
 Moddy was written to analyze complex systems in the concept phase to
 validate the suitability of the concept.
 """
-from .constants import *
+from .constants import *  # noqa: F403, F401
 
 # import moddy global api
-from .sim_core import Sim
-from .sim_part import SimPart
+from .sim_core import Sim  # noqa: F401
+from .sim_part import SimPart  # noqa: F401
 
-from .vthread import VThread
-from .vt_sched_rtos import VtSchedRtos, VSimpleProg
+from .vthread import VThread  # noqa: F401
+from .vt_sched_rtos import VtSchedRtos, VSimpleProg  # noqa: F401
 
-from .fsm import Fsm
-from moddy.fsm_part import SimFsmPart
+from .fsm import Fsm  # noqa: F401
+from moddy.fsm_part import SimFsmPart  # noqa: F401
 
-from moddy.interactive_sequence_diagram import gen_interactive_sequence_diagram
-from moddy.trace_to_csv import gen_trace_table
-from moddy.dot_structure import gen_dot_structure_graph
+from moddy.interactive_sequence_diagram import (  # noqa: F401
+    gen_interactive_sequence_diagram,  # noqa: F401
+)
+from moddy.trace_to_csv import gen_trace_table  # noqa: F401
+from moddy.dot_structure import gen_dot_structure_graph  # noqa: F401
 
-from moddy.dot_fsm import gen_fsm_graph
+from moddy.dot_fsm import gen_fsm_graph  # noqa: F401
 
 AUTHOR_NAME = "Klaus Popp"
 AUTHOR_EMAIL = "klauspopp@gmx.de"

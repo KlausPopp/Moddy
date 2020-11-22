@@ -114,7 +114,8 @@ class TestSchedRtos(unittest.TestCase):
     def testQueingPort(self):
         busyAppearance = moddy.BC_WHITE_ON_BLUE
 
-        # Block myThread1 22s from running. Test to see if messages arrive when thread initially preempted
+        # Block myThread1 22s from running. Test to see if messages arrive
+        # when thread initially preempted
         # Was a bug in moddy <= 1.7.1
         class myBlockThread(moddy.VThread):
             def __init__(self, sim):

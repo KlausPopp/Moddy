@@ -20,7 +20,7 @@ def gen_trace_table(sim, file_name, **kwargs):
     :param sim sim: Simulator instance
     :param file_name: output filename (including .csv)
 
-    :param \*\*kwargs: further arguments
+    :param kwargs: further arguments
 
      * time_unit="s" - time unit for all time stamps in table \
          ('s', 'ms', 'us', 'ns')

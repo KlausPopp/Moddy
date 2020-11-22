@@ -50,18 +50,22 @@ class TestFsm(unittest.TestCase):
                     "": [("INITIAL", "Off")],  # FSM uninitialized
                     "Off": [("PowerApplied", "Standby")],
                     "Standby":
-                    # This transition is triggered whenever ANY message arrives on the powerButtonPort
+                    # This transition is triggered whenever ANY message
+                    # arrives on the powerButtonPort
                     [("PowerButton", "Booting"), ("IgnitionOn", "Booting")],
                     "Booting": [("bootTmr_expired", "NormalOp")],
                     "NormalOp":
-                    # The following two lines specify nested state machines, executing in parallel
+                    # The following two lines specify nested state machines,
+                    # executing in parallel
                     [
                         ("Apps", TestFsm.CarInfoSystem.FSM.ApplicationsFsm),
                         ("Vol", TestFsm.CarInfoSystem.FSM.VolumeFsm),
-                        # This transition is triggered whenever ANY message arrives on the powerButtonPort
+                        # This transition is triggered whenever ANY message
+                        # arrives on the powerButtonPort
                         ("PowerButton", "Shutdown"),
                         ("IgnitionOff", "Shutdown"),
-                        # This transition is triggered whenever clockTmr expires, transition to self,
+                        # This transition is triggered whenever clockTmr
+                        # expires, transition to self,
                         # executes the 'Do' methode
                         ("clockTmr_expired", "NormalOp"),
                     ],
