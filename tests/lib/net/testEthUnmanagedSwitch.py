@@ -8,7 +8,7 @@ import unittest
 import moddy
 from moddy import US, MS
 from moddy.lib.net.ethernet import eth_bcast_addr, eth_flight_time, eth_pdu
-from moddy.lib.net.ethUnmanagedSwitch import EthUnmanagedSwitch
+from moddy.lib.net.eth_unmanaged_switch import EthUnmanagedSwitch
 from moddy.lib.pdu import Pdu
 from tests.utils import baseFileName, funcName
 
