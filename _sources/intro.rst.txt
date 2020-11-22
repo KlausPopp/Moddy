@@ -6,7 +6,7 @@ Introduction
 
 .. note::
     This is the documentation for Moddy 2.x. Moddy 2.x is no more compatible
-    with models written for moddy 2.x.
+    with models written for moddy 1.x.
     See :ref:`migrating_from_moddy1` for migration instructions
 
 
