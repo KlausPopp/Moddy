@@ -1,9 +1,9 @@
 """
-:mod:`ethUnmanagedSwitch` -- Unmanaged Ehternet Switch
-======================================================
+:mod:`eth_unmanaged_switch` -- Unmanaged Ethernet Switch
+=========================================================
 
-.. module:: ethUnmanagedSwitch
-   :synopsis: Unmanaged Ehternet Switch
+.. module:: eth_unmanaged_switch
+   :synopsis: Unmanaged Ethernet Switch
 .. moduleauthor:: Klaus Popp <klauspopp@gmx.de>
 """
 

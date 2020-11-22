@@ -1,0 +1,4 @@
+[flake8]
+# ignore too long lines
+max-line-length = 80
+max-complexity = 18

@@ -29,6 +29,7 @@ def eth_flight_time(net_speed, n_bytes):
     Compute flight time of an Ethernet frame
     If nBytes are below the minimum Ethernet frame length,
     the flight time of the minimum frame length is returned.
+
     :param netSpeed: physical link speed in bits/second
     :param nBytes: number of bytes to transmit
     :return: transmission time on wire in seconds
@@ -39,9 +40,10 @@ def eth_flight_time(net_speed, n_bytes):
 def eth_pdu(src, dst, eth_type, payload):
     """
     Create an Ethernet Pdu
+
     :param str src: Source MAC address
     :param str dst: Destination MAC address
-    :param ehtType: Ethernet type
+    :param eht_type: Ethernet type
     :param Pdu payload: Ethernet payload
     :return: filled Pdu
     """

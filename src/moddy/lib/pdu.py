@@ -1,13 +1,13 @@
 """
 Created on 27.04.2018
 
-@author: klaus.popp@men.de
+@author: klauspopp@gmx.de
 """
 
 
-def EmptyPdu():
+def empty_pdu(pdu_type):
     """ return a empty PDU """
-    return Pdu({}, 0)
+    return Pdu(pdu_type, {}, 0)
 
 
 class Pdu(dict):
@@ -16,12 +16,14 @@ class Pdu(dict):
 
     The Pdu is represented as a dictionary, containing the modelled protocol
     pdu fields.
-    The additional member '_bytelen' represents the real byte length of
+    The additional member '_byte_len' represents the real byte length of
     all pdu fields
-    dict={ 'm1': m1value, 'm2': m2value }, _bytelen=10
+
+    .. code-block::
+
+        dict={ 'm1': m1value, 'm2': m2value }, _byte_len=10
 
     Pdus can be nested.
-
 
     :param str pdu_type: A string describing the type of the Pdu \
       (without 'Pdu'), e.g. 'Eth'
@@ -44,28 +46,39 @@ class Pdu(dict):
 
     @classmethod
     def is_pdu(cls, obj):
+        """
+        Check if obj is a Pdu or a subclass of Pdu
+        """
         return issubclass(obj.__class__, cls)
 
     def byte_len(self):
+        """
+        Return the length of the Pdu in bytes, including
+        all its nested PDUs
+        """
         byte_len = self._byte_len
         for value in self.values():
             if Pdu.is_pdu(value):
                 byte_len += value.byte_len()
         return byte_len
 
-    def fill_up(self, nBytes):
+    def fill_up(self, n_bytes):
         """
-        Fill top level PDU up, so it has a byte_len of nBytes
+        Fill top level PDU up, so it has a byte_len of n_bytes
         if PDU already larger, raise Attribute error
         """
-        if self.byte_len() > nBytes:
+        if self.byte_len() > n_bytes:
             raise AttributeError(
                 "Pdu is longer than fillup value %d/%d"
-                % (self.byte_len(), nBytes)
+                % (self.byte_len(), n_bytes)
             )
-        self._byte_len = nBytes - self.byte_len() + self._byte_len
+        self._byte_len = n_bytes - self.byte_len() + self._byte_len
 
     def __repr__(self):
+        """
+        Return a string showing the top level items in a PDU
+        """
+
         s = "%sPdu(%d)" % (self.pdu_type, self.byte_len())
 
         for key, value in self.items():
@@ -87,10 +100,13 @@ class Pdu(dict):
         Return a string as __repr()__, but also dump sub-pdus in separated,
         intended lines, e.g.:
 
-            IpPdu(1220) ihl=14 flags=0 src=192.1.1.2 dst=192.1.1.8 \
-              payld=RawPdu(1000) payld2=RawPdu(200)
-               payld:RawPdu(1000) raw=IPPAYLOAD
-               payld2:RawPdu(200) raw=AnotherPayld
+        .. code-block::
+
+            IpPdu(1220) ihl=14 flags=0 src=192.1.1.2 dst=192.1.1.8
+            payld=RawPdu(1000) payld2=RawPdu(200)
+                payld:RawPdu(1000) raw=IPPAYLOAD
+                payld2:RawPdu(200) raw=AnotherPayld
+
         """
         return self._dump("", self, 0)
 
@@ -108,8 +124,10 @@ class Pdu(dict):
         Split the Pdu into fragments and return list of fragments
         Each fragment is represented as a Pdu
 
+        .. code-block::
+
             Pdu( "<orgtype>Frag", { 'fr': (<offset of fragment>,
-             <len of fragment>), 'org'=[<original Pdu>], fraglen )
+            <len of fragment>), 'org'=[<original Pdu>], fraglen )
 
         Note: the 'org' member is transferred with every fragment.
         It is enclosed in a list, so that it
@@ -143,6 +161,18 @@ class Pdu(dict):
 
 
 class PduDefragmenter(object):
+    """
+    Class to defragment a PDU that has been fragmented with
+    split_to_fragments().
+
+    Create an instance of this class and add all received fragments
+    with add_fragment(). Fragments may be received in any order.
+
+    Whether the defragmentation is complete, can be checked by
+    calling the_pdu() or defrag_complete_info().
+
+    """
+
     def __init__(self):
         self.pdu = None
         self.frags = []  # list with tuples (off,len) of received fragments
@@ -155,6 +185,10 @@ class PduDefragmenter(object):
         self.pdu = frag["org"][0]
 
     def the_pdu(self):
+        """
+        Return the complete defragmented PDU. If fragments are missing,
+        return None.
+        """
         if self.defrag_complete_info() is None:
             return self.pdu
         else:
@@ -163,6 +197,7 @@ class PduDefragmenter(object):
     def defrag_complete_info(self):
         """
         Check if defragmentation complete.
+
         :return string: None if complete or string with info with \
         first missing frag
         """

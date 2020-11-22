@@ -16,7 +16,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../src"))
-from moddy.version import VERSION
+
+from moddy.version import VERSION  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 

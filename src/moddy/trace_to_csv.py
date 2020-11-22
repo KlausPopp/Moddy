@@ -25,7 +25,7 @@ def gen_trace_table(sim, file_name, **kwargs):
      * time_unit="s" - time unit for all time stamps in table \
          ('s', 'ms', 'us', 'ns')
      * float_comma=',' - Comma character for float numbers
-    
+
     """
     trc = TraceToCsv(sim.tracing.traced_events(), **kwargs)
     trc.save(file_name)

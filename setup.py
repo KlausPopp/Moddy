@@ -1,9 +1,11 @@
-# created based on https://python-packaging.readthedocs.io/en/latest/minimal.html
-# But instead of python setup.py register sdist upload, use https://pypi.org/p/twine/
+# created based on
+# https://python-packaging.readthedocs.io/en/latest/minimal.html
+# But instead of python setup.py register sdist upload,
+# use https://pypi.org/p/twine/
 #
 
 
-from setuptools import setup, find_packages
+from setuptools import setup
 import sys
 import os
 import re

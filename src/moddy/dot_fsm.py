@@ -46,7 +46,8 @@ class DotFsm(object):
     """
     Display the an fsm via the DOT language (Graphviz)
     States are vizualized as nodes
-    Subfsms are drawn in separate subgraphs, an edge is drawn from the main state to the
+    Subfsms are drawn in separate subgraphs, an edge is drawn from the main
+    state to the
     initial state in the subfsm
     """
 
