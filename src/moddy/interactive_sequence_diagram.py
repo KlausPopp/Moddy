@@ -425,14 +425,10 @@ class TraceGenDynamicViewer:
 
     def seq_diag_interactive_viewer_path(self):
         """
-        get path relative to output directory to the
+        get (absolute) path to the
         seq_diag_interactive_viewer directory
         """
-        path = os.path.dirname(
-            os.path.relpath(
-                seq_diag_interactive_viewer.__file__, self._out_dir
-            )
-        )
+        path = os.path.dirname(seq_diag_interactive_viewer.__file__)
         return path
 
     def readseq_diag_interactive_viewer_file(self, file_name):
